@@ -57,6 +57,3 @@ STAKED_ETH_CONTRACT_ADDRESS: Address = environ['STAKED_ETH_CONTRACT_ADDRESS']
 # credentials
 # TODO: consider reading from file
 REPORTER_PRIVATE_KEY: str = environ['REPORTER_PRIVATE_KEY']
-
-# database
-DATABASE_PATH: str = environ.get('DATABASE_PATH', '/tmp/db.json')
