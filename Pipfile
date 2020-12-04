@@ -10,6 +10,7 @@ web3 = "*"
 grpcio = "*"
 protobuf = "*"
 google-api-core = "*"
+prometheus-client = "*"
 
 [dev-packages]
 
