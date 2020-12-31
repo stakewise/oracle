@@ -11,7 +11,6 @@ from utils import (
     InterruptHandler,
     check_default_account_balance
 )
-from reporting.metrics import REPORTER_BALANCE
 from reporting.reward_token import RewardToken
 from reporting.settings import (
     WEB3_WS_ENDPOINT,
@@ -68,12 +67,11 @@ def main():
 
     while not interrupt_handler.exit:
         # сheck reporter balance
-        current_balance = check_default_account_balance(
+        check_default_account_balance(
             web3_client,
             BALANCE_WARNING_THRESHOLD,
             BALANCE_ERROR_THRESHOLD
         )
-        REPORTER_BALANCE.set(current_balance)
 
         current_datetime = datetime.now(tz=timezone.utc)
         if reward_token_total_rewards.next_update_at > current_datetime:

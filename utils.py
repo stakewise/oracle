@@ -183,13 +183,10 @@ def get_genesis_time(stub: BeaconNodeValidatorStub) -> datetime:
     return datetime.fromtimestamp(chain_start.genesis_time, tz=timezone.utc)
 
 
-def get_pool_validator_public_keys(w3: Web3, validators: Contract, pool_id: bytes) -> Set[BLSPubkey]:
+def get_pool_validator_public_keys(pool_contract: Contract) -> Set[BLSPubkey]:
     """Fetches pool validator public keys."""
-    event_filter = validators.events.ValidatorRegistered.createFilter(
-        fromBlock=0,
-        argument_filters={'entityId': pool_id}
-    )
+    event_filter = pool_contract.events.ValidatorRegistered.createFilter(fromBlock=0)
     events = event_filter.get_all_entries()
-    w3.eth.uninstallFilter(event_filter.filter_id)
+    pool_contract.web3.eth.uninstallFilter(event_filter.filter_id)
 
-    return set(event['args']['pubKey'] for event in events)
+    return set(event['args']['publicKey'] for event in events)

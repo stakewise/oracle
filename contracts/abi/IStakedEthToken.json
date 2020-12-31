@@ -120,31 +120,12 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "account",
-        "type": "address"
-      }
-    ],
-    "name": "depositOf",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_rewardEthToken",
+        "name": "_admin",
         "type": "address"
       },
       {
         "internalType": "address",
-        "name": "_settings",
+        "name": "_rewardEthToken",
         "type": "address"
       },
       {
