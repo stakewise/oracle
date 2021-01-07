@@ -24,6 +24,6 @@ jobs:
 
       - name: lint
         run: |
-          black . --check
+          black . --check --exclude proto
           flake8
           mypy .
