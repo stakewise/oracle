@@ -1,0 +1,29 @@
+---
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: use python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: install
+        run: |
+          python -m pip install --upgrade pip wheel
+          pip install --require-hashes -r requirements.txt -r requirements-dev.txt
+
+      - name: lint
+        run: |
+          black . --check --exclude proto
+          flake8
+          mypy .
