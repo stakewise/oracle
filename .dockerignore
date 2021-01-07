@@ -1,0 +1,7 @@
+/.git
+/.idea
+venv
+.mypy_cache
+Dockerfile
+.dockerignore
+.gitignore

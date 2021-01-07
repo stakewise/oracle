@@ -10,19 +10,21 @@ ENV PYTHONUSERBASE $PYROOT
 
 WORKDIR /build
 
-# Install pipenv
-RUN pip install 'pipenv==2018.11.26'
+# Setup virtualenv
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
-# Copy Pipfile, Pipfile.lock to the build container
-COPY Pipfile* ./
+# Copy requirements
+COPY requirements.txt ./
 
 # Install build dependencies
 RUN apt-get update && \
   apt-get install -y \
   gcc \
   && rm -rf /var/lib/apt/lists/*
+
 # Install dependencies
-RUN PIP_USER=1 PIP_IGNORE_INSTALLED=1 pipenv install --system --deploy --ignore-pipfile
+RUN pip install --require-hashes -r requirements.txt
 
 ####################
 # Production image #
@@ -30,17 +32,12 @@ RUN PIP_USER=1 PIP_IGNORE_INSTALLED=1 pipenv install --system --deploy --ignore-
 FROM python:3.8.7-slim
 
 # Dependencies path
-ENV PYROOT /pyroot
-ENV PATH $PYROOT/bin:$PATH
-ENV PYTHONPATH $PYROOT/lib/python:$PATH
-# This is crucial for pkg_resources to work
-ENV PYTHONUSERBASE $PYROOT
+ENV PATH="/opt/venv/bin:$PATH"
 
-WORKDIR /src
+WORKDIR /app
 
 # Copy dependencies from build container
-COPY --from=builder $PYROOT/bin/ $PYROOT/bin/
-COPY --from=builder $PYROOT/lib/ $PYROOT/lib/
+COPY --from=builder /opt/venv /opt/venv
 
 # Copy source code
 COPY . ./
