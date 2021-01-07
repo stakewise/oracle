@@ -1,12 +1,26 @@
+import time
 from datetime import datetime, timezone, timedelta
 from typing import List, Set
 
-import time
 from eth_typing import BLSPubkey
 from loguru import logger
 from web3 import Web3
 from web3.types import Wei
 
+from contracts import (
+    get_balance_reporters_contract,
+    get_pool_contract,
+    get_reward_eth_contract,
+    get_staked_eth_contract,
+    get_ownable_pausable_contract
+)
+from proto.eth.v1alpha1.beacon_chain_pb2 import ListValidatorBalancesRequest
+from proto.eth.v1alpha1.validator_pb2 import MultipleValidatorStatusRequest
+from reporting.settings import (
+    BEACON_CHAIN_RPC_ENDPOINT,
+    TRANSACTION_TIMEOUT,
+    BALANCE_REPORTERS_CONTRACT_ADDRESS
+)
 from utils import (
     InterruptHandler,
     get_validator_stub,
@@ -15,27 +29,6 @@ from utils import (
     get_genesis_time,
     get_pool_validator_public_keys,
     ValidatorStatus
-)
-from contracts import (
-    get_settings_contract,
-    get_validators_contract,
-    get_reward_eth_token_contract,
-    get_staked_eth_token_contract,
-    get_balance_reporters_contract
-)
-from proto.eth.v1alpha1.beacon_chain_pb2 import ListValidatorBalancesRequest
-from proto.eth.v1alpha1.validator_pb2 import MultipleValidatorStatusRequest
-from reporting.settings import (
-    POOL_CONTRACT_ADDRESS,
-    SETTINGS_CONTRACT_ADDRESS,
-    BEACON_CHAIN_RPC_ENDPOINT,
-    TRANSACTION_TIMEOUT,
-    REWARD_ETH_CONTRACT_ADDRESS,
-    STAKED_ETH_CONTRACT_ADDRESS,
-    VALIDATORS_CONTRACT_ADDRESS,
-    REWARD_TOKEN_UPDATE_PERIOD,
-    BALANCE_REPORTERS_CONTRACT_ADDRESS,
-    MAX_REWARD_UPDATE_POSTPONES
 )
 
 ACTIVE_STATUSES = [
@@ -53,23 +46,20 @@ class RewardToken(object):
         self.w3 = w3
         self.interrupt_handler = interrupt_handler
 
-        self.pool_entity_id: bytes = w3.solidityKeccak(['address'], [POOL_CONTRACT_ADDRESS])
-        logger.debug(f'Pool entity ID: {w3.toHex(primitive=self.pool_entity_id)}')
+        self.pool = get_pool_contract(w3)
+        logger.debug(f'Pool contract address: {self.pool.address}')
 
-        self.reward_eth_token = get_reward_eth_token_contract(w3, REWARD_ETH_CONTRACT_ADDRESS)
+        self.reward_eth_token = get_reward_eth_contract(w3)
         logger.debug(f'Reward ETH Token contract address: {self.reward_eth_token.address}')
 
-        self.staked_eth_token = get_staked_eth_token_contract(w3, STAKED_ETH_CONTRACT_ADDRESS)
+        self.staked_eth_token = get_staked_eth_contract(w3)
         logger.debug(f'Staked ETH Token contract address: {self.staked_eth_token.address}')
 
-        self.balanceReporters = get_balance_reporters_contract(w3, BALANCE_REPORTERS_CONTRACT_ADDRESS)
+        self.balanceReporters = get_balance_reporters_contract(w3)
         logger.debug(f'Balance Reporters contract address: {self.balanceReporters.address}')
 
-        self.validators = get_validators_contract(w3, VALIDATORS_CONTRACT_ADDRESS)
-        logger.debug(f'Validators contract address: {self.validators.address}')
-
-        self.settings = get_settings_contract(w3, SETTINGS_CONTRACT_ADDRESS)
-        logger.debug(f'Settings contract address: {self.settings.address}')
+        self.balanceReportersPausable = get_ownable_pausable_contract(w3, BALANCE_REPORTERS_CONTRACT_ADDRESS)
+        logger.debug(f'Balance Reporters (pausable) contract address: {self.balanceReporters.address}')
 
         self.validator_stub = get_validator_stub(BEACON_CHAIN_RPC_ENDPOINT)
         self.beacon_chain_stub = get_beacon_chain_stub(BEACON_CHAIN_RPC_ENDPOINT)
@@ -81,31 +71,45 @@ class RewardToken(object):
         self.deposit_amount: Wei = self.w3.toWei(int(chain_config['MaxEffectiveBalance']), 'gwei')
         self.far_future_epoch = int(chain_config['FarFutureEpoch'])
 
-        self.postpones = 0
         self.last_update_at = datetime.fromtimestamp(
             self.reward_eth_token.functions.updateTimestamp().call(),
             tz=timezone.utc
         )
         # find last and next update dates
+        self.total_rewards_update_period: timedelta = timedelta(
+            seconds=self.balanceReporters.functions.totalRewardsUpdatePeriod().call()
+        )
+        logger.debug(f'Total rewards update period: {self.total_rewards_update_period}')
         if self.last_update_at < self.genesis_time:
-            next_update_at = self.last_update_at + timedelta(seconds=REWARD_TOKEN_UPDATE_PERIOD)
+            next_update_at = self.last_update_at + self.total_rewards_update_period
             while next_update_at <= datetime.now(tz=timezone.utc):
                 self.last_update_at = next_update_at
-                next_update_at = self.last_update_at + timedelta(seconds=REWARD_TOKEN_UPDATE_PERIOD)
+                next_update_at = self.last_update_at + self.total_rewards_update_period
 
-        self.next_update_at = self.last_update_at + timedelta(seconds=REWARD_TOKEN_UPDATE_PERIOD)
+        self.next_update_at = self.last_update_at + self.total_rewards_update_period
 
     def process(self) -> None:
         """Records new pool validators, updates total rewards."""
-        if self.settings.functions.pausedContracts(self.balanceReporters.address).call():
+        total_rewards_update_period = timedelta(
+            seconds=self.balanceReporters.functions.totalRewardsUpdatePeriod().call()
+        )
+        if total_rewards_update_period != self.total_rewards_update_period:
+            # adjust next update time based on new period
+            self.next_update_at = self.next_update_at - self.total_rewards_update_period + total_rewards_update_period
+            logger.info(f'Updated total rewards update period: previous={self.total_rewards_update_period},'
+                        f' new={total_rewards_update_period}')
+            self.total_rewards_update_period = total_rewards_update_period
+            return
+
+        if self.balanceReportersPausable.functions.paused().call():
             self.last_update_at = self.next_update_at
-            self.next_update_at = self.last_update_at + timedelta(seconds=REWARD_TOKEN_UPDATE_PERIOD)
+            self.next_update_at = self.last_update_at + self.total_rewards_update_period
             logger.info(f'Skipping update as Balance Reporters contract is paused:'
                         f' next update at {self.next_update_at}')
             return
 
         # fetch new pool validators
-        public_keys: Set[BLSPubkey] = get_pool_validator_public_keys(self.w3, self.validators, self.pool_entity_id)
+        public_keys: Set[BLSPubkey] = get_pool_validator_public_keys(self.pool)
         inactive_public_keys: Set[BLSPubkey] = set()
 
         # filter out inactive validators
@@ -118,7 +122,7 @@ class RewardToken(object):
         active_public_keys: List[BLSPubkey] = list(public_keys.difference(inactive_public_keys))
         if not active_public_keys:
             self.last_update_at = self.next_update_at
-            self.next_update_at = self.last_update_at + timedelta(seconds=REWARD_TOKEN_UPDATE_PERIOD)
+            self.next_update_at = self.last_update_at + self.total_rewards_update_period
             logger.info(f'No active validators: next update at={str(self.next_update_at)}')
             return
 
@@ -158,10 +162,8 @@ class RewardToken(object):
             pretty_period_rewards = f'{self.w3.fromWei(period_rewards, "ether")} ETH'
         logger.info(f'Retrieved pool validators rewards: total={pretty_total_rewards}, period={pretty_period_rewards}')
 
-        if period_rewards <= 0 and self.postpones <= MAX_REWARD_UPDATE_POSTPONES:
-            # skip updating rewards in case they went negative for the period
-            self.postpones += 1
-
+        # skip minting new rewards in case they are negative or zero for the period
+        if period_rewards <= 0:
             last_update_at = datetime.fromtimestamp(
                 self.reward_eth_token.functions.updateTimestamp().call(),
                 tz=timezone.utc
@@ -171,43 +173,36 @@ class RewardToken(object):
             else:
                 self.last_update_at = self.next_update_at
 
-            self.next_update_at = self.last_update_at + timedelta(seconds=REWARD_TOKEN_UPDATE_PERIOD)
-            logger.info(f'Re-scheduling rewards update: next at={str(self.next_update_at)},'
-                        f' postpones={self.postpones}')
+            self.next_update_at = self.last_update_at + self.total_rewards_update_period
+            logger.info(f'Skipping updating total rewards: period rewards={pretty_period_rewards},'
+                        f' next at={str(self.next_update_at)}')
             return
 
-        # check whether to sync uniswap pairs
-        sync_pairs = False
-        uniswap_pairs = self.balanceReporters.functions.getUniswapPairs().call()
-        for pair in uniswap_pairs:
-            latest_block = self.w3.eth.blockNumber
-            deposit = self.staked_eth_token.functions.depositOf(pair).call(block_number=latest_block)
-            balance = self.staked_eth_token.functions.balanceOf(pair).call(block_number=latest_block)
-            if deposit != balance:
-                sync_pairs = True
-                break
-
-        if not self.balanceReporters.functions.hasVoted(self.w3.eth.defaultAccount, total_rewards, sync_pairs).call():
-            # submit votes
-            tx_hash = self.balanceReporters.functions.voteForTotalRewards(total_rewards, sync_pairs).transact()
-            logger.info(f'Vote has been submitted: total rewards={pretty_total_rewards}, sync pairs={sync_pairs}')
+        if not self.balanceReporters.functions.hasTotalRewardsVote(self.w3.eth.defaultAccount, total_rewards).call():
+            # submit vote
+            tx_hash = self.balanceReporters.functions.voteForTotalRewards(total_rewards).transact()
+            logger.info(f'Vote has been submitted: total rewards={pretty_total_rewards}')
             self.w3.eth.waitForTransactionReceipt(tx_hash, timeout=TRANSACTION_TIMEOUT)
 
         last_update_at = datetime.fromtimestamp(
             self.reward_eth_token.functions.updateTimestamp().call(),
             tz=timezone.utc
         )
+        timeout = 360  # wait for 30 minutes for other voters
         while self.next_update_at > last_update_at:
+            if timeout <= 0:
+                raise RuntimeError("Timed out waiting for other reporters' votes")
+
             logger.info(f'Waiting for other reporters to vote...')
             time.sleep(5)
             last_update_at = datetime.fromtimestamp(
                 self.reward_eth_token.functions.updateTimestamp().call(),
                 tz=timezone.utc
             )
+            timeout -= 1
 
         logger.info(f'Pool validators total rewards successfully submitted')
         self.last_update_at = last_update_at
 
-        self.postpones = 0
-        self.next_update_at = self.last_update_at + timedelta(seconds=REWARD_TOKEN_UPDATE_PERIOD)
+        self.next_update_at = self.last_update_at + self.total_rewards_update_period
         logger.info(f'Re-scheduling rewards update: next at={self.next_update_at}')

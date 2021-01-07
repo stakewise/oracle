@@ -1,7 +1,7 @@
 ###########
 # Builder #
 ###########
-FROM python:3.8.6-slim AS builder
+FROM python:3.8.7-slim AS builder
 
 # This is where pip will install to
 ENV PYROOT /pyroot
@@ -27,7 +27,7 @@ RUN PIP_USER=1 PIP_IGNORE_INSTALLED=1 pipenv install --system --deploy --ignore-
 ####################
 # Production image #
 ####################
-FROM python:3.8.6-slim
+FROM python:3.8.7-slim
 
 # Dependencies path
 ENV PYROOT /pyroot

@@ -1,49 +1,64 @@
 import json
-from os import path
-from typing import Dict
+import os
 
-from eth_typing import Address
+from eth_typing import ChecksumAddress
 from web3 import Web3
 from web3.contract import Contract
 
-current_dir = path.dirname(__file__)
+from reporting.settings import (
+    POOL_CONTRACT_ADDRESS,
+    REWARD_ETH_CONTRACT_ADDRESS,
+    STAKED_ETH_CONTRACT_ADDRESS,
+    BALANCE_REPORTERS_CONTRACT_ADDRESS
+)
 
 
-def _load_abi(filename: str) -> Dict:
-    with open(path.join(current_dir, 'abi', filename), 'r') as f:
-        return json.load(f)
+def get_staked_eth_contract(w3: Web3) -> Contract:
+    """:returns instance of `StakedEthToken` contract."""
+    current_dir = os.path.dirname(__file__)
+    with open(os.path.join(current_dir, 'abi/IStakedEthToken.json')) as f:
+        abi = json.load(f)
+
+    return w3.eth.contract(abi=abi, address=STAKED_ETH_CONTRACT_ADDRESS)
 
 
-def get_settings_contract(w3: Web3, contract_address: Address) -> Contract:
+def get_reward_eth_contract(w3: Web3) -> Contract:
+    """:returns instance of `RewardEthToken` contract."""
+    current_dir = os.path.dirname(__file__)
+    with open(os.path.join(current_dir, 'abi/IRewardEthToken.json')) as f:
+        abi = json.load(f)
+
+    return w3.eth.contract(abi=abi, address=REWARD_ETH_CONTRACT_ADDRESS)
+
+
+def get_pool_contract(w3: Web3) -> Contract:
+    """:returns instance of `Pool` contract."""
+    current_dir = os.path.dirname(__file__)
+    with open(os.path.join(current_dir, 'abi/IPool.json')) as f:
+        abi = json.load(f)
+
     return w3.eth.contract(
-        abi=_load_abi('ISettings.json'),
-        address=contract_address
+        abi=abi,
+        address=POOL_CONTRACT_ADDRESS
     )
 
 
-def get_validators_contract(w3: Web3, contract_address: Address) -> Contract:
+def get_ownable_pausable_contract(w3: Web3, contract_address: ChecksumAddress) -> Contract:
+    """:returns instance of `OwnablePausable` contract."""
+    current_dir = os.path.dirname(__file__)
+    with open(os.path.join(current_dir, 'abi/OwnablePausableUpgradeable.json')) as f:
+        abi = json.load(f)
+
+    return w3.eth.contract(abi=abi, address=contract_address)
+
+
+def get_balance_reporters_contract(w3: Web3) -> Contract:
+    """:returns instance of `Balance Reporters` contract."""
+    current_dir = os.path.dirname(__file__)
+    with open(os.path.join(current_dir, 'abi/IBalanceReporters.json')) as f:
+        abi = json.load(f)
+
     return w3.eth.contract(
-        abi=_load_abi('IValidators.json'),
-        address=contract_address
-    )
-
-
-def get_reward_eth_token_contract(w3: Web3, contract_address: Address) -> Contract:
-    return w3.eth.contract(
-        abi=_load_abi('IRewardEthToken.json'),
-        address=contract_address
-    )
-
-
-def get_staked_eth_token_contract(w3: Web3, contract_address: Address) -> Contract:
-    return w3.eth.contract(
-        abi=_load_abi('IStakedEthToken.json'),
-        address=contract_address
-    )
-
-
-def get_balance_reporters_contract(w3: Web3, contract_address: Address) -> Contract:
-    return w3.eth.contract(
-        abi=_load_abi('IBalanceReporters.json'),
-        address=contract_address
+        abi=abi,
+        address=BALANCE_REPORTERS_CONTRACT_ADDRESS
     )
