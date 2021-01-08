@@ -53,7 +53,7 @@ APPLY_GAS_PRICE_STRATEGY: bool = environ.get("APPLY_GAS_PRICE_STRATEGY", "False"
     "true",
     "True",
 )
-MAX_TX_WAIT_SECONDS: int = int(environ["MAX_TX_WAIT_SECONDS"])
+MAX_TX_WAIT_SECONDS: int = int(environ.get("MAX_TX_WAIT_SECONDS", "120"))
 
 # how long to wait for transaction to mine
 TRANSACTION_TIMEOUT: int = int(environ["TRANSACTION_TIMEOUT"])
