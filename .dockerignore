@@ -5,3 +5,4 @@ venv
 Dockerfile
 .dockerignore
 .gitignore
+settings.txt

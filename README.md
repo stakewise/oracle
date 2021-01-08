@@ -86,7 +86,9 @@ where `settings.txt` is an environment file with [Settings](#settings).
 | BALANCE_REPORTERS_CONTRACT_ADDRESS     | The address of the [Balance Reporters Contract](https://github.com/stakewise/contracts/blob/0b7a80e0f8fe0ffcc428fcf4392955b636dc723e/contracts/BalanceReporters.sol).                                   | Yes      | -       |
 | REWARD_ETH_CONTRACT_ADDRESS            | The address of the [Reward ETH Token Contract](https://github.com/stakewise/contracts/blob/0b7a80e0f8fe0ffcc428fcf4392955b636dc723e/contracts/tokens/RewardEthToken.sol).                               | Yes      | -       |
 | STAKED_ETH_CONTRACT_ADDRESS            | The address of the  [Staked ETH Token Contract](https://github.com/stakewise/contracts/blob/0b7a80e0f8fe0ffcc428fcf4392955b636dc723e/contracts/tokens/StakedEthToken.sol).                              | Yes      | -       |
-| REPORTER_PRIVATE_KEY                   | The ETH1 private key of the operator (see `Generating Private Key` below).                                                                                                            | Yes      | -       |
+| REPORTER_PRIVATE_KEY                   | The ETH1 private key of the operator (see `Generating Private Key` below).                                                                                                                              | Yes      | -       |
+| NOTIFIERS_TELEGRAM_TOKEN               | Telegram chat token where notifications about low balance or errors will be sent.                                                                                                                       | Yes      | -       |
+| NOTIFIERS_TELEGRAM_CHAT_ID             | Telegram chat ID where notifications about low balance or errors will be sent.                                                                                                                          | Yes      | -       |
 
 ## Example settings
 
@@ -107,6 +109,8 @@ POOL_CONTRACT_ADDRESS=0xD60F7AE203Ba7c54e2712975E93313a1824b67e1
 REWARD_ETH_CONTRACT_ADDRESS=0xCFAAb3f925c9cd6F3B3a7c9Af9389EA2F3D7de78
 STAKED_ETH_CONTRACT_ADDRESS=0x124dd949ce16de90A0440527f8b9321080DFC888
 REPORTER_PRIVATE_KEY=0x<private_key>
+NOTIFIERS_TELEGRAM_TOKEN=12345token
+NOTIFIERS_TELEGRAM_CHAT_ID=123456
 EOL
 ```
 
