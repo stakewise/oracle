@@ -53,7 +53,7 @@ docker run --env-file ./settings.txt gcr.io/stakewiselabs/reporter:latest
 
 where `settings.txt` is an environment file with [Settings](#settings).
 
-### Option 2. Run with Native Python
+### Option 2. Run with Python
 
 Run the following command locally to start the balance reporter:
 
