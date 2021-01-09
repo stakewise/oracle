@@ -15,7 +15,7 @@ them to the [BalanceReporters](https://github.com/stakewise/contracts/blob/0b7a8
 ### Option 1. Build `reporter` with native Python
 
 ```shell script
-pip3 install -r requirements.txt
+pip3 install -r requirements/prod.txt
 ```
 
 ### Option 2. Build `reporter` with `virtualenv`
@@ -30,7 +30,7 @@ source venv/bin/activate
 and install the dependencies:
 
 ```shell script
-pip install -r requirements.txt
+pip install -r requirements/prod.txt
 ```
 
 ### Option 3. Build the docker image (see below to use the existing one)
