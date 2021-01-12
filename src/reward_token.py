@@ -1,7 +1,7 @@
+import time
 from datetime import datetime, timezone, timedelta
 from typing import List, Set
 
-import time
 from eth_typing.bls import BLSPubkey
 from loguru import logger
 from web3 import Web3
@@ -83,7 +83,8 @@ class RewardToken(object):
         self.far_future_epoch = int(chain_config["FarFutureEpoch"])
 
         self.last_update_at = datetime.fromtimestamp(
-            self.reward_eth_token.functions.updateTimestamp().call(), tz=timezone.utc
+            self.reward_eth_token.functions.lastUpdateTimestamp().call(),
+            tz=timezone.utc,
         )
         # find last and next update dates
         self.total_rewards_update_period: timedelta = timedelta(
@@ -208,7 +209,7 @@ class RewardToken(object):
         # skip minting new rewards in case they are negative or zero for the period
         if period_rewards <= 0:
             last_update_at = datetime.fromtimestamp(
-                self.reward_eth_token.functions.updateTimestamp().call(),
+                self.reward_eth_token.functions.lastUpdateTimestamp().call(),
                 tz=timezone.utc,
             )
             if last_update_at > self.next_update_at:
@@ -237,7 +238,8 @@ class RewardToken(object):
             self.w3.eth.waitForTransactionReceipt(tx_hash, timeout=TRANSACTION_TIMEOUT)
 
         last_update_at = datetime.fromtimestamp(
-            self.reward_eth_token.functions.updateTimestamp().call(), tz=timezone.utc
+            self.reward_eth_token.functions.lastUpdateTimestamp().call(),
+            tz=timezone.utc,
         )
         timeout = 360  # wait for 30 minutes for other voters
         while self.next_update_at > last_update_at:
@@ -247,7 +249,7 @@ class RewardToken(object):
             logger.info("Waiting for other reporters to vote...")
             time.sleep(5)
             last_update_at = datetime.fromtimestamp(
-                self.reward_eth_token.functions.updateTimestamp().call(),
+                self.reward_eth_token.functions.lastUpdateTimestamp().call(),
                 tz=timezone.utc,
             )
             timeout -= 1
