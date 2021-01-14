@@ -201,24 +201,6 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "tokenContract",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "claimedRewards",
-        "type": "uint256"
-      }
-    ],
-    "name": "claimRewards",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
         "name": "_admin",
         "type": "address"
       },
@@ -230,11 +212,6 @@
       {
         "internalType": "address",
         "name": "_balanceReporters",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_stakedTokens",
         "type": "address"
       },
       {
@@ -258,9 +235,9 @@
     "name": "lastUpdateTimestamp",
     "outputs": [
       {
-        "internalType": "uint128",
+        "internalType": "uint256",
         "name": "",
-        "type": "uint128"
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
