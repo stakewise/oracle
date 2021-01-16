@@ -48,7 +48,7 @@ docker build --pull -t reporter .
 Run the following command locally to start the balance reporter:
 
 ```shell script
-docker run --env-file ./settings.txt gcr.io/stakewiselabs/reporter:latest
+docker run --env-file ./settings.txt stakewiselabs/balance-reporter:latest
 ```
 
 where `settings.txt` is an environment file with [Settings](#settings).
