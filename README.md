@@ -1,4 +1,4 @@
-# Oracle
+# StakeWise Oracle
 
 Oracles are responsible for submitting off-chain data of StakeWise pool validators from ETH2 beacon chain
 to the [Oracles](https://github.com/stakewise/contracts/blob/master/contracts/Oracles.sol) smart contract.
