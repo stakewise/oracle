@@ -62,8 +62,8 @@ TRANSACTION_TIMEOUT: int = int(environ["TRANSACTION_TIMEOUT"])
 POOL_CONTRACT_ADDRESS: ChecksumAddress = ChecksumAddress(
     HexAddress(HexStr(environ["POOL_CONTRACT_ADDRESS"]))
 )
-BALANCE_REPORTERS_CONTRACT_ADDRESS: ChecksumAddress = ChecksumAddress(
-    HexAddress(HexStr(environ["BALANCE_REPORTERS_CONTRACT_ADDRESS"]))
+ORACLES_CONTRACT_ADDRESS: ChecksumAddress = ChecksumAddress(
+    HexAddress(HexStr(environ["ORACLES_CONTRACT_ADDRESS"]))
 )
 REWARD_ETH_CONTRACT_ADDRESS: ChecksumAddress = ChecksumAddress(
     HexAddress(HexStr(environ["REWARD_ETH_CONTRACT_ADDRESS"]))

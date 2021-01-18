@@ -8,7 +8,7 @@ from web3 import Web3
 from web3.types import Wei
 
 from contracts import (
-    get_balance_reporters_contract,
+    get_oracles_contract,
     get_pool_contract,
     get_reward_eth_contract,
     get_staked_eth_contract,
@@ -19,7 +19,7 @@ from proto.eth.v1alpha1.validator_pb2 import MultipleValidatorStatusRequest  # t
 from src.settings import (
     BEACON_CHAIN_RPC_ENDPOINT,
     TRANSACTION_TIMEOUT,
-    BALANCE_REPORTERS_CONTRACT_ADDRESS,
+    ORACLES_CONTRACT_ADDRESS,
 )
 from src.utils import (
     InterruptHandler,
@@ -59,13 +59,13 @@ class RewardToken(object):
             f"Staked ETH Token contract address: {self.staked_eth_token.address}"
         )
 
-        self.balanceReporters = get_balance_reporters_contract(w3)
+        self.balanceReporters = get_oracles_contract(w3)
         logger.debug(
             f"Balance Reporters contract address: {self.balanceReporters.address}"
         )
 
         self.balanceReportersPausable = get_ownable_pausable_contract(
-            w3, BALANCE_REPORTERS_CONTRACT_ADDRESS
+            w3, ORACLES_CONTRACT_ADDRESS
         )
 
         self.validator_stub = get_validator_stub(BEACON_CHAIN_RPC_ENDPOINT)
