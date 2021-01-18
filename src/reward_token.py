@@ -8,7 +8,7 @@ from web3 import Web3
 from web3.types import Wei
 
 from contracts import (
-    get_balance_reporters_contract,
+    get_oracles_contract,
     get_pool_contract,
     get_reward_eth_contract,
     get_staked_eth_contract,
@@ -19,7 +19,7 @@ from proto.eth.v1alpha1.validator_pb2 import MultipleValidatorStatusRequest  # t
 from src.settings import (
     BEACON_CHAIN_RPC_ENDPOINT,
     TRANSACTION_TIMEOUT,
-    BALANCE_REPORTERS_CONTRACT_ADDRESS,
+    ORACLES_CONTRACT_ADDRESS,
 )
 from src.utils import (
     InterruptHandler,
@@ -59,13 +59,11 @@ class RewardToken(object):
             f"Staked ETH Token contract address: {self.staked_eth_token.address}"
         )
 
-        self.balanceReporters = get_balance_reporters_contract(w3)
-        logger.debug(
-            f"Balance Reporters contract address: {self.balanceReporters.address}"
-        )
+        self.oracles = get_oracles_contract(w3)
+        logger.debug(f"Oracles contract address: {self.oracles.address}")
 
-        self.balanceReportersPausable = get_ownable_pausable_contract(
-            w3, BALANCE_REPORTERS_CONTRACT_ADDRESS
+        self.oraclesPausable = get_ownable_pausable_contract(
+            w3, ORACLES_CONTRACT_ADDRESS
         )
 
         self.validator_stub = get_validator_stub(BEACON_CHAIN_RPC_ENDPOINT)
@@ -88,7 +86,7 @@ class RewardToken(object):
         )
         # find last and next update dates
         self.total_rewards_update_period: timedelta = timedelta(
-            seconds=self.balanceReporters.functions.totalRewardsUpdatePeriod().call()
+            seconds=self.oracles.functions.totalRewardsUpdatePeriod().call()
         )
         logger.debug(f"Total rewards update period: {self.total_rewards_update_period}")
         if self.last_update_at < self.genesis_time:
@@ -102,7 +100,7 @@ class RewardToken(object):
     def process(self) -> None:
         """Records new pool validators, updates total rewards."""
         total_rewards_update_period = timedelta(
-            seconds=self.balanceReporters.functions.totalRewardsUpdatePeriod().call()
+            seconds=self.oracles.functions.totalRewardsUpdatePeriod().call()
         )
         if total_rewards_update_period != self.total_rewards_update_period:
             # adjust next update time based on new period
@@ -119,11 +117,11 @@ class RewardToken(object):
             self.total_rewards_update_period = total_rewards_update_period
             return
 
-        if self.balanceReportersPausable.functions.paused().call():
+        if self.oraclesPausable.functions.paused().call():
             self.last_update_at = self.next_update_at
             self.next_update_at = self.last_update_at + self.total_rewards_update_period
             logger.info(
-                f"Skipping update as Balance Reporters contract is paused:"
+                f"Skipping update as Oracles contract is paused:"
                 f" next update at {self.next_update_at}"
             )
             return
@@ -225,11 +223,11 @@ class RewardToken(object):
             )
             return
 
-        if not self.balanceReporters.functions.hasTotalRewardsVote(
+        if not self.oracles.functions.hasTotalRewardsVote(
             self.w3.eth.defaultAccount, total_rewards
         ).call():
             # submit vote
-            tx_hash = self.balanceReporters.functions.voteForTotalRewards(
+            tx_hash = self.oracles.functions.voteForTotalRewards(
                 total_rewards
             ).transact()
             logger.info(
@@ -244,9 +242,9 @@ class RewardToken(object):
         timeout = 360  # wait for 30 minutes for other voters
         while self.next_update_at > last_update_at:
             if timeout <= 0:
-                raise RuntimeError("Timed out waiting for other reporters' votes")
+                raise RuntimeError("Timed out waiting for other oracles' votes")
 
-            logger.info("Waiting for other reporters to vote...")
+            logger.info("Waiting for other oracles to vote...")
             time.sleep(5)
             last_update_at = datetime.fromtimestamp(
                 self.reward_eth_token.functions.lastUpdateTimestamp().call(),

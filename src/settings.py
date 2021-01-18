@@ -62,8 +62,8 @@ TRANSACTION_TIMEOUT: int = int(environ["TRANSACTION_TIMEOUT"])
 POOL_CONTRACT_ADDRESS: ChecksumAddress = ChecksumAddress(
     HexAddress(HexStr(environ["POOL_CONTRACT_ADDRESS"]))
 )
-BALANCE_REPORTERS_CONTRACT_ADDRESS: ChecksumAddress = ChecksumAddress(
-    HexAddress(HexStr(environ["BALANCE_REPORTERS_CONTRACT_ADDRESS"]))
+ORACLES_CONTRACT_ADDRESS: ChecksumAddress = ChecksumAddress(
+    HexAddress(HexStr(environ["ORACLES_CONTRACT_ADDRESS"]))
 )
 REWARD_ETH_CONTRACT_ADDRESS: ChecksumAddress = ChecksumAddress(
     HexAddress(HexStr(environ["REWARD_ETH_CONTRACT_ADDRESS"]))
@@ -74,4 +74,4 @@ STAKED_ETH_CONTRACT_ADDRESS: ChecksumAddress = ChecksumAddress(
 
 # credentials
 # TODO: consider reading from file
-REPORTER_PRIVATE_KEY: str = environ["REPORTER_PRIVATE_KEY"]
+ORACLE_PRIVATE_KEY: str = environ["ORACLE_PRIVATE_KEY"]

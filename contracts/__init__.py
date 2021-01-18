@@ -9,7 +9,7 @@ from src.settings import (
     POOL_CONTRACT_ADDRESS,
     REWARD_ETH_CONTRACT_ADDRESS,
     STAKED_ETH_CONTRACT_ADDRESS,
-    BALANCE_REPORTERS_CONTRACT_ADDRESS,
+    ORACLES_CONTRACT_ADDRESS,
 )
 
 
@@ -51,10 +51,10 @@ def get_ownable_pausable_contract(
     return w3.eth.contract(abi=abi, address=contract_address)
 
 
-def get_balance_reporters_contract(w3: Web3) -> Contract:
-    """:returns instance of `Balance Reporters` contract."""
+def get_oracles_contract(w3: Web3) -> Contract:
+    """:returns instance of `Oracles` contract."""
     current_dir = os.path.dirname(__file__)
-    with open(os.path.join(current_dir, "abi/IBalanceReporters.json")) as f:
+    with open(os.path.join(current_dir, "abi/IOracles.json")) as f:
         abi = json.load(f)
 
-    return w3.eth.contract(abi=abi, address=BALANCE_REPORTERS_CONTRACT_ADDRESS)
+    return w3.eth.contract(abi=abi, address=ORACLES_CONTRACT_ADDRESS)

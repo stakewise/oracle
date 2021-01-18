@@ -14,7 +14,7 @@ from src.settings import (
     INJECT_RETRY_REQUEST_MIDDLEWARE,
     INJECT_LOCAL_FILTER_MIDDLEWARE,
     STALE_CHECK_MIDDLEWARE_ALLOWABLE_DELAY,
-    REPORTER_PRIVATE_KEY,
+    ORACLE_PRIVATE_KEY,
     BALANCE_WARNING_THRESHOLD,
     BALANCE_ERROR_THRESHOLD,
     APPLY_GAS_PRICE_STRATEGY,
@@ -56,7 +56,7 @@ def main() -> None:
     )
 
     # setup default account
-    configure_default_account(web3_client, REPORTER_PRIVATE_KEY)
+    configure_default_account(web3_client, ORACLE_PRIVATE_KEY)
 
     # wait for interrupt
     interrupt_handler = InterruptHandler()
@@ -66,7 +66,7 @@ def main() -> None:
     )
 
     while not interrupt_handler.exit:
-        # сheck reporter balance
+        # сheck oracle balance
         check_default_account_balance(
             web3_client, BALANCE_WARNING_THRESHOLD, BALANCE_ERROR_THRESHOLD
         )
