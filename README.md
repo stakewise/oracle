@@ -1,7 +1,7 @@
-# Balance Reporter
+# Oracle
 
-Balance Reporter are responsible for reading balances of StakeWise pool validators from ETH2 beacon chain and submit
-them to the [BalanceReporters](https://github.com/stakewise/contracts/blob/0b7a80e0f8fe0ffcc428fcf4392955b636dc723e/contracts/BalanceReporters.sol) smart contract.
+Oracles are responsible for submitting off-chain data of StakeWise pool validators from ETH2 beacon chain
+to the [Oracles](https://github.com/stakewise/contracts/blob/master/contracts/Oracles.sol) smart contract.
 
 ## Installation
 
@@ -12,13 +12,13 @@ them to the [BalanceReporters](https://github.com/stakewise/contracts/blob/0b7a8
 - [Geth **v1.9.25+**](https://github.com/ethereum/go-ethereum)
 - [Prysm **v1.0.5+**](https://github.com/prysmaticlabs/prysm)
 
-### Option 1. Build `reporter` with native Python
+### Option 1. Build `oracle` with native Python
 
 ```shell script
 pip3 install -r requirements/prod.txt
 ```
 
-### Option 2. Build `reporter` with `virtualenv`
+### Option 2. Build `oracle` with `virtualenv`
 
 For the [virtualenv](https://virtualenv.pypa.io/en/latest/) users, you can create a new `venv`:
 
@@ -38,24 +38,24 @@ pip install -r requirements/prod.txt
 Run the following command locally to build the docker image:
 
 ```shell script
-docker build --pull -t reporter .
+docker build --pull -t oracle .
 ```
 
 ## Usage
 
 ### Option 1. Use the existing docker image
 
-Run the following command locally to start the balance reporter:
+Run the following command locally to start the oracle:
 
 ```shell script
-docker run --env-file ./settings.txt stakewiselabs/balance-reporter:latest
+docker run --env-file ./settings.txt stakewiselabs/oracle:latest
 ```
 
 where `settings.txt` is an environment file with [Settings](#settings).
 
 ### Option 2. Run with Python
 
-Run the following command locally to start the balance reporter:
+Run the following command locally to start the oracle:
 
 ```shell script
 source ./settings.txt
@@ -66,8 +66,8 @@ where `settings.txt` is an environment file with [Settings](#settings).
 
 ## Settings
 
-|                Variable                | Description                                                                                                                                                                                             | Required | Default |
-|:--------------------------------------:|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|---------|
+| Variable                               | Description                                                                                                                                                                                             | Required | Default |
+|----------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|---------|
 | LOG_LEVEL                              | The log level of the program.                                                                                                                                                                           | No       | DEBUG   |
 | WEB3_WS_ENDPOINT                       | The WS endpoint to the ETH1 client. Must be specified if `WEB3_HTTP_ENDPOINT` endpoint is not provided.                                                                                                 | No       | -       |
 | WEB3_HTTP_ENDPOINT                     | The HTTP endpoint to the ETH1 client. Must be specified if `WEB3_WS_ENDPOINT` endpoint is not provided.                                                                                                 | No       | -       |
@@ -77,16 +77,16 @@ where `settings.txt` is an environment file with [Settings](#settings).
 | STALE_CHECK_MIDDLEWARE_ALLOWABLE_DELAY | The time specified in seconds after which the block is considered stale in `INJECT_STALE_CHECK_MIDDLEWARE` middleware. Must be specified if `INJECT_STALE_CHECK_MIDDLEWARE` is set to `True`.           | No       | -       |
 | INJECT_RETRY_REQUEST_MIDDLEWARE        | Whether to retry failed transactions (see [Retry middleware](https://web3py.readthedocs.io/en/stable/middleware.html#httprequestretry)).                                                                | No       | False   |
 | INJECT_LOCAL_FILTER_MIDDLEWARE         | Whether to store log event filters locally instead of storing on the ETH1 node (see [Local middleware](https://web3py.readthedocs.io/en/stable/middleware.html#locally-managed-log-and-block-filters)). | No       | False   |
-| BALANCE_WARNING_THRESHOLD              | The telegram notification will be sent when the reporter's balance will drop below such amount of ether.                                                                                                | Yes      | -       |
-| BALANCE_ERROR_THRESHOLD                | The program will exit with an error when the reporter's balance will drop below such amount of ether.                                                                                                   | Yes      | -       |
+| BALANCE_WARNING_THRESHOLD              | The telegram notification will be sent when the oracle's balance will drop below such amount of ether.                                                                                                  | Yes      | -       |
+| BALANCE_ERROR_THRESHOLD                | The program will exit with an error when the oracle's balance will drop below such amount of ether.                                                                                                     | Yes      | -       |
 | APPLY_GAS_PRICE_STRATEGY               | Defines whether the gas strategy should be applied.                                                                                                                                                     | No       | False   |
-| MAX_TX_WAIT_SECONDS                    | The preferred number of seconds the reporter is willing to wait for the transaction to mine. Will be applied only if `APPLY_GAS_PRICE_STRATEGY` is set to `True`.                                       | No       | 120     |
-| TRANSACTION_TIMEOUT                    | The maximum number of seconds the reporter is willing to wait for the transaction to mine. After that it will throw time out error.                                                                     | Yes      | -       |
-| POOL_CONTRACT_ADDRESS                  | The address of the [Pool Contract](https://github.com/stakewise/contracts/blob/0b7a80e0f8fe0ffcc428fcf4392955b636dc723e/contracts/collectors/Pool.sol).                                                 | Yes      | -       |
-| BALANCE_REPORTERS_CONTRACT_ADDRESS     | The address of the [Balance Reporters Contract](https://github.com/stakewise/contracts/blob/0b7a80e0f8fe0ffcc428fcf4392955b636dc723e/contracts/BalanceReporters.sol).                                   | Yes      | -       |
-| REWARD_ETH_CONTRACT_ADDRESS            | The address of the [Reward ETH Token Contract](https://github.com/stakewise/contracts/blob/0b7a80e0f8fe0ffcc428fcf4392955b636dc723e/contracts/tokens/RewardEthToken.sol).                               | Yes      | -       |
-| STAKED_ETH_CONTRACT_ADDRESS            | The address of the  [Staked ETH Token Contract](https://github.com/stakewise/contracts/blob/0b7a80e0f8fe0ffcc428fcf4392955b636dc723e/contracts/tokens/StakedEthToken.sol).                              | Yes      | -       |
-| REPORTER_PRIVATE_KEY                   | The ETH1 private key of the operator (see `Generating Private Key` below).                                                                                                                              | Yes      | -       |
+| MAX_TX_WAIT_SECONDS                    | The preferred number of seconds the oracle is willing to wait for the transaction to mine. Will be applied only if `APPLY_GAS_PRICE_STRATEGY` is set to `True`.                                         | No       | 120     |
+| TRANSACTION_TIMEOUT                    | The maximum number of seconds the oracle is willing to wait for the transaction to mine. After that it will throw time out error.                                                                       | Yes      | -       |
+| POOL_CONTRACT_ADDRESS                  | The address of the [Pool Contract](https://github.com/stakewise/contracts/blob/master/contracts/collectors/Pool.sol).                                                                                   | Yes      | -       |
+| ORACLES_CONTRACT_ADDRESS               | The address of the [Oracle Contract](https://github.com/stakewise/contracts/blob/master/contracts/Oracles.sol).                                                                                         | Yes      | -       |
+| REWARD_ETH_CONTRACT_ADDRESS            | The address of the [Reward ETH Token Contract](https://github.com/stakewise/contracts/blob/master/contracts/tokens/RewardEthToken.sol).                                                                 | Yes      | -       |
+| STAKED_ETH_CONTRACT_ADDRESS            | The address of the  [Staked ETH Token Contract](https://github.com/stakewise/contracts/blob/master/contracts/tokens/StakedEthToken.sol).                                                                | Yes      | -       |
+| ORACLE_PRIVATE_KEY                     | The ETH1 private key of the operator (see `Generating Private Key` below).                                                                                                                              | Yes      | -       |
 | NOTIFIERS_TELEGRAM_TOKEN               | Telegram chat token where notifications about low balance or errors will be sent.                                                                                                                       | Yes      | -       |
 | NOTIFIERS_TELEGRAM_CHAT_ID             | Telegram chat ID where notifications about low balance or errors will be sent.                                                                                                                          | Yes      | -       |
 
@@ -104,11 +104,11 @@ BALANCE_ERROR_THRESHOLD=0.01
 APPLY_GAS_PRICE_STRATEGY=True
 MAX_TX_WAIT_SECONDS=120
 TRANSACTION_TIMEOUT=600
-BALANCE_REPORTERS_CONTRACT_ADDRESS=0xb8DC146F6F463631Ad950b165F21A87E824eFA0b
+ORACLES_CONTRACT_ADDRESS=0xb8DC146F6F463631Ad950b165F21A87E824eFA0b
 POOL_CONTRACT_ADDRESS=0xD60F7AE203Ba7c54e2712975E93313a1824b67e1
 REWARD_ETH_CONTRACT_ADDRESS=0xCFAAb3f925c9cd6F3B3a7c9Af9389EA2F3D7de78
 STAKED_ETH_CONTRACT_ADDRESS=0x124dd949ce16de90A0440527f8b9321080DFC888
-REPORTER_PRIVATE_KEY=0x<private_key>
+ORACLE_PRIVATE_KEY=0x<private_key>
 NOTIFIERS_TELEGRAM_TOKEN=12345token
 NOTIFIERS_TELEGRAM_CHAT_ID=123456
 EOL
