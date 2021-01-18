@@ -74,4 +74,4 @@ STAKED_ETH_CONTRACT_ADDRESS: ChecksumAddress = ChecksumAddress(
 
 # credentials
 # TODO: consider reading from file
-REPORTER_PRIVATE_KEY: str = environ["REPORTER_PRIVATE_KEY"]
+ORACLE_PRIVATE_KEY: str = environ["ORACLE_PRIVATE_KEY"]
