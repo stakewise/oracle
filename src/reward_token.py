@@ -20,6 +20,8 @@ from src.settings import (
     BEACON_CHAIN_RPC_ENDPOINT,
     TRANSACTION_TIMEOUT,
     ORACLES_CONTRACT_ADDRESS,
+    BALANCE_WARNING_THRESHOLD,
+    BALANCE_ERROR_THRESHOLD,
 )
 from src.utils import (
     InterruptHandler,
@@ -29,6 +31,7 @@ from src.utils import (
     get_genesis_time,
     get_pool_validator_public_keys,
     ValidatorStatus,
+    check_default_account_balance,
 )
 
 ACTIVE_STATUSES = [
@@ -264,3 +267,8 @@ class RewardToken(object):
 
         self.next_update_at = self.last_update_at + self.total_rewards_update_period
         logger.info(f"Re-scheduling rewards update: next at={self.next_update_at}")
+
+        # check oracle balance
+        check_default_account_balance(
+            self.w3, BALANCE_WARNING_THRESHOLD, BALANCE_ERROR_THRESHOLD
+        )

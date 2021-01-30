@@ -64,13 +64,12 @@ def main() -> None:
     reward_token_total_rewards = RewardToken(
         w3=web3_client, interrupt_handler=interrupt_handler
     )
+    # check oracle balance
+    check_default_account_balance(
+        web3_client, BALANCE_WARNING_THRESHOLD, BALANCE_ERROR_THRESHOLD
+    )
 
     while not interrupt_handler.exit:
-        # check oracle balance
-        check_default_account_balance(
-            web3_client, BALANCE_WARNING_THRESHOLD, BALANCE_ERROR_THRESHOLD
-        )
-
         # update Reward Token total rewards
         reward_token_total_rewards.process()
 
