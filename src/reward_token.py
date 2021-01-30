@@ -60,11 +60,10 @@ class RewardToken(object):
         )
 
         self.oracles = get_oracles_contract(w3)
-        logger.debug(f"Oracles contract address: {self.oracles.address}")
-
-        self.oraclesPausable = get_ownable_pausable_contract(
+        self.oracles_pausable = get_ownable_pausable_contract(
             w3, ORACLES_CONTRACT_ADDRESS
         )
+        logger.debug(f"Oracles contract address: {self.oracles.address}")
 
         self.validator_stub = get_validator_stub(BEACON_CHAIN_RPC_ENDPOINT)
         self.beacon_chain_stub = get_beacon_chain_stub(BEACON_CHAIN_RPC_ENDPOINT)
@@ -114,10 +113,14 @@ class RewardToken(object):
                 f" previous={self.total_rewards_update_period},"
                 f" new={total_rewards_update_period}"
             )
+            logger.info(f"Scheduling next rewards update at {self.next_update_at}")
             self.total_rewards_update_period = total_rewards_update_period
+
+        if self.next_update_at > datetime.now(tz=timezone.utc):
+            # it's not the time to update yet
             return
 
-        if self.oraclesPausable.functions.paused().call():
+        if self.oracles_pausable.functions.paused().call():
             self.last_update_at = self.next_update_at
             self.next_update_at = self.last_update_at + self.total_rewards_update_period
             logger.info(
@@ -130,13 +133,22 @@ class RewardToken(object):
         public_keys: Set[BLSPubkey] = get_pool_validator_public_keys(self.pool)
         inactive_public_keys: Set[BLSPubkey] = set()
 
+        # calculate epoch to fetch balance at
+        epoch: int = int(
+            (self.next_update_at - self.genesis_time).total_seconds()
+            / self.seconds_per_epoch
+        )
+
         # filter out inactive validators
         response = self.validator_stub.MultipleValidatorStatus(
             MultipleValidatorStatusRequest(public_keys=public_keys)
         )
         for i, public_key in enumerate(response.public_keys):
             status_response = response.statuses[i]
-            if ValidatorStatus(status_response.status) not in ACTIVE_STATUSES:
+            if (
+                ValidatorStatus(status_response.status) not in ACTIVE_STATUSES
+                or status_response.activation_epoch >= epoch
+            ):
                 inactive_public_keys.add(public_key)
 
         active_public_keys: List[BLSPubkey] = list(
@@ -150,11 +162,6 @@ class RewardToken(object):
             )
             return
 
-        # calculate epoch to fetch balance at
-        epoch: int = int(
-            (self.next_update_at - self.genesis_time).total_seconds()
-            / self.seconds_per_epoch
-        )
         logger.debug(
             f"Retrieving balances for {len(active_public_keys)} / {len(public_keys)}"
             f" validators at epoch={epoch}"

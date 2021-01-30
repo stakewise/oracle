@@ -58,6 +58,9 @@ MAX_TX_WAIT_SECONDS: int = int(environ.get("MAX_TX_WAIT_SECONDS", "120"))
 # how long to wait for transaction to mine
 TRANSACTION_TIMEOUT: int = int(environ["TRANSACTION_TIMEOUT"])
 
+# how long to wait before processing again
+PROCESS_INTERVAL: int = int(environ["PROCESS_INTERVAL"])
+
 # contracts
 POOL_CONTRACT_ADDRESS: ChecksumAddress = ChecksumAddress(
     HexAddress(HexStr(environ["POOL_CONTRACT_ADDRESS"]))

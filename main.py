@@ -1,7 +1,6 @@
-from datetime import datetime, timezone
-
 import sys
 import time
+
 from loguru import logger
 from notifiers.logging import NotificationHandler  # type: ignore
 
@@ -20,6 +19,7 @@ from src.settings import (
     APPLY_GAS_PRICE_STRATEGY,
     MAX_TX_WAIT_SECONDS,
     LOG_LEVEL,
+    PROCESS_INTERVAL,
 )
 from src.utils import (
     get_web3_client,
@@ -66,25 +66,16 @@ def main() -> None:
     )
 
     while not interrupt_handler.exit:
-        # сheck oracle balance
+        # check oracle balance
         check_default_account_balance(
             web3_client, BALANCE_WARNING_THRESHOLD, BALANCE_ERROR_THRESHOLD
         )
 
-        current_datetime = datetime.now(tz=timezone.utc)
-        if reward_token_total_rewards.next_update_at > current_datetime:
-            logger.info(
-                f"Scheduling next rewards update at"
-                f" {reward_token_total_rewards.next_update_at}"
-            )
-            time.sleep(
-                (
-                    reward_token_total_rewards.next_update_at - current_datetime
-                ).total_seconds()
-            )
-
         # update Reward Token total rewards
         reward_token_total_rewards.process()
+
+        # wait until next processing time
+        time.sleep(PROCESS_INTERVAL)
 
 
 if __name__ == "__main__":
