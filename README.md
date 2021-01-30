@@ -89,6 +89,7 @@ where `settings.txt` is an environment file with [Settings](#settings).
 | ORACLE_PRIVATE_KEY                     | The ETH1 private key of the operator (see `Generating Private Key` below).                                                                                                                              | Yes      | -       |
 | NOTIFIERS_TELEGRAM_TOKEN               | Telegram chat token where notifications about low balance or errors will be sent.                                                                                                                       | Yes      | -       |
 | NOTIFIERS_TELEGRAM_CHAT_ID             | Telegram chat ID where notifications about low balance or errors will be sent.                                                                                                                          | Yes      | -       |
+| PROCESS_INTERVAL                       | How long to wait before processing again.                                                                                                                                                               | Yes      | -       |
 
 ## Example settings
 
