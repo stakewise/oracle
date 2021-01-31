@@ -90,14 +90,15 @@ class RewardToken(object):
         self.total_rewards_update_period: timedelta = timedelta(
             seconds=self.oracles.functions.totalRewardsUpdatePeriod().call()
         )
-        logger.debug(f"Total rewards update period: {self.total_rewards_update_period}")
-        if self.last_update_at < self.genesis_time:
+        logger.info(f"Total rewards update period: {self.total_rewards_update_period}")
+
+        next_update_at = self.last_update_at + self.total_rewards_update_period
+        while next_update_at <= datetime.now(tz=timezone.utc):
+            self.last_update_at = next_update_at
             next_update_at = self.last_update_at + self.total_rewards_update_period
-            while next_update_at <= datetime.now(tz=timezone.utc):
-                self.last_update_at = next_update_at
-                next_update_at = self.last_update_at + self.total_rewards_update_period
 
         self.next_update_at = self.last_update_at + self.total_rewards_update_period
+        logger.info(f"Next rewards update time: {self.next_update_at}")
 
     def process(self) -> None:
         """Records new pool validators, updates total rewards."""
@@ -106,18 +107,24 @@ class RewardToken(object):
         )
         if total_rewards_update_period != self.total_rewards_update_period:
             # adjust next update time based on new period
-            self.next_update_at = (
+            next_update_at = (
                 self.next_update_at
                 - self.total_rewards_update_period
                 + total_rewards_update_period
             )
+            self.total_rewards_update_period = total_rewards_update_period
             logger.info(
                 f"Updated total rewards update period:"
                 f" previous={self.total_rewards_update_period},"
                 f" new={total_rewards_update_period}"
             )
+
+            while next_update_at <= datetime.now(tz=timezone.utc):
+                self.last_update_at = next_update_at
+                next_update_at = self.last_update_at + self.total_rewards_update_period
+
+            self.next_update_at = self.last_update_at + self.total_rewards_update_period
             logger.info(f"Scheduling next rewards update at {self.next_update_at}")
-            self.total_rewards_update_period = total_rewards_update_period
 
         if self.next_update_at > datetime.now(tz=timezone.utc):
             # it's not the time to update yet
@@ -165,7 +172,7 @@ class RewardToken(object):
             )
             return
 
-        logger.debug(
+        logger.info(
             f"Retrieving balances for {len(active_public_keys)} / {len(public_keys)}"
             f" validators at epoch={epoch}"
         )
