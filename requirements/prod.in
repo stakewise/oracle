@@ -3,4 +3,4 @@ notifiers==1.2.1
 web3==5.15.0
 grpcio==1.35.0
 protobuf==3.14.0
-google-api-core==1.24.1
+google-api-core==1.25.1
