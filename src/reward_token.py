@@ -256,13 +256,13 @@ class RewardToken(object):
             self.reward_eth_token.functions.lastUpdateTimestamp().call(),
             tz=timezone.utc,
         )
-        timeout = 360  # wait for 30 minutes for other voters
+        timeout = TRANSACTION_TIMEOUT  # wait for other voters
         while self.next_update_at > last_update_at:
             if timeout <= 0:
                 raise RuntimeError("Timed out waiting for other oracles' votes")
 
             logger.info("Waiting for other oracles to vote...")
-            time.sleep(5)
+            time.sleep(1)
             last_update_at = datetime.fromtimestamp(
                 self.reward_eth_token.functions.lastUpdateTimestamp().call(),
                 tz=timezone.utc,
