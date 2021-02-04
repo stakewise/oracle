@@ -202,7 +202,7 @@ def get_pool_validator_public_keys(pool_contract: Contract) -> Set[BLSPubkey]:
     return set(event["args"]["publicKey"] for event in events)
 
 
-def wait_prism_ready(
+def wait_prysm_ready(
     interrupt_handler: InterruptHandler,
     endpoint: str,
     process_interval: int,

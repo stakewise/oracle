@@ -27,7 +27,7 @@ from src.utils import (
     configure_default_account,
     InterruptHandler,
     check_default_account_balance,
-    wait_prism_ready,
+    wait_prysm_ready,
 )
 
 # Send notification to admins on error
@@ -64,7 +64,7 @@ def main() -> None:
     interrupt_handler = InterruptHandler()
 
     # wait that node is synced before trying to do anything
-    wait_prism_ready(
+    wait_prysm_ready(
         interrupt_handler, BEACON_CHAIN_RPC_ENDPOINT, PROCESS_INTERVAL, logger
     )
 
