@@ -212,13 +212,13 @@ def wait_prism_ready(
 
     Prysm RPC APIs return unavailable until Prysm is synced.
     """
-    ready = False
-    while not ready and not interrupt_handler.exit:
+    while not interrupt_handler.exit:
         try:
             beacon_chain_stub = get_beacon_chain_stub(endpoint)
 
             # This will bomb with RPC error if Prysm is not ready
             get_chain_config(beacon_chain_stub)
+            break
         except RpcError as e:
             code = e.code()
             if code == StatusCode.UNAVAILABLE:
