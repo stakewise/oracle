@@ -75,9 +75,7 @@ def main() -> None:
     )
 
     # wait that node is synced before trying to do anything
-    wait_prysm_ready(
-        interrupt_handler, BEACON_CHAIN_RPC_ENDPOINT, PROCESS_INTERVAL, logger
-    )
+    wait_prysm_ready(interrupt_handler, BEACON_CHAIN_RPC_ENDPOINT, PROCESS_INTERVAL)
 
     reward_token_total_rewards = RewardToken(
         w3=web3_client, interrupt_handler=interrupt_handler
