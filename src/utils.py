@@ -1,15 +1,17 @@
 import decimal
 import signal
+import time
 from asyncio.exceptions import TimeoutError
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Union, Any, Callable, Set, Dict
 
+
 from eth_typing.bls import BLSPubkey
 from eth_typing.evm import HexAddress
 from google.protobuf import empty_pb2
-from grpc import insecure_channel
-from loguru import logger
+from grpc import insecure_channel, RpcError, StatusCode
+from loguru import logger, Logger
 from notifiers.core import get_notifier  # type: ignore
 from web3 import Web3
 from web3.contract import Contract
@@ -198,3 +200,34 @@ def get_pool_validator_public_keys(pool_contract: Contract) -> Set[BLSPubkey]:
     pool_contract.web3.eth.uninstallFilter(event_filter.filter_id)
 
     return set(event["args"]["publicKey"] for event in events)
+
+
+def wait_prysm_ready(
+    interrupt_handler: InterruptHandler,
+    endpoint: str,
+    process_interval: int,
+    logger: Logger,
+) -> None:
+    """Wait that Prysm accepts requests and is synced.
+
+    Prysm RPC APIs return unavailable until Prysm is synced.
+    """
+    while not interrupt_handler.exit:
+        try:
+            beacon_chain_stub = get_beacon_chain_stub(endpoint)
+
+            # This will bomb with RPC error if Prysm is not ready
+            get_chain_config(beacon_chain_stub)
+            break
+        except RpcError as e:
+            code = e.code()
+            if code == StatusCode.UNAVAILABLE:
+                logger.warning(
+                    f"Could not connect to {endpoint} gRPC endpoint. "
+                    f"Maybe Prysm node is not synced? "
+                    f"Will keep trying every {process_interval} seconds."
+                )
+            else:
+                logger.warning("Unknown gRPC error connecting to Prysm: {e}")
+
+        time.sleep(process_interval)

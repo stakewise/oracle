@@ -20,12 +20,14 @@ from src.settings import (
     MAX_TX_WAIT_SECONDS,
     LOG_LEVEL,
     PROCESS_INTERVAL,
+    BEACON_CHAIN_RPC_ENDPOINT,
 )
 from src.utils import (
     get_web3_client,
     configure_default_account,
     InterruptHandler,
     check_default_account_balance,
+    wait_prysm_ready,
 )
 
 # Send notification to admins on error
@@ -60,6 +62,11 @@ def main() -> None:
 
     # wait for interrupt
     interrupt_handler = InterruptHandler()
+
+    # wait that node is synced before trying to do anything
+    wait_prysm_ready(
+        interrupt_handler, BEACON_CHAIN_RPC_ENDPOINT, PROCESS_INTERVAL, logger
+    )
 
     reward_token_total_rewards = RewardToken(
         w3=web3_client, interrupt_handler=interrupt_handler
