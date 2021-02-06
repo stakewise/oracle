@@ -11,7 +11,7 @@ from eth_typing.bls import BLSPubkey
 from eth_typing.evm import HexAddress
 from google.protobuf import empty_pb2
 from grpc import insecure_channel, RpcError, StatusCode
-from loguru import logger, Logger
+from loguru import logger
 from notifiers.core import get_notifier  # type: ignore
 from web3 import Web3
 from web3.contract import Contract
@@ -206,7 +206,6 @@ def wait_prysm_ready(
     interrupt_handler: InterruptHandler,
     endpoint: str,
     process_interval: int,
-    logger: Logger,
 ) -> None:
     """Wait that Prysm accepts requests and is synced.
 
