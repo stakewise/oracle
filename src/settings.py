@@ -11,6 +11,7 @@ LOG_LEVEL: str = environ.get("LOG_LEVEL", "DEBUG")
 # connections
 # use either WS or HTTP for Web3
 WEB3_WS_ENDPOINT: str = environ.get("WEB3_WS_ENDPOINT", "")
+WEB3_WS_ENDPOINT_TIMEOUT: int = int(environ.get("WEB3_WS_ENDPOINT_TIMEOUT", "60"))
 WEB3_HTTP_ENDPOINT: str = "" if WEB3_WS_ENDPOINT else environ["WEB3_HTTP_ENDPOINT"]
 BEACON_CHAIN_RPC_ENDPOINT: str = environ["BEACON_CHAIN_RPC_ENDPOINT"]
 

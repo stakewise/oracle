@@ -7,6 +7,7 @@ from notifiers.logging import NotificationHandler  # type: ignore
 from src.reward_token import RewardToken
 from src.settings import (
     WEB3_WS_ENDPOINT,
+    WEB3_WS_ENDPOINT_TIMEOUT,
     WEB3_HTTP_ENDPOINT,
     INJECT_POA_MIDDLEWARE,
     INJECT_STALE_CHECK_MIDDLEWARE,
@@ -49,6 +50,7 @@ def main() -> None:
     web3_client = get_web3_client(
         http_endpoint=WEB3_HTTP_ENDPOINT,
         ws_endpoint=WEB3_WS_ENDPOINT,
+        ws_endpoint_timeout=WEB3_WS_ENDPOINT_TIMEOUT,
         apply_gas_price_strategy=APPLY_GAS_PRICE_STRATEGY,
         max_tx_wait_seconds=MAX_TX_WAIT_SECONDS,
         inject_retry_request=INJECT_RETRY_REQUEST_MIDDLEWARE,
