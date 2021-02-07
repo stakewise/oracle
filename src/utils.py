@@ -90,7 +90,9 @@ def get_web3_client(
     """Returns instance of the Web3 client."""
     # Either http or ws endpoint must be provided (prefer ws over http)
     if ws_endpoint:
-        w3 = Web3(Web3.WebsocketProvider(ws_endpoint, websocket_timeout=ws_endpoint_timeout))
+        w3 = Web3(
+            Web3.WebsocketProvider(ws_endpoint, websocket_timeout=ws_endpoint_timeout)
+        )
         logger.info(f"Using Web3 websocket endpoint {ws_endpoint}")
 
         if inject_retry_request:
