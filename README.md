@@ -70,6 +70,7 @@ where `settings.txt` is an environment file with [Settings](#settings).
 |----------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|---------|
 | LOG_LEVEL                              | The log level of the program.                                                                                                                                                                           | No       | DEBUG   |
 | WEB3_WS_ENDPOINT                       | The WS endpoint to the ETH1 client. Must be specified if `WEB3_HTTP_ENDPOINT` endpoint is not provided.                                                                                                 | No       | -       |
+| WEB3_WS_ENDPOINT_TIMEOUT               | The WS endpoint timeout in seconds.                                                                                                                                                                     | No       | 60      |
 | WEB3_HTTP_ENDPOINT                     | The HTTP endpoint to the ETH1 client. Must be specified if `WEB3_WS_ENDPOINT` endpoint is not provided.                                                                                                 | No       | -       |
 | BEACON_CHAIN_RPC_ENDPOINT              | The Beacon Chain RPC HTTP endpoint.                                                                                                                                                                     | Yes      | -       |
 | INJECT_POA_MIDDLEWARE                  | Whether to inject POA middleware into Web3 client (see [POA middleware](https://web3py.readthedocs.io/en/stable/middleware.html#geth-style-proof-of-authority)).                                        | No       | False   |
@@ -104,7 +105,7 @@ BALANCE_WARNING_THRESHOLD=0.05
 BALANCE_ERROR_THRESHOLD=0.008
 APPLY_GAS_PRICE_STRATEGY=True
 MAX_TX_WAIT_SECONDS=180
-TRANSACTION_TIMEOUT=3600
+TRANSACTION_TIMEOUT=10800
 PROCESS_INTERVAL=30
 ORACLES_CONTRACT_ADDRESS=0x2f1C5E86B13a74f5A6E7B4b35DD77fe29Aa47514
 POOL_CONTRACT_ADDRESS=0xC874b064f465bdD6411D45734b56fac750Cda29A
