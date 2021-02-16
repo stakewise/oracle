@@ -3,7 +3,9 @@ from datetime import datetime, timezone, timedelta
 from typing import List, Set
 
 from eth_typing.bls import BLSPubkey
+from grpc._channel import _InactiveRpcError
 from loguru import logger
+from requests import HTTPError
 from web3 import Web3
 from web3.types import Wei
 
@@ -140,7 +142,18 @@ class RewardToken(object):
             return
 
         # fetch new pool validators
-        public_keys: Set[BLSPubkey] = get_pool_validator_public_keys(self.pool)
+        for _ in range(5):
+            try:
+                public_keys: Set[BLSPubkey] = get_pool_validator_public_keys(self.pool)
+                break
+            except HTTPError:
+                logger.warning(
+                    "Failed to fetch validators' public keys, trying again..."
+                )
+            time.sleep(5)
+        else:
+            public_keys: Set[BLSPubkey] = get_pool_validator_public_keys(self.pool)
+
         inactive_public_keys: Set[BLSPubkey] = set()
 
         # calculate epoch to fetch balance at
@@ -150,9 +163,20 @@ class RewardToken(object):
         )
 
         # filter out inactive validators
-        response = self.validator_stub.MultipleValidatorStatus(
-            MultipleValidatorStatusRequest(public_keys=public_keys)
-        )
+        for _ in range(5):
+            try:
+                response = self.validator_stub.MultipleValidatorStatus(
+                    MultipleValidatorStatusRequest(public_keys=public_keys)
+                )
+                break
+            except _InactiveRpcError:
+                logger.warning("Failed to fetch validators' statuses, trying again...")
+            time.sleep(5)
+        else:
+            response = self.validator_stub.MultipleValidatorStatus(
+                MultipleValidatorStatusRequest(public_keys=public_keys)
+            )
+
         for i, public_key in enumerate(response.public_keys):
             status_response = response.statuses[i]
             if (
@@ -183,7 +207,18 @@ class RewardToken(object):
             epoch=epoch, public_keys=active_public_keys
         )
         while True:
-            response = self.beacon_chain_stub.ListValidatorBalances(request)
+            for _ in range(5):
+                try:
+                    response = self.beacon_chain_stub.ListValidatorBalances(request)
+                    break
+                except _InactiveRpcError:
+                    logger.warning(
+                        "Failed to fetch validators' balances, trying again..."
+                    )
+                time.sleep(5)
+            else:
+                response = self.beacon_chain_stub.ListValidatorBalances(request)
+
             for balance_response in response.balances:
                 total_balances += int(Web3.toWei(balance_response.balance, "gwei"))
 
