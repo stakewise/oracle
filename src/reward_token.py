@@ -3,7 +3,7 @@ from datetime import datetime, timezone, timedelta
 from typing import List, Set
 
 from eth_typing.bls import BLSPubkey
-from grpc._channel import _InactiveRpcError
+from grpc._channel import _InactiveRpcError  # type: ignore
 from loguru import logger
 from requests import HTTPError
 from web3 import Web3
@@ -152,7 +152,7 @@ class RewardToken(object):
                 )
             time.sleep(5)
         else:
-            public_keys: Set[BLSPubkey] = get_pool_validator_public_keys(self.pool)
+            public_keys = get_pool_validator_public_keys(self.pool)
 
         inactive_public_keys: Set[BLSPubkey] = set()
 
