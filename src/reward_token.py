@@ -147,9 +147,7 @@ class RewardToken(object):
                 public_keys: Set[BLSPubkey] = get_pool_validator_public_keys(self.pool)
                 break
             except HTTPError:
-                logger.warning(
-                    "Failed to fetch validators' public keys, trying again..."
-                )
+                logger.warning("Failed to fetch validators' public keys, retrying...")
             time.sleep(5)
         else:
             public_keys = get_pool_validator_public_keys(self.pool)
@@ -170,7 +168,7 @@ class RewardToken(object):
                 )
                 break
             except _InactiveRpcError:
-                logger.warning("Failed to fetch validators' statuses, trying again...")
+                logger.warning("Failed to fetch validators' statuses, retrying...")
             time.sleep(5)
         else:
             response = self.validator_stub.MultipleValidatorStatus(
@@ -212,9 +210,7 @@ class RewardToken(object):
                     response = self.beacon_chain_stub.ListValidatorBalances(request)
                     break
                 except _InactiveRpcError:
-                    logger.warning(
-                        "Failed to fetch validators' balances, trying again..."
-                    )
+                    logger.warning("Failed to fetch validators' balances, retrying...")
                 time.sleep(5)
             else:
                 response = self.beacon_chain_stub.ListValidatorBalances(request)
