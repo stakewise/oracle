@@ -4,7 +4,7 @@ import time
 from loguru import logger
 from notifiers.logging import NotificationHandler  # type: ignore
 
-from src.reward_token import RewardToken
+from src.oracle import Oracle
 from src.settings import (
     WEB3_WS_ENDPOINT,
     WEB3_WS_ENDPOINT_TIMEOUT,
@@ -81,18 +81,19 @@ def main() -> None:
     # wait that node is synced before trying to do anything
     wait_prysm_ready(interrupt_handler, BEACON_CHAIN_RPC_ENDPOINT, PROCESS_INTERVAL)
 
-    reward_token_total_rewards = RewardToken(
-        w3=web3_client, interrupt_handler=interrupt_handler
-    )
+    oracle = Oracle(w3=web3_client, interrupt_handler=interrupt_handler)
+
     # check oracle balance
     if SEND_TELEGRAM_NOTIFICATIONS:
         check_default_account_balance(
-            web3_client, BALANCE_WARNING_THRESHOLD, BALANCE_ERROR_THRESHOLD
+            w3=web3_client,
+            warning_amount=BALANCE_WARNING_THRESHOLD,
+            error_amount=BALANCE_ERROR_THRESHOLD,
         )
 
     while not interrupt_handler.exit:
-        # update Reward Token total rewards
-        reward_token_total_rewards.process()
+        # check and perform oracle duties
+        oracle.process()
 
         # wait until next processing time
         time.sleep(PROCESS_INTERVAL)
