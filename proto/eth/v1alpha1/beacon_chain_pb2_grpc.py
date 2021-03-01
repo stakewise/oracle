@@ -55,7 +55,7 @@ class BeaconChainStub(object):
                 )
         self.StreamBlocks = channel.unary_stream(
                 '/ethereum.eth.v1alpha1.BeaconChain/StreamBlocks',
-                request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                request_serializer=eth_dot_v1alpha1_dot_beacon__chain__pb2.StreamBlocksRequest.SerializeToString,
                 response_deserializer=eth_dot_v1alpha1_dot_beacon__block__pb2.SignedBeaconBlock.FromString,
                 )
         self.StreamChainHead = channel.unary_stream(
@@ -421,7 +421,7 @@ def add_BeaconChainServicer_to_server(servicer, server):
             ),
             'StreamBlocks': grpc.unary_stream_rpc_method_handler(
                     servicer.StreamBlocks,
-                    request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                    request_deserializer=eth_dot_v1alpha1_dot_beacon__chain__pb2.StreamBlocksRequest.FromString,
                     response_serializer=eth_dot_v1alpha1_dot_beacon__block__pb2.SignedBeaconBlock.SerializeToString,
             ),
             'StreamChainHead': grpc.unary_stream_rpc_method_handler(
@@ -638,7 +638,7 @@ class BeaconChain(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_stream(request, target, '/ethereum.eth.v1alpha1.BeaconChain/StreamBlocks',
-            google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            eth_dot_v1alpha1_dot_beacon__chain__pb2.StreamBlocksRequest.SerializeToString,
             eth_dot_v1alpha1_dot_beacon__block__pb2.SignedBeaconBlock.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

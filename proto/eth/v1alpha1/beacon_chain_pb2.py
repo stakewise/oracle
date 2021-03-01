@@ -14,7 +14,6 @@ _sym_db = _symbol_database.Default()
 
 from google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
-from google.protobuf import any_pb2 as google_dot_protobuf_dot_any__pb2
 from eth.v1alpha1 import attestation_pb2 as eth_dot_v1alpha1_dot_attestation__pb2
 from eth.v1alpha1 import beacon_block_pb2 as eth_dot_v1alpha1_dot_beacon__block__pb2
 from eth.v1alpha1 import validator_pb2 as eth_dot_v1alpha1_dot_validator__pb2
@@ -26,9 +25,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1f\x65th/v1alpha1/beacon_chain.proto\x12\x15\x65thereum.eth.v1alpha1\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x19google/protobuf/any.proto\x1a\x1e\x65th/v1alpha1/attestation.proto\x1a\x1f\x65th/v1alpha1/beacon_block.proto\x1a\x1c\x65th/v1alpha1/validator.proto\"[\n\x12ValidatorChangeSet\x12\x30\n\x06\x61\x63tion\x18\x01 \x01(\x0e\x32 .ethereum.eth.v1alpha1.SetAction\x12\x13\n\x0bpublic_keys\x18\x02 \x03(\x0c\"\x81\x01\n\x1eListIndexedAttestationsRequest\x12\x0f\n\x05\x65poch\x18\x01 \x01(\x04H\x00\x12\x17\n\rgenesis_epoch\x18\x02 \x01(\x08H\x00\x12\x11\n\tpage_size\x18\x03 \x01(\x05\x12\x12\n\npage_token\x18\x04 \x01(\tB\x0e\n\x0cquery_filter\"z\n\x17ListAttestationsRequest\x12\x0f\n\x05\x65poch\x18\x01 \x01(\x04H\x00\x12\x17\n\rgenesis_epoch\x18\x02 \x01(\x08H\x00\x12\x11\n\tpage_size\x18\x03 \x01(\x05\x12\x12\n\npage_token\x18\x04 \x01(\tB\x0e\n\x0cquery_filter\"\x81\x01\n\x18ListAttestationsResponse\x12\x38\n\x0c\x61ttestations\x18\x01 \x03(\x0b\x32\".ethereum.eth.v1alpha1.Attestation\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t\x12\x12\n\ntotal_size\x18\x03 \x01(\x05\"\x97\x01\n\x1fListIndexedAttestationsResponse\x12G\n\x14indexed_attestations\x18\x01 \x03(\x0b\x32).ethereum.eth.v1alpha1.IndexedAttestation\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t\x12\x12\n\ntotal_size\x18\x03 \x01(\x05\"\x8e\x01\n\x11ListBlocksRequest\x12\x0e\n\x04root\x18\x01 \x01(\x0cH\x00\x12\x0e\n\x04slot\x18\x02 \x01(\x04H\x00\x12\x0f\n\x05\x65poch\x18\x03 \x01(\x04H\x00\x12\x11\n\x07genesis\x18\x04 \x01(\x08H\x00\x12\x11\n\tpage_size\x18\x05 \x01(\x05\x12\x12\n\npage_token\x18\x06 \x01(\tB\x0e\n\x0cquery_filter\"\x87\x01\n\x12ListBlocksResponse\x12\x44\n\x0f\x62lockContainers\x18\x01 \x03(\x0b\x32+.ethereum.eth.v1alpha1.BeaconBlockContainer\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t\x12\x12\n\ntotal_size\x18\x03 \x01(\x05\"c\n\x14\x42\x65\x61\x63onBlockContainer\x12\x37\n\x05\x62lock\x18\x01 \x01(\x0b\x32(.ethereum.eth.v1alpha1.SignedBeaconBlock\x12\x12\n\nblock_root\x18\x02 \x01(\x0c\"\xd3\x02\n\tChainHead\x12\x11\n\thead_slot\x18\x01 \x01(\x04\x12\x12\n\nhead_epoch\x18\x02 \x01(\x04\x12\x17\n\x0fhead_block_root\x18\x03 \x01(\x0c\x12\x16\n\x0e\x66inalized_slot\x18\x04 \x01(\x04\x12\x17\n\x0f\x66inalized_epoch\x18\x05 \x01(\x04\x12\x1c\n\x14\x66inalized_block_root\x18\x06 \x01(\x0c\x12\x16\n\x0ejustified_slot\x18\x07 \x01(\x04\x12\x17\n\x0fjustified_epoch\x18\x08 \x01(\x04\x12\x1c\n\x14justified_block_root\x18\t \x01(\x0c\x12\x1f\n\x17previous_justified_slot\x18\n \x01(\x04\x12 \n\x18previous_justified_epoch\x18\x0b \x01(\x04\x12%\n\x1dprevious_justified_block_root\x18\x0c \x01(\x0c\"K\n\x15ListCommitteesRequest\x12\x0f\n\x05\x65poch\x18\x01 \x01(\x04H\x00\x12\x11\n\x07genesis\x18\x02 \x01(\x08H\x00\x42\x0e\n\x0cquery_filter\"\x82\x03\n\x10\x42\x65\x61\x63onCommittees\x12\r\n\x05\x65poch\x18\x01 \x01(\x04\x12K\n\ncommittees\x18\x02 \x03(\x0b\x32\x37.ethereum.eth.v1alpha1.BeaconCommittees.CommitteesEntry\x12\x1e\n\x16\x61\x63tive_validator_count\x18\x03 \x01(\x04\x1a*\n\rCommitteeItem\x12\x19\n\x11validator_indices\x18\x01 \x03(\x04\x1a[\n\x0e\x43ommitteesList\x12I\n\ncommittees\x18\x01 \x03(\x0b\x32\x35.ethereum.eth.v1alpha1.BeaconCommittees.CommitteeItem\x1ai\n\x0f\x43ommitteesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x04\x12\x45\n\x05value\x18\x02 \x01(\x0b\x32\x36.ethereum.eth.v1alpha1.BeaconCommittees.CommitteesList:\x02\x38\x01\"\x9f\x01\n\x1cListValidatorBalancesRequest\x12\x0f\n\x05\x65poch\x18\x01 \x01(\x04H\x00\x12\x11\n\x07genesis\x18\x02 \x01(\x08H\x00\x12\x13\n\x0bpublic_keys\x18\x03 \x03(\x0c\x12\x0f\n\x07indices\x18\x04 \x03(\x04\x12\x11\n\tpage_size\x18\x05 \x01(\x05\x12\x12\n\npage_token\x18\x06 \x01(\tB\x0e\n\x0cquery_filter\"\xe2\x01\n\x11ValidatorBalances\x12\r\n\x05\x65poch\x18\x01 \x01(\x04\x12\x42\n\x08\x62\x61lances\x18\x02 \x03(\x0b\x32\x30.ethereum.eth.v1alpha1.ValidatorBalances.Balance\x12\x17\n\x0fnext_page_token\x18\x03 \x01(\t\x12\x12\n\ntotal_size\x18\x04 \x01(\x05\x1aM\n\x07\x42\x61lance\x12\x12\n\npublic_key\x18\x01 \x01(\x0c\x12\r\n\x05index\x18\x02 \x01(\x04\x12\x0f\n\x07\x62\x61lance\x18\x03 \x01(\x04\x12\x0e\n\x06status\x18\x04 \x01(\t\"\xa8\x01\n\x15ListValidatorsRequest\x12\x0f\n\x05\x65poch\x18\x01 \x01(\x04H\x00\x12\x11\n\x07genesis\x18\x02 \x01(\x08H\x00\x12\x0e\n\x06\x61\x63tive\x18\x03 \x01(\x08\x12\x11\n\tpage_size\x18\x04 \x01(\x05\x12\x12\n\npage_token\x18\x05 \x01(\t\x12\x13\n\x0bpublic_keys\x18\x06 \x03(\x0c\x12\x0f\n\x07indices\x18\x07 \x03(\x04\x42\x0e\n\x0cquery_filter\"L\n\x13GetValidatorRequest\x12\x0f\n\x05index\x18\x01 \x01(\x04H\x00\x12\x14\n\npublic_key\x18\x02 \x01(\x0cH\x00\x42\x0e\n\x0cquery_filter\"\xf0\x01\n\nValidators\x12\r\n\x05\x65poch\x18\x01 \x01(\x04\x12L\n\x0evalidator_list\x18\x02 \x03(\x0b\x32\x34.ethereum.eth.v1alpha1.Validators.ValidatorContainer\x12\x17\n\x0fnext_page_token\x18\x03 \x01(\t\x12\x12\n\ntotal_size\x18\x04 \x01(\x05\x1aX\n\x12ValidatorContainer\x12\r\n\x05index\x18\x01 \x01(\x04\x12\x33\n\tvalidator\x18\x02 \x01(\x0b\x32 .ethereum.eth.v1alpha1.Validator\"Y\n#GetValidatorActiveSetChangesRequest\x12\x0f\n\x05\x65poch\x18\x01 \x01(\x04H\x00\x12\x11\n\x07genesis\x18\x02 \x01(\x08H\x00\x42\x0e\n\x0cquery_filter\"\xfb\x01\n\x10\x41\x63tiveSetChanges\x12\r\n\x05\x65poch\x18\x01 \x01(\x04\x12\x1d\n\x15\x61\x63tivated_public_keys\x18\x02 \x03(\x0c\x12\x19\n\x11\x61\x63tivated_indices\x18\x03 \x03(\x04\x12\x1a\n\x12\x65xited_public_keys\x18\x04 \x03(\x0c\x12\x16\n\x0e\x65xited_indices\x18\x05 \x03(\x04\x12\x1b\n\x13slashed_public_keys\x18\x06 \x03(\x0c\x12\x17\n\x0fslashed_indices\x18\x07 \x03(\x04\x12\x1b\n\x13\x65jected_public_keys\x18\x08 \x03(\x0c\x12\x17\n\x0f\x65jected_indices\x18\t \x03(\x04\"G\n\x1bValidatorPerformanceRequest\x12\x17\n\x0bpublic_keys\x18\x01 \x03(\x0c\x42\x02\x18\x01\x12\x0f\n\x07indices\x18\x02 \x03(\x04\"\x84\x03\n\x1cValidatorPerformanceResponse\x12\"\n\x1a\x63urrent_effective_balances\x18\x01 \x03(\x04\x12\x17\n\x0finclusion_slots\x18\x02 \x03(\x04\x12\x1b\n\x13inclusion_distances\x18\x03 \x03(\x04\x12\x1e\n\x16\x63orrectly_voted_source\x18\x04 \x03(\x08\x12\x1e\n\x16\x63orrectly_voted_target\x18\x05 \x03(\x08\x12\x1c\n\x14\x63orrectly_voted_head\x18\x06 \x03(\x08\x12(\n balances_before_epoch_transition\x18\x07 \x03(\x04\x12\'\n\x1f\x62\x61lances_after_epoch_transition\x18\x08 \x03(\x04\x12\x1a\n\x12missing_validators\x18\t \x03(\x0c\x12(\n average_active_validator_balance\x18\n \x01(\x02\x12\x13\n\x0bpublic_keys\x18\x0b \x03(\x0c\"\xa5\x01\n\x0eValidatorQueue\x12\x13\n\x0b\x63hurn_limit\x18\x01 \x01(\x04\x12\x1e\n\x16\x61\x63tivation_public_keys\x18\x02 \x03(\x0c\x12\x18\n\x10\x65xit_public_keys\x18\x03 \x03(\x0c\x12$\n\x1c\x61\x63tivation_validator_indices\x18\x04 \x03(\x04\x12\x1e\n\x16\x65xit_validator_indices\x18\x05 \x03(\x04\"\xa2\x01\n\x1fListValidatorAssignmentsRequest\x12\x0f\n\x05\x65poch\x18\x01 \x01(\x04H\x00\x12\x11\n\x07genesis\x18\x02 \x01(\x08H\x00\x12\x13\n\x0bpublic_keys\x18\x03 \x03(\x0c\x12\x0f\n\x07indices\x18\x04 \x03(\x04\x12\x11\n\tpage_size\x18\x05 \x01(\x05\x12\x12\n\npage_token\x18\x06 \x01(\tB\x0e\n\x0cquery_filter\"\xd0\x02\n\x14ValidatorAssignments\x12\r\n\x05\x65poch\x18\x01 \x01(\x04\x12T\n\x0b\x61ssignments\x18\x02 \x03(\x0b\x32?.ethereum.eth.v1alpha1.ValidatorAssignments.CommitteeAssignment\x12\x17\n\x0fnext_page_token\x18\x03 \x01(\t\x12\x12\n\ntotal_size\x18\x04 \x01(\x05\x1a\xa5\x01\n\x13\x43ommitteeAssignment\x12\x19\n\x11\x62\x65\x61\x63on_committees\x18\x01 \x03(\x04\x12\x17\n\x0f\x63ommittee_index\x18\x02 \x01(\x04\x12\x15\n\rattester_slot\x18\x03 \x01(\x04\x12\x16\n\x0eproposer_slots\x18\x04 \x03(\x04\x12\x12\n\npublic_key\x18\x05 \x01(\x0c\x12\x17\n\x0fvalidator_index\x18\x06 \x01(\x04\"V\n GetValidatorParticipationRequest\x12\x0f\n\x05\x65poch\x18\x01 \x01(\x04H\x00\x12\x11\n\x07genesis\x18\x02 \x01(\x08H\x00\x42\x0e\n\x0cquery_filter\"\x88\x01\n\x1eValidatorParticipationResponse\x12\r\n\x05\x65poch\x18\x01 \x01(\x04\x12\x11\n\tfinalized\x18\x02 \x01(\x08\x12\x44\n\rparticipation\x18\x03 \x01(\x0b\x32-.ethereum.eth.v1alpha1.ValidatorParticipation\"?\n\x16\x41ttestationPoolRequest\x12\x11\n\tpage_size\x18\x01 \x01(\x05\x12\x12\n\npage_token\x18\x02 \x01(\t\"\x80\x01\n\x17\x41ttestationPoolResponse\x12\x38\n\x0c\x61ttestations\x18\x01 \x03(\x0b\x32\".ethereum.eth.v1alpha1.Attestation\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t\x12\x12\n\ntotal_size\x18\x03 \x01(\x05\"~\n\x0c\x42\x65\x61\x63onConfig\x12?\n\x06\x63onfig\x18\x01 \x03(\x0b\x32/.ethereum.eth.v1alpha1.BeaconConfig.ConfigEntry\x1a-\n\x0b\x43onfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"1\n\x16SubmitSlashingResponse\x12\x17\n\x0fslashed_indices\x18\x01 \x03(\x04\"M\n\x16IndividualVotesRequest\x12\r\n\x05\x65poch\x18\x01 \x01(\x04\x12\x13\n\x0bpublic_keys\x18\x02 \x03(\x0c\x12\x0f\n\x07indices\x18\x03 \x03(\x04\"\xed\x04\n\x16IndividualVotesRespond\x12V\n\x10individual_votes\x18\x01 \x03(\x0b\x32<.ethereum.eth.v1alpha1.IndividualVotesRespond.IndividualVote\x1a\xfa\x03\n\x0eIndividualVote\x12\r\n\x05\x65poch\x18\x01 \x01(\x04\x12\x12\n\npublic_key\x18\x02 \x01(\x0c\x12\x17\n\x0fvalidator_index\x18\x03 \x01(\x04\x12\x12\n\nis_slashed\x18\x04 \x01(\x08\x12(\n is_withdrawable_in_current_epoch\x18\x05 \x01(\x08\x12\"\n\x1ais_active_in_current_epoch\x18\x06 \x01(\x08\x12#\n\x1bis_active_in_previous_epoch\x18\x07 \x01(\x08\x12!\n\x19is_current_epoch_attester\x18\x08 \x01(\x08\x12(\n is_current_epoch_target_attester\x18\t \x01(\x08\x12\"\n\x1ais_previous_epoch_attester\x18\n \x01(\x08\x12)\n!is_previous_epoch_target_attester\x18\x0b \x01(\x08\x12\'\n\x1fis_previous_epoch_head_attester\x18\x0c \x01(\x08\x12,\n$current_epoch_effective_balance_gwei\x18\r \x01(\x04\x12\x16\n\x0einclusion_slot\x18\x0e \x01(\x04\x12\x1a\n\x12inclusion_distance\x18\x0f \x01(\x04\"S\n\x1aWeakSubjectivityCheckpoint\x12\x12\n\nblock_root\x18\x01 \x01(\x0c\x12\x12\n\nstate_root\x18\x02 \x01(\x0c\x12\r\n\x05\x65poch\x18\x03 \x01(\x04*V\n\tSetAction\x12\x16\n\x12\x41\x44\x44_VALIDATOR_KEYS\x10\x00\x12\x19\n\x15REMOVE_VALIDATOR_KEYS\x10\x01\x12\x16\n\x12SET_VALIDATOR_KEYS\x10\x02\x32\xfe\x1c\n\x0b\x42\x65\x61\x63onChain\x12\x9e\x01\n\x10ListAttestations\x12..ethereum.eth.v1alpha1.ListAttestationsRequest\x1a/.ethereum.eth.v1alpha1.ListAttestationsResponse\")\x82\xd3\xe4\x93\x02#\x12!/eth/v1alpha1/beacon/attestations\x12\xbb\x01\n\x17ListIndexedAttestations\x12\x35.ethereum.eth.v1alpha1.ListIndexedAttestationsRequest\x1a\x36.ethereum.eth.v1alpha1.ListIndexedAttestationsResponse\"1\x82\xd3\xe4\x93\x02+\x12)/eth/v1alpha1/beacon/attestations/indexed\x12\x84\x01\n\x12StreamAttestations\x12\x16.google.protobuf.Empty\x1a\".ethereum.eth.v1alpha1.Attestation\"0\x82\xd3\xe4\x93\x02*\x12(/eth/v1alpha1/beacon/attestations/stream0\x01\x12\x9a\x01\n\x19StreamIndexedAttestations\x12\x16.google.protobuf.Empty\x1a).ethereum.eth.v1alpha1.IndexedAttestation\"8\x82\xd3\xe4\x93\x02\x32\x12\x30/eth/v1alpha1/beacon/attestations/indexed/stream0\x01\x12\xa0\x01\n\x0f\x41ttestationPool\x12-.ethereum.eth.v1alpha1.AttestationPoolRequest\x1a..ethereum.eth.v1alpha1.AttestationPoolResponse\".\x82\xd3\xe4\x93\x02(\x12&/eth/v1alpha1/beacon/attestations/pool\x12\x86\x01\n\nListBlocks\x12(.ethereum.eth.v1alpha1.ListBlocksRequest\x1a).ethereum.eth.v1alpha1.ListBlocksResponse\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/eth/v1alpha1/beacon/blocks\x12~\n\x0cStreamBlocks\x12\x16.google.protobuf.Empty\x1a(.ethereum.eth.v1alpha1.SignedBeaconBlock\"*\x82\xd3\xe4\x93\x02$\x12\"/eth/v1alpha1/beacon/blocks/stream0\x01\x12|\n\x0fStreamChainHead\x12\x16.google.protobuf.Empty\x1a .ethereum.eth.v1alpha1.ChainHead\"-\x82\xd3\xe4\x93\x02\'\x12%/eth/v1alpha1/beacon/chainhead/stream0\x01\x12p\n\x0cGetChainHead\x12\x16.google.protobuf.Empty\x1a .ethereum.eth.v1alpha1.ChainHead\"&\x82\xd3\xe4\x93\x02 \x12\x1e/eth/v1alpha1/beacon/chainhead\x12\xa5\x01\n\x1dGetWeakSubjectivityCheckpoint\x12\x16.google.protobuf.Empty\x1a\x31.ethereum.eth.v1alpha1.WeakSubjectivityCheckpoint\"9\x82\xd3\xe4\x93\x02\x33\x12\x31/eth/v1alpha1/beacon/weak_subjectivity_checkpoint\x12\x96\x01\n\x14ListBeaconCommittees\x12,.ethereum.eth.v1alpha1.ListCommitteesRequest\x1a\'.ethereum.eth.v1alpha1.BeaconCommittees\"\'\x82\xd3\xe4\x93\x02!\x12\x1f/eth/v1alpha1/beacon/committees\x12\xa1\x01\n\x15ListValidatorBalances\x12\x33.ethereum.eth.v1alpha1.ListValidatorBalancesRequest\x1a(.ethereum.eth.v1alpha1.ValidatorBalances\")\x82\xd3\xe4\x93\x02#\x12!/eth/v1alpha1/validators/balances\x12\x83\x01\n\x0eListValidators\x12,.ethereum.eth.v1alpha1.ListValidatorsRequest\x1a!.ethereum.eth.v1alpha1.Validators\" \x82\xd3\xe4\x93\x02\x1a\x12\x18/eth/v1alpha1/validators\x12}\n\x0cGetValidator\x12*.ethereum.eth.v1alpha1.GetValidatorRequest\x1a .ethereum.eth.v1alpha1.Validator\"\x1f\x82\xd3\xe4\x93\x02\x19\x12\x17/eth/v1alpha1/validator\x12\xb6\x01\n\x1cGetValidatorActiveSetChanges\x12:.ethereum.eth.v1alpha1.GetValidatorActiveSetChangesRequest\x1a\'.ethereum.eth.v1alpha1.ActiveSetChanges\"1\x82\xd3\xe4\x93\x02+\x12)/eth/v1alpha1/validators/activesetchanges\x12z\n\x11GetValidatorQueue\x12\x16.google.protobuf.Empty\x1a%.ethereum.eth.v1alpha1.ValidatorQueue\"&\x82\xd3\xe4\x93\x02 \x12\x1e/eth/v1alpha1/validators/queue\x12\xb0\x01\n\x17GetValidatorPerformance\x12\x32.ethereum.eth.v1alpha1.ValidatorPerformanceRequest\x1a\x33.ethereum.eth.v1alpha1.ValidatorPerformanceResponse\",\x82\xd3\xe4\x93\x02&\x12$/eth/v1alpha1/validators/performance\x12\xad\x01\n\x18ListValidatorAssignments\x12\x36.ethereum.eth.v1alpha1.ListValidatorAssignmentsRequest\x1a+.ethereum.eth.v1alpha1.ValidatorAssignments\",\x82\xd3\xe4\x93\x02&\x12$/eth/v1alpha1/validators/assignments\x12\xbb\x01\n\x19GetValidatorParticipation\x12\x37.ethereum.eth.v1alpha1.GetValidatorParticipationRequest\x1a\x35.ethereum.eth.v1alpha1.ValidatorParticipationResponse\".\x82\xd3\xe4\x93\x02(\x12&/eth/v1alpha1/validators/participation\x12s\n\x0fGetBeaconConfig\x12\x16.google.protobuf.Empty\x1a#.ethereum.eth.v1alpha1.BeaconConfig\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/eth/v1alpha1/beacon/config\x12\xa0\x01\n\x14StreamValidatorsInfo\x12).ethereum.eth.v1alpha1.ValidatorChangeSet\x1a$.ethereum.eth.v1alpha1.ValidatorInfo\"3\x82\xd3\xe4\x93\x02-\x12+/eth/v1alpha1/beacon/validators/info/stream(\x01\x30\x01\x12\xa8\x01\n\x16SubmitAttesterSlashing\x12\'.ethereum.eth.v1alpha1.AttesterSlashing\x1a-.ethereum.eth.v1alpha1.SubmitSlashingResponse\"6\x82\xd3\xe4\x93\x02\x30\x12./eth/v1alpha1/beacon/slashings/attester/submit\x12\xa8\x01\n\x16SubmitProposerSlashing\x12\'.ethereum.eth.v1alpha1.ProposerSlashing\x1a-.ethereum.eth.v1alpha1.SubmitSlashingResponse\"6\x82\xd3\xe4\x93\x02\x30\x12./eth/v1alpha1/beacon/slashings/proposer/submit\x12\xa1\x01\n\x12GetIndividualVotes\x12-.ethereum.eth.v1alpha1.IndividualVotesRequest\x1a-.ethereum.eth.v1alpha1.IndividualVotesRespond\"-\x82\xd3\xe4\x93\x02\'\x12%/eth/v1alpha1/beacon/individual_votesb\x06proto3'
+  serialized_pb=b'\n\x1f\x65th/v1alpha1/beacon_chain.proto\x12\x15\x65thereum.eth.v1alpha1\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1e\x65th/v1alpha1/attestation.proto\x1a\x1f\x65th/v1alpha1/beacon_block.proto\x1a\x1c\x65th/v1alpha1/validator.proto\"[\n\x12ValidatorChangeSet\x12\x30\n\x06\x61\x63tion\x18\x01 \x01(\x0e\x32 .ethereum.eth.v1alpha1.SetAction\x12\x13\n\x0bpublic_keys\x18\x02 \x03(\x0c\"\x81\x01\n\x1eListIndexedAttestationsRequest\x12\x0f\n\x05\x65poch\x18\x01 \x01(\x04H\x00\x12\x17\n\rgenesis_epoch\x18\x02 \x01(\x08H\x00\x12\x11\n\tpage_size\x18\x03 \x01(\x05\x12\x12\n\npage_token\x18\x04 \x01(\tB\x0e\n\x0cquery_filter\"z\n\x17ListAttestationsRequest\x12\x0f\n\x05\x65poch\x18\x01 \x01(\x04H\x00\x12\x17\n\rgenesis_epoch\x18\x02 \x01(\x08H\x00\x12\x11\n\tpage_size\x18\x03 \x01(\x05\x12\x12\n\npage_token\x18\x04 \x01(\tB\x0e\n\x0cquery_filter\"\x81\x01\n\x18ListAttestationsResponse\x12\x38\n\x0c\x61ttestations\x18\x01 \x03(\x0b\x32\".ethereum.eth.v1alpha1.Attestation\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t\x12\x12\n\ntotal_size\x18\x03 \x01(\x05\"\x97\x01\n\x1fListIndexedAttestationsResponse\x12G\n\x14indexed_attestations\x18\x01 \x03(\x0b\x32).ethereum.eth.v1alpha1.IndexedAttestation\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t\x12\x12\n\ntotal_size\x18\x03 \x01(\x05\"\x8e\x01\n\x11ListBlocksRequest\x12\x0e\n\x04root\x18\x01 \x01(\x0cH\x00\x12\x0e\n\x04slot\x18\x02 \x01(\x04H\x00\x12\x0f\n\x05\x65poch\x18\x03 \x01(\x04H\x00\x12\x11\n\x07genesis\x18\x04 \x01(\x08H\x00\x12\x11\n\tpage_size\x18\x05 \x01(\x05\x12\x12\n\npage_token\x18\x06 \x01(\tB\x0e\n\x0cquery_filter\"\x87\x01\n\x12ListBlocksResponse\x12\x44\n\x0f\x62lockContainers\x18\x01 \x03(\x0b\x32+.ethereum.eth.v1alpha1.BeaconBlockContainer\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t\x12\x12\n\ntotal_size\x18\x03 \x01(\x05\",\n\x13StreamBlocksRequest\x12\x15\n\rverified_only\x18\x01 \x01(\x08\"v\n\x14\x42\x65\x61\x63onBlockContainer\x12\x37\n\x05\x62lock\x18\x01 \x01(\x0b\x32(.ethereum.eth.v1alpha1.SignedBeaconBlock\x12\x12\n\nblock_root\x18\x02 \x01(\x0c\x12\x11\n\tcanonical\x18\x03 \x01(\x08\"\xd3\x02\n\tChainHead\x12\x11\n\thead_slot\x18\x01 \x01(\x04\x12\x12\n\nhead_epoch\x18\x02 \x01(\x04\x12\x17\n\x0fhead_block_root\x18\x03 \x01(\x0c\x12\x16\n\x0e\x66inalized_slot\x18\x04 \x01(\x04\x12\x17\n\x0f\x66inalized_epoch\x18\x05 \x01(\x04\x12\x1c\n\x14\x66inalized_block_root\x18\x06 \x01(\x0c\x12\x16\n\x0ejustified_slot\x18\x07 \x01(\x04\x12\x17\n\x0fjustified_epoch\x18\x08 \x01(\x04\x12\x1c\n\x14justified_block_root\x18\t \x01(\x0c\x12\x1f\n\x17previous_justified_slot\x18\n \x01(\x04\x12 \n\x18previous_justified_epoch\x18\x0b \x01(\x04\x12%\n\x1dprevious_justified_block_root\x18\x0c \x01(\x0c\"K\n\x15ListCommitteesRequest\x12\x0f\n\x05\x65poch\x18\x01 \x01(\x04H\x00\x12\x11\n\x07genesis\x18\x02 \x01(\x08H\x00\x42\x0e\n\x0cquery_filter\"\x82\x03\n\x10\x42\x65\x61\x63onCommittees\x12\r\n\x05\x65poch\x18\x01 \x01(\x04\x12K\n\ncommittees\x18\x02 \x03(\x0b\x32\x37.ethereum.eth.v1alpha1.BeaconCommittees.CommitteesEntry\x12\x1e\n\x16\x61\x63tive_validator_count\x18\x03 \x01(\x04\x1a*\n\rCommitteeItem\x12\x19\n\x11validator_indices\x18\x01 \x03(\x04\x1a[\n\x0e\x43ommitteesList\x12I\n\ncommittees\x18\x01 \x03(\x0b\x32\x35.ethereum.eth.v1alpha1.BeaconCommittees.CommitteeItem\x1ai\n\x0f\x43ommitteesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x04\x12\x45\n\x05value\x18\x02 \x01(\x0b\x32\x36.ethereum.eth.v1alpha1.BeaconCommittees.CommitteesList:\x02\x38\x01\"\x9f\x01\n\x1cListValidatorBalancesRequest\x12\x0f\n\x05\x65poch\x18\x01 \x01(\x04H\x00\x12\x11\n\x07genesis\x18\x02 \x01(\x08H\x00\x12\x13\n\x0bpublic_keys\x18\x03 \x03(\x0c\x12\x0f\n\x07indices\x18\x04 \x03(\x04\x12\x11\n\tpage_size\x18\x05 \x01(\x05\x12\x12\n\npage_token\x18\x06 \x01(\tB\x0e\n\x0cquery_filter\"\xe2\x01\n\x11ValidatorBalances\x12\r\n\x05\x65poch\x18\x01 \x01(\x04\x12\x42\n\x08\x62\x61lances\x18\x02 \x03(\x0b\x32\x30.ethereum.eth.v1alpha1.ValidatorBalances.Balance\x12\x17\n\x0fnext_page_token\x18\x03 \x01(\t\x12\x12\n\ntotal_size\x18\x04 \x01(\x05\x1aM\n\x07\x42\x61lance\x12\x12\n\npublic_key\x18\x01 \x01(\x0c\x12\r\n\x05index\x18\x02 \x01(\x04\x12\x0f\n\x07\x62\x61lance\x18\x03 \x01(\x04\x12\x0e\n\x06status\x18\x04 \x01(\t\"\xa8\x01\n\x15ListValidatorsRequest\x12\x0f\n\x05\x65poch\x18\x01 \x01(\x04H\x00\x12\x11\n\x07genesis\x18\x02 \x01(\x08H\x00\x12\x0e\n\x06\x61\x63tive\x18\x03 \x01(\x08\x12\x11\n\tpage_size\x18\x04 \x01(\x05\x12\x12\n\npage_token\x18\x05 \x01(\t\x12\x13\n\x0bpublic_keys\x18\x06 \x03(\x0c\x12\x0f\n\x07indices\x18\x07 \x03(\x04\x42\x0e\n\x0cquery_filter\"L\n\x13GetValidatorRequest\x12\x0f\n\x05index\x18\x01 \x01(\x04H\x00\x12\x14\n\npublic_key\x18\x02 \x01(\x0cH\x00\x42\x0e\n\x0cquery_filter\"\xf0\x01\n\nValidators\x12\r\n\x05\x65poch\x18\x01 \x01(\x04\x12L\n\x0evalidator_list\x18\x02 \x03(\x0b\x32\x34.ethereum.eth.v1alpha1.Validators.ValidatorContainer\x12\x17\n\x0fnext_page_token\x18\x03 \x01(\t\x12\x12\n\ntotal_size\x18\x04 \x01(\x05\x1aX\n\x12ValidatorContainer\x12\r\n\x05index\x18\x01 \x01(\x04\x12\x33\n\tvalidator\x18\x02 \x01(\x0b\x32 .ethereum.eth.v1alpha1.Validator\"Y\n#GetValidatorActiveSetChangesRequest\x12\x0f\n\x05\x65poch\x18\x01 \x01(\x04H\x00\x12\x11\n\x07genesis\x18\x02 \x01(\x08H\x00\x42\x0e\n\x0cquery_filter\"\xfb\x01\n\x10\x41\x63tiveSetChanges\x12\r\n\x05\x65poch\x18\x01 \x01(\x04\x12\x1d\n\x15\x61\x63tivated_public_keys\x18\x02 \x03(\x0c\x12\x19\n\x11\x61\x63tivated_indices\x18\x03 \x03(\x04\x12\x1a\n\x12\x65xited_public_keys\x18\x04 \x03(\x0c\x12\x16\n\x0e\x65xited_indices\x18\x05 \x03(\x04\x12\x1b\n\x13slashed_public_keys\x18\x06 \x03(\x0c\x12\x17\n\x0fslashed_indices\x18\x07 \x03(\x04\x12\x1b\n\x13\x65jected_public_keys\x18\x08 \x03(\x0c\x12\x17\n\x0f\x65jected_indices\x18\t \x03(\x04\"G\n\x1bValidatorPerformanceRequest\x12\x17\n\x0bpublic_keys\x18\x01 \x03(\x0c\x42\x02\x18\x01\x12\x0f\n\x07indices\x18\x02 \x03(\x04\"\x84\x03\n\x1cValidatorPerformanceResponse\x12\"\n\x1a\x63urrent_effective_balances\x18\x01 \x03(\x04\x12\x17\n\x0finclusion_slots\x18\x02 \x03(\x04\x12\x1b\n\x13inclusion_distances\x18\x03 \x03(\x04\x12\x1e\n\x16\x63orrectly_voted_source\x18\x04 \x03(\x08\x12\x1e\n\x16\x63orrectly_voted_target\x18\x05 \x03(\x08\x12\x1c\n\x14\x63orrectly_voted_head\x18\x06 \x03(\x08\x12(\n balances_before_epoch_transition\x18\x07 \x03(\x04\x12\'\n\x1f\x62\x61lances_after_epoch_transition\x18\x08 \x03(\x04\x12\x1a\n\x12missing_validators\x18\t \x03(\x0c\x12(\n average_active_validator_balance\x18\n \x01(\x02\x12\x13\n\x0bpublic_keys\x18\x0b \x03(\x0c\"\xad\x01\n\x0eValidatorQueue\x12\x13\n\x0b\x63hurn_limit\x18\x01 \x01(\x04\x12\"\n\x16\x61\x63tivation_public_keys\x18\x02 \x03(\x0c\x42\x02\x18\x01\x12\x1c\n\x10\x65xit_public_keys\x18\x03 \x03(\x0c\x42\x02\x18\x01\x12$\n\x1c\x61\x63tivation_validator_indices\x18\x04 \x03(\x04\x12\x1e\n\x16\x65xit_validator_indices\x18\x05 \x03(\x04\"\xa2\x01\n\x1fListValidatorAssignmentsRequest\x12\x0f\n\x05\x65poch\x18\x01 \x01(\x04H\x00\x12\x11\n\x07genesis\x18\x02 \x01(\x08H\x00\x12\x13\n\x0bpublic_keys\x18\x03 \x03(\x0c\x12\x0f\n\x07indices\x18\x04 \x03(\x04\x12\x11\n\tpage_size\x18\x05 \x01(\x05\x12\x12\n\npage_token\x18\x06 \x01(\tB\x0e\n\x0cquery_filter\"\xd4\x02\n\x14ValidatorAssignments\x12\r\n\x05\x65poch\x18\x01 \x01(\x04\x12T\n\x0b\x61ssignments\x18\x02 \x03(\x0b\x32?.ethereum.eth.v1alpha1.ValidatorAssignments.CommitteeAssignment\x12\x17\n\x0fnext_page_token\x18\x03 \x01(\t\x12\x12\n\ntotal_size\x18\x04 \x01(\x05\x1a\xa9\x01\n\x13\x43ommitteeAssignment\x12\x19\n\x11\x62\x65\x61\x63on_committees\x18\x01 \x03(\x04\x12\x17\n\x0f\x63ommittee_index\x18\x02 \x01(\x04\x12\x15\n\rattester_slot\x18\x03 \x01(\x04\x12\x16\n\x0eproposer_slots\x18\x04 \x03(\x04\x12\x16\n\npublic_key\x18\x05 \x01(\x0c\x42\x02\x18\x01\x12\x17\n\x0fvalidator_index\x18\x06 \x01(\x04\"V\n GetValidatorParticipationRequest\x12\x0f\n\x05\x65poch\x18\x01 \x01(\x04H\x00\x12\x11\n\x07genesis\x18\x02 \x01(\x08H\x00\x42\x0e\n\x0cquery_filter\"\x88\x01\n\x1eValidatorParticipationResponse\x12\r\n\x05\x65poch\x18\x01 \x01(\x04\x12\x11\n\tfinalized\x18\x02 \x01(\x08\x12\x44\n\rparticipation\x18\x03 \x01(\x0b\x32-.ethereum.eth.v1alpha1.ValidatorParticipation\"?\n\x16\x41ttestationPoolRequest\x12\x11\n\tpage_size\x18\x01 \x01(\x05\x12\x12\n\npage_token\x18\x02 \x01(\t\"\x80\x01\n\x17\x41ttestationPoolResponse\x12\x38\n\x0c\x61ttestations\x18\x01 \x03(\x0b\x32\".ethereum.eth.v1alpha1.Attestation\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t\x12\x12\n\ntotal_size\x18\x03 \x01(\x05\"~\n\x0c\x42\x65\x61\x63onConfig\x12?\n\x06\x63onfig\x18\x01 \x03(\x0b\x32/.ethereum.eth.v1alpha1.BeaconConfig.ConfigEntry\x1a-\n\x0b\x43onfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"1\n\x16SubmitSlashingResponse\x12\x17\n\x0fslashed_indices\x18\x01 \x03(\x04\"M\n\x16IndividualVotesRequest\x12\r\n\x05\x65poch\x18\x01 \x01(\x04\x12\x13\n\x0bpublic_keys\x18\x02 \x03(\x0c\x12\x0f\n\x07indices\x18\x03 \x03(\x04\"\xed\x04\n\x16IndividualVotesRespond\x12V\n\x10individual_votes\x18\x01 \x03(\x0b\x32<.ethereum.eth.v1alpha1.IndividualVotesRespond.IndividualVote\x1a\xfa\x03\n\x0eIndividualVote\x12\r\n\x05\x65poch\x18\x01 \x01(\x04\x12\x12\n\npublic_key\x18\x02 \x01(\x0c\x12\x17\n\x0fvalidator_index\x18\x03 \x01(\x04\x12\x12\n\nis_slashed\x18\x04 \x01(\x08\x12(\n is_withdrawable_in_current_epoch\x18\x05 \x01(\x08\x12\"\n\x1ais_active_in_current_epoch\x18\x06 \x01(\x08\x12#\n\x1bis_active_in_previous_epoch\x18\x07 \x01(\x08\x12!\n\x19is_current_epoch_attester\x18\x08 \x01(\x08\x12(\n is_current_epoch_target_attester\x18\t \x01(\x08\x12\"\n\x1ais_previous_epoch_attester\x18\n \x01(\x08\x12)\n!is_previous_epoch_target_attester\x18\x0b \x01(\x08\x12\'\n\x1fis_previous_epoch_head_attester\x18\x0c \x01(\x08\x12,\n$current_epoch_effective_balance_gwei\x18\r \x01(\x04\x12\x16\n\x0einclusion_slot\x18\x0e \x01(\x04\x12\x1a\n\x12inclusion_distance\x18\x0f \x01(\x04\"S\n\x1aWeakSubjectivityCheckpoint\x12\x12\n\nblock_root\x18\x01 \x01(\x0c\x12\x12\n\nstate_root\x18\x02 \x01(\x0c\x12\r\n\x05\x65poch\x18\x03 \x01(\x04*V\n\tSetAction\x12\x16\n\x12\x41\x44\x44_VALIDATOR_KEYS\x10\x00\x12\x19\n\x15REMOVE_VALIDATOR_KEYS\x10\x01\x12\x16\n\x12SET_VALIDATOR_KEYS\x10\x02\x32\x93\x1d\n\x0b\x42\x65\x61\x63onChain\x12\x9e\x01\n\x10ListAttestations\x12..ethereum.eth.v1alpha1.ListAttestationsRequest\x1a/.ethereum.eth.v1alpha1.ListAttestationsResponse\")\x82\xd3\xe4\x93\x02#\x12!/eth/v1alpha1/beacon/attestations\x12\xbb\x01\n\x17ListIndexedAttestations\x12\x35.ethereum.eth.v1alpha1.ListIndexedAttestationsRequest\x1a\x36.ethereum.eth.v1alpha1.ListIndexedAttestationsResponse\"1\x82\xd3\xe4\x93\x02+\x12)/eth/v1alpha1/beacon/attestations/indexed\x12\x84\x01\n\x12StreamAttestations\x12\x16.google.protobuf.Empty\x1a\".ethereum.eth.v1alpha1.Attestation\"0\x82\xd3\xe4\x93\x02*\x12(/eth/v1alpha1/beacon/attestations/stream0\x01\x12\x9a\x01\n\x19StreamIndexedAttestations\x12\x16.google.protobuf.Empty\x1a).ethereum.eth.v1alpha1.IndexedAttestation\"8\x82\xd3\xe4\x93\x02\x32\x12\x30/eth/v1alpha1/beacon/attestations/indexed/stream0\x01\x12\xa0\x01\n\x0f\x41ttestationPool\x12-.ethereum.eth.v1alpha1.AttestationPoolRequest\x1a..ethereum.eth.v1alpha1.AttestationPoolResponse\".\x82\xd3\xe4\x93\x02(\x12&/eth/v1alpha1/beacon/attestations/pool\x12\x86\x01\n\nListBlocks\x12(.ethereum.eth.v1alpha1.ListBlocksRequest\x1a).ethereum.eth.v1alpha1.ListBlocksResponse\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/eth/v1alpha1/beacon/blocks\x12\x92\x01\n\x0cStreamBlocks\x12*.ethereum.eth.v1alpha1.StreamBlocksRequest\x1a(.ethereum.eth.v1alpha1.SignedBeaconBlock\"*\x82\xd3\xe4\x93\x02$\x12\"/eth/v1alpha1/beacon/blocks/stream0\x01\x12|\n\x0fStreamChainHead\x12\x16.google.protobuf.Empty\x1a .ethereum.eth.v1alpha1.ChainHead\"-\x82\xd3\xe4\x93\x02\'\x12%/eth/v1alpha1/beacon/chainhead/stream0\x01\x12p\n\x0cGetChainHead\x12\x16.google.protobuf.Empty\x1a .ethereum.eth.v1alpha1.ChainHead\"&\x82\xd3\xe4\x93\x02 \x12\x1e/eth/v1alpha1/beacon/chainhead\x12\xa5\x01\n\x1dGetWeakSubjectivityCheckpoint\x12\x16.google.protobuf.Empty\x1a\x31.ethereum.eth.v1alpha1.WeakSubjectivityCheckpoint\"9\x82\xd3\xe4\x93\x02\x33\x12\x31/eth/v1alpha1/beacon/weak_subjectivity_checkpoint\x12\x96\x01\n\x14ListBeaconCommittees\x12,.ethereum.eth.v1alpha1.ListCommitteesRequest\x1a\'.ethereum.eth.v1alpha1.BeaconCommittees\"\'\x82\xd3\xe4\x93\x02!\x12\x1f/eth/v1alpha1/beacon/committees\x12\xa1\x01\n\x15ListValidatorBalances\x12\x33.ethereum.eth.v1alpha1.ListValidatorBalancesRequest\x1a(.ethereum.eth.v1alpha1.ValidatorBalances\")\x82\xd3\xe4\x93\x02#\x12!/eth/v1alpha1/validators/balances\x12\x83\x01\n\x0eListValidators\x12,.ethereum.eth.v1alpha1.ListValidatorsRequest\x1a!.ethereum.eth.v1alpha1.Validators\" \x82\xd3\xe4\x93\x02\x1a\x12\x18/eth/v1alpha1/validators\x12}\n\x0cGetValidator\x12*.ethereum.eth.v1alpha1.GetValidatorRequest\x1a .ethereum.eth.v1alpha1.Validator\"\x1f\x82\xd3\xe4\x93\x02\x19\x12\x17/eth/v1alpha1/validator\x12\xb6\x01\n\x1cGetValidatorActiveSetChanges\x12:.ethereum.eth.v1alpha1.GetValidatorActiveSetChangesRequest\x1a\'.ethereum.eth.v1alpha1.ActiveSetChanges\"1\x82\xd3\xe4\x93\x02+\x12)/eth/v1alpha1/validators/activesetchanges\x12z\n\x11GetValidatorQueue\x12\x16.google.protobuf.Empty\x1a%.ethereum.eth.v1alpha1.ValidatorQueue\"&\x82\xd3\xe4\x93\x02 \x12\x1e/eth/v1alpha1/validators/queue\x12\xb0\x01\n\x17GetValidatorPerformance\x12\x32.ethereum.eth.v1alpha1.ValidatorPerformanceRequest\x1a\x33.ethereum.eth.v1alpha1.ValidatorPerformanceResponse\",\x82\xd3\xe4\x93\x02&\x12$/eth/v1alpha1/validators/performance\x12\xad\x01\n\x18ListValidatorAssignments\x12\x36.ethereum.eth.v1alpha1.ListValidatorAssignmentsRequest\x1a+.ethereum.eth.v1alpha1.ValidatorAssignments\",\x82\xd3\xe4\x93\x02&\x12$/eth/v1alpha1/validators/assignments\x12\xbb\x01\n\x19GetValidatorParticipation\x12\x37.ethereum.eth.v1alpha1.GetValidatorParticipationRequest\x1a\x35.ethereum.eth.v1alpha1.ValidatorParticipationResponse\".\x82\xd3\xe4\x93\x02(\x12&/eth/v1alpha1/validators/participation\x12s\n\x0fGetBeaconConfig\x12\x16.google.protobuf.Empty\x1a#.ethereum.eth.v1alpha1.BeaconConfig\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/eth/v1alpha1/beacon/config\x12\xa0\x01\n\x14StreamValidatorsInfo\x12).ethereum.eth.v1alpha1.ValidatorChangeSet\x1a$.ethereum.eth.v1alpha1.ValidatorInfo\"3\x82\xd3\xe4\x93\x02-\x12+/eth/v1alpha1/beacon/validators/info/stream(\x01\x30\x01\x12\xa8\x01\n\x16SubmitAttesterSlashing\x12\'.ethereum.eth.v1alpha1.AttesterSlashing\x1a-.ethereum.eth.v1alpha1.SubmitSlashingResponse\"6\x82\xd3\xe4\x93\x02\x30\x12./eth/v1alpha1/beacon/slashings/attester/submit\x12\xa8\x01\n\x16SubmitProposerSlashing\x12\'.ethereum.eth.v1alpha1.ProposerSlashing\x1a-.ethereum.eth.v1alpha1.SubmitSlashingResponse\"6\x82\xd3\xe4\x93\x02\x30\x12./eth/v1alpha1/beacon/slashings/proposer/submit\x12\xa1\x01\n\x12GetIndividualVotes\x12-.ethereum.eth.v1alpha1.IndividualVotesRequest\x1a-.ethereum.eth.v1alpha1.IndividualVotesRespond\"-\x82\xd3\xe4\x93\x02\'\x12%/eth/v1alpha1/beacon/individual_votesb\x06proto3'
   ,
-  dependencies=[google_dot_api_dot_annotations__pb2.DESCRIPTOR,google_dot_protobuf_dot_empty__pb2.DESCRIPTOR,google_dot_protobuf_dot_any__pb2.DESCRIPTOR,eth_dot_v1alpha1_dot_attestation__pb2.DESCRIPTOR,eth_dot_v1alpha1_dot_beacon__block__pb2.DESCRIPTOR,eth_dot_v1alpha1_dot_validator__pb2.DESCRIPTOR,])
+  dependencies=[google_dot_api_dot_annotations__pb2.DESCRIPTOR,google_dot_protobuf_dot_empty__pb2.DESCRIPTOR,eth_dot_v1alpha1_dot_attestation__pb2.DESCRIPTOR,eth_dot_v1alpha1_dot_beacon__block__pb2.DESCRIPTOR,eth_dot_v1alpha1_dot_validator__pb2.DESCRIPTOR,])
 
 _SETACTION = _descriptor.EnumDescriptor(
   name='SetAction',
@@ -55,8 +54,8 @@ _SETACTION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=5820,
-  serialized_end=5906,
+  serialized_start=5870,
+  serialized_end=5956,
 )
 _sym_db.RegisterEnumDescriptor(_SETACTION)
 
@@ -101,8 +100,8 @@ _VALIDATORCHANGESET = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=239,
-  serialized_end=330,
+  serialized_start=212,
+  serialized_end=303,
 )
 
 
@@ -159,8 +158,8 @@ _LISTINDEXEDATTESTATIONSREQUEST = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=333,
-  serialized_end=462,
+  serialized_start=306,
+  serialized_end=435,
 )
 
 
@@ -217,8 +216,8 @@ _LISTATTESTATIONSREQUEST = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=464,
-  serialized_end=586,
+  serialized_start=437,
+  serialized_end=559,
 )
 
 
@@ -263,8 +262,8 @@ _LISTATTESTATIONSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=589,
-  serialized_end=718,
+  serialized_start=562,
+  serialized_end=691,
 )
 
 
@@ -309,8 +308,8 @@ _LISTINDEXEDATTESTATIONSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=721,
-  serialized_end=872,
+  serialized_start=694,
+  serialized_end=845,
 )
 
 
@@ -381,8 +380,8 @@ _LISTBLOCKSREQUEST = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=875,
-  serialized_end=1017,
+  serialized_start=848,
+  serialized_end=990,
 )
 
 
@@ -427,8 +426,40 @@ _LISTBLOCKSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1020,
-  serialized_end=1155,
+  serialized_start=993,
+  serialized_end=1128,
+)
+
+
+_STREAMBLOCKSREQUEST = _descriptor.Descriptor(
+  name='StreamBlocksRequest',
+  full_name='ethereum.eth.v1alpha1.StreamBlocksRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='verified_only', full_name='ethereum.eth.v1alpha1.StreamBlocksRequest.verified_only', index=0,
+      number=1, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1130,
+  serialized_end=1174,
 )
 
 
@@ -454,6 +485,13 @@ _BEACONBLOCKCONTAINER = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='canonical', full_name='ethereum.eth.v1alpha1.BeaconBlockContainer.canonical', index=2,
+      number=3, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -466,8 +504,8 @@ _BEACONBLOCKCONTAINER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1157,
-  serialized_end=1256,
+  serialized_start=1176,
+  serialized_end=1294,
 )
 
 
@@ -575,8 +613,8 @@ _CHAINHEAD = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1259,
-  serialized_end=1598,
+  serialized_start=1297,
+  serialized_end=1636,
 )
 
 
@@ -619,8 +657,8 @@ _LISTCOMMITTEESREQUEST = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=1600,
-  serialized_end=1675,
+  serialized_start=1638,
+  serialized_end=1713,
 )
 
 
@@ -651,8 +689,8 @@ _BEACONCOMMITTEES_COMMITTEEITEM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1822,
-  serialized_end=1864,
+  serialized_start=1860,
+  serialized_end=1902,
 )
 
 _BEACONCOMMITTEES_COMMITTEESLIST = _descriptor.Descriptor(
@@ -682,8 +720,8 @@ _BEACONCOMMITTEES_COMMITTEESLIST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1866,
-  serialized_end=1957,
+  serialized_start=1904,
+  serialized_end=1995,
 )
 
 _BEACONCOMMITTEES_COMMITTEESENTRY = _descriptor.Descriptor(
@@ -720,8 +758,8 @@ _BEACONCOMMITTEES_COMMITTEESENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1959,
-  serialized_end=2064,
+  serialized_start=1997,
+  serialized_end=2102,
 )
 
 _BEACONCOMMITTEES = _descriptor.Descriptor(
@@ -765,8 +803,8 @@ _BEACONCOMMITTEES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1678,
-  serialized_end=2064,
+  serialized_start=1716,
+  serialized_end=2102,
 )
 
 
@@ -837,8 +875,8 @@ _LISTVALIDATORBALANCESREQUEST = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=2067,
-  serialized_end=2226,
+  serialized_start=2105,
+  serialized_end=2264,
 )
 
 
@@ -890,8 +928,8 @@ _VALIDATORBALANCES_BALANCE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2378,
-  serialized_end=2455,
+  serialized_start=2416,
+  serialized_end=2493,
 )
 
 _VALIDATORBALANCES = _descriptor.Descriptor(
@@ -942,8 +980,8 @@ _VALIDATORBALANCES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2229,
-  serialized_end=2455,
+  serialized_start=2267,
+  serialized_end=2493,
 )
 
 
@@ -1021,8 +1059,8 @@ _LISTVALIDATORSREQUEST = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=2458,
-  serialized_end=2626,
+  serialized_start=2496,
+  serialized_end=2664,
 )
 
 
@@ -1065,8 +1103,8 @@ _GETVALIDATORREQUEST = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=2628,
-  serialized_end=2704,
+  serialized_start=2666,
+  serialized_end=2742,
 )
 
 
@@ -1104,8 +1142,8 @@ _VALIDATORS_VALIDATORCONTAINER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2859,
-  serialized_end=2947,
+  serialized_start=2897,
+  serialized_end=2985,
 )
 
 _VALIDATORS = _descriptor.Descriptor(
@@ -1156,8 +1194,8 @@ _VALIDATORS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2707,
-  serialized_end=2947,
+  serialized_start=2745,
+  serialized_end=2985,
 )
 
 
@@ -1200,8 +1238,8 @@ _GETVALIDATORACTIVESETCHANGESREQUEST = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=2949,
-  serialized_end=3038,
+  serialized_start=2987,
+  serialized_end=3076,
 )
 
 
@@ -1288,8 +1326,8 @@ _ACTIVESETCHANGES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3041,
-  serialized_end=3292,
+  serialized_start=3079,
+  serialized_end=3330,
 )
 
 
@@ -1327,8 +1365,8 @@ _VALIDATORPERFORMANCEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3294,
-  serialized_end=3365,
+  serialized_start=3332,
+  serialized_end=3403,
 )
 
 
@@ -1429,8 +1467,8 @@ _VALIDATORPERFORMANCERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3368,
-  serialized_end=3756,
+  serialized_start=3406,
+  serialized_end=3794,
 )
 
 
@@ -1455,14 +1493,14 @@ _VALIDATORQUEUE = _descriptor.Descriptor(
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\030\001', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='exit_public_keys', full_name='ethereum.eth.v1alpha1.ValidatorQueue.exit_public_keys', index=2,
       number=3, type=12, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\030\001', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='activation_validator_indices', full_name='ethereum.eth.v1alpha1.ValidatorQueue.activation_validator_indices', index=3,
       number=4, type=4, cpp_type=4, label=3,
@@ -1489,8 +1527,8 @@ _VALIDATORQUEUE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3759,
-  serialized_end=3924,
+  serialized_start=3797,
+  serialized_end=3970,
 )
 
 
@@ -1561,8 +1599,8 @@ _LISTVALIDATORASSIGNMENTSREQUEST = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=3927,
-  serialized_end=4089,
+  serialized_start=3973,
+  serialized_end=4135,
 )
 
 
@@ -1608,7 +1646,7 @@ _VALIDATORASSIGNMENTS_COMMITTEEASSIGNMENT = _descriptor.Descriptor(
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\030\001', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='validator_index', full_name='ethereum.eth.v1alpha1.ValidatorAssignments.CommitteeAssignment.validator_index', index=5,
       number=6, type=4, cpp_type=4, label=1,
@@ -1628,8 +1666,8 @@ _VALIDATORASSIGNMENTS_COMMITTEEASSIGNMENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4263,
-  serialized_end=4428,
+  serialized_start=4309,
+  serialized_end=4478,
 )
 
 _VALIDATORASSIGNMENTS = _descriptor.Descriptor(
@@ -1680,8 +1718,8 @@ _VALIDATORASSIGNMENTS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4092,
-  serialized_end=4428,
+  serialized_start=4138,
+  serialized_end=4478,
 )
 
 
@@ -1724,8 +1762,8 @@ _GETVALIDATORPARTICIPATIONREQUEST = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=4430,
-  serialized_end=4516,
+  serialized_start=4480,
+  serialized_end=4566,
 )
 
 
@@ -1770,8 +1808,8 @@ _VALIDATORPARTICIPATIONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4519,
-  serialized_end=4655,
+  serialized_start=4569,
+  serialized_end=4705,
 )
 
 
@@ -1809,8 +1847,8 @@ _ATTESTATIONPOOLREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4657,
-  serialized_end=4720,
+  serialized_start=4707,
+  serialized_end=4770,
 )
 
 
@@ -1855,8 +1893,8 @@ _ATTESTATIONPOOLRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4723,
-  serialized_end=4851,
+  serialized_start=4773,
+  serialized_end=4901,
 )
 
 
@@ -1894,8 +1932,8 @@ _BEACONCONFIG_CONFIGENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4934,
-  serialized_end=4979,
+  serialized_start=4984,
+  serialized_end=5029,
 )
 
 _BEACONCONFIG = _descriptor.Descriptor(
@@ -1925,8 +1963,8 @@ _BEACONCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4853,
-  serialized_end=4979,
+  serialized_start=4903,
+  serialized_end=5029,
 )
 
 
@@ -1957,8 +1995,8 @@ _SUBMITSLASHINGRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4981,
-  serialized_end=5030,
+  serialized_start=5031,
+  serialized_end=5080,
 )
 
 
@@ -2003,8 +2041,8 @@ _INDIVIDUALVOTESREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5032,
-  serialized_end=5109,
+  serialized_start=5082,
+  serialized_end=5159,
 )
 
 
@@ -2133,8 +2171,8 @@ _INDIVIDUALVOTESRESPOND_INDIVIDUALVOTE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5227,
-  serialized_end=5733,
+  serialized_start=5277,
+  serialized_end=5783,
 )
 
 _INDIVIDUALVOTESRESPOND = _descriptor.Descriptor(
@@ -2164,8 +2202,8 @@ _INDIVIDUALVOTESRESPOND = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5112,
-  serialized_end=5733,
+  serialized_start=5162,
+  serialized_end=5783,
 )
 
 
@@ -2210,8 +2248,8 @@ _WEAKSUBJECTIVITYCHECKPOINT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5735,
-  serialized_end=5818,
+  serialized_start=5785,
+  serialized_end=5868,
 )
 
 _VALIDATORCHANGESET.fields_by_name['action'].enum_type = _SETACTION
@@ -2311,6 +2349,7 @@ DESCRIPTOR.message_types_by_name['ListAttestationsResponse'] = _LISTATTESTATIONS
 DESCRIPTOR.message_types_by_name['ListIndexedAttestationsResponse'] = _LISTINDEXEDATTESTATIONSRESPONSE
 DESCRIPTOR.message_types_by_name['ListBlocksRequest'] = _LISTBLOCKSREQUEST
 DESCRIPTOR.message_types_by_name['ListBlocksResponse'] = _LISTBLOCKSRESPONSE
+DESCRIPTOR.message_types_by_name['StreamBlocksRequest'] = _STREAMBLOCKSREQUEST
 DESCRIPTOR.message_types_by_name['BeaconBlockContainer'] = _BEACONBLOCKCONTAINER
 DESCRIPTOR.message_types_by_name['ChainHead'] = _CHAINHEAD
 DESCRIPTOR.message_types_by_name['ListCommitteesRequest'] = _LISTCOMMITTEESREQUEST
@@ -2387,6 +2426,13 @@ ListBlocksResponse = _reflection.GeneratedProtocolMessageType('ListBlocksRespons
   # @@protoc_insertion_point(class_scope:ethereum.eth.v1alpha1.ListBlocksResponse)
   })
 _sym_db.RegisterMessage(ListBlocksResponse)
+
+StreamBlocksRequest = _reflection.GeneratedProtocolMessageType('StreamBlocksRequest', (_message.Message,), {
+  'DESCRIPTOR' : _STREAMBLOCKSREQUEST,
+  '__module__' : 'eth.v1alpha1.beacon_chain_pb2'
+  # @@protoc_insertion_point(class_scope:ethereum.eth.v1alpha1.StreamBlocksRequest)
+  })
+_sym_db.RegisterMessage(StreamBlocksRequest)
 
 BeaconBlockContainer = _reflection.GeneratedProtocolMessageType('BeaconBlockContainer', (_message.Message,), {
   'DESCRIPTOR' : _BEACONBLOCKCONTAINER,
@@ -2630,6 +2676,9 @@ _sym_db.RegisterMessage(WeakSubjectivityCheckpoint)
 
 _BEACONCOMMITTEES_COMMITTEESENTRY._options = None
 _VALIDATORPERFORMANCEREQUEST.fields_by_name['public_keys']._options = None
+_VALIDATORQUEUE.fields_by_name['activation_public_keys']._options = None
+_VALIDATORQUEUE.fields_by_name['exit_public_keys']._options = None
+_VALIDATORASSIGNMENTS_COMMITTEEASSIGNMENT.fields_by_name['public_key']._options = None
 _BEACONCONFIG_CONFIGENTRY._options = None
 
 _BEACONCHAIN = _descriptor.ServiceDescriptor(
@@ -2639,8 +2688,8 @@ _BEACONCHAIN = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=5909,
-  serialized_end=9619,
+  serialized_start=5959,
+  serialized_end=9690,
   methods=[
   _descriptor.MethodDescriptor(
     name='ListAttestations',
@@ -2707,7 +2756,7 @@ _BEACONCHAIN = _descriptor.ServiceDescriptor(
     full_name='ethereum.eth.v1alpha1.BeaconChain.StreamBlocks',
     index=6,
     containing_service=None,
-    input_type=google_dot_protobuf_dot_empty__pb2._EMPTY,
+    input_type=_STREAMBLOCKSREQUEST,
     output_type=eth_dot_v1alpha1_dot_beacon__block__pb2._SIGNEDBEACONBLOCK,
     serialized_options=b'\202\323\344\223\002$\022\"/eth/v1alpha1/beacon/blocks/stream',
     create_key=_descriptor._internal_create_key,
