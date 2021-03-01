@@ -4,12 +4,18 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "address[]",
-        "name": "rewardEthUniswapPairs",
-        "type": "address[]"
+        "internalType": "bool",
+        "name": "disabled",
+        "type": "bool"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
       }
     ],
-    "name": "RewardEthUniswapPairsUpdated",
+    "name": "DepositsActivationToggled",
     "type": "event"
   },
   {
@@ -18,11 +24,17 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "totalRewardsUpdatePeriod",
+        "name": "syncPeriod",
         "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
       }
     ],
-    "name": "TotalRewardsUpdatePeriodUpdated",
+    "name": "SyncPeriodUpdated",
     "type": "event"
   },
   {
@@ -45,9 +57,21 @@
         "internalType": "uint256",
         "name": "totalRewards",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "activationDuration",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "beaconActivatingAmount",
+        "type": "uint256"
       }
     ],
-    "name": "TotalRewardsVoteSubmitted",
+    "name": "VoteSubmitted",
     "type": "event"
   },
   {
@@ -84,12 +108,12 @@
   },
   {
     "inputs": [],
-    "name": "getRewardEthUniswapPairs",
+    "name": "depositsActivationEnabled",
     "outputs": [
       {
-        "internalType": "address[]",
+        "internalType": "bool",
         "name": "",
-        "type": "address[]"
+        "type": "bool"
       }
     ],
     "stateMutability": "view",
@@ -106,9 +130,19 @@
         "internalType": "uint256",
         "name": "_totalRewards",
         "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_activationDuration",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_beaconActivatingAmount",
+        "type": "uint256"
       }
     ],
-    "name": "hasTotalRewardsVote",
+    "name": "hasVote",
     "outputs": [
       {
         "internalType": "bool",
@@ -133,7 +167,7 @@
       },
       {
         "internalType": "uint256",
-        "name": "_totalRewardsUpdatePeriod",
+        "name": "_syncPeriod",
         "type": "uint256"
       }
     ],
@@ -177,32 +211,19 @@
   {
     "inputs": [
       {
-        "internalType": "address[]",
-        "name": "_rewardEthUniswapPairs",
-        "type": "address[]"
-      }
-    ],
-    "name": "setRewardEthUniswapPairs",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "uint256",
-        "name": "_newTotalRewardsUpdatePeriod",
+        "name": "_syncPeriod",
         "type": "uint256"
       }
     ],
-    "name": "setTotalRewardsUpdatePeriod",
+    "name": "setSyncPeriod",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [],
-    "name": "totalRewardsUpdatePeriod",
+    "name": "syncPeriod",
     "outputs": [
       {
         "internalType": "uint256",
@@ -216,12 +237,53 @@
   {
     "inputs": [
       {
+        "internalType": "bool",
+        "name": "_depositsActivationEnabled",
+        "type": "bool"
+      }
+    ],
+    "name": "toggleDepositsActivation",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_pool",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "_depositsActivationEnabled",
+        "type": "bool"
+      }
+    ],
+    "name": "upgrade",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
-        "name": "_newTotalRewards",
+        "name": "_totalRewards",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_activationDuration",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_beaconActivatingAmount",
         "type": "uint256"
       }
     ],
-    "name": "voteForTotalRewards",
+    "name": "vote",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
