@@ -184,20 +184,20 @@ def check_default_account_balance(
     w3: Web3, warning_amount: Wei, error_amount: Wei
 ) -> Union[int, decimal.Decimal]:
     """Returns the default account current balance."""
-    balance = w3.eth.getBalance(w3.eth.defaultAccount)
+    balance = w3.eth.getBalance(w3.eth.default_account)
     if balance < error_amount:
         telegram.notify(
-            message=f"`{w3.eth.defaultAccount}` account has run out of balance:"
+            message=f"`{w3.eth.default_account}` account has run out of balance:"
             f' `{Web3.fromWei(balance, "ether")} ETH` left',
             parse_mode="markdown",
             raise_on_errors=True,
         )
-        raise RuntimeError(f"{w3.eth.defaultAccount} account has run out of balance!")
+        raise RuntimeError(f"{w3.eth.default_account} account has run out of balance!")
 
     eth_value = Web3.fromWei(balance, "ether")
     if balance < warning_amount:
         telegram.notify(
-            message=f"`{w3.eth.defaultAccount}` account is running out of balance:"
+            message=f"`{w3.eth.default_account}` account is running out of balance:"
             f" `{eth_value} ETH` left",
             parse_mode="markdown",
             raise_on_errors=True,
@@ -211,8 +211,8 @@ def configure_default_account(w3: Web3, private_key: str) -> ChecksumAddress:
     w3.middleware_onion.add(construct_sign_and_send_raw_middleware(account))
     logger.warning("Injected middleware for capturing transactions and sending as raw")
 
-    w3.eth.defaultAccount = account.address
-    logger.info(f"Configured default account {w3.eth.defaultAccount}")
+    w3.eth.default_account = account.address
+    logger.info(f"Configured default account {w3.eth.default_account}")
 
     return account.address
 
