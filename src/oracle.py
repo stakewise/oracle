@@ -14,12 +14,10 @@ from contracts import (
     get_pool_contract,
     get_reward_eth_contract,
     get_staked_eth_contract,
-    get_ownable_pausable_contract,
 )
 from src.settings import (
     BEACON_CHAIN_RPC_ENDPOINT,
     TRANSACTION_TIMEOUT,
-    ORACLES_CONTRACT_ADDRESS,
     BALANCE_WARNING_THRESHOLD,
     BALANCE_ERROR_THRESHOLD,
 )
@@ -79,9 +77,6 @@ class Oracle(object):
         )
 
         self.oracles = get_oracles_contract(w3)
-        self.oracles_pausable = get_ownable_pausable_contract(
-            w3, ORACLES_CONTRACT_ADDRESS
-        )
         logger.debug(f"Oracles contract address: {self.oracles.address}")
 
         self.validator_stub = get_validator_stub(BEACON_CHAIN_RPC_ENDPOINT)
@@ -167,7 +162,7 @@ class Oracle(object):
             # it's not the time to update yet
             return
 
-        if check_oracles_paused(self.oracles_pausable):
+        if check_oracles_paused(self.oracles):
             self.last_update_at = self.next_update_at
             self.next_update_at = self.last_update_at + self.oracles_sync_period
             logger.info(

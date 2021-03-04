@@ -249,9 +249,9 @@ def get_oracles_sync_period(oracles: Contract) -> int:
 
 
 @retry(reraise=True, wait=backoff, stop=stop_attempts, before_sleep=retry_log)
-def check_oracles_paused(oracles_pausable: Contract) -> bool:
+def check_oracles_paused(oracles: Contract) -> bool:
     """Fetches whether `Oracles` contract is paused or not."""
-    return oracles_pausable.functions.paused().call()
+    return oracles.functions.paused().call()
 
 
 @retry(reraise=True, wait=backoff, stop=stop_attempts, before_sleep=retry_log)
