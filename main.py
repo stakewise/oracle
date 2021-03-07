@@ -22,6 +22,7 @@ from src.settings import (
     LOG_LEVEL,
     PROCESS_INTERVAL,
     BEACON_CHAIN_RPC_ENDPOINT,
+    SEND_TELEGRAM_NOTIFICATIONS,
 )
 from src.utils import (
     get_web3_client,
@@ -66,15 +67,16 @@ def main() -> None:
     # wait for interrupt
     interrupt_handler = InterruptHandler()
 
-    # Notify Telegram the oracle is warming up, so that
-    # oracle maintainers know the service has restarted
-    telegram.notify(
-        message=f"Oracle starting with account [{web3_client.eth.defaultAccount}]"
-        f"(https://etherscan.io/address/{web3_client.eth.defaultAccount})",
-        parse_mode="markdown",
-        raise_on_errors=True,
-        disable_web_page_preview=True,
-    )
+    if SEND_TELEGRAM_NOTIFICATIONS:
+        # Notify Telegram the oracle is warming up, so that
+        # oracle maintainers know the service has restarted
+        telegram.notify(
+            message=f"Oracle starting with account [{web3_client.eth.defaultAccount}]"
+            f"(https://etherscan.io/address/{web3_client.eth.defaultAccount})",
+            parse_mode="markdown",
+            raise_on_errors=True,
+            disable_web_page_preview=True,
+        )
 
     # wait that node is synced before trying to do anything
     wait_prysm_ready(interrupt_handler, BEACON_CHAIN_RPC_ENDPOINT, PROCESS_INTERVAL)
@@ -83,9 +85,10 @@ def main() -> None:
         w3=web3_client, interrupt_handler=interrupt_handler
     )
     # check oracle balance
-    check_default_account_balance(
-        web3_client, BALANCE_WARNING_THRESHOLD, BALANCE_ERROR_THRESHOLD
-    )
+    if SEND_TELEGRAM_NOTIFICATIONS:
+        check_default_account_balance(
+            web3_client, BALANCE_WARNING_THRESHOLD, BALANCE_ERROR_THRESHOLD
+        )
 
     while not interrupt_handler.exit:
         # update Reward Token total rewards

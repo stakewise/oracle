@@ -31,6 +31,11 @@ if INJECT_STALE_CHECK_MIDDLEWARE:
         environ["STALE_CHECK_MIDDLEWARE_ALLOWABLE_DELAY"]
     )
 
+# defines whether to enable sending telegram notifications
+SEND_TELEGRAM_NOTIFICATIONS: bool = environ.get(
+    "SEND_TELEGRAM_NOTIFICATIONS", "True"
+) in ("True", "true")
+
 # whether to retry http or ws requests
 INJECT_RETRY_REQUEST_MIDDLEWARE: bool = environ.get(
     "INJECT_RETRY_REQUEST_MIDDLEWARE", "False"

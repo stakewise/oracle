@@ -91,6 +91,7 @@ where `settings.txt` is an environment file with [Settings](#settings).
 | NOTIFIERS_TELEGRAM_TOKEN               | Telegram chat token where notifications about low balance or errors will be sent.                                                                                                                       | No       | -       |
 | NOTIFIERS_TELEGRAM_CHAT_ID             | Telegram chat ID where notifications about low balance or errors will be sent.                                                                                                                          | No       | -       |
 | PROCESS_INTERVAL                       | How long to wait before processing again.                                                                                                                                                               | Yes      | -       |
+| SEND_TELEGRAM_NOTIFICATIONS            | Defines whether to send telegram notifications about oracle balance and errors.                                                                                                                         | No       | True    |
 
 ## Example settings
 
