@@ -3,8 +3,8 @@ from datetime import datetime, timezone, timedelta
 from math import ceil
 from typing import Set
 
-from eth_typing.evm import ChecksumAddress
 from eth_typing.bls import BLSPubkey
+from eth_typing.evm import ChecksumAddress
 from loguru import logger
 from web3 import Web3
 from web3.types import Wei
@@ -186,7 +186,7 @@ class Oracle(object):
                 (self.next_update_at - self.genesis_time).total_seconds()
                 / self.seconds_per_epoch
             )
-            - 2
+            - 3
         )
 
         # filter out inactive validators
@@ -199,7 +199,7 @@ class Oracle(object):
 
             if status in ACTIVATING_STATUSES or (
                 status == ValidatorStatus.ACTIVE
-                and status_response.activation_epoch < epoch
+                and status_response.activation_epoch > epoch
             ):
                 activating_public_keys.add(public_key)
             elif status not in ACTIVE_STATUSES:

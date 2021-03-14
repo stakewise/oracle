@@ -282,25 +282,29 @@ def get_validator_activation_duration(
         validator_status = validator_stub.ValidatorStatus(
             ValidatorStatusRequest(public_key=public_key)
         )
-        if validator_status.deposit_inclusion_slot <= max_slot:
-            break
-        queue_length -= 1
+        if validator_status.deposit_inclusion_slot > max_slot:
+            queue_length -= 1
 
+    # remove validators activated by the time the new validator will be included
     queue_length -= int((inclusion_delay / seconds_per_epoch) * queue.churn_limit)
-    if queue_length < 0:
-        queue_length = 0
+    queue_length = max(queue_length, 0)
 
+    # fetch validators currently getting included
     blocks = beacon_chain_stub.ListBlocks(ListBlocksRequest(slot=max_slot))
-    from_block = blocks.blockContainers[0].block.block.body.eth1_data.block_hash
-    to_block = (
-        vrc_contract.web3.eth.get_block(from_block)["number"] + eth1_follow_distance
-    )
+    max_slot_block_hash = blocks.blockContainers[
+        0
+    ].block.block.body.eth1_data.block_hash
+    from_block = vrc_contract.web3.eth.get_block(max_slot_block_hash)["number"]
+    to_block = from_block + eth1_follow_distance
+
     validators_filter = vrc_contract.events.DepositEvent.createFilter(
         fromBlock=from_block, toBlock=to_block
     )
     not_included_validators_count = len(
-        set([event["pubkey"] for event in validators_filter.get_all_entries()])
+        set([event["args"]["pubkey"] for event in validators_filter.get_all_entries()])
     )
+    vrc_contract.web3.eth.uninstallFilter(validators_filter.filter_id)
+
     queue_length += not_included_validators_count
 
     return inclusion_delay + int((queue_length / queue.churn_limit) * seconds_per_epoch)
