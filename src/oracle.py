@@ -21,6 +21,7 @@ from src.settings import (
     TRANSACTION_TIMEOUT,
     BALANCE_WARNING_THRESHOLD,
     BALANCE_ERROR_THRESHOLD,
+    SEND_TELEGRAM_NOTIFICATIONS,
 )
 from src.utils import (
     InterruptHandler,
@@ -320,6 +321,9 @@ class Oracle(object):
         logger.info(f"Re-scheduling rewards update: next at={self.next_update_at}")
 
         # check oracle balance
-        check_default_account_balance(
-            self.w3, BALANCE_WARNING_THRESHOLD, BALANCE_ERROR_THRESHOLD
-        )
+        if SEND_TELEGRAM_NOTIFICATIONS:
+            check_default_account_balance(
+                w3=self.w3,
+                warning_amount=BALANCE_WARNING_THRESHOLD,
+                error_amount=BALANCE_ERROR_THRESHOLD,
+            )
