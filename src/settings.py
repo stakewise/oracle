@@ -81,6 +81,10 @@ STAKED_ETH_CONTRACT_ADDRESS: ChecksumAddress = ChecksumAddress(
     HexAddress(HexStr(environ["STAKED_ETH_CONTRACT_ADDRESS"]))
 )
 
+VRC_CONTRACT_ADDRESS: ChecksumAddress = ChecksumAddress(
+    HexAddress(HexStr(environ["VRC_CONTRACT_ADDRESS"]))
+)
+
 # credentials
 # TODO: consider reading from file
 ORACLE_PRIVATE_KEY: str = environ["ORACLE_PRIVATE_KEY"]

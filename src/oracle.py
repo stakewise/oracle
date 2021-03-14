@@ -14,6 +14,7 @@ from contracts import (
     get_pool_contract,
     get_reward_eth_contract,
     get_staked_eth_contract,
+    get_vrc_contract,
 )
 from src.settings import (
     BEACON_CHAIN_RPC_ENDPOINT,
@@ -76,6 +77,9 @@ class Oracle(object):
             f"Staked ETH Token contract address: {self.staked_eth_token.address}"
         )
 
+        self.vrc = get_vrc_contract(w3)
+        logger.debug(f"VRC contract address: {self.vrc.address}")
+
         self.oracles = get_oracles_contract(w3)
         logger.debug(f"Oracles contract address: {self.oracles.address}")
 
@@ -93,15 +97,14 @@ class Oracle(object):
             int(chain_config["MaxEffectiveBalance"]), "gwei"
         )
         self.far_future_epoch = int(chain_config["FarFutureEpoch"])
-        eth1_follow_distance = int(chain_config["Eth1FollowDistance"])
-        seconds_per_eth1_block = int(chain_config["SecondsPerETH1Block"])
+        self.eth1_follow_distance = int(chain_config["Eth1FollowDistance"])
+        self.seconds_per_eth1_block = int(chain_config["SecondsPerETH1Block"])
         epochs_per_eth1_voting_period = int(chain_config["EpochsPerEth1VotingPeriod"])
         self.inclusion_delay = ceil(
             (
-                (eth1_follow_distance * seconds_per_eth1_block)
+                (self.eth1_follow_distance * self.seconds_per_eth1_block)
                 + (self.seconds_per_epoch * epochs_per_eth1_voting_period)
             )
-            / 3600
         )
 
         self.last_update_at = datetime.fromtimestamp(
@@ -176,10 +179,13 @@ class Oracle(object):
         inactive_public_keys: Set[BLSPubkey] = set()
         activating_public_keys: Set[BLSPubkey] = set()
 
-        # calculate epoch to fetch balance at
-        epoch: int = int(
-            (self.next_update_at - self.genesis_time).total_seconds()
-            / self.seconds_per_epoch
+        # calculate finalized epoch to fetch balance at
+        epoch: int = (
+            int(
+                (self.next_update_at - self.genesis_time).total_seconds()
+                / self.seconds_per_epoch
+            )
+            - 2
         )
 
         # filter out inactive validators
@@ -218,12 +224,9 @@ class Oracle(object):
             stub=self.beacon_chain_stub, epoch=epoch, public_keys=active_public_keys
         )
 
+        total_staked_balance: Wei = Wei(len(active_public_keys) * self.deposit_amount)
         logger.info(
-            f"Retrieving balances for {len(activating_public_keys)} / {len(public_keys)}"
-            f" activating validators at epoch={epoch}"
-        )
-        activating_total_balance = get_validators_total_balance(
-            stub=self.beacon_chain_stub, epoch=epoch, public_keys=activating_public_keys
+            f"Total staked balance: {self.w3.fromWei(total_staked_balance, 'ether')}"
         )
 
         # calculate new rewards
@@ -258,14 +261,14 @@ class Oracle(object):
             )
 
         if self.deposits_activation_enabled:
-            activation_duration = (
-                self.inclusion_delay
-                + get_validator_activation_duration(
-                    beacon_chain_stub=self.beacon_chain_stub,
-                    validator_stub=self.validator_stub,
-                    max_inclusion_slot=epoch * self.slots_per_epoch,
-                    seconds_per_epoch=self.seconds_per_epoch,
-                )
+            activation_duration = get_validator_activation_duration(
+                beacon_chain_stub=self.beacon_chain_stub,
+                validator_stub=self.validator_stub,
+                max_slot=epoch * self.slots_per_epoch,
+                seconds_per_epoch=self.seconds_per_epoch,
+                eth1_follow_distance=self.eth1_follow_distance,
+                inclusion_delay=self.inclusion_delay,
+                vrc_contract=self.vrc,
             )
         else:
             activation_duration = 0
@@ -275,20 +278,20 @@ class Oracle(object):
             ChecksumAddress(self.w3.eth.default_account),  # type: ignore
             total_rewards,
             activation_duration,
-            activating_total_balance,
+            total_staked_balance,
         ):
             # submit vote
             logger.info(
                 f"Submitting vote:"
                 f" total rewards={pretty_total_rewards},"
                 f" activation duration={activation_duration} seconds,"
-                f" beacon activating amount={self.w3.fromWei(abs(activating_total_balance), 'ether')} ETH"
+                f" total staked balance={self.w3.fromWei(total_staked_balance, 'ether')} ETH"
             )
             submit_oracle_vote(
                 self.oracles,
                 total_rewards,
                 activation_duration,
-                activating_total_balance,
+                total_staked_balance,
                 TRANSACTION_TIMEOUT,
             )
             logger.info("Vote has been successfully submitted")

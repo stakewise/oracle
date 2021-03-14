@@ -206,7 +206,7 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "totalActivatingAmount",
+        "name": "totalStakingAmount",
         "type": "uint256"
       },
       {
@@ -216,7 +216,7 @@
         "type": "address"
       }
     ],
-    "name": "TotalActivatingAmountUpdated",
+    "name": "TotalStakingAmountUpdated",
     "type": "event"
   },
   {
@@ -517,39 +517,6 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "_admin",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_stakedEthToken",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_validatorRegistration",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_validators",
-        "type": "address"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "_withdrawalCredentials",
-        "type": "bytes32"
-      }
-    ],
-    "name": "initialize",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
         "name": "_account",
         "type": "address"
       }
@@ -765,11 +732,11 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "_totalActivatingAmount",
+        "name": "_totalStakingAmount",
         "type": "uint256"
       }
     ],
-    "name": "setTotalActivatingAmount",
+    "name": "setTotalStakingAmount",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -789,7 +756,20 @@
   },
   {
     "inputs": [],
-    "name": "totalActivatingAmount",
+    "name": "totalCollectedAmount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "totalStakingAmount",
     "outputs": [
       {
         "internalType": "uint256",
@@ -821,7 +801,7 @@
       },
       {
         "internalType": "uint256",
-        "name": "_beaconActivatingAmount",
+        "name": "_totalStakingAmount",
         "type": "uint256"
       },
       {

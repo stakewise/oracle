@@ -36,7 +36,10 @@ from web3.middleware.stalecheck import make_stalecheck_middleware
 from web3.types import RPCEndpoint, Wei
 from websockets import ConnectionClosedError
 
-from proto.eth.v1alpha1.beacon_chain_pb2 import ListValidatorBalancesRequest
+from proto.eth.v1alpha1.beacon_chain_pb2 import (
+    ListValidatorBalancesRequest,
+    ListBlocksRequest,
+)
 from proto.eth.v1alpha1.beacon_chain_pb2_grpc import BeaconChainStub
 from proto.eth.v1alpha1.validator_pb2 import (
     MultipleValidatorStatusRequest,
@@ -264,10 +267,13 @@ def check_deposits_activation_enabled(oracles: Contract) -> bool:
 def get_validator_activation_duration(
     beacon_chain_stub: BeaconChainStub,
     validator_stub: BeaconNodeValidatorStub,
-    max_inclusion_slot: int,
+    max_slot: int,
     seconds_per_epoch: int,
+    eth1_follow_distance: int,
+    inclusion_delay: int,
+    vrc_contract: Contract,
 ) -> int:
-    """Fetches validator queue length from the beacon chain."""
+    """Estimates number of seconds for the validator to get activated."""
     queue = beacon_chain_stub.GetValidatorQueue(empty_pb2.Empty())
     queue_length = len(queue.activation_public_keys)
 
@@ -276,11 +282,28 @@ def get_validator_activation_duration(
         validator_status = validator_stub.ValidatorStatus(
             ValidatorStatusRequest(public_key=public_key)
         )
-        if validator_status.deposit_inclusion_slot <= max_inclusion_slot:
+        if validator_status.deposit_inclusion_slot <= max_slot:
             break
         queue_length -= 1
 
-    return (queue_length / queue.churn_limit) * seconds_per_epoch
+    queue_length -= int((inclusion_delay / seconds_per_epoch) * queue.churn_limit)
+    if queue_length < 0:
+        queue_length = 0
+
+    blocks = beacon_chain_stub.ListBlocks(ListBlocksRequest(slot=max_slot))
+    from_block = blocks.blockContainers[0].block.block.body.eth1_data.block_hash
+    to_block = (
+        vrc_contract.web3.eth.get_block(from_block)["number"] + eth1_follow_distance
+    )
+    validators_filter = vrc_contract.events.DepositEvent.createFilter(
+        fromBlock=from_block, toBlock=to_block
+    )
+    not_included_validators_count = len(
+        set([event["pubkey"] for event in validators_filter.get_all_entries()])
+    )
+    queue_length += not_included_validators_count
+
+    return inclusion_delay + int((queue_length / queue.churn_limit) * seconds_per_epoch)
 
 
 @retry(reraise=True, wait=backoff, stop=stop_attempts, before_sleep=retry_log)

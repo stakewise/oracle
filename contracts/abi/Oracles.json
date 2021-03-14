@@ -168,7 +168,7 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "beaconActivatingAmount",
+        "name": "totalStakingAmount",
         "type": "uint256"
       }
     ],
@@ -262,6 +262,19 @@
       }
     ],
     "name": "candidates",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "currentNonce",
     "outputs": [
       {
         "internalType": "uint256",
@@ -408,7 +421,7 @@
       },
       {
         "internalType": "uint256",
-        "name": "_beaconActivatingAmount",
+        "name": "_totalStakingAmount",
         "type": "uint256"
       }
     ],
@@ -421,29 +434,6 @@
       }
     ],
     "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_admin",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_rewardEthToken",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_syncPeriod",
-        "type": "uint256"
-      }
-    ],
-    "name": "initialize",
-    "outputs": [],
-    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -676,7 +666,7 @@
       },
       {
         "internalType": "uint256",
-        "name": "_beaconActivatingAmount",
+        "name": "_totalStakingAmount",
         "type": "uint256"
       }
     ],
