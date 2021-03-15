@@ -331,11 +331,12 @@ def submit_oracle_vote(
     activation_duration: int,
     activating_total_balance: Wei,
     transaction_timeout: int,
+    gas: Wei,
 ) -> None:
     """Submits oracle vote to `Oracles` contract."""
     tx_hash = oracles.functions.vote(
         total_rewards, activation_duration, activating_total_balance
-    ).transact()
+    ).transact({"gas": gas})
     oracles.web3.eth.waitForTransactionReceipt(tx_hash, timeout=transaction_timeout)
 
 

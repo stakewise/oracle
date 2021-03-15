@@ -61,6 +61,9 @@ APPLY_GAS_PRICE_STRATEGY: bool = environ.get("APPLY_GAS_PRICE_STRATEGY", "False"
 )
 MAX_TX_WAIT_SECONDS: int = int(environ.get("MAX_TX_WAIT_SECONDS", "120"))
 
+# maximum gas spent on oracle vote
+ORACLE_VOTE_MAX_GAS: Wei = Wei(int(environ["ORACLE_VOTE_MAX_GAS"]))
+
 # how long to wait for transaction to mine
 TRANSACTION_TIMEOUT: int = int(environ["TRANSACTION_TIMEOUT"])
 

@@ -22,6 +22,7 @@ from src.settings import (
     BALANCE_WARNING_THRESHOLD,
     BALANCE_ERROR_THRESHOLD,
     SEND_TELEGRAM_NOTIFICATIONS,
+    ORACLE_VOTE_MAX_GAS,
 )
 from src.utils import (
     InterruptHandler,
@@ -271,6 +272,22 @@ class Oracle(object):
                 inclusion_delay=self.inclusion_delay,
                 vrc_contract=self.vrc,
             )
+            # skip updating activation duration if it hasn't changed more than 1 hour
+            prev_activation_duration = self.pool.functions.activationDuration().call()
+            if (
+                prev_activation_duration == activation_duration
+                or (
+                    prev_activation_duration
+                    < activation_duration
+                    <= prev_activation_duration + 3600
+                )
+                or (
+                    prev_activation_duration
+                    > activation_duration
+                    >= prev_activation_duration - 3600
+                )
+            ):
+                activation_duration = prev_activation_duration
         else:
             activation_duration = 0
 
@@ -294,6 +311,7 @@ class Oracle(object):
                 activation_duration,
                 total_staked_balance,
                 TRANSACTION_TIMEOUT,
+                ORACLE_VOTE_MAX_GAS,
             )
             logger.info("Vote has been successfully submitted")
 
