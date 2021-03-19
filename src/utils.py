@@ -36,15 +36,11 @@ from web3.middleware.stalecheck import make_stalecheck_middleware
 from web3.types import RPCEndpoint, Wei
 from websockets import ConnectionClosedError
 
-from proto.eth.v1alpha1.beacon_chain_pb2 import (
-    ListValidatorBalancesRequest,
-    ListBlocksRequest,
-)
+from proto.eth.v1alpha1.beacon_chain_pb2 import ListValidatorBalancesRequest
 from proto.eth.v1alpha1.beacon_chain_pb2_grpc import BeaconChainStub
 from proto.eth.v1alpha1.validator_pb2 import (
     MultipleValidatorStatusRequest,
     MultipleValidatorStatusResponse,
-    ValidatorStatusRequest,
 )
 from proto.eth.v1alpha1.validator_pb2_grpc import BeaconNodeValidatorStub
 
@@ -258,85 +254,28 @@ def check_oracles_paused(oracles: Contract) -> bool:
 
 
 @retry(reraise=True, wait=backoff, stop=stop_attempts, before_sleep=retry_log)
-def check_deposits_activation_enabled(oracles: Contract) -> bool:
-    """Checks whether deposits activation is enabled in `Oracles` contract."""
-    return oracles.functions.depositsActivationEnabled().call()
-
-
-@retry(reraise=True, wait=backoff, stop=stop_attempts, before_sleep=retry_log)
-def get_validator_activation_duration(
-    beacon_chain_stub: BeaconChainStub,
-    validator_stub: BeaconNodeValidatorStub,
-    max_slot: int,
-    seconds_per_epoch: int,
-    eth1_follow_distance: int,
-    inclusion_delay: int,
-    vrc_contract: Contract,
-) -> int:
-    """Estimates number of seconds for the validator to get activated."""
-    queue = beacon_chain_stub.GetValidatorQueue(empty_pb2.Empty())
-    queue_length = len(queue.activation_public_keys)
-
-    # remove validators with higher inclusion slot
-    for public_key in reversed(queue.activation_public_keys):
-        validator_status = validator_stub.ValidatorStatus(
-            ValidatorStatusRequest(public_key=public_key)
-        )
-        if validator_status.deposit_inclusion_slot > max_slot:
-            queue_length -= 1
-
-    # remove validators activated by the time the new validator will be included
-    queue_length -= int((inclusion_delay / seconds_per_epoch) * queue.churn_limit)
-    queue_length = max(queue_length, 0)
-
-    # fetch validators currently getting included
-    blocks = beacon_chain_stub.ListBlocks(ListBlocksRequest(slot=max_slot))
-    max_slot_block_hash = blocks.blockContainers[
-        0
-    ].block.block.body.eth1_data.block_hash
-    from_block = vrc_contract.web3.eth.get_block(max_slot_block_hash)["number"]
-    to_block = from_block + eth1_follow_distance
-
-    validators_filter = vrc_contract.events.DepositEvent.createFilter(
-        fromBlock=from_block, toBlock=to_block
-    )
-    not_included_validators_count = len(
-        set([event["args"]["pubkey"] for event in validators_filter.get_all_entries()])
-    )
-    vrc_contract.web3.eth.uninstallFilter(validators_filter.filter_id)
-
-    queue_length += not_included_validators_count
-
-    return inclusion_delay + int((queue_length / queue.churn_limit) * seconds_per_epoch)
-
-
-@retry(reraise=True, wait=backoff, stop=stop_attempts, before_sleep=retry_log)
 def check_oracle_has_vote(
     oracles: Contract,
     oracle: ChecksumAddress,
     total_rewards: Wei,
-    activation_duration: int,
-    activating_total_balance: Wei,
+    activated_validators: int,
 ) -> bool:
     """Checks whether oracle has submitted a vote."""
-    return oracles.functions.hasVote(
-        oracle, total_rewards, activation_duration, activating_total_balance
-    ).call()
+    return oracles.functions.hasVote(oracle, total_rewards, activated_validators).call()
 
 
 @retry(reraise=True, wait=backoff, stop=stop_attempts, before_sleep=retry_log)
 def submit_oracle_vote(
     oracles: Contract,
     total_rewards: Wei,
-    activation_duration: int,
-    activating_total_balance: Wei,
+    activated_validators: int,
     transaction_timeout: int,
     gas: Wei,
 ) -> None:
     """Submits oracle vote to `Oracles` contract."""
-    tx_hash = oracles.functions.vote(
-        total_rewards, activation_duration, activating_total_balance
-    ).transact({"gas": gas})
+    tx_hash = oracles.functions.vote(total_rewards, activated_validators).transact(
+        {"gas": gas}
+    )
     oracles.web3.eth.waitForTransactionReceipt(tx_hash, timeout=transaction_timeout)
 
 
@@ -424,6 +363,6 @@ def wait_prysm_ready(
                     f"Will keep trying every {process_interval} seconds."
                 )
             else:
-                logger.warning("Unknown gRPC error connecting to Prysm: {e}")
+                logger.warning(f"Unknown gRPC error connecting to Prysm: {e}")
 
         time.sleep(process_interval)

@@ -1,6 +1,5 @@
 import time
 from datetime import datetime, timezone, timedelta
-from math import ceil
 from typing import Set
 
 from eth_typing.bls import BLSPubkey
@@ -41,11 +40,9 @@ from src.utils import (
     get_reth_total_rewards,
     check_oracle_has_vote,
     submit_oracle_vote,
-    check_deposits_activation_enabled,
-    get_validator_activation_duration,
 )
 
-ACTIVE_STATUSES = [
+ACTIVATED_STATUSES = [
     ValidatorStatus.ACTIVE,
     ValidatorStatus.EXITING,
     ValidatorStatus.SLASHING,
@@ -98,16 +95,6 @@ class Oracle(object):
         self.deposit_amount: Wei = self.w3.toWei(
             int(chain_config["MaxEffectiveBalance"]), "gwei"
         )
-        self.far_future_epoch = int(chain_config["FarFutureEpoch"])
-        self.eth1_follow_distance = int(chain_config["Eth1FollowDistance"])
-        self.seconds_per_eth1_block = int(chain_config["SecondsPerETH1Block"])
-        epochs_per_eth1_voting_period = int(chain_config["EpochsPerEth1VotingPeriod"])
-        self.inclusion_delay = ceil(
-            (
-                (self.eth1_follow_distance * self.seconds_per_eth1_block)
-                + (self.seconds_per_epoch * epochs_per_eth1_voting_period)
-            )
-        )
 
         self.last_update_at = datetime.fromtimestamp(
             get_last_update_timestamp(self.reward_eth_token),
@@ -126,13 +113,6 @@ class Oracle(object):
 
         self.next_update_at = self.last_update_at + self.oracles_sync_period
         logger.info(f"Next rewards update time: {self.next_update_at}")
-
-        self.deposits_activation_enabled = check_deposits_activation_enabled(
-            self.oracles
-        )
-        logger.info(
-            f"Deposit activations setting: {'enabled' if self.deposits_activation_enabled else 'disabled'}"
-        )
 
     def process(self) -> None:
         """Records new pool validators, submits off-chain data to `Oracles` contract."""
@@ -154,15 +134,6 @@ class Oracle(object):
             self.next_update_at = self.last_update_at + self.oracles_sync_period
             logger.info(f"Scheduling oracles update at {self.next_update_at}")
 
-        deposits_activation_enabled = check_deposits_activation_enabled(self.oracles)
-        if deposits_activation_enabled != self.deposits_activation_enabled:
-            previous = "enabled" if self.deposits_activation_enabled else "disabled"
-            new = "enabled" if deposits_activation_enabled else "disabled"
-            self.deposits_activation_enabled = deposits_activation_enabled
-            logger.info(
-                f'Updated deposit activations setting: previous="{previous}", new="{new}"'
-            )
-
         if self.next_update_at > datetime.now(tz=timezone.utc):
             # it's not the time to update yet
             return
@@ -178,8 +149,6 @@ class Oracle(object):
 
         # fetch new pool validators
         public_keys: Set[BLSPubkey] = get_pool_validator_public_keys(self.pool)
-        inactive_public_keys: Set[BLSPubkey] = set()
-        activating_public_keys: Set[BLSPubkey] = set()
 
         # calculate finalized epoch to fetch balance at
         epoch: int = (
@@ -190,50 +159,41 @@ class Oracle(object):
             - 3
         )
 
-        # filter out inactive validators
+        # fetch activated validators
         validator_statuses = get_pool_validator_statuses(
             stub=self.validator_stub, public_keys=public_keys
         )
+        activated_public_keys: Set[BLSPubkey] = set()
         for i, public_key in enumerate(validator_statuses.public_keys):  # type: ignore
             status_response = validator_statuses.statuses[i]  # type: ignore
             status = ValidatorStatus(status_response.status)
 
-            if status in ACTIVATING_STATUSES or (
-                status == ValidatorStatus.ACTIVE
-                and status_response.activation_epoch > epoch
+            if (
+                status in ACTIVATED_STATUSES
+                and status_response.activation_epoch <= epoch
             ):
-                activating_public_keys.add(public_key)
-            elif status not in ACTIVE_STATUSES:
-                inactive_public_keys.add(public_key)
+                activated_public_keys.add(public_key)
 
-        active_public_keys: Set[BLSPubkey] = public_keys.difference(
-            inactive_public_keys.union(activating_public_keys)
-        )
-
-        if not active_public_keys:
+        if not activated_public_keys:
             self.last_update_at = self.next_update_at
             self.next_update_at = self.last_update_at + self.oracles_sync_period
             logger.info(
-                f"No active validators: next update at={str(self.next_update_at)}"
+                f"No activated validators: next update at={str(self.next_update_at)}"
             )
             return
 
+        activated_validators = len(activated_public_keys)
         logger.info(
-            f"Retrieving balances for {len(active_public_keys)} / {len(public_keys)}"
-            f" active validators at epoch={epoch}"
+            f"Retrieving balances for {activated_validators} / {len(public_keys)}"
+            f" activated validators at epoch={epoch}"
         )
-        active_total_balance = get_validators_total_balance(
-            stub=self.beacon_chain_stub, epoch=epoch, public_keys=active_public_keys
-        )
-
-        total_staked_balance: Wei = Wei(len(active_public_keys) * self.deposit_amount)
-        logger.info(
-            f"Total staked balance: {self.w3.fromWei(total_staked_balance, 'ether')}"
+        activated_total_balance = get_validators_total_balance(
+            stub=self.beacon_chain_stub, epoch=epoch, public_keys=activated_public_keys
         )
 
         # calculate new rewards
         total_rewards: Wei = Wei(
-            active_total_balance - (self.deposit_amount * len(active_public_keys))
+            activated_total_balance - (activated_validators * self.deposit_amount)
         )
         if total_rewards < 0:
             pretty_total_rewards = (
@@ -262,54 +222,22 @@ class Oracle(object):
                 f"Skipping updating total rewards: period rewards={pretty_period_rewards}"
             )
 
-        if self.deposits_activation_enabled:
-            activation_duration = get_validator_activation_duration(
-                beacon_chain_stub=self.beacon_chain_stub,
-                validator_stub=self.validator_stub,
-                max_slot=epoch * self.slots_per_epoch,
-                seconds_per_epoch=self.seconds_per_epoch,
-                eth1_follow_distance=self.eth1_follow_distance,
-                inclusion_delay=self.inclusion_delay,
-                vrc_contract=self.vrc,
-            )
-            # skip updating activation duration if it hasn't changed more than 1 hour
-            prev_activation_duration = self.pool.functions.activationDuration().call()
-            if (
-                prev_activation_duration == activation_duration
-                or (
-                    prev_activation_duration
-                    < activation_duration
-                    <= prev_activation_duration + 3600
-                )
-                or (
-                    prev_activation_duration
-                    > activation_duration
-                    >= prev_activation_duration - 3600
-                )
-            ):
-                activation_duration = prev_activation_duration
-        else:
-            activation_duration = 0
-
         if not check_oracle_has_vote(
             self.oracles,
             ChecksumAddress(self.w3.eth.default_account),  # type: ignore
             total_rewards,
-            activation_duration,
-            total_staked_balance,
+            activated_validators,
         ):
             # submit vote
             logger.info(
                 f"Submitting vote:"
                 f" total rewards={pretty_total_rewards},"
-                f" activation duration={activation_duration} seconds,"
-                f" total staked balance={self.w3.fromWei(total_staked_balance, 'ether')} ETH"
+                f" activated validators={activated_validators}"
             )
             submit_oracle_vote(
                 self.oracles,
                 total_rewards,
-                activation_duration,
-                total_staked_balance,
+                activated_validators,
                 TRANSACTION_TIMEOUT,
                 ORACLE_VOTE_MAX_GAS,
             )
