@@ -6,7 +6,7 @@ from eth_typing.evm import ChecksumAddress, HexAddress
 from web3 import Web3
 from web3.types import Wei
 
-LOG_LEVEL: str = environ.get("LOG_LEVEL", "DEBUG")
+LOG_LEVEL: str = environ.get("LOG_LEVEL", "INFO")
 
 # connections
 # use either WS or HTTP for Web3
