@@ -1,10 +1,10 @@
+import logging
 import time
 from datetime import datetime, timezone, timedelta
 from typing import Set
 
 from eth_typing.bls import BLSPubkey
 from eth_typing.evm import ChecksumAddress
-from loguru import logger
 from web3 import Web3
 from web3.types import Wei
 
@@ -54,6 +54,8 @@ ACTIVATING_STATUSES = [
     ValidatorStatus.PENDING,
     ValidatorStatus.DEPOSITED,
 ]
+
+logger = logging.getLogger(__name__)
 
 
 class Oracle(object):

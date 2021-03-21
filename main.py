@@ -1,8 +1,5 @@
-import sys
+import logging
 import time
-
-from loguru import logger
-from notifiers.logging import NotificationHandler  # type: ignore
 
 from src.oracle import Oracle
 from src.settings import (
@@ -19,10 +16,10 @@ from src.settings import (
     BALANCE_ERROR_THRESHOLD,
     APPLY_GAS_PRICE_STRATEGY,
     MAX_TX_WAIT_SECONDS,
-    LOG_LEVEL,
     PROCESS_INTERVAL,
     BEACON_CHAIN_RPC_ENDPOINT,
     SEND_TELEGRAM_NOTIFICATIONS,
+    LOG_LEVEL,
 )
 from src.utils import (
     get_web3_client,
@@ -33,19 +30,9 @@ from src.utils import (
     telegram,
 )
 
-# Send notification to admins on error
-handler = NotificationHandler("telegram")
-logger.remove(0)
-logger.add(
-    sink=sys.stderr,
-    format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green>"
-    " <level>{level}</level> <level>{message}</level>",
-    level=LOG_LEVEL,
-)
-logger.add(handler, level="ERROR", backtrace=False, diagnose=False)
+logging.basicConfig(level=LOG_LEVEL)
 
 
-@logger.catch
 def main() -> None:
     # setup Web3 client
     web3_client = get_web3_client(
