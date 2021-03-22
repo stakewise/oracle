@@ -83,12 +83,11 @@ where `settings.txt` is an environment file with [Settings](#settings).
 | APPLY_GAS_PRICE_STRATEGY               | Defines whether the gas strategy should be applied.                                                                                                                                                     | No       | False   |
 | MAX_TX_WAIT_SECONDS                    | The preferred number of seconds the oracle is willing to wait for the transaction to mine. Will be applied only if `APPLY_GAS_PRICE_STRATEGY` is set to `True`.                                         | No       | 120     |
 | TRANSACTION_TIMEOUT                    | The maximum number of seconds the oracle is willing to wait for the transaction to mine. After that it will throw time out error.                                                                       | Yes      | -       |
-| ORACLE_VOTE_MAX_GAS                    | The maximum gas spent on oracle vote.                                                                                                                                                                   | Yes      | -       |
+| ORACLE_VOTE_GAS_LIMIT                  | The maximum gas spent on oracle vote.                                                                                                                                                                   | Yes      | -       |
 | POOL_CONTRACT_ADDRESS                  | The address of the [Pool Contract](https://github.com/stakewise/contracts/blob/master/contracts/collectors/Pool.sol).                                                                                   | Yes      | -       |
 | ORACLES_CONTRACT_ADDRESS               | The address of the [Oracle Contract](https://github.com/stakewise/contracts/blob/master/contracts/Oracles.sol).                                                                                         | Yes      | -       |
 | REWARD_ETH_CONTRACT_ADDRESS            | The address of the [Reward ETH Token Contract](https://github.com/stakewise/contracts/blob/master/contracts/tokens/RewardEthToken.sol).                                                                 | Yes      | -       |
 | STAKED_ETH_CONTRACT_ADDRESS            | The address of the  [Staked ETH Token Contract](https://github.com/stakewise/contracts/blob/master/contracts/tokens/StakedEthToken.sol).                                                                | Yes      | -       |
-| VRC_CONTRACT_ADDRESS                   | The address of the [ETH2 Validators Registration Contract](https://github.com/ethereum/eth2.0-specs/blob/dev/solidity_deposit_contract/deposit_contract.sol)                                            | Yes      | -       |
 | ORACLE_PRIVATE_KEY                     | The ETH1 private key of the operator (see `Generating Private Key` below).                                                                                                                              | Yes      | -       |
 | NOTIFIERS_TELEGRAM_TOKEN               | Telegram chat token where notifications about low balance or errors will be sent.                                                                                                                       | No       | -       |
 | NOTIFIERS_TELEGRAM_CHAT_ID             | Telegram chat ID where notifications about low balance or errors will be sent.                                                                                                                          | No       | -       |
@@ -114,7 +113,6 @@ ORACLES_CONTRACT_ADDRESS=0x2f1C5E86B13a74f5A6E7B4b35DD77fe29Aa47514
 POOL_CONTRACT_ADDRESS=0xC874b064f465bdD6411D45734b56fac750Cda29A
 REWARD_ETH_CONTRACT_ADDRESS=0x20BC832ca081b91433ff6c17f85701B6e92486c5
 STAKED_ETH_CONTRACT_ADDRESS=0xFe2e637202056d30016725477c5da089Ab0A043A
-VRC_CONTRACT_ADDRESS=0x00000000219ab540356cBB839Cbe05303d7705Fa
 ORACLE_PRIVATE_KEY=0x<private_key>
 NOTIFIERS_TELEGRAM_TOKEN=12345token
 NOTIFIERS_TELEGRAM_CHAT_ID=123456

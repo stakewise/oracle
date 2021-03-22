@@ -9,7 +9,6 @@ from src.settings import (
     REWARD_ETH_CONTRACT_ADDRESS,
     STAKED_ETH_CONTRACT_ADDRESS,
     ORACLES_CONTRACT_ADDRESS,
-    VRC_CONTRACT_ADDRESS,
 )
 
 
@@ -47,12 +46,3 @@ def get_oracles_contract(w3: Web3) -> Contract:
         abi = json.load(f)
 
     return w3.eth.contract(abi=abi, address=ORACLES_CONTRACT_ADDRESS)
-
-
-def get_vrc_contract(w3: Web3) -> Contract:
-    """:returns instance of `VRC` contract."""
-    current_dir = os.path.dirname(__file__)
-    with open(os.path.join(current_dir, "abi/IDepositContract.json")) as f:
-        abi = json.load(f)
-
-    return w3.eth.contract(abi=abi, address=VRC_CONTRACT_ADDRESS)

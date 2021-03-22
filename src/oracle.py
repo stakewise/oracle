@@ -13,7 +13,6 @@ from contracts import (
     get_pool_contract,
     get_reward_eth_contract,
     get_staked_eth_contract,
-    get_vrc_contract,
 )
 from src.settings import (
     BEACON_CHAIN_RPC_ENDPOINT,
@@ -21,7 +20,7 @@ from src.settings import (
     BALANCE_WARNING_THRESHOLD,
     BALANCE_ERROR_THRESHOLD,
     SEND_TELEGRAM_NOTIFICATIONS,
-    ORACLE_VOTE_MAX_GAS,
+    ORACLE_VOTE_GAS_LIMIT,
 )
 from src.utils import (
     InterruptHandler,
@@ -77,9 +76,6 @@ class Oracle(object):
         logger.debug(
             f"Staked ETH Token contract address: {self.staked_eth_token.address}"
         )
-
-        self.vrc = get_vrc_contract(w3)
-        logger.debug(f"VRC contract address: {self.vrc.address}")
 
         self.oracles = get_oracles_contract(w3)
         logger.debug(f"Oracles contract address: {self.oracles.address}")
@@ -241,7 +237,7 @@ class Oracle(object):
                 total_rewards,
                 activated_validators,
                 TRANSACTION_TIMEOUT,
-                ORACLE_VOTE_MAX_GAS,
+                ORACLE_VOTE_GAS_LIMIT,
             )
             logger.info("Vote has been successfully submitted")
 

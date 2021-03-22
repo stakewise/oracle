@@ -62,7 +62,7 @@ APPLY_GAS_PRICE_STRATEGY: bool = environ.get("APPLY_GAS_PRICE_STRATEGY", "False"
 MAX_TX_WAIT_SECONDS: int = int(environ.get("MAX_TX_WAIT_SECONDS", "120"))
 
 # maximum gas spent on oracle vote
-ORACLE_VOTE_MAX_GAS: Wei = Wei(int(environ["ORACLE_VOTE_MAX_GAS"]))
+ORACLE_VOTE_GAS_LIMIT: Wei = Wei(int(environ["ORACLE_VOTE_GAS_LIMIT"]))
 
 # how long to wait for transaction to mine
 TRANSACTION_TIMEOUT: int = int(environ["TRANSACTION_TIMEOUT"])
@@ -82,10 +82,6 @@ REWARD_ETH_CONTRACT_ADDRESS: ChecksumAddress = ChecksumAddress(
 )
 STAKED_ETH_CONTRACT_ADDRESS: ChecksumAddress = ChecksumAddress(
     HexAddress(HexStr(environ["STAKED_ETH_CONTRACT_ADDRESS"]))
-)
-
-VRC_CONTRACT_ADDRESS: ChecksumAddress = ChecksumAddress(
-    HexAddress(HexStr(environ["VRC_CONTRACT_ADDRESS"]))
 )
 
 # credentials
