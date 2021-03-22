@@ -14,12 +14,11 @@
 syntax = "proto3";
 
 // https://github.com/prysmaticlabs/ethereumapis/blob/master/eth/v1alpha1/beacon_chain.proto
-// Commit: 3cbfa1b
+// Commit: 81b15e2
 package ethereum.eth.v1alpha1;
 
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
-import "google/protobuf/any.proto";
 
 import "eth/v1alpha1/attestation.proto";
 import "eth/v1alpha1/beacon_block.proto";
@@ -102,7 +101,7 @@ service BeaconChain {
 
     // Server-side stream of all signed blocks as they are received by
     // the beacon chain node.
-    rpc StreamBlocks(google.protobuf.Empty) returns (stream SignedBeaconBlock) {
+    rpc StreamBlocks(StreamBlocksRequest) returns (stream SignedBeaconBlock) {
         option (google.api.http) = {
             get: "/eth/v1alpha1/beacon/blocks/stream"
         };
@@ -391,6 +390,11 @@ message ListBlocksResponse {
     int32 total_size = 3;
 }
 
+// Request to only return blocks that is verified by the beacon node.
+message StreamBlocksRequest {
+    bool verified_only = 1;
+}
+
 // A container that contains both the beacon block
 // and its corresponding root.
 message BeaconBlockContainer {
@@ -399,6 +403,9 @@ message BeaconBlockContainer {
 
     // 32 byte merkle tree root of contained beacon block.
     bytes block_root = 2;
+
+    // Boolean indicating whether the block is canonical.
+    bool canonical = 3;
 }
 
 // Information about the head of the beacon chain.
@@ -676,11 +683,11 @@ message ValidatorQueue {
 
     // Ordered list of 48 byte public keys awaiting activation. 0th index is the
     // next key to be processed.
-    repeated bytes activation_public_keys = 2;
+    repeated bytes activation_public_keys = 2 [deprecated = true];
 
     // Ordered list of public keys awaiting exit. 0th index is the next key to
     // be processed.
-    repeated bytes exit_public_keys = 3;
+    repeated bytes exit_public_keys = 3 [deprecated = true];
 
     // Ordered list of validator indices awaiting activation. 0th item in the list is the
     // next validator index to be processed.
@@ -734,7 +741,7 @@ message ValidatorAssignments {
         repeated uint64 proposer_slots = 4;
 
         // 48 byte BLS public key.
-        bytes public_key = 5;
+        bytes public_key = 5 [deprecated = true];
 
         // Validator index in the beacon state.
         uint64 validator_index = 6;

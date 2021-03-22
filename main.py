@@ -1,10 +1,7 @@
-import sys
+import logging
 import time
 
-from loguru import logger
-from notifiers.logging import NotificationHandler  # type: ignore
-
-from src.reward_token import RewardToken
+from src.oracle import Oracle
 from src.settings import (
     WEB3_WS_ENDPOINT,
     WEB3_WS_ENDPOINT_TIMEOUT,
@@ -19,10 +16,10 @@ from src.settings import (
     BALANCE_ERROR_THRESHOLD,
     APPLY_GAS_PRICE_STRATEGY,
     MAX_TX_WAIT_SECONDS,
-    LOG_LEVEL,
     PROCESS_INTERVAL,
     BEACON_CHAIN_RPC_ENDPOINT,
     SEND_TELEGRAM_NOTIFICATIONS,
+    LOG_LEVEL,
 )
 from src.utils import (
     get_web3_client,
@@ -33,19 +30,13 @@ from src.utils import (
     telegram,
 )
 
-# Send notification to admins on error
-handler = NotificationHandler("telegram")
-logger.remove(0)
-logger.add(
-    sink=sys.stderr,
-    format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green>"
-    " <level>{level}</level> <level>{message}</level>",
+logging.basicConfig(
+    format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
+    datefmt="%m-%d %H:%M",
     level=LOG_LEVEL,
 )
-logger.add(handler, level="ERROR", backtrace=False, diagnose=False)
 
 
-@logger.catch
 def main() -> None:
     # setup Web3 client
     web3_client = get_web3_client(
@@ -71,8 +62,8 @@ def main() -> None:
         # Notify Telegram the oracle is warming up, so that
         # oracle maintainers know the service has restarted
         telegram.notify(
-            message=f"Oracle starting with account [{web3_client.eth.defaultAccount}]"
-            f"(https://etherscan.io/address/{web3_client.eth.defaultAccount})",
+            message=f"Oracle starting with account [{web3_client.eth.default_account}]"
+            f"(https://etherscan.io/address/{web3_client.eth.default_account})",
             parse_mode="markdown",
             raise_on_errors=True,
             disable_web_page_preview=True,
@@ -81,18 +72,19 @@ def main() -> None:
     # wait that node is synced before trying to do anything
     wait_prysm_ready(interrupt_handler, BEACON_CHAIN_RPC_ENDPOINT, PROCESS_INTERVAL)
 
-    reward_token_total_rewards = RewardToken(
-        w3=web3_client, interrupt_handler=interrupt_handler
-    )
+    oracle = Oracle(w3=web3_client, interrupt_handler=interrupt_handler)
+
     # check oracle balance
     if SEND_TELEGRAM_NOTIFICATIONS:
         check_default_account_balance(
-            web3_client, BALANCE_WARNING_THRESHOLD, BALANCE_ERROR_THRESHOLD
+            w3=web3_client,
+            warning_amount=BALANCE_WARNING_THRESHOLD,
+            error_amount=BALANCE_ERROR_THRESHOLD,
         )
 
     while not interrupt_handler.exit:
-        # update Reward Token total rewards
-        reward_token_total_rewards.process()
+        # check and perform oracle duties
+        oracle.process()
 
         # wait until next processing time
         time.sleep(PROCESS_INTERVAL)

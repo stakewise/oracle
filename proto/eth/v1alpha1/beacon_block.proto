@@ -14,7 +14,7 @@
 syntax = "proto3";
 
 // https://github.com/prysmaticlabs/ethereumapis/blob/master/eth/v1alpha1/beacon_block.proto
-// Commit: 7dafd77
+// Commit: 81b15e2
 package ethereum.eth.v1alpha1;
 
 import "eth/v1alpha1/attestation.proto";

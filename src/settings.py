@@ -6,7 +6,7 @@ from eth_typing.evm import ChecksumAddress, HexAddress
 from web3 import Web3
 from web3.types import Wei
 
-LOG_LEVEL: str = environ.get("LOG_LEVEL", "DEBUG")
+LOG_LEVEL: str = environ.get("LOG_LEVEL", "INFO")
 
 # connections
 # use either WS or HTTP for Web3
@@ -60,6 +60,9 @@ APPLY_GAS_PRICE_STRATEGY: bool = environ.get("APPLY_GAS_PRICE_STRATEGY", "False"
     "True",
 )
 MAX_TX_WAIT_SECONDS: int = int(environ.get("MAX_TX_WAIT_SECONDS", "120"))
+
+# maximum gas spent on oracle vote
+ORACLE_VOTE_GAS_LIMIT: Wei = Wei(int(environ["ORACLE_VOTE_GAS_LIMIT"]))
 
 # how long to wait for transaction to mine
 TRANSACTION_TIMEOUT: int = int(environ["TRANSACTION_TIMEOUT"])
