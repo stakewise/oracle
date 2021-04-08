@@ -3,9 +3,8 @@ import logging
 import signal
 import time
 from asyncio.exceptions import TimeoutError
-from datetime import datetime, timezone
 from enum import Enum
-from typing import Union, Any, Callable, Set, Dict
+from typing import Union, Any, Callable, Set, Dict, Tuple
 
 from eth_typing.bls import BLSPubkey
 from eth_typing.evm import ChecksumAddress
@@ -17,10 +16,12 @@ from tenacity import (  # type: ignore
     stop_after_attempt,
     wait_fixed,
     wait_random,
+    Retrying,
 )
 from tenacity.before_sleep import before_sleep_log
 from web3 import Web3
 from web3.contract import Contract
+from web3.exceptions import ContractLogicError
 from web3.gas_strategies.time_based import construct_time_based_gas_price_strategy
 from web3.middleware.cache import (
     _time_based_cache_middleware,
@@ -38,6 +39,7 @@ from websockets import ConnectionClosedError
 
 from proto.eth.v1alpha1.beacon_chain_pb2 import ListValidatorBalancesRequest
 from proto.eth.v1alpha1.beacon_chain_pb2_grpc import BeaconChainStub
+from proto.eth.v1alpha1.node_pb2_grpc import NodeStub
 from proto.eth.v1alpha1.validator_pb2 import (
     MultipleValidatorStatusRequest,
     MultipleValidatorStatusResponse,
@@ -205,6 +207,12 @@ def get_beacon_chain_stub(rpc_endpoint: str) -> BeaconChainStub:
     return BeaconChainStub(channel)
 
 
+def get_node_stub(rpc_endpoint: str) -> NodeStub:
+    """Instantiates node stub."""
+    channel = insecure_channel(rpc_endpoint)
+    return NodeStub(channel)
+
+
 @retry(
     reraise=True,
     wait=backoff,
@@ -223,9 +231,33 @@ def get_chain_config(stub: BeaconChainStub) -> Dict[str, str]:
     stop=stop_attempts,
     before_sleep=before_sleep_log(logger, logging.WARNING),
 )
-def get_last_update_timestamp(reward_eth_token: Contract) -> int:
-    """Fetches last update timestamp from `RewardEthToken` contract."""
-    return reward_eth_token.functions.lastUpdateTimestamp().call()
+def get_rewards_voting_parameters(
+    reward_eth_token: Contract, oracles: Contract, multicall: Contract
+) -> Tuple[bool, bool, int, int, int, int]:
+    """Fetches rewards voting parameters."""
+    calls = [
+        dict(target=oracles.address, callData=oracles.encodeABI("isRewardsVoting")),
+        dict(target=oracles.address, callData=oracles.encodeABI("paused")),
+        dict(target=oracles.address, callData=oracles.encodeABI("syncPeriod")),
+        dict(target=oracles.address, callData=oracles.encodeABI("currentNonce")),
+        dict(
+            target=reward_eth_token.address,
+            callData=reward_eth_token.encodeABI("lastUpdateTimestamp"),
+        ),
+        dict(
+            target=reward_eth_token.address,
+            callData=reward_eth_token.encodeABI("totalSupply"),
+        ),
+    ]
+    response = multicall.functions.aggregate(calls).call()[1]
+    return (
+        bool(Web3.toInt(response[0])),
+        bool(Web3.toInt(response[1])),
+        Web3.toInt(response[2]),
+        Web3.toInt(response[3]),
+        Web3.toInt(response[4]),
+        Web3.toInt(response[5]),
+    )
 
 
 @retry(
@@ -234,20 +266,9 @@ def get_last_update_timestamp(reward_eth_token: Contract) -> int:
     stop=stop_attempts,
     before_sleep=before_sleep_log(logger, logging.WARNING),
 )
-def get_oracles_sync_period(oracles: Contract) -> int:
-    """Fetches oracles sync period from `Oracles` contract."""
-    return oracles.functions.syncPeriod().call()
-
-
-@retry(
-    reraise=True,
-    wait=backoff,
-    stop=stop_attempts,
-    before_sleep=before_sleep_log(logger, logging.WARNING),
-)
-def check_oracles_paused(oracles: Contract) -> bool:
-    """Fetches whether `Oracles` contract is paused or not."""
-    return oracles.functions.paused().call()
+def get_last_update_timestamp(contract: Contract) -> int:
+    """Fetches last update timestamp from the contract."""
+    return contract.functions.lastUpdateTimestamp().call()
 
 
 @retry(
@@ -257,33 +278,50 @@ def check_oracles_paused(oracles: Contract) -> bool:
     before_sleep=before_sleep_log(logger, logging.WARNING),
 )
 def check_oracle_has_vote(
-    oracles: Contract,
-    oracle: ChecksumAddress,
-    total_rewards: Wei,
-    activated_validators: int,
+    oracles: Contract, oracle: ChecksumAddress, candidate_id: bytes
 ) -> bool:
     """Checks whether oracle has submitted a vote."""
-    return oracles.functions.hasVote(oracle, total_rewards, activated_validators).call()
+    return oracles.functions.hasVote(oracle, candidate_id).call()
 
 
-@retry(
-    reraise=True,
-    wait=backoff,
-    stop=stop_attempts,
-    before_sleep=before_sleep_log(logger, logging.WARNING),
-)
-def submit_oracle_vote(
+def submit_oracle_rewards_vote(
     oracles: Contract,
+    reward_eth_token: Contract,
     total_rewards: Wei,
     activated_validators: int,
+    last_update_timestamp: int,
     transaction_timeout: int,
     gas: Wei,
 ) -> None:
     """Submits oracle vote to `Oracles` contract."""
-    tx_hash = oracles.functions.vote(total_rewards, activated_validators).transact(
-        {"gas": gas}
-    )
-    oracles.web3.eth.waitForTransactionReceipt(tx_hash, timeout=transaction_timeout)
+    tx_hash = None
+    for attempt in Retrying(
+        reraise=True,
+        wait=backoff,
+        stop=stop_attempts,
+        before_sleep=before_sleep_log(logger, logging.WARNING),
+    ):
+        with attempt:
+            try:
+                oracles.functions.voteForRewards(
+                    total_rewards, activated_validators
+                ).estimateGas({"gas": gas})
+            except ContractLogicError as e:
+                if last_update_timestamp < get_last_update_timestamp(reward_eth_token):
+                    logger.info("New rewards have already been submitted")
+                    return
+                raise e
+
+            if tx_hash is None:
+                tx_hash = oracles.functions.voteForRewards(
+                    total_rewards, activated_validators
+                ).transact({"gas": gas})
+            else:
+                tx_hash = oracles.web3.eth.replace_transaction(tx_hash, {"gas": gas})
+
+            oracles.web3.eth.waitForTransactionReceipt(
+                transaction_hash=tx_hash, timeout=transaction_timeout, poll_latency=5
+            )
 
 
 @retry(
@@ -292,21 +330,9 @@ def submit_oracle_vote(
     stop=stop_attempts,
     before_sleep=before_sleep_log(logger, logging.WARNING),
 )
-def get_reth_total_rewards(reward_eth_token: Contract) -> Wei:
-    """Fetches `RewardEthToken` total rewards."""
-    return reward_eth_token.functions.totalRewards().call()
-
-
-@retry(
-    reraise=True,
-    wait=backoff,
-    stop=stop_attempts,
-    before_sleep=before_sleep_log(logger, logging.WARNING),
-)
-def get_genesis_time(stub: BeaconNodeValidatorStub) -> datetime:
-    """Fetches beacon chain genesis time."""
-    chain_start = next(stub.WaitForChainStart(empty_pb2.Empty()))
-    return datetime.fromtimestamp(chain_start.genesis_time, tz=timezone.utc)
+def get_genesis_timestamp(stub: NodeStub) -> int:
+    """Fetches beacon chain genesis timestamp."""
+    return stub.GetGenesis(empty_pb2.Empty()).genesis_time.ToSeconds()
 
 
 @retry(

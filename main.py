@@ -1,5 +1,6 @@
 import logging
 import time
+from urllib.parse import urljoin
 
 from src.oracle import Oracle
 from src.settings import (
@@ -20,6 +21,7 @@ from src.settings import (
     BEACON_CHAIN_RPC_ENDPOINT,
     SEND_TELEGRAM_NOTIFICATIONS,
     LOG_LEVEL,
+    ETHERSCAN_ADDRESS_BASE_URL,
 )
 from src.utils import (
     get_web3_client,
@@ -63,7 +65,7 @@ def main() -> None:
         # oracle maintainers know the service has restarted
         telegram.notify(
             message=f"Oracle starting with account [{web3_client.eth.default_account}]"
-            f"(https://etherscan.io/address/{web3_client.eth.default_account})",
+            f"({urljoin(ETHERSCAN_ADDRESS_BASE_URL, str(web3_client.eth.default_account))})",
             parse_mode="markdown",
             raise_on_errors=True,
             disable_web_page_preview=True,
