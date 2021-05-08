@@ -4,7 +4,7 @@ from typing import Set
 
 from eth_typing.bls import BLSPubkey
 from web3 import Web3
-from web3.types import Wei
+from web3.types import Wei, BlockIdentifier, Timestamp
 
 from contracts import (
     get_oracles_contract,
@@ -20,10 +20,11 @@ from src.settings import (
     SEND_TELEGRAM_NOTIFICATIONS,
     ORACLE_VOTE_GAS_LIMIT,
     VOTING_TIMEOUT,
-    SYNC_DELAY,
+    SYNC_BLOCKS_DELAY,
+    ETH1_CONFIRMATION_BLOCKS,
+    ETH2_CONFIRMATION_EPOCHS,
 )
-from src.utils import (
-    InterruptHandler,
+from src.staking_rewards.utils import (
     get_validator_stub,
     get_beacon_chain_stub,
     get_node_stub,
@@ -31,13 +32,18 @@ from src.utils import (
     get_genesis_timestamp,
     get_pool_validator_public_keys,
     ValidatorStatus,
-    check_default_account_balance,
-    get_last_update_timestamp,
     get_pool_validator_statuses,
     get_validators_total_balance,
-    check_oracle_has_vote,
     submit_oracle_rewards_vote,
     get_rewards_voting_parameters,
+    get_sync_period,
+    get_current_nonce,
+)
+from src.utils import (
+    get_block,
+    get_latest_block_number,
+    check_oracle_has_vote,
+    check_default_account_balance,
 )
 
 ACTIVATED_STATUSES = [
@@ -56,13 +62,11 @@ ACTIVATING_STATUSES = [
 logger = logging.getLogger(__name__)
 
 
-class Oracle(object):
-    """Performs oracles duties."""
+class Rewards(object):
+    """Updates total rewards and activated validators number."""
 
-    def __init__(self, w3: Web3, interrupt_handler: InterruptHandler) -> None:
+    def __init__(self, w3: Web3) -> None:
         self.w3 = w3
-        self.interrupt_handler = interrupt_handler
-
         self.pool = get_pool_contract(w3)
         logger.info(f"Pool contract address: {self.pool.address}")
 
@@ -93,42 +97,90 @@ class Oracle(object):
             int(chain_config["MaxEffectiveBalance"]), "gwei"
         )
 
-        self.delay = 0
+        self.blocks_delay: BlockIdentifier = 0
 
     def process(self) -> None:
         """Submits off-chain data for total rewards and activated validators to `Oracles` contract."""
+
+        # fetch current block number adjusted based on the number of confirmation blocks
+        current_block_number: BlockIdentifier = get_latest_block_number(
+            w3=self.w3, confirmation_blocks=ETH1_CONFIRMATION_BLOCKS
+        )
 
         # fetch voting parameters
         (
             is_voting,
             is_paused,
-            sync_period,
             current_nonce,
-            last_update_timestamp,
+            last_update_block_number,
             last_total_rewards,
         ) = get_rewards_voting_parameters(
             multicall=self.multicall_contract,
             oracles=self.oracles,
             reward_eth_token=self.reward_eth_token,
+            block_identifier=current_block_number,
         )
-        next_sync_timestamp = last_update_timestamp + sync_period + self.delay
-        if not is_voting or next_sync_timestamp > int(time.time()):
+
+        # check whether it's voting time
+        if not is_voting:
             return
 
         if is_paused:
             logger.info("Skipping rewards update as Oracles contract is paused")
             return
 
-        # fetch new pool validators
-        public_keys: Set[BLSPubkey] = get_pool_validator_public_keys(self.pool)
+        # fetch the sync period in number of blocks at the time of last update block number
+        if not last_update_block_number:
+            # if it's the first update, use the latest block
+            sync_period: int = get_sync_period(self.oracles)
+        else:
+            sync_period: int = get_sync_period(self.oracles, last_update_block_number)
 
-        # calculate finalized epoch to fetch balance at
-        epoch: int = (
-            int((next_sync_timestamp - self.genesis_timestamp) / self.seconds_per_epoch)
-            - 3
+        # calculate next sync block number
+        if not last_update_block_number:
+            # if it's the first update, increment based on the ETH2 genesis time
+            # assumes every ETH1 block is 13 seconds
+            next_sync_block_number: BlockIdentifier = (
+                self.genesis_timestamp // 13
+            ) + sync_period
+        else:
+            next_sync_block_number: BlockIdentifier = (
+                last_update_block_number + sync_period
+            )
+
+        # apply blocks delay if any
+        next_sync_block_number += self.blocks_delay
+
+        # if more than 1 update was skipped -> catch up close to the current block
+        while next_sync_block_number + sync_period < current_block_number:
+            next_sync_block_number += sync_period
+
+        if next_sync_block_number > current_block_number:
+            # skip updating if the time hasn't come yet
+            return
+
+        # fetch pool validator BLS public keys
+        public_keys: Set[BLSPubkey] = get_pool_validator_public_keys(
+            pool_contract=self.pool, block_number=next_sync_block_number
         )
 
-        # fetch activated validators
+        # calculate finalized epoch to fetch validator balances at
+        next_sync_timestamp: Timestamp = get_block(
+            w3=self.w3, block_identifier=next_sync_block_number
+        )["timestamp"]
+
+        # calculate ETH2 epoch to fetch validator balances at
+        # reduce by the number of the maximum ETH2 justified epochs
+        epoch: int = (
+            int((next_sync_timestamp - self.genesis_timestamp) / self.seconds_per_epoch)
+            - ETH2_CONFIRMATION_EPOCHS
+        )
+        logger.info(
+            f"Voting for new total rewards with parameters:"
+            f" block number={next_sync_block_number}, epoch={epoch}"
+        )
+
+        # fetch activated validators from the beacon chain
         validator_statuses = get_pool_validator_statuses(
             stub=self.validator_stub, public_keys=public_keys
         )
@@ -137,6 +189,7 @@ class Oracle(object):
             status_response = validator_statuses.statuses[i]  # type: ignore
             status = ValidatorStatus(status_response.status)
 
+            # filter out only validator public keys with activated statuses
             if (
                 status in ACTIVATED_STATUSES
                 and status_response.activation_epoch <= epoch
@@ -146,11 +199,9 @@ class Oracle(object):
         activated_validators = len(activated_public_keys)
         if not activated_validators:
             logger.warning(
-                f"Delaying rewards update by {SYNC_DELAY} seconds as there are no activated validators"
+                f"Delaying rewards update by {SYNC_BLOCKS_DELAY} blocks as there are no activated validators"
             )
-            while next_sync_timestamp <= int(time.time()):
-                self.delay += SYNC_DELAY
-                next_sync_timestamp += SYNC_DELAY
+            self.blocks_delay += SYNC_BLOCKS_DELAY
             return
 
         logger.info(
@@ -189,29 +240,28 @@ class Oracle(object):
         # delay updating rewards in case they are negative
         if period_rewards <= 0:
             logger.warning(
-                f"Delaying updating rewards by {SYNC_DELAY} seconds:"
+                f"Delaying updating rewards by {SYNC_BLOCKS_DELAY} seconds:"
                 f" period rewards={pretty_period_rewards}"
             )
-
-            while next_sync_timestamp <= int(time.time()):
-                self.delay += SYNC_DELAY
-                next_sync_timestamp += SYNC_DELAY
+            self.blocks_delay += SYNC_BLOCKS_DELAY
             return
 
         # reset delay if voting
-        self.delay = 0
+        self.blocks_delay = 0
 
         # generate candidate ID
-        candidate_id = Web3.solidityKeccak(
+        encoded_data: bytes = self.w3.codec.encode_abi(
             ["uint256", "uint256", "uint256"],
             [current_nonce, total_rewards, activated_validators],
         )
+        candidate_id: bytes = self.w3.keccak(primitive=encoded_data)
 
         # check whether has not voted yet for candidate
         if not check_oracle_has_vote(
-            self.oracles,
-            self.w3.eth.default_account,  # type: ignore
-            candidate_id,
+            oracles=self.oracles,
+            oracle=self.w3.eth.default_account,  # type: ignore
+            candidate_id=candidate_id,
+            block_identifier=current_block_number,
         ):
             # submit vote
             logger.info(
@@ -222,25 +272,35 @@ class Oracle(object):
             )
             submit_oracle_rewards_vote(
                 oracles=self.oracles,
-                reward_eth_token=self.reward_eth_token,
                 total_rewards=total_rewards,
                 activated_validators=activated_validators,
-                last_update_timestamp=last_update_timestamp,
+                current_nonce=current_nonce,
                 transaction_timeout=TRANSACTION_TIMEOUT,
                 gas=ORACLE_VOTE_GAS_LIMIT,
+                confirmation_blocks=ETH1_CONFIRMATION_BLOCKS,
             )
             logger.info("Rewards vote has been successfully submitted")
 
-        # wait for other voters
-        current_update_timestamp = get_last_update_timestamp(self.reward_eth_token)
+        # wait until enough votes will be submitted and value updated
+        current_block_number = get_latest_block_number(
+            w3=self.w3, confirmation_blocks=ETH1_CONFIRMATION_BLOCKS
+        )
+        new_nonce = get_current_nonce(
+            oracles=self.oracles, block_identifier=current_block_number
+        )
         timeout = VOTING_TIMEOUT
-        while current_update_timestamp == last_update_timestamp:
+        while current_nonce == new_nonce:
             if timeout <= 0:
                 raise RuntimeError("Timed out waiting for other oracles' rewards votes")
 
             logger.info("Waiting for other oracles to vote...")
             time.sleep(10)
-            current_update_timestamp = get_last_update_timestamp(self.reward_eth_token)
+            current_block_number = get_latest_block_number(
+                w3=self.w3, confirmation_blocks=ETH1_CONFIRMATION_BLOCKS
+            )
+            new_nonce = get_current_nonce(
+                oracles=self.oracles, block_identifier=current_block_number
+            )
             timeout -= 10
 
         logger.info("Oracles have successfully voted for the same rewards")

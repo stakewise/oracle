@@ -71,14 +71,21 @@ MAX_TX_WAIT_SECONDS: int = int(environ.get("MAX_TX_WAIT_SECONDS", "180"))
 # how long to wait for transaction to mine
 TRANSACTION_TIMEOUT: int = int(environ.get("TRANSACTION_TIMEOUT", "1800"))
 
+# required ETH1 confirmation blocks
+ETH1_CONFIRMATION_BLOCKS: int = int(environ.get("ETH1_CONFIRMATION_BLOCKS", "12"))
+
+# required ETH2 confirmation epochs
+ETH2_CONFIRMATION_EPOCHS: int = int(environ.get("ETH2_CONFIRMATION_EPOCHS", "3"))
+
 # how long to wait before processing again (in seconds)
 PROCESS_INTERVAL: int = int(environ.get("PROCESS_INTERVAL", "300"))
 
 # how long to wait for other oracles to vote (in seconds)
 VOTING_TIMEOUT: int = int(environ.get("VOTING_TIMEOUT", "3600"))
 
-# sync delay applied when rewards are less or no activated validators (in seconds)
-SYNC_DELAY: int = int(environ.get("SYNC_DELAY", "3600"))
+# delay in ETH1 blocks applied to the next update due to negative balance or no activated validators
+# ~1 hour with block time of 13 seconds
+SYNC_BLOCKS_DELAY: int = int(environ.get("SYNC_BLOCKS_DELAY", "277"))
 
 # maximum gas spent on oracle vote
 ORACLE_VOTE_GAS_LIMIT: Wei = Wei(int(environ.get("ORACLE_VOTE_GAS_LIMIT", "250000")))
