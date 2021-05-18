@@ -1,10 +1,12 @@
 import decimal
 import logging
 import signal
+import time
 from asyncio.exceptions import TimeoutError
 from typing import Union, Any, Callable
 
 from eth_typing.evm import ChecksumAddress
+from hexbytes import HexBytes
 from notifiers.core import get_notifier  # type: ignore
 from tenacity import (  # type: ignore
     retry,
@@ -195,7 +197,7 @@ def check_oracle_has_vote(
 )
 def get_latest_block_number(w3: Web3, confirmation_blocks: int) -> BlockIdentifier:
     """Gets the latest block number."""
-    return w3.eth.block_number - confirmation_blocks
+    return max(w3.eth.block_number - confirmation_blocks, 0)
 
 
 @retry(
@@ -207,3 +209,68 @@ def get_latest_block_number(w3: Web3, confirmation_blocks: int) -> BlockIdentifi
 def get_block(w3: Web3, block_identifier: BlockIdentifier) -> BlockData:
     """Fetch the specific block."""
     return w3.eth.get_block(block_identifier)
+
+
+@retry(
+    reraise=True,
+    wait=backoff,
+    stop=stop_attempts,
+    before_sleep=before_sleep_log(logger, logging.WARNING),
+)
+def get_current_nonce(
+    oracles: Contract, block_identifier: BlockIdentifier = "latest"
+) -> BlockIdentifier:
+    """Fetches current nonce from the `Oracles` contract."""
+    return oracles.functions.currentNonce().call(block_identifier=block_identifier)
+
+
+def wait_for_oracles_nonce_update(
+    w3: Web3,
+    oracles: Contract,
+    confirmation_blocks: int,
+    timeout: int,
+    current_nonce: int,
+) -> None:
+    """Waits until the nonce will be updated for the oracles."""
+    current_block_number = get_latest_block_number(
+        w3=w3, confirmation_blocks=confirmation_blocks
+    )
+    new_nonce = get_current_nonce(
+        oracles=oracles, block_identifier=current_block_number
+    )
+    while current_nonce == new_nonce:
+        if timeout <= 0:
+            raise RuntimeError("Timed out waiting for other oracles' votes")
+
+        logger.info("Waiting for other oracles to vote...")
+        time.sleep(10)
+        current_block_number = get_latest_block_number(
+            w3=w3, confirmation_blocks=confirmation_blocks
+        )
+        new_nonce = get_current_nonce(
+            oracles=oracles, block_identifier=current_block_number
+        )
+        timeout -= 10
+
+
+def wait_for_transaction(
+    oracles: Contract,
+    tx_hash: HexBytes,
+    confirmation_blocks: int,
+    timeout: int,
+) -> None:
+    """Waits for transaction to be mined"""
+    receipt = oracles.web3.eth.waitForTransactionReceipt(
+        transaction_hash=tx_hash, timeout=timeout, poll_latency=5
+    )
+    confirmation_block: BlockIdentifier = receipt["blockNumber"] + confirmation_blocks
+    current_block: BlockIdentifier = oracles.web3.eth.block_number
+    while confirmation_block > current_block:
+        logger.info(
+            f"Waiting for {confirmation_block - current_block} confirmation blocks..."
+        )
+        time.sleep(15)
+
+        receipt = oracles.web3.eth.getTransactionReceipt(tx_hash)
+        confirmation_block = receipt["blockNumber"] + confirmation_blocks
+        current_block = oracles.web3.eth.block_number

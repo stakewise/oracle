@@ -2,7 +2,7 @@ import logging
 import time
 from urllib.parse import urljoin
 
-from src.staking_rewards import Rewards, wait_prysm_ready
+from src.merkle_distributor import Distributor
 from src.settings import (
     WEB3_WS_ENDPOINT,
     WEB3_WS_ENDPOINT_TIMEOUT,
@@ -23,6 +23,7 @@ from src.settings import (
     LOG_LEVEL,
     ETHERSCAN_ADDRESS_BASE_URL,
 )
+from src.staking_rewards import Rewards, wait_prysm_ready
 from src.utils import (
     get_web3_client,
     configure_default_account,
@@ -74,7 +75,7 @@ def main() -> None:
     wait_prysm_ready(
         interrupt_handler=interrupt_handler,
         endpoint=BEACON_CHAIN_RPC_ENDPOINT,
-        process_interval=PROCESS_INTERVAL
+        process_interval=PROCESS_INTERVAL,
     )
 
     # check oracle balance
@@ -86,9 +87,13 @@ def main() -> None:
         )
 
     staking_rewards = Rewards(w3=web3_client)
+    merkle_distributor = Distributor(w3=web3_client)
     while not interrupt_handler.exit:
         # check and update staking rewards
         staking_rewards.process()
+
+        # check and update merkle distributor
+        merkle_distributor.process()
 
         # wait until next processing time
         time.sleep(PROCESS_INTERVAL)

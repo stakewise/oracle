@@ -28,7 +28,13 @@ from proto.eth.v1alpha1.validator_pb2 import (
     MultipleValidatorStatusResponse,
 )
 from proto.eth.v1alpha1.validator_pb2_grpc import BeaconNodeValidatorStub
-from src.utils import logger, backoff, stop_attempts, InterruptHandler
+from src.utils import (
+    logger,
+    backoff,
+    stop_attempts,
+    InterruptHandler,
+    wait_for_transaction,
+)
 
 
 class ValidatorStatus(Enum):
@@ -119,19 +125,6 @@ def get_rewards_voting_parameters(
     stop=stop_attempts,
     before_sleep=before_sleep_log(logger, logging.WARNING),
 )
-def get_current_nonce(
-    oracles: Contract, block_identifier: BlockIdentifier = "latest"
-) -> BlockIdentifier:
-    """Fetches current nonce from the `Oracles` contract."""
-    return oracles.functions.currentNonce().call(block_identifier=block_identifier)
-
-
-@retry(
-    reraise=True,
-    wait=backoff,
-    stop=stop_attempts,
-    before_sleep=before_sleep_log(logger, logging.WARNING),
-)
 def get_sync_period(
     oracles: Contract, block_identifier: BlockIdentifier = "latest"
 ) -> BlockIdentifier:
@@ -148,7 +141,7 @@ def submit_oracle_rewards_vote(
     gas: Wei,
     confirmation_blocks: int,
 ) -> None:
-    """Submits new vote to `Oracles` contract."""
+    """Submits new total rewards vote to `Oracles` contract."""
     tx_hash = None
     for attempt in Retrying(
         reraise=True,
@@ -175,22 +168,12 @@ def submit_oracle_rewards_vote(
             else:
                 tx_hash = oracles.web3.eth.replace_transaction(tx_hash, {"gas": gas})
 
-            receipt = oracles.web3.eth.waitForTransactionReceipt(
-                transaction_hash=tx_hash, timeout=transaction_timeout, poll_latency=5
+            wait_for_transaction(
+                oracles=oracles,
+                tx_hash=tx_hash,
+                timeout=transaction_timeout,
+                confirmation_blocks=confirmation_blocks,
             )
-            confirmation_block: BlockIdentifier = (
-                receipt["blockNumber"] + confirmation_blocks
-            )
-            current_block: BlockIdentifier = oracles.web3.eth.block_number
-            while confirmation_block > current_block:
-                logger.info(
-                    f"Waiting for {confirmation_block - current_block} confirmation blocks..."
-                )
-                time.sleep(15)
-
-                receipt = oracles.web3.eth.getTransactionReceipt(tx_hash)
-                confirmation_block = receipt["blockNumber"] + confirmation_blocks
-                current_block = oracles.web3.eth.block_number
 
 
 @retry(

@@ -1,5 +1,4 @@
 import logging
-import time
 from typing import Set
 
 from eth_typing.bls import BLSPubkey
@@ -37,13 +36,13 @@ from src.staking_rewards.utils import (
     submit_oracle_rewards_vote,
     get_rewards_voting_parameters,
     get_sync_period,
-    get_current_nonce,
 )
 from src.utils import (
     get_block,
     get_latest_block_number,
     check_oracle_has_vote,
     check_default_account_balance,
+    wait_for_oracles_nonce_update,
 )
 
 ACTIVATED_STATUSES = [
@@ -282,27 +281,13 @@ class Rewards(object):
             logger.info("Rewards vote has been successfully submitted")
 
         # wait until enough votes will be submitted and value updated
-        current_block_number = get_latest_block_number(
-            w3=self.w3, confirmation_blocks=ETH1_CONFIRMATION_BLOCKS
+        wait_for_oracles_nonce_update(
+            w3=self.w3,
+            oracles=self.oracles,
+            confirmation_blocks=ETH1_CONFIRMATION_BLOCKS,
+            timeout=VOTING_TIMEOUT,
+            current_nonce=current_nonce,
         )
-        new_nonce = get_current_nonce(
-            oracles=self.oracles, block_identifier=current_block_number
-        )
-        timeout = VOTING_TIMEOUT
-        while current_nonce == new_nonce:
-            if timeout <= 0:
-                raise RuntimeError("Timed out waiting for other oracles' rewards votes")
-
-            logger.info("Waiting for other oracles to vote...")
-            time.sleep(10)
-            current_block_number = get_latest_block_number(
-                w3=self.w3, confirmation_blocks=ETH1_CONFIRMATION_BLOCKS
-            )
-            new_nonce = get_current_nonce(
-                oracles=self.oracles, block_identifier=current_block_number
-            )
-            timeout -= 10
-
         logger.info("Oracles have successfully voted for the same rewards")
 
         # check oracle balance
