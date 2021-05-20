@@ -3,7 +3,7 @@ from typing import Set
 
 from eth_typing.bls import BLSPubkey
 from web3 import Web3
-from web3.types import Wei, BlockIdentifier, Timestamp
+from web3.types import Wei, BlockNumber, Timestamp
 
 from contracts import (
     get_oracles_contract,
@@ -96,13 +96,13 @@ class Rewards(object):
             int(chain_config["MaxEffectiveBalance"]), "gwei"
         )
 
-        self.blocks_delay: BlockIdentifier = 0
+        self.blocks_delay: BlockNumber = BlockNumber(0)
 
     def process(self) -> None:
         """Submits off-chain data for total rewards and activated validators to `Oracles` contract."""
 
         # fetch current block number adjusted based on the number of confirmation blocks
-        current_block_number: BlockIdentifier = get_latest_block_number(
+        current_block_number: BlockNumber = get_latest_block_number(
             w3=self.w3, confirmation_blocks=ETH1_CONFIRMATION_BLOCKS
         )
 
@@ -117,7 +117,7 @@ class Rewards(object):
             multicall=self.multicall_contract,
             oracles=self.oracles,
             reward_eth_token=self.reward_eth_token,
-            block_identifier=current_block_number,
+            block_number=current_block_number,
         )
 
         # check whether it's voting time
@@ -131,7 +131,7 @@ class Rewards(object):
         # fetch the sync period in number of blocks at the time of last update block number
         if not last_update_block_number:
             # if it's the first update, use the latest block
-            sync_period: int = get_sync_period(self.oracles)
+            sync_period: int = get_sync_period(self.oracles, "latest")
         else:
             sync_period: int = get_sync_period(self.oracles, last_update_block_number)
 
@@ -139,11 +139,11 @@ class Rewards(object):
         if not last_update_block_number:
             # if it's the first update, increment based on the ETH2 genesis time
             # assumes every ETH1 block is 13 seconds
-            next_sync_block_number: BlockIdentifier = (
-                self.genesis_timestamp // 13
-            ) + sync_period
+            next_sync_block_number: BlockNumber = BlockNumber(
+                (self.genesis_timestamp // 13) + sync_period
+            )
         else:
-            next_sync_block_number: BlockIdentifier = (
+            next_sync_block_number: BlockNumber = BlockNumber(
                 last_update_block_number + sync_period
             )
 
@@ -165,7 +165,7 @@ class Rewards(object):
 
         # calculate finalized epoch to fetch validator balances at
         next_sync_timestamp: Timestamp = get_block(
-            w3=self.w3, block_identifier=next_sync_block_number
+            w3=self.w3, block_number=next_sync_block_number
         )["timestamp"]
 
         # calculate ETH2 epoch to fetch validator balances at
@@ -260,7 +260,7 @@ class Rewards(object):
             oracles=self.oracles,
             oracle=self.w3.eth.default_account,  # type: ignore
             candidate_id=candidate_id,
-            block_identifier=current_block_number,
+            block_number=current_block_number,
         ):
             # submit vote
             logger.info(

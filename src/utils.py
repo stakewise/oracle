@@ -31,7 +31,7 @@ from web3.middleware.filter import local_filter_middleware
 from web3.middleware.geth_poa import geth_poa_middleware
 from web3.middleware.signing import construct_sign_and_send_raw_middleware
 from web3.middleware.stalecheck import make_stalecheck_middleware
-from web3.types import RPCEndpoint, Wei, BlockIdentifier, BlockData
+from web3.types import RPCEndpoint, Wei, BlockNumber, BlockData
 from websockets import ConnectionClosedError
 
 telegram = get_notifier("telegram")
@@ -180,11 +180,11 @@ def check_oracle_has_vote(
     oracles: Contract,
     oracle: ChecksumAddress,
     candidate_id: bytes,
-    block_identifier: BlockIdentifier = "latest",
+    block_number: BlockNumber,
 ) -> bool:
     """Checks whether oracle has submitted a vote."""
     return oracles.functions.hasVote(oracle, candidate_id).call(
-        block_identifier=block_identifier
+        block_identifier=block_number
     )
 
 
@@ -194,9 +194,9 @@ def check_oracle_has_vote(
     stop=stop_attempts,
     before_sleep=before_sleep_log(logger, logging.WARNING),
 )
-def get_latest_block_number(w3: Web3, confirmation_blocks: int) -> BlockIdentifier:
+def get_latest_block_number(w3: Web3, confirmation_blocks: int) -> BlockNumber:
     """Gets the latest block number."""
-    return max(w3.eth.block_number - confirmation_blocks, 0)
+    return BlockNumber(max(w3.eth.block_number - confirmation_blocks, 0))
 
 
 @retry(
@@ -205,9 +205,9 @@ def get_latest_block_number(w3: Web3, confirmation_blocks: int) -> BlockIdentifi
     stop=stop_attempts,
     before_sleep=before_sleep_log(logger, logging.WARNING),
 )
-def get_block(w3: Web3, block_identifier: BlockIdentifier) -> BlockData:
+def get_block(w3: Web3, block_number: BlockNumber) -> BlockData:
     """Fetch the specific block."""
-    return w3.eth.get_block(block_identifier)
+    return w3.eth.get_block(block_number)
 
 
 @retry(
@@ -216,11 +216,9 @@ def get_block(w3: Web3, block_identifier: BlockIdentifier) -> BlockData:
     stop=stop_attempts,
     before_sleep=before_sleep_log(logger, logging.WARNING),
 )
-def get_current_nonce(
-    oracles: Contract, block_identifier: BlockIdentifier = "latest"
-) -> BlockIdentifier:
+def get_current_nonce(oracles: Contract, block_number: BlockNumber) -> int:
     """Fetches current nonce from the `Oracles` contract."""
-    return oracles.functions.currentNonce().call(block_identifier=block_identifier)
+    return oracles.functions.currentNonce().call(block_identifier=block_number)
 
 
 def wait_for_oracles_nonce_update(
@@ -234,9 +232,7 @@ def wait_for_oracles_nonce_update(
     current_block_number = get_latest_block_number(
         w3=w3, confirmation_blocks=confirmation_blocks
     )
-    new_nonce = get_current_nonce(
-        oracles=oracles, block_identifier=current_block_number
-    )
+    new_nonce = get_current_nonce(oracles=oracles, block_number=current_block_number)
     while current_nonce == new_nonce:
         if timeout <= 0:
             raise RuntimeError("Timed out waiting for other oracles' votes")
@@ -247,7 +243,7 @@ def wait_for_oracles_nonce_update(
             w3=w3, confirmation_blocks=confirmation_blocks
         )
         new_nonce = get_current_nonce(
-            oracles=oracles, block_identifier=current_block_number
+            oracles=oracles, block_number=current_block_number
         )
         timeout -= 10
 
@@ -262,8 +258,8 @@ def wait_for_transaction(
     receipt = oracles.web3.eth.wait_for_transaction_receipt(
         transaction_hash=tx_hash, timeout=timeout, poll_latency=5
     )
-    confirmation_block: BlockIdentifier = receipt["blockNumber"] + confirmation_blocks
-    current_block: BlockIdentifier = oracles.web3.eth.block_number
+    confirmation_block: BlockNumber = receipt["blockNumber"] + confirmation_blocks
+    current_block: BlockNumber = oracles.web3.eth.block_number
     while confirmation_block > current_block:
         logger.info(
             f"Waiting for {confirmation_block - current_block} confirmation blocks..."

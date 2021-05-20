@@ -2,7 +2,7 @@ import copy
 from typing import Tuple, List, Dict, Set
 
 from cachetools.func import lru_cache
-from eth_typing import BlockIdentifier, HexStr, ChecksumAddress, HexAddress
+from eth_typing import BlockNumber, HexStr, ChecksumAddress, HexAddress
 from web3 import Web3
 from web3.contract import Contract
 from web3.types import Wei
@@ -23,7 +23,7 @@ from src.merkle_distributor.utils import (
 class DistributionTree(object):
     def __init__(
         self,
-        block_number: BlockIdentifier,
+        block_number: BlockNumber,
         distributions: List[Distribution],
         reward_eth_token: Contract,
         staked_eth_token: Contract,
@@ -65,15 +65,15 @@ class DistributionTree(object):
         self.uniswap_v2_pairs: Set[ChecksumAddress] = oracles_settings[
             "uniswap_v2_pairs"
         ]
-        self.uniswap_v3_pairs: Dict[
-            ChecksumAddress, BlockIdentifier
-        ] = oracles_settings["uniswap_v3_pairs"]
-        self.erc20_tokens: Dict[ChecksumAddress, BlockIdentifier] = oracles_settings[
+        self.uniswap_v3_pairs: Dict[ChecksumAddress, BlockNumber] = oracles_settings[
+            "uniswap_v3_pairs"
+        ]
+        self.erc20_tokens: Dict[ChecksumAddress, BlockNumber] = oracles_settings[
             "erc20_tokens"
         ]
 
-        self.staked_eth_token_deployment_block_number: BlockIdentifier = (
-            BlockIdentifier(11726304)
+        self.staked_eth_token_deployment_block_number: BlockNumber = BlockNumber(
+            11726304
         )
 
     @staticmethod

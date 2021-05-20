@@ -11,7 +11,7 @@ from tenacity.before_sleep import before_sleep_log
 from web3 import Web3
 from web3.contract import Contract
 from web3.exceptions import ContractLogicError
-from web3.types import Wei, BlockIdentifier
+from web3.types import Wei, BlockNumber
 
 from src.staking_rewards.utils import backoff, stop_attempts
 from src.utils import wait_for_transaction
@@ -43,10 +43,10 @@ class OraclesSettings(TypedDict):
     uniswap_v2_pairs: Set[ChecksumAddress]
 
     # set of Uniswap V3 supported pairs
-    uniswap_v3_pairs: Dict[ChecksumAddress, BlockIdentifier]
+    uniswap_v3_pairs: Dict[ChecksumAddress, BlockNumber]
 
     # dictionary of supported ERC-20 tokens and the block number when they were created
-    erc20_tokens: Dict[ChecksumAddress, BlockIdentifier]
+    erc20_tokens: Dict[ChecksumAddress, BlockNumber]
 
 
 @retry(
@@ -59,8 +59,8 @@ def get_merkle_root_voting_parameters(
     oracles: Contract,
     multicall: Contract,
     reward_eth_token: Contract,
-    block_identifier: BlockIdentifier = "latest",
-) -> Tuple[bool, bool, int, Wei]:
+    block_number: BlockNumber,
+) -> Tuple[bool, bool, int, BlockNumber]:
     """Fetches merkle root voting parameters."""
     calls = [
         dict(target=oracles.address, callData=oracles.encodeABI("isMerkleRootVoting")),
@@ -71,9 +71,9 @@ def get_merkle_root_voting_parameters(
             callData=reward_eth_token.encodeABI("lastUpdateBlockNumber"),
         ),
     ]
-    response = multicall.functions.aggregate(calls).call(
-        block_identifier=block_identifier
-    )[1]
+    response = multicall.functions.aggregate(calls).call(block_identifier=block_number)[
+        1
+    ]
     return (
         bool(Web3.toInt(response[0])),
         bool(Web3.toInt(response[1])),
@@ -91,8 +91,8 @@ def get_merkle_root_voting_parameters(
 def get_prev_merkle_root_parameters(
     merkle_distributor: Contract,
     reward_eth_token: Contract,
-    to_block: BlockIdentifier = "latest",
-) -> Union[None, Tuple[HexStr, HexStr, BlockIdentifier, BlockIdentifier]]:
+    to_block: BlockNumber,
+) -> Union[None, Tuple[HexStr, HexStr, BlockNumber, BlockNumber]]:
     """
     Fetches previous merkle root update parameters.
     """
@@ -105,7 +105,7 @@ def get_prev_merkle_root_parameters(
 
     # fetch block number of staking rewards update prior to merkle distributor update
     prev_merkle_root_update_block_number = events[-1]["blockNumber"]
-    prev_merkle_root_staking_rewards_update_block_number: BlockIdentifier = (
+    prev_merkle_root_staking_rewards_update_block_number: BlockNumber = (
         reward_eth_token.functions.lastUpdateBlockNumber().call(
             block_identifier=prev_merkle_root_update_block_number
         )
@@ -121,9 +121,9 @@ def get_prev_merkle_root_parameters(
 
 def get_staked_eth_period_reward(
     reward_eth_token: Contract,
-    new_rewards_block_number: BlockIdentifier,
-    prev_merkle_root_update_block_number: BlockIdentifier = None,
-    prev_merkle_root_staking_rewards_update_block_number: BlockIdentifier = None,
+    new_rewards_block_number: BlockNumber,
+    prev_merkle_root_update_block_number: BlockNumber = None,
+    prev_merkle_root_staking_rewards_update_block_number: BlockNumber = None,
 ) -> Wei:
     """Calculates period reward of staked eth since the last update."""
     total_rewards: Wei = reward_eth_token.functions.balanceOf(EMPTY_ADDR_HEX).call(
@@ -157,7 +157,7 @@ def get_staked_eth_period_reward(
     before_sleep=before_sleep_log(logger, logging.WARNING),
 )
 def get_reth_disabled_accounts(
-    reward_eth_token: Contract, to_block: BlockIdentifier
+    reward_eth_token: Contract, to_block: BlockNumber
 ) -> Set[ChecksumAddress]:
     """
     Fetches accounts that have rETH2 distribution disabled from RewardEthToken contract.
@@ -190,7 +190,7 @@ def get_staked_eth_distributions(
     reward_eth_token_address: ChecksumAddress,
     reth_disabled_accounts: List[ChecksumAddress],
     staked_eth_period_reward: Wei,
-    new_rewards_block_number: BlockIdentifier,
+    new_rewards_block_number: BlockNumber,
 ) -> List[Distribution]:
     """Creates staked eth reward distributions."""
     if staked_eth_period_reward <= 0:
@@ -266,7 +266,7 @@ def get_staked_eth_distributions(
 def get_oracles_config(
     node_id: bytes,
     ens_resolver: Contract,
-    block_number: BlockIdentifier,
+    block_number: BlockNumber,
     ens_text_record: str,
     ipfs_endpoint: str,
 ) -> OraclesSettings:
@@ -320,23 +320,23 @@ def get_oracles_config(
 )
 def get_distributions(
     merkle_distributor: Contract,
-    distribution_start_block: BlockIdentifier,
-    distribution_end_block: BlockIdentifier,
+    distribution_start_block: BlockNumber,
+    distribution_end_block: BlockNumber,
     blocks_interval: int,
-) -> Dict[BlockIdentifier, List[Distribution]]:
+) -> Dict[BlockNumber, List[Distribution]]:
     """Creates rewards distributions for reward tokens with specific block intervals."""
     distribute_events = merkle_distributor.events.DistributionAdded.getLogs(
         fromBlock=0, toBlock="latest"
     )
-    distributions: Dict[BlockIdentifier, List[Distribution]] = {}
+    distributions: Dict[BlockNumber, List[Distribution]] = {}
     for event in distribute_events:
         token: ChecksumAddress = Web3.toChecksumAddress(event["args"]["token"])
         beneficiary: ChecksumAddress = Web3.toChecksumAddress(
             event["args"]["beneficiary"]
         )
         amount: Wei = event["args"]["amount"]
-        start_block: BlockIdentifier = event["args"]["startBlock"]
-        end_block: BlockIdentifier = event["args"]["endBlock"]
+        start_block: BlockNumber = event["args"]["startBlock"]
+        end_block: BlockNumber = event["args"]["endBlock"]
 
         if (
             end_block <= distribution_start_block
@@ -352,8 +352,8 @@ def get_distributions(
 
         reward_per_block: Wei = Wei(amount // total_blocks)
         interval_reward: Wei = Wei(reward_per_block * blocks_interval)
-        start: BlockIdentifier = max(distribution_start_block, start_block)
-        end: BlockIdentifier = min(distribution_end_block, end_block)
+        start: BlockNumber = max(distribution_start_block, start_block)
+        end: BlockNumber = min(distribution_end_block, end_block)
         while start != end:
             if start + blocks_interval > end:
                 interval = end - start
@@ -363,7 +363,7 @@ def get_distributions(
                     reward += amount - (reward_per_block * total_blocks)
 
                 if reward > 0:
-                    distributions.setdefault(start + interval, []).append(
+                    distributions.setdefault(BlockNumber(start + interval), []).append(
                         Distribution(beneficiary, token, reward)
                     )
                 break
@@ -384,7 +384,7 @@ def get_distributions(
     before_sleep=before_sleep_log(logger, logging.WARNING),
 )
 def get_merkle_distributor_claimed_addresses(
-    merkle_distributor: Contract, from_block: BlockIdentifier
+    merkle_distributor: Contract, from_block: BlockNumber
 ) -> Set[ChecksumAddress]:
     """Fetches addresses that have claimed their tokens from `MerkleDistributor` contract."""
     events = merkle_distributor.events.Claimed.getLogs(
@@ -447,7 +447,7 @@ def get_balancer_vault_pool_shares(
     subgraph_url: str,
     token_address: ChecksumAddress,
     pool_ids: Set[HexStr],
-    block_number: BlockIdentifier,
+    block_number: BlockNumber,
 ) -> Dict[ChecksumAddress, Wei]:
     """Fetches vault shares for specific token in balancer pools."""
     transport = RequestsHTTPTransport(url=subgraph_url)
@@ -505,7 +505,7 @@ def get_balancer_vault_pool_shares(
 def get_balancer_pool_balances(
     subgraph_url: str,
     pool_id: HexStr,
-    block_number: BlockIdentifier,
+    block_number: BlockNumber,
 ) -> Tuple[Dict[ChecksumAddress, Wei], Wei]:
     """Fetches users' balances of the Balancer V2 pool."""
     transport = RequestsHTTPTransport(url=subgraph_url)
@@ -597,7 +597,7 @@ def get_balancer_pool_balances(
 def get_uniswap_v2_balances(
     subgraph_url: str,
     pair_address: ChecksumAddress,
-    block_number: BlockIdentifier,
+    block_number: BlockNumber,
 ) -> Tuple[Dict[ChecksumAddress, Wei], Wei]:
     """Fetches users' balances of the Uniswap V2 Pair."""
     transport = RequestsHTTPTransport(url=subgraph_url)
@@ -693,8 +693,8 @@ def get_uniswap_v3_balances(
     subgraph_url: str,
     pool_address: ChecksumAddress,
     position_manager: Contract,
-    from_block: BlockIdentifier,
-    to_block: BlockIdentifier,
+    from_block: BlockNumber,
+    to_block: BlockNumber,
 ) -> Tuple[Dict[ChecksumAddress, Wei], Wei]:
     """Fetches users' balances of the Uniswap V3 Pair that provide liquidity for the current tick."""
     transport = RequestsHTTPTransport(url=subgraph_url)
@@ -834,13 +834,13 @@ def get_uniswap_v3_balances(
 def get_uniswap_v3_token_owner_liquidity(
     position_manager: Contract,
     token_id_to_owner: Dict[int, ChecksumAddress],
-    start_block: BlockIdentifier,
-    end_block: BlockIdentifier,
+    start_block: BlockNumber,
+    end_block: BlockNumber,
 ) -> Dict[ChecksumAddress, Wei]:
     """Fetches liquidity for specific Uniswap V3 token IDs and aggregates based on the owner address."""
     # fetch liquidity positions for all the token IDs
     argument_filters = {"tokenId": list(token_id_to_owner.keys())}
-    _start_block: BlockIdentifier = start_block
+    _start_block: BlockNumber = start_block
     blocks_spread = 200_000
     owner_to_liquidity: Dict[ChecksumAddress, Wei] = {}
 
@@ -853,9 +853,9 @@ def get_uniswap_v3_token_owner_liquidity(
             before_sleep=before_sleep_log(logger, logging.WARNING),
         ):
             if start_block + blocks_spread >= end_block:
-                to_block: BlockIdentifier = end_block
+                to_block: BlockNumber = end_block
             else:
-                to_block: BlockIdentifier = start_block + blocks_spread
+                to_block: BlockNumber = start_block + blocks_spread
             with attempt:
                 try:
                     decrease_events = position_manager.events.IncreaseLiquidity.getLogs(
@@ -892,9 +892,9 @@ def get_uniswap_v3_token_owner_liquidity(
             before_sleep=before_sleep_log(logger, logging.WARNING),
         ):
             if start_block + blocks_spread >= end_block:
-                to_block: BlockIdentifier = end_block
+                to_block: BlockNumber = end_block
             else:
-                to_block: BlockIdentifier = start_block + blocks_spread
+                to_block: BlockNumber = start_block + blocks_spread
             with attempt:
                 try:
                     decrease_events = position_manager.events.DecreaseLiquidity.getLogs(
@@ -934,14 +934,14 @@ def get_uniswap_v3_token_owner_liquidity(
 def get_uniswap_v3_token_ids(
     position_manager: Contract,
     account_transactions: Dict[ChecksumAddress, Set[HexStr]],
-    start_block: BlockIdentifier,
-    end_block: BlockIdentifier,
+    start_block: BlockNumber,
+    end_block: BlockNumber,
 ) -> Dict[int, ChecksumAddress]:
     """Fetches Uniswap V3 token IDs for specific accounts."""
     argument_filters = {"from": EMPTY_ADDR_HEX, "to": list(account_transactions.keys())}
     visited_mint_transactions: Set[HexStr] = set()
     duplicated_transactions: Set[HexStr] = set()
-    _start_block: BlockIdentifier = start_block
+    _start_block: BlockNumber = start_block
 
     # fetch token IDs
     blocks_spread = 200_000
@@ -954,9 +954,9 @@ def get_uniswap_v3_token_ids(
             before_sleep=before_sleep_log(logger, logging.WARNING),
         ):
             if start_block + blocks_spread >= end_block:
-                to_block: BlockIdentifier = end_block
+                to_block: BlockNumber = end_block
             else:
-                to_block: BlockIdentifier = start_block + blocks_spread
+                to_block: BlockNumber = start_block + blocks_spread
             with attempt:
                 try:
                     transfer_events = position_manager.events.Transfer.getLogs(
@@ -1018,9 +1018,9 @@ def get_uniswap_v3_token_ids(
             before_sleep=before_sleep_log(logger, logging.WARNING),
         ):
             if start_block + blocks_spread >= end_block:
-                to_block: BlockIdentifier = end_block
+                to_block: BlockNumber = end_block
             else:
-                to_block: BlockIdentifier = start_block + blocks_spread
+                to_block: BlockNumber = start_block + blocks_spread
             with attempt:
                 try:
                     transfer_events = position_manager.events.Transfer.getLogs(
@@ -1052,7 +1052,7 @@ def get_uniswap_v3_token_ids(
 
 
 def get_token_participated_accounts(
-    token: Contract, start_block: BlockIdentifier, end_block: BlockIdentifier
+    token: Contract, start_block: BlockNumber, end_block: BlockNumber
 ) -> Set[ChecksumAddress]:
     """Fetches accounts that were in either `from` or `to` of the contract Transfer event."""
     blocks_spread = 200_000
@@ -1066,9 +1066,9 @@ def get_token_participated_accounts(
         ):
             with attempt:
                 if start_block + blocks_spread >= end_block:
-                    to_block: BlockIdentifier = end_block
+                    to_block: BlockNumber = end_block
                 else:
-                    to_block: BlockIdentifier = start_block + blocks_spread
+                    to_block: BlockNumber = start_block + blocks_spread
                 try:
                     transfer_events = token.events.Transfer.getLogs(
                         fromBlock=start_block, toBlock=to_block
@@ -1098,7 +1098,7 @@ def get_token_participated_accounts(
 
 
 def get_erc20_token_balances(
-    token: Contract, start_block: BlockIdentifier, end_block: BlockIdentifier
+    token: Contract, start_block: BlockNumber, end_block: BlockNumber
 ) -> Tuple[Dict[ChecksumAddress, Wei], Wei]:
     """Fetches balances of the ERC-20 token."""
     blocks_spread = 200_000
@@ -1112,9 +1112,9 @@ def get_erc20_token_balances(
         ):
             with attempt:
                 if start_block + blocks_spread >= end_block:
-                    to_block: BlockIdentifier = end_block
+                    to_block: BlockNumber = end_block
                 else:
-                    to_block: BlockIdentifier = start_block + blocks_spread
+                    to_block: BlockNumber = start_block + blocks_spread
                 try:
                     transfer_events = token.events.Transfer.getLogs(
                         fromBlock=start_block, toBlock=to_block
@@ -1158,8 +1158,8 @@ def get_reward_eth_token_balances(
     reward_eth_token: Contract,
     staked_eth_token: Contract,
     multicall: Contract,
-    from_block: BlockIdentifier,
-    to_block: BlockIdentifier,
+    from_block: BlockNumber,
+    to_block: BlockNumber,
 ) -> Tuple[Dict[ChecksumAddress, Wei], Wei]:
     """Fetches RewardEthToken balances and total supply excluding maintainer."""
 
@@ -1310,7 +1310,7 @@ def submit_oracle_merkle_root_vote(
                 # check whether gas price can be estimated for the the vote
                 oracles.functions.voteForMerkleRoot(
                     current_nonce, merkle_root, merkle_proofs
-                ).estimate_gas({"gas": gas})
+                ).estimateGas({"gas": gas})
             except ContractLogicError as e:
                 # check whether nonce has changed -> new merkle root was already submitted
                 if current_nonce != oracles.functions.currentNonce().call():

@@ -1,17 +1,17 @@
+from enum import Enum
+
 import logging
 import time
-from enum import Enum
-from typing import Set, Dict, Tuple
-
 from eth_typing.bls import BLSPubkey
 from google.protobuf import empty_pb2
 from grpc import insecure_channel, RpcError, StatusCode
 from tenacity import retry, Retrying
 from tenacity.before_sleep import before_sleep_log
+from typing import Set, Dict, Tuple
 from web3 import Web3
 from web3.contract import Contract
 from web3.exceptions import ContractLogicError
-from web3.types import Wei, BlockIdentifier, Timestamp
+from web3.types import Wei, BlockNumber, Timestamp, BlockIdentifier
 
 from proto.eth.v1alpha1.beacon_chain_pb2 import ListValidatorBalancesRequest
 from proto.eth.v1alpha1.beacon_chain_pb2_grpc import BeaconChainStub
@@ -84,8 +84,8 @@ def get_rewards_voting_parameters(
     reward_eth_token: Contract,
     oracles: Contract,
     multicall: Contract,
-    block_identifier: BlockIdentifier = "latest",
-) -> Tuple[bool, bool, int, BlockIdentifier, Wei]:
+    block_number: BlockNumber,
+) -> Tuple[bool, bool, int, BlockNumber, Wei]:
     """Fetches rewards voting parameters."""
     calls = [
         dict(target=oracles.address, callData=oracles.encodeABI("isRewardsVoting")),
@@ -100,9 +100,9 @@ def get_rewards_voting_parameters(
             callData=reward_eth_token.encodeABI("totalSupply"),
         ),
     ]
-    response = multicall.functions.aggregate(calls).call(
-        block_identifier=block_identifier
-    )[1]
+    response = multicall.functions.aggregate(calls).call(block_identifier=block_number)[
+        1
+    ]
     return (
         bool(Web3.toInt(response[0])),
         bool(Web3.toInt(response[1])),
@@ -120,7 +120,7 @@ def get_rewards_voting_parameters(
 )
 def get_sync_period(
     oracles: Contract, block_identifier: BlockIdentifier = "latest"
-) -> BlockIdentifier:
+) -> BlockNumber:
     """Fetches sync period from the `Oracles` contract."""
     return oracles.functions.syncPeriod().call(block_identifier=block_identifier)
 
@@ -147,7 +147,7 @@ def submit_oracle_rewards_vote(
                 # check whether gas price can be estimated for the the vote
                 oracles.functions.voteForRewards(
                     current_nonce, total_rewards, activated_validators
-                ).estimate_gas({"gas": gas})
+                ).estimateGas({"gas": gas})
             except ContractLogicError as e:
                 # check whether nonce has changed -> new rewards were already submitted
                 if current_nonce != oracles.functions.currentNonce().call():
@@ -187,7 +187,7 @@ def get_genesis_timestamp(stub: NodeStub) -> Timestamp:
     before_sleep=before_sleep_log(logger, logging.WARNING),
 )
 def get_pool_validator_public_keys(
-    pool_contract: Contract, block_number: BlockIdentifier = "latest"
+    pool_contract: Contract, block_number: BlockNumber
 ) -> Set[BLSPubkey]:
     """Fetches pool validator public keys."""
     events = pool_contract.events.ValidatorRegistered.getLogs(

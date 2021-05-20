@@ -3,7 +3,7 @@ from typing import Set, Dict, List
 
 from eth_typing import HexStr, ChecksumAddress
 from web3 import Web3
-from web3.types import Wei, BlockIdentifier
+from web3.types import Wei, BlockNumber
 
 from contracts import (
     get_oracles_contract,
@@ -98,13 +98,13 @@ class Distributor(object):
         self.ens_node_id: bytes = get_ens_node_id(DAO_ENS_DOMAIN)
         logger.info(f"Using DAO ENS domain: {DAO_ENS_DOMAIN}")
 
-        self.skipped_rewards_block_number: BlockIdentifier = 0
+        self.skipped_rewards_block_number: BlockNumber = BlockNumber(0)
 
     def process(self) -> None:
         """Submits merkle root for rewards distribution and updates IPFS proofs."""
 
         # fetch current block number adjusted based on the number of confirmation blocks
-        current_block_number: BlockIdentifier = get_latest_block_number(
+        current_block_number: BlockNumber = get_latest_block_number(
             w3=self.w3, confirmation_blocks=ETH1_CONFIRMATION_BLOCKS
         )
 
@@ -118,7 +118,7 @@ class Distributor(object):
             oracles=self.oracles,
             multicall=self.multicall_contract,
             reward_eth_token=self.reward_eth_token,
-            block_identifier=current_block_number,
+            block_number=current_block_number,
         )
 
         # check whether it's voting time
@@ -143,16 +143,14 @@ class Distributor(object):
         # use rewards update block number at the time of last merkle distribution as a starting block
         if prev_merkle_root_parameters is None:
             # it's the first merkle root update
-            prev_merkle_root_update_block_number: BlockIdentifier = BlockIdentifier(0)
-            prev_merkle_root_rewards_update_block_number: BlockIdentifier = (
-                BlockIdentifier(0)
-            )
+            prev_merkle_root_update_block_number: BlockNumber = BlockNumber(0)
+            prev_merkle_root_rewards_update_block_number: BlockNumber = BlockNumber(0)
             logger.warning("Executing first Merkle Distributor update")
         else:
-            prev_merkle_root_update_block_number: BlockIdentifier = (
+            prev_merkle_root_update_block_number: BlockNumber = (
                 prev_merkle_root_parameters[2]
             )
-            prev_merkle_root_rewards_update_block_number: BlockIdentifier = (
+            prev_merkle_root_rewards_update_block_number: BlockNumber = (
                 prev_merkle_root_parameters[3]
             )
 
@@ -196,9 +194,7 @@ class Distributor(object):
         )
 
         # calculate block distributions of additional tokens
-        block_distributions: Dict[
-            BlockIdentifier, List[Distribution]
-        ] = get_distributions(
+        block_distributions: Dict[BlockNumber, List[Distribution]] = get_distributions(
             merkle_distributor=self.merkle_distributor,
             distribution_start_block=prev_merkle_root_rewards_update_block_number,
             distribution_end_block=new_rewards_block_number,
@@ -321,11 +317,11 @@ class Distributor(object):
 
     def vote_for_merkle_root(
         self,
-        current_block_number: BlockIdentifier,
+        current_block_number: BlockNumber,
         current_nonce: int,
         merkle_root: HexStr,
         merkle_proofs: str,
-    ):
+    ) -> None:
         # generate candidate ID
         encoded_data: bytes = self.w3.codec.encode_abi(
             ["uint256", "bytes32", "string"],
@@ -338,7 +334,7 @@ class Distributor(object):
             oracles=self.oracles,
             oracle=self.w3.eth.default_account,  # type: ignore
             candidate_id=candidate_id,
-            block_identifier=current_block_number,
+            block_number=current_block_number,
         ):
             # submit vote
             logger.info(
