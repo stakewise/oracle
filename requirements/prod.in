@@ -5,3 +5,4 @@ protobuf==3.15.3
 google-api-core==1.27.0
 tenacity==7.0.0
 ipfshttpclient==0.7.0a1
+gql==2.0.0

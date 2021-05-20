@@ -98,6 +98,14 @@ googleapis-common-protos==1.53.0 \
     --hash=sha256:a88ee8903aa0a81f6c3cec2d5cf62d3c8aa67c06439b0496b49048fb1854ebf4 \
     --hash=sha256:f6d561ab8fb16b30020b940e2dd01cd80082f4762fa9f3ee670f4419b4b8dbd0
     # via google-api-core
+gql==2.0.0 \
+    --hash=sha256:35032ddd4bfe6b8f3169f806b022168932385d751eacc5c5f7122e0b3f4d6b88 \
+    --hash=sha256:fe8d3a08047f77362ddfcfddba7cae377da2dd66f5e61c59820419c9283d4fb5
+    # via -r requirements/prod.in
+graphql-core==2.3.2 \
+    --hash=sha256:44c9bac4514e5e30c5a595fac8e3c76c1975cae14db215e8174c7fe995825bad \
+    --hash=sha256:aac46a9ac524c9855910c14c48fc5d60474def7f99fd10245e76608eba7af746
+    # via gql
 grpcio==1.37.1 \
     --hash=sha256:025fa7dffb0cf724070cfcbe2ff600a18b0cf84642ede5c92f2717162e2a8c95 \
     --hash=sha256:0b8817acef140cb9a3543208c13282d3bf4bb0103e930ddbb779677604085ada \
@@ -196,6 +204,11 @@ packaging==20.9 \
 parsimonious==0.8.1 \
     --hash=sha256:3add338892d580e0cb3b1a39e4a1b427ff9f687858fdd61097053742391a9f6b
     # via eth-abi
+promise==2.3 \
+    --hash=sha256:dfd18337c523ba4b6a58801c164c1904a9d4d1b1747c7d5dbf45b693a49d93d0
+    # via
+    #   gql
+    #   graphql-core
 protobuf==3.15.3 \
     --hash=sha256:0c678e11b7b6d6e5baa9710f44de01d48bc81b7db617ad5283a76f1f4c73df99 \
     --hash=sha256:1fe832e1a5c51c71c2d6e949e597f3c47ef39c817264086293e4037941ab9bd7 \
@@ -282,6 +295,7 @@ requests==2.25.1 \
     --hash=sha256:c210084e36a42ae6b9219e00e48287def368a26d03a048ddad7bfee44f75871e
     # via
     #   google-api-core
+    #   gql
     #   ipfshttpclient
     #   notifiers
     #   web3
@@ -299,16 +313,23 @@ rsa==4.7.2 \
     --hash=sha256:78f9a9bf4e7be0c5ded4583326e7461e3a3c5aae24073648b4bdfa797d78c9d2 \
     --hash=sha256:9d689e6ca1b3038bc82bf8d23e944b6b6037bc02301a574935b2dd946e0353b9
     # via google-auth
+rx==1.6.1 \
+    --hash=sha256:13a1d8d9e252625c173dc795471e614eadfe1cf40ffc684e08b8fff0d9748c23 \
+    --hash=sha256:7357592bc7e881a95e0c2013b73326f704953301ab551fbc8133a6fadab84105
+    # via graphql-core
 six==1.15.0 \
     --hash=sha256:30639c035cdb23534cd4aa2dd52c3bf48f06e5f4a941509c8bafd8ce11080259 \
     --hash=sha256:8b74bedcbbbaca38ff6d7491d76f2b06b3592611af620f8426e82dddb04a5ced
     # via
     #   google-api-core
     #   google-auth
+    #   gql
+    #   graphql-core
     #   grpcio
     #   jsonschema
     #   multiaddr
     #   parsimonious
+    #   promise
     #   protobuf
     #   tenacity
 tenacity==7.0.0 \
