@@ -147,7 +147,7 @@ def submit_oracle_rewards_vote(
                 # check whether gas price can be estimated for the the vote
                 oracles.functions.voteForRewards(
                     current_nonce, total_rewards, activated_validators
-                ).estimateGas({"gas": gas})
+                ).estimate_gas({"gas": gas})
             except ContractLogicError as e:
                 # check whether nonce has changed -> new rewards were already submitted
                 if current_nonce != oracles.functions.currentNonce().call():
@@ -190,7 +190,7 @@ def get_pool_validator_public_keys(
     pool_contract: Contract, block_number: BlockIdentifier = "latest"
 ) -> Set[BLSPubkey]:
     """Fetches pool validator public keys."""
-    events = pool_contract.events.ValidatorRegistered.getLogs(
+    events = pool_contract.events.ValidatorRegistered.get_logs(
         fromBlock=0, toBlock=block_number
     )
     return set(event["args"]["publicKey"] for event in events)

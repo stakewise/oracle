@@ -112,7 +112,7 @@ def get_web3_client(
         logger.info("Injected local filter middleware")
 
     if apply_gas_price_strategy:
-        w3.eth.setGasPriceStrategy(
+        w3.eth.set_gas_price_strategy(
             construct_time_based_gas_price_strategy(
                 max_wait_seconds=max_tx_wait_seconds,
                 weighted=True,
@@ -259,7 +259,7 @@ def wait_for_transaction(
     timeout: int,
 ) -> None:
     """Waits for transaction to be mined"""
-    receipt = oracles.web3.eth.waitForTransactionReceipt(
+    receipt = oracles.web3.eth.wait_for_transaction_receipt(
         transaction_hash=tx_hash, timeout=timeout, poll_latency=5
     )
     confirmation_block: BlockIdentifier = receipt["blockNumber"] + confirmation_blocks
@@ -270,6 +270,6 @@ def wait_for_transaction(
         )
         time.sleep(15)
 
-        receipt = oracles.web3.eth.getTransactionReceipt(tx_hash)
+        receipt = oracles.web3.eth.get_transaction_receipt(tx_hash)
         confirmation_block = receipt["blockNumber"] + confirmation_blocks
         current_block = oracles.web3.eth.block_number

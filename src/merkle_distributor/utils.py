@@ -97,7 +97,7 @@ def get_prev_merkle_root_parameters(
     """
     Fetches previous merkle root update parameters.
     """
-    events = merkle_distributor.events.MerkleRootUpdated.getLogs(
+    events = merkle_distributor.events.MerkleRootUpdated.get_logs(
         fromBlock=0, toBlock=to_block
     )
     if not events:
@@ -140,7 +140,7 @@ def get_staked_eth_period_reward(
     prev_total_rewards: Wei = reward_eth_token.functions.balanceOf(EMPTY_ADDR_HEX).call(
         block_identifier=prev_merkle_root_staking_rewards_update_block_number
     )
-    claimed_events = reward_eth_token.events.Transfer.getLogs(
+    claimed_events = reward_eth_token.events.Transfer.get_logs(
         argument_filters={"from": EMPTY_ADDR_HEX},
         fromBlock=prev_merkle_root_update_block_number,
         toBlock="latest",
@@ -163,7 +163,7 @@ def get_reth_disabled_accounts(
     """
     Fetches accounts that have rETH2 distribution disabled from RewardEthToken contract.
     """
-    events = reward_eth_token.events.RewardsToggled.getLogs(
+    events = reward_eth_token.events.RewardsToggled.get_logs(
         fromBlock=0, toBlock=to_block
     )
     reth_disabled_accounts: Set[ChecksumAddress] = set()
@@ -326,7 +326,7 @@ def get_distributions(
     blocks_interval: int,
 ) -> Dict[BlockIdentifier, List[Distribution]]:
     """Creates rewards distributions for reward tokens with specific block intervals."""
-    distribute_events = merkle_distributor.events.DistributionAdded.getLogs(
+    distribute_events = merkle_distributor.events.DistributionAdded.get_logs(
         fromBlock=0, toBlock="latest"
     )
     distributions: Dict[BlockIdentifier, List[Distribution]] = {}
@@ -388,7 +388,7 @@ def get_merkle_distributor_claimed_addresses(
     merkle_distributor: Contract, from_block: BlockIdentifier
 ) -> Set[ChecksumAddress]:
     """Fetches addresses that have claimed their tokens from `MerkleDistributor` contract."""
-    events = merkle_distributor.events.Claimed.getLogs(
+    events = merkle_distributor.events.Claimed.get_logs(
         fromBlock=from_block, toBlock="latest"
     )
     return set(Web3.toChecksumAddress(event["args"]["account"]) for event in events)
@@ -859,10 +859,12 @@ def get_uniswap_v3_token_owner_liquidity(
                 to_block: BlockIdentifier = start_block + blocks_spread
             with attempt:
                 try:
-                    decrease_events = position_manager.events.IncreaseLiquidity.getLogs(
-                        argument_filters=argument_filters,
-                        fromBlock=start_block,
-                        toBlock=to_block,
+                    decrease_events = (
+                        position_manager.events.IncreaseLiquidity.get_logs(
+                            argument_filters=argument_filters,
+                            fromBlock=start_block,
+                            toBlock=to_block,
+                        )
                     )
                     start_block = to_block + 1
                 except Exception as e:
@@ -898,10 +900,12 @@ def get_uniswap_v3_token_owner_liquidity(
                 to_block: BlockIdentifier = start_block + blocks_spread
             with attempt:
                 try:
-                    decrease_events = position_manager.events.DecreaseLiquidity.getLogs(
-                        argument_filters=argument_filters,
-                        fromBlock=start_block,
-                        toBlock=to_block,
+                    decrease_events = (
+                        position_manager.events.DecreaseLiquidity.get_logs(
+                            argument_filters=argument_filters,
+                            fromBlock=start_block,
+                            toBlock=to_block,
+                        )
                     )
                     start_block = to_block + 1
                 except Exception as e:
@@ -960,7 +964,7 @@ def get_uniswap_v3_token_ids(
                 to_block: BlockIdentifier = start_block + blocks_spread
             with attempt:
                 try:
-                    transfer_events = position_manager.events.Transfer.getLogs(
+                    transfer_events = position_manager.events.Transfer.get_logs(
                         argument_filters=argument_filters,
                         fromBlock=start_block,
                         toBlock=to_block,
@@ -1024,7 +1028,7 @@ def get_uniswap_v3_token_ids(
                 to_block: BlockIdentifier = start_block + blocks_spread
             with attempt:
                 try:
-                    transfer_events = position_manager.events.Transfer.getLogs(
+                    transfer_events = position_manager.events.Transfer.get_logs(
                         argument_filters=argument_filters,
                         fromBlock=start_block,
                         toBlock=to_block,
@@ -1071,7 +1075,7 @@ def get_token_participated_accounts(
                 else:
                     to_block: BlockIdentifier = start_block + blocks_spread
                 try:
-                    transfer_events = token.events.Transfer.getLogs(
+                    transfer_events = token.events.Transfer.get_logs(
                         fromBlock=start_block, toBlock=to_block
                     )
                     start_block = to_block + 1
@@ -1117,7 +1121,7 @@ def get_erc20_token_balances(
                 else:
                     to_block: BlockIdentifier = start_block + blocks_spread
                 try:
-                    transfer_events = token.events.Transfer.getLogs(
+                    transfer_events = token.events.Transfer.get_logs(
                         fromBlock=start_block, toBlock=to_block
                     )
                     start_block = to_block + 1
@@ -1311,7 +1315,7 @@ def submit_oracle_merkle_root_vote(
                 # check whether gas price can be estimated for the the vote
                 oracles.functions.voteForMerkleRoot(
                     current_nonce, merkle_root, merkle_proofs
-                ).estimateGas({"gas": gas})
+                ).estimate_gas({"gas": gas})
             except ContractLogicError as e:
                 # check whether nonce has changed -> new merkle root was already submitted
                 if current_nonce != oracles.functions.currentNonce().call():
