@@ -1,7 +1,7 @@
 from typing import List, Union, Dict
 
-from eth_typing import HexStr
-from eth_utils import keccak
+from eth_typing.encoding import HexStr
+from eth_utils.crypto import keccak
 from web3 import Web3
 
 
@@ -59,11 +59,12 @@ class MerkleTree(object):
         for i, el in enumerate(elements):
             if i % 2 == 0:
                 # Hash the current element with its pair element
-                next_layer.append(
-                    MerkleTree.combine_hash(
-                        el, elements[i + 1] if i < len(elements) - 1 else None
-                    )
-                )
+                if i < len(elements) - 1:
+                    combined_hash = MerkleTree.combine_hash(el, elements[i + 1])
+                else:
+                    combined_hash = el
+
+                next_layer.append(combined_hash)
 
         return next_layer
 

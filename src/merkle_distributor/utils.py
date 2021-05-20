@@ -7,14 +7,7 @@ from eth_typing import HexStr, ChecksumAddress
 from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
 from graphql import DocumentNode
-from notifiers.core import get_notifier  # type: ignore
-from tenacity import (  # type: ignore
-    retry,
-    stop_after_attempt,
-    wait_fixed,
-    wait_random,
-    Retrying,
-)
+from tenacity import retry, Retrying
 from tenacity.before_sleep import before_sleep_log
 from web3 import Web3
 from web3.contract import Contract

@@ -1,8 +1,9 @@
 import logging
-import time
 from urllib.parse import urljoin
 
-from src.merkle_distributor import Distributor
+import time
+
+from src.merkle_distributor.distributor import Distributor
 from src.settings import (
     WEB3_WS_ENDPOINT,
     WEB3_WS_ENDPOINT_TIMEOUT,
@@ -23,7 +24,8 @@ from src.settings import (
     LOG_LEVEL,
     ETHERSCAN_ADDRESS_BASE_URL,
 )
-from src.staking_rewards import Rewards, wait_prysm_ready
+from src.staking_rewards.rewards import Rewards
+from src.staking_rewards.utils import wait_prysm_ready
 from src.utils import (
     get_web3_client,
     configure_default_account,

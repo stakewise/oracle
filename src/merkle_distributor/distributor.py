@@ -29,7 +29,8 @@ from src.merkle_distributor.utils import (
     get_ens_node_id,
     OraclesSettings,
     get_merkle_node,
-    pin_claims_to_ipfs, submit_oracle_merkle_root_vote,
+    pin_claims_to_ipfs,
+    submit_oracle_merkle_root_vote,
 )
 from src.settings import (
     ETH1_CONFIRMATION_BLOCKS,
@@ -116,6 +117,7 @@ class Distributor(object):
         ) = get_merkle_root_voting_parameters(
             oracles=self.oracles,
             multicall=self.multicall_contract,
+            reward_eth_token=self.reward_eth_token,
             block_identifier=current_block_number,
         )
 
@@ -134,7 +136,6 @@ class Distributor(object):
         # NB! can be `None` if it's the first update
         prev_merkle_root_parameters = get_prev_merkle_root_parameters(
             merkle_distributor=self.merkle_distributor,
-            multicall=self.multicall_contract,
             reward_eth_token=self.reward_eth_token,
             to_block=new_rewards_block_number,
         )

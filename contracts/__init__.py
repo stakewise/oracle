@@ -1,7 +1,7 @@
 import json
 import os
 
-from eth_typing import ChecksumAddress
+from eth_typing.evm import ChecksumAddress
 from web3 import Web3
 from web3.contract import Contract
 

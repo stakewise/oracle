@@ -6,14 +6,13 @@ from asyncio.exceptions import TimeoutError
 from typing import Union, Any, Callable
 
 from eth_typing.evm import ChecksumAddress
-from hexbytes import HexBytes
+from hexbytes.main import HexBytes
 from notifiers.core import get_notifier  # type: ignore
 from tenacity import (  # type: ignore
     retry,
     stop_after_attempt,
     wait_fixed,
     wait_random,
-    Retrying,
 )
 from tenacity.before_sleep import before_sleep_log
 from web3 import Web3
