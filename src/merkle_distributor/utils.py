@@ -287,27 +287,31 @@ def get_oracles_config(
             oracles_settings["snapshot_interval_in_blocks"]
         ),
         balancer_staked_eth_pool_ids=set(
-            oracles_settings["balancer_staked_eth_pool_ids"]
+            oracles_settings.get("balancer_staked_eth_pool_ids", [])
         ),
         balancer_pools={
             Web3.toChecksumAddress(pool_address): pool_id
-            for pool_address, pool_id in oracles_settings["balancer_pools"].items()
+            for pool_address, pool_id in oracles_settings.get(
+                "balancer_pools", {}
+            ).items()
         },
         uniswap_v2_pairs=set(
             [
                 Web3.toChecksumAddress(pair)
-                for pair in oracles_settings["uniswap_v2_pairs"]
+                for pair in oracles_settings.get("uniswap_v2_pairs", [])
             ]
         ),
         uniswap_v3_pairs={
             Web3.toChecksumAddress(token_address): int(block_number)
-            for token_address, block_number in oracles_settings[
-                "uniswap_v3_pairs"
-            ].items()
+            for token_address, block_number in oracles_settings.get(
+                "uniswap_v3_pairs", {}
+            ).items()
         },
         erc20_tokens={
             Web3.toChecksumAddress(token_address): int(block_number)
-            for token_address, block_number in oracles_settings["erc20_tokens"].items()
+            for token_address, block_number in oracles_settings.get(
+                "erc20_tokens", {}
+            ).items()
         },
     )
 
