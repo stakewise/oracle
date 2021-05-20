@@ -11,16 +11,18 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
+from eth.ext import options_pb2 as eth_dot_ext_dot_options__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='eth/v1alpha1/attestation.proto',
   package='ethereum.eth.v1alpha1',
   syntax='proto3',
-  serialized_options=None,
+  serialized_options=b'\n\031org.ethereum.eth.v1alpha1B\020AttestationProtoP\001Z6github.com/prysmaticlabs/ethereumapis/eth/v1alpha1;eth\252\002\025Ethereum.Eth.v1alpha1\312\002\025Ethereum\\Eth\\v1alpha1',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1e\x65th/v1alpha1/attestation.proto\x12\x15\x65thereum.eth.v1alpha1\"p\n\x0b\x41ttestation\x12\x18\n\x10\x61ggregation_bits\x18\x01 \x01(\x0c\x12\x34\n\x04\x64\x61ta\x18\x02 \x01(\x0b\x32&.ethereum.eth.v1alpha1.AttestationData\x12\x11\n\tsignature\x18\x03 \x01(\x0c\"\x88\x01\n\x1c\x41ggregateAttestationAndProof\x12\x18\n\x10\x61ggregator_index\x18\x01 \x01(\x04\x12\x35\n\taggregate\x18\x03 \x01(\x0b\x32\".ethereum.eth.v1alpha1.Attestation\x12\x17\n\x0fselection_proof\x18\x02 \x01(\x0c\"}\n\"SignedAggregateAttestationAndProof\x12\x44\n\x07message\x18\x01 \x01(\x0b\x32\x33.ethereum.eth.v1alpha1.AggregateAttestationAndProof\x12\x11\n\tsignature\x18\x02 \x01(\x0c\"\xb9\x01\n\x0f\x41ttestationData\x12\x0c\n\x04slot\x18\x01 \x01(\x04\x12\x17\n\x0f\x63ommittee_index\x18\x02 \x01(\x04\x12\x19\n\x11\x62\x65\x61\x63on_block_root\x18\x03 \x01(\x0c\x12\x31\n\x06source\x18\x04 \x01(\x0b\x32!.ethereum.eth.v1alpha1.Checkpoint\x12\x31\n\x06target\x18\x05 \x01(\x0b\x32!.ethereum.eth.v1alpha1.Checkpoint\")\n\nCheckpoint\x12\r\n\x05\x65poch\x18\x01 \x01(\x04\x12\x0c\n\x04root\x18\x02 \x01(\x0c\x62\x06proto3'
-)
+  serialized_pb=b'\n\x1e\x65th/v1alpha1/attestation.proto\x12\x15\x65thereum.eth.v1alpha1\x1a\x15\x65th/ext/options.proto\"\xb2\x01\n\x0b\x41ttestation\x12R\n\x10\x61ggregation_bits\x18\x01 \x01(\x0c\x42\x38\x92\xb5\x18\x04\x32\x30\x34\x38\x82\xb5\x18,github.com/prysmaticlabs/go-bitfield.Bitlist\x12\x34\n\x04\x64\x61ta\x18\x02 \x01(\x0b\x32&.ethereum.eth.v1alpha1.AttestationData\x12\x19\n\tsignature\x18\x03 \x01(\x0c\x42\x06\x8a\xb5\x18\x02\x39\x36\"\xc8\x01\n\x1c\x41ggregateAttestationAndProof\x12P\n\x10\x61ggregator_index\x18\x01 \x01(\x04\x42\x36\x82\xb5\x18\x32github.com/prysmaticlabs/eth2-types.ValidatorIndex\x12\x35\n\taggregate\x18\x03 \x01(\x0b\x32\".ethereum.eth.v1alpha1.Attestation\x12\x1f\n\x0fselection_proof\x18\x02 \x01(\x0c\x42\x06\x8a\xb5\x18\x02\x39\x36\"\x85\x01\n\"SignedAggregateAttestationAndProof\x12\x44\n\x07message\x18\x01 \x01(\x0b\x32\x33.ethereum.eth.v1alpha1.AggregateAttestationAndProof\x12\x19\n\tsignature\x18\x02 \x01(\x0c\x42\x06\x8a\xb5\x18\x02\x39\x36\"\xa7\x02\n\x0f\x41ttestationData\x12:\n\x04slot\x18\x01 \x01(\x04\x42,\x82\xb5\x18(github.com/prysmaticlabs/eth2-types.Slot\x12O\n\x0f\x63ommittee_index\x18\x02 \x01(\x04\x42\x36\x82\xb5\x18\x32github.com/prysmaticlabs/eth2-types.CommitteeIndex\x12!\n\x11\x62\x65\x61\x63on_block_root\x18\x03 \x01(\x0c\x42\x06\x8a\xb5\x18\x02\x33\x32\x12\x31\n\x06source\x18\x04 \x01(\x0b\x32!.ethereum.eth.v1alpha1.Checkpoint\x12\x31\n\x06target\x18\x05 \x01(\x0b\x32!.ethereum.eth.v1alpha1.Checkpoint\"`\n\nCheckpoint\x12<\n\x05\x65poch\x18\x01 \x01(\x04\x42-\x82\xb5\x18)github.com/prysmaticlabs/eth2-types.Epoch\x12\x14\n\x04root\x18\x02 \x01(\x0c\x42\x06\x8a\xb5\x18\x02\x33\x32\x42\x97\x01\n\x19org.ethereum.eth.v1alpha1B\x10\x41ttestationProtoP\x01Z6github.com/prysmaticlabs/ethereumapis/eth/v1alpha1;eth\xaa\x02\x15\x45thereum.Eth.v1alpha1\xca\x02\x15\x45thereum\\Eth\\v1alpha1b\x06proto3'
+  ,
+  dependencies=[eth_dot_ext_dot_options__pb2.DESCRIPTOR,])
 
 
 
@@ -39,7 +41,7 @@ _ATTESTATION = _descriptor.Descriptor(
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\222\265\030\0042048\202\265\030,github.com/prysmaticlabs/go-bitfield.Bitlist', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='data', full_name='ethereum.eth.v1alpha1.Attestation.data', index=1,
       number=2, type=11, cpp_type=10, label=1,
@@ -53,7 +55,7 @@ _ATTESTATION = _descriptor.Descriptor(
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\00296', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -66,8 +68,8 @@ _ATTESTATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=57,
-  serialized_end=169,
+  serialized_start=81,
+  serialized_end=259,
 )
 
 
@@ -85,7 +87,7 @@ _AGGREGATEATTESTATIONANDPROOF = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\0302github.com/prysmaticlabs/eth2-types.ValidatorIndex', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='aggregate', full_name='ethereum.eth.v1alpha1.AggregateAttestationAndProof.aggregate', index=1,
       number=3, type=11, cpp_type=10, label=1,
@@ -99,7 +101,7 @@ _AGGREGATEATTESTATIONANDPROOF = _descriptor.Descriptor(
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\00296', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -112,8 +114,8 @@ _AGGREGATEATTESTATIONANDPROOF = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=172,
-  serialized_end=308,
+  serialized_start=262,
+  serialized_end=462,
 )
 
 
@@ -138,7 +140,7 @@ _SIGNEDAGGREGATEATTESTATIONANDPROOF = _descriptor.Descriptor(
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\00296', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -151,8 +153,8 @@ _SIGNEDAGGREGATEATTESTATIONANDPROOF = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=310,
-  serialized_end=435,
+  serialized_start=465,
+  serialized_end=598,
 )
 
 
@@ -170,21 +172,21 @@ _ATTESTATIONDATA = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030(github.com/prysmaticlabs/eth2-types.Slot', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='committee_index', full_name='ethereum.eth.v1alpha1.AttestationData.committee_index', index=1,
       number=2, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\0302github.com/prysmaticlabs/eth2-types.CommitteeIndex', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='beacon_block_root', full_name='ethereum.eth.v1alpha1.AttestationData.beacon_block_root', index=2,
       number=3, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\00232', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='source', full_name='ethereum.eth.v1alpha1.AttestationData.source', index=3,
       number=4, type=11, cpp_type=10, label=1,
@@ -211,8 +213,8 @@ _ATTESTATIONDATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=438,
-  serialized_end=623,
+  serialized_start=601,
+  serialized_end=896,
 )
 
 
@@ -230,14 +232,14 @@ _CHECKPOINT = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030)github.com/prysmaticlabs/eth2-types.Epoch', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='root', full_name='ethereum.eth.v1alpha1.Checkpoint.root', index=1,
       number=2, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\00232', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -250,8 +252,8 @@ _CHECKPOINT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=625,
-  serialized_end=666,
+  serialized_start=898,
+  serialized_end=994,
 )
 
 _ATTESTATION.fields_by_name['data'].message_type = _ATTESTATIONDATA
@@ -302,4 +304,15 @@ Checkpoint = _reflection.GeneratedProtocolMessageType('Checkpoint', (_message.Me
 _sym_db.RegisterMessage(Checkpoint)
 
 
+DESCRIPTOR._options = None
+_ATTESTATION.fields_by_name['aggregation_bits']._options = None
+_ATTESTATION.fields_by_name['signature']._options = None
+_AGGREGATEATTESTATIONANDPROOF.fields_by_name['aggregator_index']._options = None
+_AGGREGATEATTESTATIONANDPROOF.fields_by_name['selection_proof']._options = None
+_SIGNEDAGGREGATEATTESTATIONANDPROOF.fields_by_name['signature']._options = None
+_ATTESTATIONDATA.fields_by_name['slot']._options = None
+_ATTESTATIONDATA.fields_by_name['committee_index']._options = None
+_ATTESTATIONDATA.fields_by_name['beacon_block_root']._options = None
+_CHECKPOINT.fields_by_name['epoch']._options = None
+_CHECKPOINT.fields_by_name['root']._options = None
 # @@protoc_insertion_point(module_scope)

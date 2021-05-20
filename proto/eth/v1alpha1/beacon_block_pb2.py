@@ -11,6 +11,7 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
+from eth.ext import options_pb2 as eth_dot_ext_dot_options__pb2
 from eth.v1alpha1 import attestation_pb2 as eth_dot_v1alpha1_dot_attestation__pb2
 
 
@@ -20,9 +21,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1f\x65th/v1alpha1/beacon_block.proto\x12\x15\x65thereum.eth.v1alpha1\x1a\x1e\x65th/v1alpha1/attestation.proto\"\x92\x01\n\x0b\x42\x65\x61\x63onBlock\x12\x0c\n\x04slot\x18\x01 \x01(\x04\x12\x16\n\x0eproposer_index\x18\x02 \x01(\x04\x12\x13\n\x0bparent_root\x18\x03 \x01(\x0c\x12\x12\n\nstate_root\x18\x04 \x01(\x0c\x12\x34\n\x04\x62ody\x18\x05 \x01(\x0b\x32&.ethereum.eth.v1alpha1.BeaconBlockBody\"Y\n\x11SignedBeaconBlock\x12\x31\n\x05\x62lock\x18\x01 \x01(\x0b\x32\".ethereum.eth.v1alpha1.BeaconBlock\x12\x11\n\tsignature\x18\x02 \x01(\x0c\"\xa9\x03\n\x0f\x42\x65\x61\x63onBlockBody\x12\x15\n\rrandao_reveal\x18\x01 \x01(\x0c\x12\x32\n\teth1_data\x18\x02 \x01(\x0b\x32\x1f.ethereum.eth.v1alpha1.Eth1Data\x12\x10\n\x08graffiti\x18\x03 \x01(\x0c\x12\x43\n\x12proposer_slashings\x18\x04 \x03(\x0b\x32\'.ethereum.eth.v1alpha1.ProposerSlashing\x12\x43\n\x12\x61ttester_slashings\x18\x05 \x03(\x0b\x32\'.ethereum.eth.v1alpha1.AttesterSlashing\x12\x38\n\x0c\x61ttestations\x18\x06 \x03(\x0b\x32\".ethereum.eth.v1alpha1.Attestation\x12\x30\n\x08\x64\x65posits\x18\x07 \x03(\x0b\x32\x1e.ethereum.eth.v1alpha1.Deposit\x12\x43\n\x0fvoluntary_exits\x18\x08 \x03(\x0b\x32*.ethereum.eth.v1alpha1.SignedVoluntaryExit\"\x96\x01\n\x10ProposerSlashing\x12@\n\x08header_1\x18\x02 \x01(\x0b\x32..ethereum.eth.v1alpha1.SignedBeaconBlockHeader\x12@\n\x08header_2\x18\x03 \x01(\x0b\x32..ethereum.eth.v1alpha1.SignedBeaconBlockHeader\"\x96\x01\n\x10\x41ttesterSlashing\x12@\n\rattestation_1\x18\x01 \x01(\x0b\x32).ethereum.eth.v1alpha1.IndexedAttestation\x12@\n\rattestation_2\x18\x02 \x01(\x0b\x32).ethereum.eth.v1alpha1.IndexedAttestation\"\xaa\x01\n\x07\x44\x65posit\x12\r\n\x05proof\x18\x01 \x03(\x0c\x12\x31\n\x04\x64\x61ta\x18\x02 \x01(\x0b\x32#.ethereum.eth.v1alpha1.Deposit.Data\x1a]\n\x04\x44\x61ta\x12\x12\n\npublic_key\x18\x01 \x01(\x0c\x12\x1e\n\x16withdrawal_credentials\x18\x02 \x01(\x0c\x12\x0e\n\x06\x61mount\x18\x03 \x01(\x04\x12\x11\n\tsignature\x18\x04 \x01(\x0c\"7\n\rVoluntaryExit\x12\r\n\x05\x65poch\x18\x01 \x01(\x04\x12\x17\n\x0fvalidator_index\x18\x02 \x01(\x04\"\\\n\x13SignedVoluntaryExit\x12\x32\n\x04\x65xit\x18\x01 \x01(\x0b\x32$.ethereum.eth.v1alpha1.VoluntaryExit\x12\x11\n\tsignature\x18\x02 \x01(\x0c\"K\n\x08\x45th1Data\x12\x14\n\x0c\x64\x65posit_root\x18\x01 \x01(\x0c\x12\x15\n\rdeposit_count\x18\x02 \x01(\x04\x12\x12\n\nblock_hash\x18\x03 \x01(\x0c\"u\n\x11\x42\x65\x61\x63onBlockHeader\x12\x0c\n\x04slot\x18\x01 \x01(\x04\x12\x16\n\x0eproposer_index\x18\x02 \x01(\x04\x12\x13\n\x0bparent_root\x18\x03 \x01(\x0c\x12\x12\n\nstate_root\x18\x04 \x01(\x0c\x12\x11\n\tbody_root\x18\x05 \x01(\x0c\"f\n\x17SignedBeaconBlockHeader\x12\x38\n\x06header\x18\x01 \x01(\x0b\x32(.ethereum.eth.v1alpha1.BeaconBlockHeader\x12\x11\n\tsignature\x18\x02 \x01(\x0c\"x\n\x12IndexedAttestation\x12\x19\n\x11\x61ttesting_indices\x18\x01 \x03(\x04\x12\x34\n\x04\x64\x61ta\x18\x02 \x01(\x0b\x32&.ethereum.eth.v1alpha1.AttestationData\x12\x11\n\tsignature\x18\x03 \x01(\x0c\x62\x06proto3'
+  serialized_pb=b'\n\x1f\x65th/v1alpha1/beacon_block.proto\x12\x15\x65thereum.eth.v1alpha1\x1a\x15\x65th/ext/options.proto\x1a\x1e\x65th/v1alpha1/attestation.proto\"\x88\x02\n\x0b\x42\x65\x61\x63onBlock\x12:\n\x04slot\x18\x01 \x01(\x04\x42,\x82\xb5\x18(github.com/prysmaticlabs/eth2-types.Slot\x12N\n\x0eproposer_index\x18\x02 \x01(\x04\x42\x36\x82\xb5\x18\x32github.com/prysmaticlabs/eth2-types.ValidatorIndex\x12\x1b\n\x0bparent_root\x18\x03 \x01(\x0c\x42\x06\x8a\xb5\x18\x02\x33\x32\x12\x1a\n\nstate_root\x18\x04 \x01(\x0c\x42\x06\x8a\xb5\x18\x02\x33\x32\x12\x34\n\x04\x62ody\x18\x05 \x01(\x0b\x32&.ethereum.eth.v1alpha1.BeaconBlockBody\"a\n\x11SignedBeaconBlock\x12\x31\n\x05\x62lock\x18\x01 \x01(\x0b\x32\".ethereum.eth.v1alpha1.BeaconBlock\x12\x19\n\tsignature\x18\x02 \x01(\x0c\x42\x06\x8a\xb5\x18\x02\x39\x36\"\xe1\x03\n\x0f\x42\x65\x61\x63onBlockBody\x12\x1d\n\rrandao_reveal\x18\x01 \x01(\x0c\x42\x06\x8a\xb5\x18\x02\x39\x36\x12\x32\n\teth1_data\x18\x02 \x01(\x0b\x32\x1f.ethereum.eth.v1alpha1.Eth1Data\x12\x18\n\x08graffiti\x18\x03 \x01(\x0c\x42\x06\x8a\xb5\x18\x02\x33\x32\x12K\n\x12proposer_slashings\x18\x04 \x03(\x0b\x32\'.ethereum.eth.v1alpha1.ProposerSlashingB\x06\x92\xb5\x18\x02\x31\x36\x12J\n\x12\x61ttester_slashings\x18\x05 \x03(\x0b\x32\'.ethereum.eth.v1alpha1.AttesterSlashingB\x05\x92\xb5\x18\x01\x32\x12\x41\n\x0c\x61ttestations\x18\x06 \x03(\x0b\x32\".ethereum.eth.v1alpha1.AttestationB\x07\x92\xb5\x18\x03\x31\x32\x38\x12\x38\n\x08\x64\x65posits\x18\x07 \x03(\x0b\x32\x1e.ethereum.eth.v1alpha1.DepositB\x06\x92\xb5\x18\x02\x31\x36\x12K\n\x0fvoluntary_exits\x18\x08 \x03(\x0b\x32*.ethereum.eth.v1alpha1.SignedVoluntaryExitB\x06\x92\xb5\x18\x02\x31\x36\"\x96\x01\n\x10ProposerSlashing\x12@\n\x08header_1\x18\x02 \x01(\x0b\x32..ethereum.eth.v1alpha1.SignedBeaconBlockHeader\x12@\n\x08header_2\x18\x03 \x01(\x0b\x32..ethereum.eth.v1alpha1.SignedBeaconBlockHeader\"\x96\x01\n\x10\x41ttesterSlashing\x12@\n\rattestation_1\x18\x01 \x01(\x0b\x32).ethereum.eth.v1alpha1.IndexedAttestation\x12@\n\rattestation_2\x18\x02 \x01(\x0b\x32).ethereum.eth.v1alpha1.IndexedAttestation\"\xd7\x01\n\x07\x44\x65posit\x12\x18\n\x05proof\x18\x01 \x03(\x0c\x42\t\x8a\xb5\x18\x05\x33\x33,32\x12\x31\n\x04\x64\x61ta\x18\x02 \x01(\x0b\x32#.ethereum.eth.v1alpha1.Deposit.Data\x1a\x7f\n\x04\x44\x61ta\x12$\n\npublic_key\x18\x01 \x01(\x0c\x42\x10\x8a\xb5\x18\x02\x34\x38\x9a\xb5\x18\x06pubkey\x12&\n\x16withdrawal_credentials\x18\x02 \x01(\x0c\x42\x06\x8a\xb5\x18\x02\x33\x32\x12\x0e\n\x06\x61mount\x18\x03 \x01(\x04\x12\x19\n\tsignature\x18\x04 \x01(\x0c\x42\x06\x8a\xb5\x18\x02\x39\x36\"\x9e\x01\n\rVoluntaryExit\x12<\n\x05\x65poch\x18\x01 \x01(\x04\x42-\x82\xb5\x18)github.com/prysmaticlabs/eth2-types.Epoch\x12O\n\x0fvalidator_index\x18\x02 \x01(\x04\x42\x36\x82\xb5\x18\x32github.com/prysmaticlabs/eth2-types.ValidatorIndex\"d\n\x13SignedVoluntaryExit\x12\x32\n\x04\x65xit\x18\x01 \x01(\x0b\x32$.ethereum.eth.v1alpha1.VoluntaryExit\x12\x19\n\tsignature\x18\x02 \x01(\x0c\x42\x06\x8a\xb5\x18\x02\x39\x36\"[\n\x08\x45th1Data\x12\x1c\n\x0c\x64\x65posit_root\x18\x01 \x01(\x0c\x42\x06\x8a\xb5\x18\x02\x33\x32\x12\x15\n\rdeposit_count\x18\x02 \x01(\x04\x12\x1a\n\nblock_hash\x18\x03 \x01(\x0c\x42\x06\x8a\xb5\x18\x02\x33\x32\"\xf3\x01\n\x11\x42\x65\x61\x63onBlockHeader\x12:\n\x04slot\x18\x01 \x01(\x04\x42,\x82\xb5\x18(github.com/prysmaticlabs/eth2-types.Slot\x12N\n\x0eproposer_index\x18\x02 \x01(\x04\x42\x36\x82\xb5\x18\x32github.com/prysmaticlabs/eth2-types.ValidatorIndex\x12\x1b\n\x0bparent_root\x18\x03 \x01(\x0c\x42\x06\x8a\xb5\x18\x02\x33\x32\x12\x1a\n\nstate_root\x18\x04 \x01(\x0c\x42\x06\x8a\xb5\x18\x02\x33\x32\x12\x19\n\tbody_root\x18\x05 \x01(\x0c\x42\x06\x8a\xb5\x18\x02\x33\x32\"n\n\x17SignedBeaconBlockHeader\x12\x38\n\x06header\x18\x01 \x01(\x0b\x32(.ethereum.eth.v1alpha1.BeaconBlockHeader\x12\x19\n\tsignature\x18\x02 \x01(\x0c\x42\x06\x8a\xb5\x18\x02\x39\x36\"\x8a\x01\n\x12IndexedAttestation\x12#\n\x11\x61ttesting_indices\x18\x01 \x03(\x04\x42\x08\x92\xb5\x18\x04\x32\x30\x34\x38\x12\x34\n\x04\x64\x61ta\x18\x02 \x01(\x0b\x32&.ethereum.eth.v1alpha1.AttestationData\x12\x19\n\tsignature\x18\x03 \x01(\x0c\x42\x06\x8a\xb5\x18\x02\x39\x36\x62\x06proto3'
   ,
-  dependencies=[eth_dot_v1alpha1_dot_attestation__pb2.DESCRIPTOR,])
+  dependencies=[eth_dot_ext_dot_options__pb2.DESCRIPTOR,eth_dot_v1alpha1_dot_attestation__pb2.DESCRIPTOR,])
 
 
 
@@ -41,28 +42,28 @@ _BEACONBLOCK = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030(github.com/prysmaticlabs/eth2-types.Slot', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='proposer_index', full_name='ethereum.eth.v1alpha1.BeaconBlock.proposer_index', index=1,
       number=2, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\0302github.com/prysmaticlabs/eth2-types.ValidatorIndex', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='parent_root', full_name='ethereum.eth.v1alpha1.BeaconBlock.parent_root', index=2,
       number=3, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\00232', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='state_root', full_name='ethereum.eth.v1alpha1.BeaconBlock.state_root', index=3,
       number=4, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\00232', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='body', full_name='ethereum.eth.v1alpha1.BeaconBlock.body', index=4,
       number=5, type=11, cpp_type=10, label=1,
@@ -82,8 +83,8 @@ _BEACONBLOCK = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=91,
-  serialized_end=237,
+  serialized_start=114,
+  serialized_end=378,
 )
 
 
@@ -108,7 +109,7 @@ _SIGNEDBEACONBLOCK = _descriptor.Descriptor(
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\00296', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -121,8 +122,8 @@ _SIGNEDBEACONBLOCK = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=239,
-  serialized_end=328,
+  serialized_start=380,
+  serialized_end=477,
 )
 
 
@@ -140,7 +141,7 @@ _BEACONBLOCKBODY = _descriptor.Descriptor(
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\00296', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='eth1_data', full_name='ethereum.eth.v1alpha1.BeaconBlockBody.eth1_data', index=1,
       number=2, type=11, cpp_type=10, label=1,
@@ -154,42 +155,42 @@ _BEACONBLOCKBODY = _descriptor.Descriptor(
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\00232', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='proposer_slashings', full_name='ethereum.eth.v1alpha1.BeaconBlockBody.proposer_slashings', index=3,
       number=4, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\222\265\030\00216', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='attester_slashings', full_name='ethereum.eth.v1alpha1.BeaconBlockBody.attester_slashings', index=4,
       number=5, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\222\265\030\0012', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='attestations', full_name='ethereum.eth.v1alpha1.BeaconBlockBody.attestations', index=5,
       number=6, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\222\265\030\003128', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='deposits', full_name='ethereum.eth.v1alpha1.BeaconBlockBody.deposits', index=6,
       number=7, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\222\265\030\00216', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='voluntary_exits', full_name='ethereum.eth.v1alpha1.BeaconBlockBody.voluntary_exits', index=7,
       number=8, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\222\265\030\00216', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -202,8 +203,8 @@ _BEACONBLOCKBODY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=331,
-  serialized_end=756,
+  serialized_start=480,
+  serialized_end=961,
 )
 
 
@@ -241,8 +242,8 @@ _PROPOSERSLASHING = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=759,
-  serialized_end=909,
+  serialized_start=964,
+  serialized_end=1114,
 )
 
 
@@ -280,8 +281,8 @@ _ATTESTERSLASHING = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=912,
-  serialized_end=1062,
+  serialized_start=1117,
+  serialized_end=1267,
 )
 
 
@@ -299,14 +300,14 @@ _DEPOSIT_DATA = _descriptor.Descriptor(
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\00248\232\265\030\006pubkey', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='withdrawal_credentials', full_name='ethereum.eth.v1alpha1.Deposit.Data.withdrawal_credentials', index=1,
       number=2, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\00232', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='amount', full_name='ethereum.eth.v1alpha1.Deposit.Data.amount', index=2,
       number=3, type=4, cpp_type=4, label=1,
@@ -320,7 +321,7 @@ _DEPOSIT_DATA = _descriptor.Descriptor(
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\00296', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -333,8 +334,8 @@ _DEPOSIT_DATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1142,
-  serialized_end=1235,
+  serialized_start=1358,
+  serialized_end=1485,
 )
 
 _DEPOSIT = _descriptor.Descriptor(
@@ -351,7 +352,7 @@ _DEPOSIT = _descriptor.Descriptor(
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\00533,32', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='data', full_name='ethereum.eth.v1alpha1.Deposit.data', index=1,
       number=2, type=11, cpp_type=10, label=1,
@@ -371,8 +372,8 @@ _DEPOSIT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1065,
-  serialized_end=1235,
+  serialized_start=1270,
+  serialized_end=1485,
 )
 
 
@@ -390,14 +391,14 @@ _VOLUNTARYEXIT = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030)github.com/prysmaticlabs/eth2-types.Epoch', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='validator_index', full_name='ethereum.eth.v1alpha1.VoluntaryExit.validator_index', index=1,
       number=2, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\0302github.com/prysmaticlabs/eth2-types.ValidatorIndex', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -410,8 +411,8 @@ _VOLUNTARYEXIT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1237,
-  serialized_end=1292,
+  serialized_start=1488,
+  serialized_end=1646,
 )
 
 
@@ -436,7 +437,7 @@ _SIGNEDVOLUNTARYEXIT = _descriptor.Descriptor(
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\00296', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -449,8 +450,8 @@ _SIGNEDVOLUNTARYEXIT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1294,
-  serialized_end=1386,
+  serialized_start=1648,
+  serialized_end=1748,
 )
 
 
@@ -468,7 +469,7 @@ _ETH1DATA = _descriptor.Descriptor(
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\00232', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='deposit_count', full_name='ethereum.eth.v1alpha1.Eth1Data.deposit_count', index=1,
       number=2, type=4, cpp_type=4, label=1,
@@ -482,7 +483,7 @@ _ETH1DATA = _descriptor.Descriptor(
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\00232', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -495,8 +496,8 @@ _ETH1DATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1388,
-  serialized_end=1463,
+  serialized_start=1750,
+  serialized_end=1841,
 )
 
 
@@ -514,35 +515,35 @@ _BEACONBLOCKHEADER = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030(github.com/prysmaticlabs/eth2-types.Slot', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='proposer_index', full_name='ethereum.eth.v1alpha1.BeaconBlockHeader.proposer_index', index=1,
       number=2, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\0302github.com/prysmaticlabs/eth2-types.ValidatorIndex', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='parent_root', full_name='ethereum.eth.v1alpha1.BeaconBlockHeader.parent_root', index=2,
       number=3, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\00232', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='state_root', full_name='ethereum.eth.v1alpha1.BeaconBlockHeader.state_root', index=3,
       number=4, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\00232', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='body_root', full_name='ethereum.eth.v1alpha1.BeaconBlockHeader.body_root', index=4,
       number=5, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\00232', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -555,8 +556,8 @@ _BEACONBLOCKHEADER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1465,
-  serialized_end=1582,
+  serialized_start=1844,
+  serialized_end=2087,
 )
 
 
@@ -581,7 +582,7 @@ _SIGNEDBEACONBLOCKHEADER = _descriptor.Descriptor(
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\00296', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -594,8 +595,8 @@ _SIGNEDBEACONBLOCKHEADER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1584,
-  serialized_end=1686,
+  serialized_start=2089,
+  serialized_end=2199,
 )
 
 
@@ -613,7 +614,7 @@ _INDEXEDATTESTATION = _descriptor.Descriptor(
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\222\265\030\0042048', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='data', full_name='ethereum.eth.v1alpha1.IndexedAttestation.data', index=1,
       number=2, type=11, cpp_type=10, label=1,
@@ -627,7 +628,7 @@ _INDEXEDATTESTATION = _descriptor.Descriptor(
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\00296', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -640,8 +641,8 @@ _INDEXEDATTESTATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1688,
-  serialized_end=1808,
+  serialized_start=2202,
+  serialized_end=2340,
 )
 
 _BEACONBLOCK.fields_by_name['body'].message_type = _BEACONBLOCKBODY
@@ -768,4 +769,33 @@ IndexedAttestation = _reflection.GeneratedProtocolMessageType('IndexedAttestatio
 _sym_db.RegisterMessage(IndexedAttestation)
 
 
+_BEACONBLOCK.fields_by_name['slot']._options = None
+_BEACONBLOCK.fields_by_name['proposer_index']._options = None
+_BEACONBLOCK.fields_by_name['parent_root']._options = None
+_BEACONBLOCK.fields_by_name['state_root']._options = None
+_SIGNEDBEACONBLOCK.fields_by_name['signature']._options = None
+_BEACONBLOCKBODY.fields_by_name['randao_reveal']._options = None
+_BEACONBLOCKBODY.fields_by_name['graffiti']._options = None
+_BEACONBLOCKBODY.fields_by_name['proposer_slashings']._options = None
+_BEACONBLOCKBODY.fields_by_name['attester_slashings']._options = None
+_BEACONBLOCKBODY.fields_by_name['attestations']._options = None
+_BEACONBLOCKBODY.fields_by_name['deposits']._options = None
+_BEACONBLOCKBODY.fields_by_name['voluntary_exits']._options = None
+_DEPOSIT_DATA.fields_by_name['public_key']._options = None
+_DEPOSIT_DATA.fields_by_name['withdrawal_credentials']._options = None
+_DEPOSIT_DATA.fields_by_name['signature']._options = None
+_DEPOSIT.fields_by_name['proof']._options = None
+_VOLUNTARYEXIT.fields_by_name['epoch']._options = None
+_VOLUNTARYEXIT.fields_by_name['validator_index']._options = None
+_SIGNEDVOLUNTARYEXIT.fields_by_name['signature']._options = None
+_ETH1DATA.fields_by_name['deposit_root']._options = None
+_ETH1DATA.fields_by_name['block_hash']._options = None
+_BEACONBLOCKHEADER.fields_by_name['slot']._options = None
+_BEACONBLOCKHEADER.fields_by_name['proposer_index']._options = None
+_BEACONBLOCKHEADER.fields_by_name['parent_root']._options = None
+_BEACONBLOCKHEADER.fields_by_name['state_root']._options = None
+_BEACONBLOCKHEADER.fields_by_name['body_root']._options = None
+_SIGNEDBEACONBLOCKHEADER.fields_by_name['signature']._options = None
+_INDEXEDATTESTATION.fields_by_name['attesting_indices']._options = None
+_INDEXEDATTESTATION.fields_by_name['signature']._options = None
 # @@protoc_insertion_point(module_scope)

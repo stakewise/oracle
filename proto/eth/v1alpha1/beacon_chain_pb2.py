@@ -14,6 +14,7 @@ _sym_db = _symbol_database.Default()
 
 from google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
+from eth.ext import options_pb2 as eth_dot_ext_dot_options__pb2
 from eth.v1alpha1 import attestation_pb2 as eth_dot_v1alpha1_dot_attestation__pb2
 from eth.v1alpha1 import beacon_block_pb2 as eth_dot_v1alpha1_dot_beacon__block__pb2
 from eth.v1alpha1 import validator_pb2 as eth_dot_v1alpha1_dot_validator__pb2
@@ -23,11 +24,11 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='eth/v1alpha1/beacon_chain.proto',
   package='ethereum.eth.v1alpha1',
   syntax='proto3',
-  serialized_options=None,
+  serialized_options=b'\n\031org.ethereum.eth.v1alpha1B\020BeaconChainProtoP\001Z6github.com/prysmaticlabs/ethereumapis/eth/v1alpha1;eth\252\002\025Ethereum.Eth.v1alpha1\312\002\025Ethereum\\Eth\\v1alpha1',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1f\x65th/v1alpha1/beacon_chain.proto\x12\x15\x65thereum.eth.v1alpha1\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1e\x65th/v1alpha1/attestation.proto\x1a\x1f\x65th/v1alpha1/beacon_block.proto\x1a\x1c\x65th/v1alpha1/validator.proto\"[\n\x12ValidatorChangeSet\x12\x30\n\x06\x61\x63tion\x18\x01 \x01(\x0e\x32 .ethereum.eth.v1alpha1.SetAction\x12\x13\n\x0bpublic_keys\x18\x02 \x03(\x0c\"\x81\x01\n\x1eListIndexedAttestationsRequest\x12\x0f\n\x05\x65poch\x18\x01 \x01(\x04H\x00\x12\x17\n\rgenesis_epoch\x18\x02 \x01(\x08H\x00\x12\x11\n\tpage_size\x18\x03 \x01(\x05\x12\x12\n\npage_token\x18\x04 \x01(\tB\x0e\n\x0cquery_filter\"z\n\x17ListAttestationsRequest\x12\x0f\n\x05\x65poch\x18\x01 \x01(\x04H\x00\x12\x17\n\rgenesis_epoch\x18\x02 \x01(\x08H\x00\x12\x11\n\tpage_size\x18\x03 \x01(\x05\x12\x12\n\npage_token\x18\x04 \x01(\tB\x0e\n\x0cquery_filter\"\x81\x01\n\x18ListAttestationsResponse\x12\x38\n\x0c\x61ttestations\x18\x01 \x03(\x0b\x32\".ethereum.eth.v1alpha1.Attestation\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t\x12\x12\n\ntotal_size\x18\x03 \x01(\x05\"\x97\x01\n\x1fListIndexedAttestationsResponse\x12G\n\x14indexed_attestations\x18\x01 \x03(\x0b\x32).ethereum.eth.v1alpha1.IndexedAttestation\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t\x12\x12\n\ntotal_size\x18\x03 \x01(\x05\"\x8e\x01\n\x11ListBlocksRequest\x12\x0e\n\x04root\x18\x01 \x01(\x0cH\x00\x12\x0e\n\x04slot\x18\x02 \x01(\x04H\x00\x12\x0f\n\x05\x65poch\x18\x03 \x01(\x04H\x00\x12\x11\n\x07genesis\x18\x04 \x01(\x08H\x00\x12\x11\n\tpage_size\x18\x05 \x01(\x05\x12\x12\n\npage_token\x18\x06 \x01(\tB\x0e\n\x0cquery_filter\"\x87\x01\n\x12ListBlocksResponse\x12\x44\n\x0f\x62lockContainers\x18\x01 \x03(\x0b\x32+.ethereum.eth.v1alpha1.BeaconBlockContainer\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t\x12\x12\n\ntotal_size\x18\x03 \x01(\x05\",\n\x13StreamBlocksRequest\x12\x15\n\rverified_only\x18\x01 \x01(\x08\"v\n\x14\x42\x65\x61\x63onBlockContainer\x12\x37\n\x05\x62lock\x18\x01 \x01(\x0b\x32(.ethereum.eth.v1alpha1.SignedBeaconBlock\x12\x12\n\nblock_root\x18\x02 \x01(\x0c\x12\x11\n\tcanonical\x18\x03 \x01(\x08\"\xd3\x02\n\tChainHead\x12\x11\n\thead_slot\x18\x01 \x01(\x04\x12\x12\n\nhead_epoch\x18\x02 \x01(\x04\x12\x17\n\x0fhead_block_root\x18\x03 \x01(\x0c\x12\x16\n\x0e\x66inalized_slot\x18\x04 \x01(\x04\x12\x17\n\x0f\x66inalized_epoch\x18\x05 \x01(\x04\x12\x1c\n\x14\x66inalized_block_root\x18\x06 \x01(\x0c\x12\x16\n\x0ejustified_slot\x18\x07 \x01(\x04\x12\x17\n\x0fjustified_epoch\x18\x08 \x01(\x04\x12\x1c\n\x14justified_block_root\x18\t \x01(\x0c\x12\x1f\n\x17previous_justified_slot\x18\n \x01(\x04\x12 \n\x18previous_justified_epoch\x18\x0b \x01(\x04\x12%\n\x1dprevious_justified_block_root\x18\x0c \x01(\x0c\"K\n\x15ListCommitteesRequest\x12\x0f\n\x05\x65poch\x18\x01 \x01(\x04H\x00\x12\x11\n\x07genesis\x18\x02 \x01(\x08H\x00\x42\x0e\n\x0cquery_filter\"\x82\x03\n\x10\x42\x65\x61\x63onCommittees\x12\r\n\x05\x65poch\x18\x01 \x01(\x04\x12K\n\ncommittees\x18\x02 \x03(\x0b\x32\x37.ethereum.eth.v1alpha1.BeaconCommittees.CommitteesEntry\x12\x1e\n\x16\x61\x63tive_validator_count\x18\x03 \x01(\x04\x1a*\n\rCommitteeItem\x12\x19\n\x11validator_indices\x18\x01 \x03(\x04\x1a[\n\x0e\x43ommitteesList\x12I\n\ncommittees\x18\x01 \x03(\x0b\x32\x35.ethereum.eth.v1alpha1.BeaconCommittees.CommitteeItem\x1ai\n\x0f\x43ommitteesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x04\x12\x45\n\x05value\x18\x02 \x01(\x0b\x32\x36.ethereum.eth.v1alpha1.BeaconCommittees.CommitteesList:\x02\x38\x01\"\x9f\x01\n\x1cListValidatorBalancesRequest\x12\x0f\n\x05\x65poch\x18\x01 \x01(\x04H\x00\x12\x11\n\x07genesis\x18\x02 \x01(\x08H\x00\x12\x13\n\x0bpublic_keys\x18\x03 \x03(\x0c\x12\x0f\n\x07indices\x18\x04 \x03(\x04\x12\x11\n\tpage_size\x18\x05 \x01(\x05\x12\x12\n\npage_token\x18\x06 \x01(\tB\x0e\n\x0cquery_filter\"\xe2\x01\n\x11ValidatorBalances\x12\r\n\x05\x65poch\x18\x01 \x01(\x04\x12\x42\n\x08\x62\x61lances\x18\x02 \x03(\x0b\x32\x30.ethereum.eth.v1alpha1.ValidatorBalances.Balance\x12\x17\n\x0fnext_page_token\x18\x03 \x01(\t\x12\x12\n\ntotal_size\x18\x04 \x01(\x05\x1aM\n\x07\x42\x61lance\x12\x12\n\npublic_key\x18\x01 \x01(\x0c\x12\r\n\x05index\x18\x02 \x01(\x04\x12\x0f\n\x07\x62\x61lance\x18\x03 \x01(\x04\x12\x0e\n\x06status\x18\x04 \x01(\t\"\xa8\x01\n\x15ListValidatorsRequest\x12\x0f\n\x05\x65poch\x18\x01 \x01(\x04H\x00\x12\x11\n\x07genesis\x18\x02 \x01(\x08H\x00\x12\x0e\n\x06\x61\x63tive\x18\x03 \x01(\x08\x12\x11\n\tpage_size\x18\x04 \x01(\x05\x12\x12\n\npage_token\x18\x05 \x01(\t\x12\x13\n\x0bpublic_keys\x18\x06 \x03(\x0c\x12\x0f\n\x07indices\x18\x07 \x03(\x04\x42\x0e\n\x0cquery_filter\"L\n\x13GetValidatorRequest\x12\x0f\n\x05index\x18\x01 \x01(\x04H\x00\x12\x14\n\npublic_key\x18\x02 \x01(\x0cH\x00\x42\x0e\n\x0cquery_filter\"\xf0\x01\n\nValidators\x12\r\n\x05\x65poch\x18\x01 \x01(\x04\x12L\n\x0evalidator_list\x18\x02 \x03(\x0b\x32\x34.ethereum.eth.v1alpha1.Validators.ValidatorContainer\x12\x17\n\x0fnext_page_token\x18\x03 \x01(\t\x12\x12\n\ntotal_size\x18\x04 \x01(\x05\x1aX\n\x12ValidatorContainer\x12\r\n\x05index\x18\x01 \x01(\x04\x12\x33\n\tvalidator\x18\x02 \x01(\x0b\x32 .ethereum.eth.v1alpha1.Validator\"Y\n#GetValidatorActiveSetChangesRequest\x12\x0f\n\x05\x65poch\x18\x01 \x01(\x04H\x00\x12\x11\n\x07genesis\x18\x02 \x01(\x08H\x00\x42\x0e\n\x0cquery_filter\"\xfb\x01\n\x10\x41\x63tiveSetChanges\x12\r\n\x05\x65poch\x18\x01 \x01(\x04\x12\x1d\n\x15\x61\x63tivated_public_keys\x18\x02 \x03(\x0c\x12\x19\n\x11\x61\x63tivated_indices\x18\x03 \x03(\x04\x12\x1a\n\x12\x65xited_public_keys\x18\x04 \x03(\x0c\x12\x16\n\x0e\x65xited_indices\x18\x05 \x03(\x04\x12\x1b\n\x13slashed_public_keys\x18\x06 \x03(\x0c\x12\x17\n\x0fslashed_indices\x18\x07 \x03(\x04\x12\x1b\n\x13\x65jected_public_keys\x18\x08 \x03(\x0c\x12\x17\n\x0f\x65jected_indices\x18\t \x03(\x04\"G\n\x1bValidatorPerformanceRequest\x12\x17\n\x0bpublic_keys\x18\x01 \x03(\x0c\x42\x02\x18\x01\x12\x0f\n\x07indices\x18\x02 \x03(\x04\"\x84\x03\n\x1cValidatorPerformanceResponse\x12\"\n\x1a\x63urrent_effective_balances\x18\x01 \x03(\x04\x12\x17\n\x0finclusion_slots\x18\x02 \x03(\x04\x12\x1b\n\x13inclusion_distances\x18\x03 \x03(\x04\x12\x1e\n\x16\x63orrectly_voted_source\x18\x04 \x03(\x08\x12\x1e\n\x16\x63orrectly_voted_target\x18\x05 \x03(\x08\x12\x1c\n\x14\x63orrectly_voted_head\x18\x06 \x03(\x08\x12(\n balances_before_epoch_transition\x18\x07 \x03(\x04\x12\'\n\x1f\x62\x61lances_after_epoch_transition\x18\x08 \x03(\x04\x12\x1a\n\x12missing_validators\x18\t \x03(\x0c\x12(\n average_active_validator_balance\x18\n \x01(\x02\x12\x13\n\x0bpublic_keys\x18\x0b \x03(\x0c\"\xad\x01\n\x0eValidatorQueue\x12\x13\n\x0b\x63hurn_limit\x18\x01 \x01(\x04\x12\"\n\x16\x61\x63tivation_public_keys\x18\x02 \x03(\x0c\x42\x02\x18\x01\x12\x1c\n\x10\x65xit_public_keys\x18\x03 \x03(\x0c\x42\x02\x18\x01\x12$\n\x1c\x61\x63tivation_validator_indices\x18\x04 \x03(\x04\x12\x1e\n\x16\x65xit_validator_indices\x18\x05 \x03(\x04\"\xa2\x01\n\x1fListValidatorAssignmentsRequest\x12\x0f\n\x05\x65poch\x18\x01 \x01(\x04H\x00\x12\x11\n\x07genesis\x18\x02 \x01(\x08H\x00\x12\x13\n\x0bpublic_keys\x18\x03 \x03(\x0c\x12\x0f\n\x07indices\x18\x04 \x03(\x04\x12\x11\n\tpage_size\x18\x05 \x01(\x05\x12\x12\n\npage_token\x18\x06 \x01(\tB\x0e\n\x0cquery_filter\"\xd4\x02\n\x14ValidatorAssignments\x12\r\n\x05\x65poch\x18\x01 \x01(\x04\x12T\n\x0b\x61ssignments\x18\x02 \x03(\x0b\x32?.ethereum.eth.v1alpha1.ValidatorAssignments.CommitteeAssignment\x12\x17\n\x0fnext_page_token\x18\x03 \x01(\t\x12\x12\n\ntotal_size\x18\x04 \x01(\x05\x1a\xa9\x01\n\x13\x43ommitteeAssignment\x12\x19\n\x11\x62\x65\x61\x63on_committees\x18\x01 \x03(\x04\x12\x17\n\x0f\x63ommittee_index\x18\x02 \x01(\x04\x12\x15\n\rattester_slot\x18\x03 \x01(\x04\x12\x16\n\x0eproposer_slots\x18\x04 \x03(\x04\x12\x16\n\npublic_key\x18\x05 \x01(\x0c\x42\x02\x18\x01\x12\x17\n\x0fvalidator_index\x18\x06 \x01(\x04\"V\n GetValidatorParticipationRequest\x12\x0f\n\x05\x65poch\x18\x01 \x01(\x04H\x00\x12\x11\n\x07genesis\x18\x02 \x01(\x08H\x00\x42\x0e\n\x0cquery_filter\"\x88\x01\n\x1eValidatorParticipationResponse\x12\r\n\x05\x65poch\x18\x01 \x01(\x04\x12\x11\n\tfinalized\x18\x02 \x01(\x08\x12\x44\n\rparticipation\x18\x03 \x01(\x0b\x32-.ethereum.eth.v1alpha1.ValidatorParticipation\"?\n\x16\x41ttestationPoolRequest\x12\x11\n\tpage_size\x18\x01 \x01(\x05\x12\x12\n\npage_token\x18\x02 \x01(\t\"\x80\x01\n\x17\x41ttestationPoolResponse\x12\x38\n\x0c\x61ttestations\x18\x01 \x03(\x0b\x32\".ethereum.eth.v1alpha1.Attestation\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t\x12\x12\n\ntotal_size\x18\x03 \x01(\x05\"~\n\x0c\x42\x65\x61\x63onConfig\x12?\n\x06\x63onfig\x18\x01 \x03(\x0b\x32/.ethereum.eth.v1alpha1.BeaconConfig.ConfigEntry\x1a-\n\x0b\x43onfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"1\n\x16SubmitSlashingResponse\x12\x17\n\x0fslashed_indices\x18\x01 \x03(\x04\"M\n\x16IndividualVotesRequest\x12\r\n\x05\x65poch\x18\x01 \x01(\x04\x12\x13\n\x0bpublic_keys\x18\x02 \x03(\x0c\x12\x0f\n\x07indices\x18\x03 \x03(\x04\"\xed\x04\n\x16IndividualVotesRespond\x12V\n\x10individual_votes\x18\x01 \x03(\x0b\x32<.ethereum.eth.v1alpha1.IndividualVotesRespond.IndividualVote\x1a\xfa\x03\n\x0eIndividualVote\x12\r\n\x05\x65poch\x18\x01 \x01(\x04\x12\x12\n\npublic_key\x18\x02 \x01(\x0c\x12\x17\n\x0fvalidator_index\x18\x03 \x01(\x04\x12\x12\n\nis_slashed\x18\x04 \x01(\x08\x12(\n is_withdrawable_in_current_epoch\x18\x05 \x01(\x08\x12\"\n\x1ais_active_in_current_epoch\x18\x06 \x01(\x08\x12#\n\x1bis_active_in_previous_epoch\x18\x07 \x01(\x08\x12!\n\x19is_current_epoch_attester\x18\x08 \x01(\x08\x12(\n is_current_epoch_target_attester\x18\t \x01(\x08\x12\"\n\x1ais_previous_epoch_attester\x18\n \x01(\x08\x12)\n!is_previous_epoch_target_attester\x18\x0b \x01(\x08\x12\'\n\x1fis_previous_epoch_head_attester\x18\x0c \x01(\x08\x12,\n$current_epoch_effective_balance_gwei\x18\r \x01(\x04\x12\x16\n\x0einclusion_slot\x18\x0e \x01(\x04\x12\x1a\n\x12inclusion_distance\x18\x0f \x01(\x04\"S\n\x1aWeakSubjectivityCheckpoint\x12\x12\n\nblock_root\x18\x01 \x01(\x0c\x12\x12\n\nstate_root\x18\x02 \x01(\x0c\x12\r\n\x05\x65poch\x18\x03 \x01(\x04*V\n\tSetAction\x12\x16\n\x12\x41\x44\x44_VALIDATOR_KEYS\x10\x00\x12\x19\n\x15REMOVE_VALIDATOR_KEYS\x10\x01\x12\x16\n\x12SET_VALIDATOR_KEYS\x10\x02\x32\x93\x1d\n\x0b\x42\x65\x61\x63onChain\x12\x9e\x01\n\x10ListAttestations\x12..ethereum.eth.v1alpha1.ListAttestationsRequest\x1a/.ethereum.eth.v1alpha1.ListAttestationsResponse\")\x82\xd3\xe4\x93\x02#\x12!/eth/v1alpha1/beacon/attestations\x12\xbb\x01\n\x17ListIndexedAttestations\x12\x35.ethereum.eth.v1alpha1.ListIndexedAttestationsRequest\x1a\x36.ethereum.eth.v1alpha1.ListIndexedAttestationsResponse\"1\x82\xd3\xe4\x93\x02+\x12)/eth/v1alpha1/beacon/attestations/indexed\x12\x84\x01\n\x12StreamAttestations\x12\x16.google.protobuf.Empty\x1a\".ethereum.eth.v1alpha1.Attestation\"0\x82\xd3\xe4\x93\x02*\x12(/eth/v1alpha1/beacon/attestations/stream0\x01\x12\x9a\x01\n\x19StreamIndexedAttestations\x12\x16.google.protobuf.Empty\x1a).ethereum.eth.v1alpha1.IndexedAttestation\"8\x82\xd3\xe4\x93\x02\x32\x12\x30/eth/v1alpha1/beacon/attestations/indexed/stream0\x01\x12\xa0\x01\n\x0f\x41ttestationPool\x12-.ethereum.eth.v1alpha1.AttestationPoolRequest\x1a..ethereum.eth.v1alpha1.AttestationPoolResponse\".\x82\xd3\xe4\x93\x02(\x12&/eth/v1alpha1/beacon/attestations/pool\x12\x86\x01\n\nListBlocks\x12(.ethereum.eth.v1alpha1.ListBlocksRequest\x1a).ethereum.eth.v1alpha1.ListBlocksResponse\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/eth/v1alpha1/beacon/blocks\x12\x92\x01\n\x0cStreamBlocks\x12*.ethereum.eth.v1alpha1.StreamBlocksRequest\x1a(.ethereum.eth.v1alpha1.SignedBeaconBlock\"*\x82\xd3\xe4\x93\x02$\x12\"/eth/v1alpha1/beacon/blocks/stream0\x01\x12|\n\x0fStreamChainHead\x12\x16.google.protobuf.Empty\x1a .ethereum.eth.v1alpha1.ChainHead\"-\x82\xd3\xe4\x93\x02\'\x12%/eth/v1alpha1/beacon/chainhead/stream0\x01\x12p\n\x0cGetChainHead\x12\x16.google.protobuf.Empty\x1a .ethereum.eth.v1alpha1.ChainHead\"&\x82\xd3\xe4\x93\x02 \x12\x1e/eth/v1alpha1/beacon/chainhead\x12\xa5\x01\n\x1dGetWeakSubjectivityCheckpoint\x12\x16.google.protobuf.Empty\x1a\x31.ethereum.eth.v1alpha1.WeakSubjectivityCheckpoint\"9\x82\xd3\xe4\x93\x02\x33\x12\x31/eth/v1alpha1/beacon/weak_subjectivity_checkpoint\x12\x96\x01\n\x14ListBeaconCommittees\x12,.ethereum.eth.v1alpha1.ListCommitteesRequest\x1a\'.ethereum.eth.v1alpha1.BeaconCommittees\"\'\x82\xd3\xe4\x93\x02!\x12\x1f/eth/v1alpha1/beacon/committees\x12\xa1\x01\n\x15ListValidatorBalances\x12\x33.ethereum.eth.v1alpha1.ListValidatorBalancesRequest\x1a(.ethereum.eth.v1alpha1.ValidatorBalances\")\x82\xd3\xe4\x93\x02#\x12!/eth/v1alpha1/validators/balances\x12\x83\x01\n\x0eListValidators\x12,.ethereum.eth.v1alpha1.ListValidatorsRequest\x1a!.ethereum.eth.v1alpha1.Validators\" \x82\xd3\xe4\x93\x02\x1a\x12\x18/eth/v1alpha1/validators\x12}\n\x0cGetValidator\x12*.ethereum.eth.v1alpha1.GetValidatorRequest\x1a .ethereum.eth.v1alpha1.Validator\"\x1f\x82\xd3\xe4\x93\x02\x19\x12\x17/eth/v1alpha1/validator\x12\xb6\x01\n\x1cGetValidatorActiveSetChanges\x12:.ethereum.eth.v1alpha1.GetValidatorActiveSetChangesRequest\x1a\'.ethereum.eth.v1alpha1.ActiveSetChanges\"1\x82\xd3\xe4\x93\x02+\x12)/eth/v1alpha1/validators/activesetchanges\x12z\n\x11GetValidatorQueue\x12\x16.google.protobuf.Empty\x1a%.ethereum.eth.v1alpha1.ValidatorQueue\"&\x82\xd3\xe4\x93\x02 \x12\x1e/eth/v1alpha1/validators/queue\x12\xb0\x01\n\x17GetValidatorPerformance\x12\x32.ethereum.eth.v1alpha1.ValidatorPerformanceRequest\x1a\x33.ethereum.eth.v1alpha1.ValidatorPerformanceResponse\",\x82\xd3\xe4\x93\x02&\x12$/eth/v1alpha1/validators/performance\x12\xad\x01\n\x18ListValidatorAssignments\x12\x36.ethereum.eth.v1alpha1.ListValidatorAssignmentsRequest\x1a+.ethereum.eth.v1alpha1.ValidatorAssignments\",\x82\xd3\xe4\x93\x02&\x12$/eth/v1alpha1/validators/assignments\x12\xbb\x01\n\x19GetValidatorParticipation\x12\x37.ethereum.eth.v1alpha1.GetValidatorParticipationRequest\x1a\x35.ethereum.eth.v1alpha1.ValidatorParticipationResponse\".\x82\xd3\xe4\x93\x02(\x12&/eth/v1alpha1/validators/participation\x12s\n\x0fGetBeaconConfig\x12\x16.google.protobuf.Empty\x1a#.ethereum.eth.v1alpha1.BeaconConfig\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/eth/v1alpha1/beacon/config\x12\xa0\x01\n\x14StreamValidatorsInfo\x12).ethereum.eth.v1alpha1.ValidatorChangeSet\x1a$.ethereum.eth.v1alpha1.ValidatorInfo\"3\x82\xd3\xe4\x93\x02-\x12+/eth/v1alpha1/beacon/validators/info/stream(\x01\x30\x01\x12\xa8\x01\n\x16SubmitAttesterSlashing\x12\'.ethereum.eth.v1alpha1.AttesterSlashing\x1a-.ethereum.eth.v1alpha1.SubmitSlashingResponse\"6\x82\xd3\xe4\x93\x02\x30\x12./eth/v1alpha1/beacon/slashings/attester/submit\x12\xa8\x01\n\x16SubmitProposerSlashing\x12\'.ethereum.eth.v1alpha1.ProposerSlashing\x1a-.ethereum.eth.v1alpha1.SubmitSlashingResponse\"6\x82\xd3\xe4\x93\x02\x30\x12./eth/v1alpha1/beacon/slashings/proposer/submit\x12\xa1\x01\n\x12GetIndividualVotes\x12-.ethereum.eth.v1alpha1.IndividualVotesRequest\x1a-.ethereum.eth.v1alpha1.IndividualVotesRespond\"-\x82\xd3\xe4\x93\x02\'\x12%/eth/v1alpha1/beacon/individual_votesb\x06proto3'
+  serialized_pb=b'\n\x1f\x65th/v1alpha1/beacon_chain.proto\x12\x15\x65thereum.eth.v1alpha1\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x15\x65th/ext/options.proto\x1a\x1e\x65th/v1alpha1/attestation.proto\x1a\x1f\x65th/v1alpha1/beacon_block.proto\x1a\x1c\x65th/v1alpha1/validator.proto\"[\n\x12ValidatorChangeSet\x12\x30\n\x06\x61\x63tion\x18\x01 \x01(\x0e\x32 .ethereum.eth.v1alpha1.SetAction\x12\x13\n\x0bpublic_keys\x18\x02 \x03(\x0c\"\xb0\x01\n\x1eListIndexedAttestationsRequest\x12>\n\x05\x65poch\x18\x01 \x01(\x04\x42-\x82\xb5\x18)github.com/prysmaticlabs/eth2-types.EpochH\x00\x12\x17\n\rgenesis_epoch\x18\x02 \x01(\x08H\x00\x12\x11\n\tpage_size\x18\x03 \x01(\x05\x12\x12\n\npage_token\x18\x04 \x01(\tB\x0e\n\x0cquery_filter\"\xa9\x01\n\x17ListAttestationsRequest\x12>\n\x05\x65poch\x18\x01 \x01(\x04\x42-\x82\xb5\x18)github.com/prysmaticlabs/eth2-types.EpochH\x00\x12\x17\n\rgenesis_epoch\x18\x02 \x01(\x08H\x00\x12\x11\n\tpage_size\x18\x03 \x01(\x05\x12\x12\n\npage_token\x18\x04 \x01(\tB\x0e\n\x0cquery_filter\"\x81\x01\n\x18ListAttestationsResponse\x12\x38\n\x0c\x61ttestations\x18\x01 \x03(\x0b\x32\".ethereum.eth.v1alpha1.Attestation\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t\x12\x12\n\ntotal_size\x18\x03 \x01(\x05\"\x97\x01\n\x1fListIndexedAttestationsResponse\x12G\n\x14indexed_attestations\x18\x01 \x03(\x0b\x32).ethereum.eth.v1alpha1.IndexedAttestation\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t\x12\x12\n\ntotal_size\x18\x03 \x01(\x05\"\xeb\x01\n\x11ListBlocksRequest\x12\x0e\n\x04root\x18\x01 \x01(\x0cH\x00\x12<\n\x04slot\x18\x02 \x01(\x04\x42,\x82\xb5\x18(github.com/prysmaticlabs/eth2-types.SlotH\x00\x12>\n\x05\x65poch\x18\x03 \x01(\x04\x42-\x82\xb5\x18)github.com/prysmaticlabs/eth2-types.EpochH\x00\x12\x11\n\x07genesis\x18\x04 \x01(\x08H\x00\x12\x11\n\tpage_size\x18\x05 \x01(\x05\x12\x12\n\npage_token\x18\x06 \x01(\tB\x0e\n\x0cquery_filter\"\x87\x01\n\x12ListBlocksResponse\x12\x44\n\x0f\x62lockContainers\x18\x01 \x03(\x0b\x32+.ethereum.eth.v1alpha1.BeaconBlockContainer\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t\x12\x12\n\ntotal_size\x18\x03 \x01(\x05\",\n\x13StreamBlocksRequest\x12\x15\n\rverified_only\x18\x01 \x01(\x08\"v\n\x14\x42\x65\x61\x63onBlockContainer\x12\x37\n\x05\x62lock\x18\x01 \x01(\x0b\x32(.ethereum.eth.v1alpha1.SignedBeaconBlock\x12\x12\n\nblock_root\x18\x02 \x01(\x0c\x12\x11\n\tcanonical\x18\x03 \x01(\x08\"\xe7\x05\n\tChainHead\x12?\n\thead_slot\x18\x01 \x01(\x04\x42,\x82\xb5\x18(github.com/prysmaticlabs/eth2-types.Slot\x12\x41\n\nhead_epoch\x18\x02 \x01(\x04\x42-\x82\xb5\x18)github.com/prysmaticlabs/eth2-types.Epoch\x12\x1f\n\x0fhead_block_root\x18\x03 \x01(\x0c\x42\x06\x8a\xb5\x18\x02\x33\x32\x12\x44\n\x0e\x66inalized_slot\x18\x04 \x01(\x04\x42,\x82\xb5\x18(github.com/prysmaticlabs/eth2-types.Slot\x12\x46\n\x0f\x66inalized_epoch\x18\x05 \x01(\x04\x42-\x82\xb5\x18)github.com/prysmaticlabs/eth2-types.Epoch\x12$\n\x14\x66inalized_block_root\x18\x06 \x01(\x0c\x42\x06\x8a\xb5\x18\x02\x33\x32\x12\x44\n\x0ejustified_slot\x18\x07 \x01(\x04\x42,\x82\xb5\x18(github.com/prysmaticlabs/eth2-types.Slot\x12\x46\n\x0fjustified_epoch\x18\x08 \x01(\x04\x42-\x82\xb5\x18)github.com/prysmaticlabs/eth2-types.Epoch\x12$\n\x14justified_block_root\x18\t \x01(\x0c\x42\x06\x8a\xb5\x18\x02\x33\x32\x12M\n\x17previous_justified_slot\x18\n \x01(\x04\x42,\x82\xb5\x18(github.com/prysmaticlabs/eth2-types.Slot\x12O\n\x18previous_justified_epoch\x18\x0b \x01(\x04\x42-\x82\xb5\x18)github.com/prysmaticlabs/eth2-types.Epoch\x12-\n\x1dprevious_justified_block_root\x18\x0c \x01(\x0c\x42\x06\x8a\xb5\x18\x02\x33\x32\"z\n\x15ListCommitteesRequest\x12>\n\x05\x65poch\x18\x01 \x01(\x04\x42-\x82\xb5\x18)github.com/prysmaticlabs/eth2-types.EpochH\x00\x12\x11\n\x07genesis\x18\x02 \x01(\x08H\x00\x42\x0e\n\x0cquery_filter\"\xe9\x03\n\x10\x42\x65\x61\x63onCommittees\x12<\n\x05\x65poch\x18\x01 \x01(\x04\x42-\x82\xb5\x18)github.com/prysmaticlabs/eth2-types.Epoch\x12K\n\ncommittees\x18\x02 \x03(\x0b\x32\x37.ethereum.eth.v1alpha1.BeaconCommittees.CommitteesEntry\x12\x1e\n\x16\x61\x63tive_validator_count\x18\x03 \x01(\x04\x1a\x62\n\rCommitteeItem\x12Q\n\x11validator_indices\x18\x01 \x03(\x04\x42\x36\x82\xb5\x18\x32github.com/prysmaticlabs/eth2-types.ValidatorIndex\x1a[\n\x0e\x43ommitteesList\x12I\n\ncommittees\x18\x01 \x03(\x0b\x32\x35.ethereum.eth.v1alpha1.BeaconCommittees.CommitteeItem\x1ai\n\x0f\x43ommitteesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x04\x12\x45\n\x05value\x18\x02 \x01(\x0b\x32\x36.ethereum.eth.v1alpha1.BeaconCommittees.CommitteesList:\x02\x38\x01\"\x90\x02\n\x1cListValidatorBalancesRequest\x12>\n\x05\x65poch\x18\x01 \x01(\x04\x42-\x82\xb5\x18)github.com/prysmaticlabs/eth2-types.EpochH\x00\x12\x11\n\x07genesis\x18\x02 \x01(\x08H\x00\x12\x1d\n\x0bpublic_keys\x18\x03 \x03(\x0c\x42\x08\x8a\xb5\x18\x04?,48\x12G\n\x07indices\x18\x04 \x03(\x04\x42\x36\x82\xb5\x18\x32github.com/prysmaticlabs/eth2-types.ValidatorIndex\x12\x11\n\tpage_size\x18\x05 \x01(\x05\x12\x12\n\npage_token\x18\x06 \x01(\tB\x0e\n\x0cquery_filter\"\xd2\x02\n\x11ValidatorBalances\x12<\n\x05\x65poch\x18\x01 \x01(\x04\x42-\x82\xb5\x18)github.com/prysmaticlabs/eth2-types.Epoch\x12\x42\n\x08\x62\x61lances\x18\x02 \x03(\x0b\x32\x30.ethereum.eth.v1alpha1.ValidatorBalances.Balance\x12\x17\n\x0fnext_page_token\x18\x03 \x01(\t\x12\x12\n\ntotal_size\x18\x04 \x01(\x05\x1a\x8d\x01\n\x07\x42\x61lance\x12\x1a\n\npublic_key\x18\x01 \x01(\x0c\x42\x06\x8a\xb5\x18\x02\x34\x38\x12\x45\n\x05index\x18\x02 \x01(\x04\x42\x36\x82\xb5\x18\x32github.com/prysmaticlabs/eth2-types.ValidatorIndex\x12\x0f\n\x07\x62\x61lance\x18\x03 \x01(\x04\x12\x0e\n\x06status\x18\x04 \x01(\t\"\x8f\x02\n\x15ListValidatorsRequest\x12>\n\x05\x65poch\x18\x01 \x01(\x04\x42-\x82\xb5\x18)github.com/prysmaticlabs/eth2-types.EpochH\x00\x12\x11\n\x07genesis\x18\x02 \x01(\x08H\x00\x12\x0e\n\x06\x61\x63tive\x18\x03 \x01(\x08\x12\x11\n\tpage_size\x18\x04 \x01(\x05\x12\x12\n\npage_token\x18\x05 \x01(\t\x12\x13\n\x0bpublic_keys\x18\x06 \x03(\x0c\x12G\n\x07indices\x18\x07 \x03(\x04\x42\x36\x82\xb5\x18\x32github.com/prysmaticlabs/eth2-types.ValidatorIndexB\x0e\n\x0cquery_filter\"\x8c\x01\n\x13GetValidatorRequest\x12G\n\x05index\x18\x01 \x01(\x04\x42\x36\x82\xb5\x18\x32github.com/prysmaticlabs/eth2-types.ValidatorIndexH\x00\x12\x1c\n\npublic_key\x18\x02 \x01(\x0c\x42\x06\x8a\xb5\x18\x02\x34\x38H\x00\x42\x0e\n\x0cquery_filter\"\xd8\x02\n\nValidators\x12<\n\x05\x65poch\x18\x01 \x01(\x04\x42-\x82\xb5\x18)github.com/prysmaticlabs/eth2-types.Epoch\x12L\n\x0evalidator_list\x18\x02 \x03(\x0b\x32\x34.ethereum.eth.v1alpha1.Validators.ValidatorContainer\x12\x17\n\x0fnext_page_token\x18\x03 \x01(\t\x12\x12\n\ntotal_size\x18\x04 \x01(\x05\x1a\x90\x01\n\x12ValidatorContainer\x12\x45\n\x05index\x18\x01 \x01(\x04\x42\x36\x82\xb5\x18\x32github.com/prysmaticlabs/eth2-types.ValidatorIndex\x12\x33\n\tvalidator\x18\x02 \x01(\x0b\x32 .ethereum.eth.v1alpha1.Validator\"\x88\x01\n#GetValidatorActiveSetChangesRequest\x12>\n\x05\x65poch\x18\x01 \x01(\x04\x42-\x82\xb5\x18)github.com/prysmaticlabs/eth2-types.EpochH\x00\x12\x11\n\x07genesis\x18\x02 \x01(\x08H\x00\x42\x0e\n\x0cquery_filter\"\xb2\x04\n\x10\x41\x63tiveSetChanges\x12<\n\x05\x65poch\x18\x01 \x01(\x04\x42-\x82\xb5\x18)github.com/prysmaticlabs/eth2-types.Epoch\x12\'\n\x15\x61\x63tivated_public_keys\x18\x02 \x03(\x0c\x42\x08\x8a\xb5\x18\x04?,48\x12Q\n\x11\x61\x63tivated_indices\x18\x03 \x03(\x04\x42\x36\x82\xb5\x18\x32github.com/prysmaticlabs/eth2-types.ValidatorIndex\x12$\n\x12\x65xited_public_keys\x18\x04 \x03(\x0c\x42\x08\x8a\xb5\x18\x04?,48\x12N\n\x0e\x65xited_indices\x18\x05 \x03(\x04\x42\x36\x82\xb5\x18\x32github.com/prysmaticlabs/eth2-types.ValidatorIndex\x12%\n\x13slashed_public_keys\x18\x06 \x03(\x0c\x42\x08\x8a\xb5\x18\x04?,48\x12O\n\x0fslashed_indices\x18\x07 \x03(\x04\x42\x36\x82\xb5\x18\x32github.com/prysmaticlabs/eth2-types.ValidatorIndex\x12%\n\x13\x65jected_public_keys\x18\x08 \x03(\x0c\x42\x08\x8a\xb5\x18\x04?,48\x12O\n\x0f\x65jected_indices\x18\t \x03(\x04\x42\x36\x82\xb5\x18\x32github.com/prysmaticlabs/eth2-types.ValidatorIndex\"\x7f\n\x1bValidatorPerformanceRequest\x12\x17\n\x0bpublic_keys\x18\x01 \x03(\x0c\x42\x02\x18\x01\x12G\n\x07indices\x18\x02 \x03(\x04\x42\x36\x82\xb5\x18\x32github.com/prysmaticlabs/eth2-types.ValidatorIndex\"\xea\x03\n\x1cValidatorPerformanceResponse\x12\"\n\x1a\x63urrent_effective_balances\x18\x01 \x03(\x04\x12\x45\n\x0finclusion_slots\x18\x02 \x03(\x04\x42,\x82\xb5\x18(github.com/prysmaticlabs/eth2-types.Slot\x12I\n\x13inclusion_distances\x18\x03 \x03(\x04\x42,\x82\xb5\x18(github.com/prysmaticlabs/eth2-types.Slot\x12\x1e\n\x16\x63orrectly_voted_source\x18\x04 \x03(\x08\x12\x1e\n\x16\x63orrectly_voted_target\x18\x05 \x03(\x08\x12\x1c\n\x14\x63orrectly_voted_head\x18\x06 \x03(\x08\x12(\n balances_before_epoch_transition\x18\x07 \x03(\x04\x12\'\n\x1f\x62\x61lances_after_epoch_transition\x18\x08 \x03(\x04\x12\x1a\n\x12missing_validators\x18\t \x03(\x0c\x12(\n average_active_validator_balance\x18\n \x01(\x02\x12\x1d\n\x0bpublic_keys\x18\x0b \x03(\x0c\x42\x08\x8a\xb5\x18\x04?,48\"\xad\x02\n\x0eValidatorQueue\x12\x13\n\x0b\x63hurn_limit\x18\x01 \x01(\x04\x12*\n\x16\x61\x63tivation_public_keys\x18\x02 \x03(\x0c\x42\n\x18\x01\x8a\xb5\x18\x04?,48\x12$\n\x10\x65xit_public_keys\x18\x03 \x03(\x0c\x42\n\x18\x01\x8a\xb5\x18\x04?,48\x12\\\n\x1c\x61\x63tivation_validator_indices\x18\x04 \x03(\x04\x42\x36\x82\xb5\x18\x32github.com/prysmaticlabs/eth2-types.ValidatorIndex\x12V\n\x16\x65xit_validator_indices\x18\x05 \x03(\x04\x42\x36\x82\xb5\x18\x32github.com/prysmaticlabs/eth2-types.ValidatorIndex\"\x93\x02\n\x1fListValidatorAssignmentsRequest\x12>\n\x05\x65poch\x18\x01 \x01(\x04\x42-\x82\xb5\x18)github.com/prysmaticlabs/eth2-types.EpochH\x00\x12\x11\n\x07genesis\x18\x02 \x01(\x08H\x00\x12\x1d\n\x0bpublic_keys\x18\x03 \x03(\x0c\x42\x08\x8a\xb5\x18\x04?,48\x12G\n\x07indices\x18\x04 \x03(\x04\x42\x36\x82\xb5\x18\x32github.com/prysmaticlabs/eth2-types.ValidatorIndex\x12\x11\n\tpage_size\x18\x05 \x01(\x05\x12\x12\n\npage_token\x18\x06 \x01(\tB\x0e\n\x0cquery_filter\"\x8d\x05\n\x14ValidatorAssignments\x12<\n\x05\x65poch\x18\x01 \x01(\x04\x42-\x82\xb5\x18)github.com/prysmaticlabs/eth2-types.Epoch\x12T\n\x0b\x61ssignments\x18\x02 \x03(\x0b\x32?.ethereum.eth.v1alpha1.ValidatorAssignments.CommitteeAssignment\x12\x17\n\x0fnext_page_token\x18\x03 \x01(\t\x12\x12\n\ntotal_size\x18\x04 \x01(\x05\x1a\xb3\x03\n\x13\x43ommitteeAssignment\x12Q\n\x11\x62\x65\x61\x63on_committees\x18\x01 \x03(\x04\x42\x36\x82\xb5\x18\x32github.com/prysmaticlabs/eth2-types.ValidatorIndex\x12O\n\x0f\x63ommittee_index\x18\x02 \x01(\x04\x42\x36\x82\xb5\x18\x32github.com/prysmaticlabs/eth2-types.CommitteeIndex\x12\x43\n\rattester_slot\x18\x03 \x01(\x04\x42,\x82\xb5\x18(github.com/prysmaticlabs/eth2-types.Slot\x12\x44\n\x0eproposer_slots\x18\x04 \x03(\x04\x42,\x82\xb5\x18(github.com/prysmaticlabs/eth2-types.Slot\x12\x1c\n\npublic_key\x18\x05 \x01(\x0c\x42\x08\x18\x01\x8a\xb5\x18\x02\x34\x38\x12O\n\x0fvalidator_index\x18\x06 \x01(\x04\x42\x36\x82\xb5\x18\x32github.com/prysmaticlabs/eth2-types.ValidatorIndex\"\x85\x01\n GetValidatorParticipationRequest\x12>\n\x05\x65poch\x18\x01 \x01(\x04\x42-\x82\xb5\x18)github.com/prysmaticlabs/eth2-types.EpochH\x00\x12\x11\n\x07genesis\x18\x02 \x01(\x08H\x00\x42\x0e\n\x0cquery_filter\"\xb7\x01\n\x1eValidatorParticipationResponse\x12<\n\x05\x65poch\x18\x01 \x01(\x04\x42-\x82\xb5\x18)github.com/prysmaticlabs/eth2-types.Epoch\x12\x11\n\tfinalized\x18\x02 \x01(\x08\x12\x44\n\rparticipation\x18\x03 \x01(\x0b\x32-.ethereum.eth.v1alpha1.ValidatorParticipation\"?\n\x16\x41ttestationPoolRequest\x12\x11\n\tpage_size\x18\x01 \x01(\x05\x12\x12\n\npage_token\x18\x02 \x01(\t\"\x80\x01\n\x17\x41ttestationPoolResponse\x12\x38\n\x0c\x61ttestations\x18\x01 \x03(\x0b\x32\".ethereum.eth.v1alpha1.Attestation\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t\x12\x12\n\ntotal_size\x18\x03 \x01(\x05\"~\n\x0c\x42\x65\x61\x63onConfig\x12?\n\x06\x63onfig\x18\x01 \x03(\x0b\x32/.ethereum.eth.v1alpha1.BeaconConfig.ConfigEntry\x1a-\n\x0b\x43onfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"i\n\x16SubmitSlashingResponse\x12O\n\x0fslashed_indices\x18\x01 \x03(\x04\x42\x36\x82\xb5\x18\x32github.com/prysmaticlabs/eth2-types.ValidatorIndex\"\xb4\x01\n\x16IndividualVotesRequest\x12<\n\x05\x65poch\x18\x01 \x01(\x04\x42-\x82\xb5\x18)github.com/prysmaticlabs/eth2-types.Epoch\x12\x13\n\x0bpublic_keys\x18\x02 \x03(\x0c\x12G\n\x07indices\x18\x03 \x03(\x04\x42\x36\x82\xb5\x18\x32github.com/prysmaticlabs/eth2-types.ValidatorIndex\"\xb0\x06\n\x16IndividualVotesRespond\x12V\n\x10individual_votes\x18\x01 \x03(\x0b\x32<.ethereum.eth.v1alpha1.IndividualVotesRespond.IndividualVote\x1a\xbd\x05\n\x0eIndividualVote\x12<\n\x05\x65poch\x18\x01 \x01(\x04\x42-\x82\xb5\x18)github.com/prysmaticlabs/eth2-types.Epoch\x12\x12\n\npublic_key\x18\x02 \x01(\x0c\x12O\n\x0fvalidator_index\x18\x03 \x01(\x04\x42\x36\x82\xb5\x18\x32github.com/prysmaticlabs/eth2-types.ValidatorIndex\x12\x12\n\nis_slashed\x18\x04 \x01(\x08\x12(\n is_withdrawable_in_current_epoch\x18\x05 \x01(\x08\x12\"\n\x1ais_active_in_current_epoch\x18\x06 \x01(\x08\x12#\n\x1bis_active_in_previous_epoch\x18\x07 \x01(\x08\x12!\n\x19is_current_epoch_attester\x18\x08 \x01(\x08\x12(\n is_current_epoch_target_attester\x18\t \x01(\x08\x12\"\n\x1ais_previous_epoch_attester\x18\n \x01(\x08\x12)\n!is_previous_epoch_target_attester\x18\x0b \x01(\x08\x12\'\n\x1fis_previous_epoch_head_attester\x18\x0c \x01(\x08\x12,\n$current_epoch_effective_balance_gwei\x18\r \x01(\x04\x12\x44\n\x0einclusion_slot\x18\x0e \x01(\x04\x42,\x82\xb5\x18(github.com/prysmaticlabs/eth2-types.Slot\x12H\n\x12inclusion_distance\x18\x0f \x01(\x04\x42,\x82\xb5\x18(github.com/prysmaticlabs/eth2-types.Slot\"\x82\x01\n\x1aWeakSubjectivityCheckpoint\x12\x12\n\nblock_root\x18\x01 \x01(\x0c\x12\x12\n\nstate_root\x18\x02 \x01(\x0c\x12<\n\x05\x65poch\x18\x03 \x01(\x04\x42-\x82\xb5\x18)github.com/prysmaticlabs/eth2-types.Epoch*V\n\tSetAction\x12\x16\n\x12\x41\x44\x44_VALIDATOR_KEYS\x10\x00\x12\x19\n\x15REMOVE_VALIDATOR_KEYS\x10\x01\x12\x16\n\x12SET_VALIDATOR_KEYS\x10\x02\x32\x93\x1d\n\x0b\x42\x65\x61\x63onChain\x12\x9e\x01\n\x10ListAttestations\x12..ethereum.eth.v1alpha1.ListAttestationsRequest\x1a/.ethereum.eth.v1alpha1.ListAttestationsResponse\")\x82\xd3\xe4\x93\x02#\x12!/eth/v1alpha1/beacon/attestations\x12\xbb\x01\n\x17ListIndexedAttestations\x12\x35.ethereum.eth.v1alpha1.ListIndexedAttestationsRequest\x1a\x36.ethereum.eth.v1alpha1.ListIndexedAttestationsResponse\"1\x82\xd3\xe4\x93\x02+\x12)/eth/v1alpha1/beacon/attestations/indexed\x12\x84\x01\n\x12StreamAttestations\x12\x16.google.protobuf.Empty\x1a\".ethereum.eth.v1alpha1.Attestation\"0\x82\xd3\xe4\x93\x02*\x12(/eth/v1alpha1/beacon/attestations/stream0\x01\x12\x9a\x01\n\x19StreamIndexedAttestations\x12\x16.google.protobuf.Empty\x1a).ethereum.eth.v1alpha1.IndexedAttestation\"8\x82\xd3\xe4\x93\x02\x32\x12\x30/eth/v1alpha1/beacon/attestations/indexed/stream0\x01\x12\xa0\x01\n\x0f\x41ttestationPool\x12-.ethereum.eth.v1alpha1.AttestationPoolRequest\x1a..ethereum.eth.v1alpha1.AttestationPoolResponse\".\x82\xd3\xe4\x93\x02(\x12&/eth/v1alpha1/beacon/attestations/pool\x12\x86\x01\n\nListBlocks\x12(.ethereum.eth.v1alpha1.ListBlocksRequest\x1a).ethereum.eth.v1alpha1.ListBlocksResponse\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/eth/v1alpha1/beacon/blocks\x12\x92\x01\n\x0cStreamBlocks\x12*.ethereum.eth.v1alpha1.StreamBlocksRequest\x1a(.ethereum.eth.v1alpha1.SignedBeaconBlock\"*\x82\xd3\xe4\x93\x02$\x12\"/eth/v1alpha1/beacon/blocks/stream0\x01\x12|\n\x0fStreamChainHead\x12\x16.google.protobuf.Empty\x1a .ethereum.eth.v1alpha1.ChainHead\"-\x82\xd3\xe4\x93\x02\'\x12%/eth/v1alpha1/beacon/chainhead/stream0\x01\x12p\n\x0cGetChainHead\x12\x16.google.protobuf.Empty\x1a .ethereum.eth.v1alpha1.ChainHead\"&\x82\xd3\xe4\x93\x02 \x12\x1e/eth/v1alpha1/beacon/chainhead\x12\xa5\x01\n\x1dGetWeakSubjectivityCheckpoint\x12\x16.google.protobuf.Empty\x1a\x31.ethereum.eth.v1alpha1.WeakSubjectivityCheckpoint\"9\x82\xd3\xe4\x93\x02\x33\x12\x31/eth/v1alpha1/beacon/weak_subjectivity_checkpoint\x12\x96\x01\n\x14ListBeaconCommittees\x12,.ethereum.eth.v1alpha1.ListCommitteesRequest\x1a\'.ethereum.eth.v1alpha1.BeaconCommittees\"\'\x82\xd3\xe4\x93\x02!\x12\x1f/eth/v1alpha1/beacon/committees\x12\xa1\x01\n\x15ListValidatorBalances\x12\x33.ethereum.eth.v1alpha1.ListValidatorBalancesRequest\x1a(.ethereum.eth.v1alpha1.ValidatorBalances\")\x82\xd3\xe4\x93\x02#\x12!/eth/v1alpha1/validators/balances\x12\x83\x01\n\x0eListValidators\x12,.ethereum.eth.v1alpha1.ListValidatorsRequest\x1a!.ethereum.eth.v1alpha1.Validators\" \x82\xd3\xe4\x93\x02\x1a\x12\x18/eth/v1alpha1/validators\x12}\n\x0cGetValidator\x12*.ethereum.eth.v1alpha1.GetValidatorRequest\x1a .ethereum.eth.v1alpha1.Validator\"\x1f\x82\xd3\xe4\x93\x02\x19\x12\x17/eth/v1alpha1/validator\x12\xb6\x01\n\x1cGetValidatorActiveSetChanges\x12:.ethereum.eth.v1alpha1.GetValidatorActiveSetChangesRequest\x1a\'.ethereum.eth.v1alpha1.ActiveSetChanges\"1\x82\xd3\xe4\x93\x02+\x12)/eth/v1alpha1/validators/activesetchanges\x12z\n\x11GetValidatorQueue\x12\x16.google.protobuf.Empty\x1a%.ethereum.eth.v1alpha1.ValidatorQueue\"&\x82\xd3\xe4\x93\x02 \x12\x1e/eth/v1alpha1/validators/queue\x12\xb0\x01\n\x17GetValidatorPerformance\x12\x32.ethereum.eth.v1alpha1.ValidatorPerformanceRequest\x1a\x33.ethereum.eth.v1alpha1.ValidatorPerformanceResponse\",\x82\xd3\xe4\x93\x02&\x12$/eth/v1alpha1/validators/performance\x12\xad\x01\n\x18ListValidatorAssignments\x12\x36.ethereum.eth.v1alpha1.ListValidatorAssignmentsRequest\x1a+.ethereum.eth.v1alpha1.ValidatorAssignments\",\x82\xd3\xe4\x93\x02&\x12$/eth/v1alpha1/validators/assignments\x12\xbb\x01\n\x19GetValidatorParticipation\x12\x37.ethereum.eth.v1alpha1.GetValidatorParticipationRequest\x1a\x35.ethereum.eth.v1alpha1.ValidatorParticipationResponse\".\x82\xd3\xe4\x93\x02(\x12&/eth/v1alpha1/validators/participation\x12s\n\x0fGetBeaconConfig\x12\x16.google.protobuf.Empty\x1a#.ethereum.eth.v1alpha1.BeaconConfig\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/eth/v1alpha1/beacon/config\x12\xa0\x01\n\x14StreamValidatorsInfo\x12).ethereum.eth.v1alpha1.ValidatorChangeSet\x1a$.ethereum.eth.v1alpha1.ValidatorInfo\"3\x82\xd3\xe4\x93\x02-\x12+/eth/v1alpha1/beacon/validators/info/stream(\x01\x30\x01\x12\xa8\x01\n\x16SubmitAttesterSlashing\x12\'.ethereum.eth.v1alpha1.AttesterSlashing\x1a-.ethereum.eth.v1alpha1.SubmitSlashingResponse\"6\x82\xd3\xe4\x93\x02\x30\x12./eth/v1alpha1/beacon/slashings/attester/submit\x12\xa8\x01\n\x16SubmitProposerSlashing\x12\'.ethereum.eth.v1alpha1.ProposerSlashing\x1a-.ethereum.eth.v1alpha1.SubmitSlashingResponse\"6\x82\xd3\xe4\x93\x02\x30\x12./eth/v1alpha1/beacon/slashings/proposer/submit\x12\xa1\x01\n\x12GetIndividualVotes\x12-.ethereum.eth.v1alpha1.IndividualVotesRequest\x1a-.ethereum.eth.v1alpha1.IndividualVotesRespond\"-\x82\xd3\xe4\x93\x02\'\x12%/eth/v1alpha1/beacon/individual_votesB\x97\x01\n\x19org.ethereum.eth.v1alpha1B\x10\x42\x65\x61\x63onChainProtoP\x01Z6github.com/prysmaticlabs/ethereumapis/eth/v1alpha1;eth\xaa\x02\x15\x45thereum.Eth.v1alpha1\xca\x02\x15\x45thereum\\Eth\\v1alpha1b\x06proto3'
   ,
-  dependencies=[google_dot_api_dot_annotations__pb2.DESCRIPTOR,google_dot_protobuf_dot_empty__pb2.DESCRIPTOR,eth_dot_v1alpha1_dot_attestation__pb2.DESCRIPTOR,eth_dot_v1alpha1_dot_beacon__block__pb2.DESCRIPTOR,eth_dot_v1alpha1_dot_validator__pb2.DESCRIPTOR,])
+  dependencies=[google_dot_api_dot_annotations__pb2.DESCRIPTOR,google_dot_protobuf_dot_empty__pb2.DESCRIPTOR,eth_dot_ext_dot_options__pb2.DESCRIPTOR,eth_dot_v1alpha1_dot_attestation__pb2.DESCRIPTOR,eth_dot_v1alpha1_dot_beacon__block__pb2.DESCRIPTOR,eth_dot_v1alpha1_dot_validator__pb2.DESCRIPTOR,])
 
 _SETACTION = _descriptor.EnumDescriptor(
   name='SetAction',
@@ -54,8 +55,8 @@ _SETACTION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=5870,
-  serialized_end=5956,
+  serialized_start=8701,
+  serialized_end=8787,
 )
 _sym_db.RegisterEnumDescriptor(_SETACTION)
 
@@ -100,8 +101,8 @@ _VALIDATORCHANGESET = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=212,
-  serialized_end=303,
+  serialized_start=235,
+  serialized_end=326,
 )
 
 
@@ -119,7 +120,7 @@ _LISTINDEXEDATTESTATIONSREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030)github.com/prysmaticlabs/eth2-types.Epoch', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='genesis_epoch', full_name='ethereum.eth.v1alpha1.ListIndexedAttestationsRequest.genesis_epoch', index=1,
       number=2, type=8, cpp_type=7, label=1,
@@ -158,8 +159,8 @@ _LISTINDEXEDATTESTATIONSREQUEST = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=306,
-  serialized_end=435,
+  serialized_start=329,
+  serialized_end=505,
 )
 
 
@@ -177,7 +178,7 @@ _LISTATTESTATIONSREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030)github.com/prysmaticlabs/eth2-types.Epoch', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='genesis_epoch', full_name='ethereum.eth.v1alpha1.ListAttestationsRequest.genesis_epoch', index=1,
       number=2, type=8, cpp_type=7, label=1,
@@ -216,8 +217,8 @@ _LISTATTESTATIONSREQUEST = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=437,
-  serialized_end=559,
+  serialized_start=508,
+  serialized_end=677,
 )
 
 
@@ -262,8 +263,8 @@ _LISTATTESTATIONSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=562,
-  serialized_end=691,
+  serialized_start=680,
+  serialized_end=809,
 )
 
 
@@ -308,8 +309,8 @@ _LISTINDEXEDATTESTATIONSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=694,
-  serialized_end=845,
+  serialized_start=812,
+  serialized_end=963,
 )
 
 
@@ -334,14 +335,14 @@ _LISTBLOCKSREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030(github.com/prysmaticlabs/eth2-types.Slot', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='epoch', full_name='ethereum.eth.v1alpha1.ListBlocksRequest.epoch', index=2,
       number=3, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030)github.com/prysmaticlabs/eth2-types.Epoch', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='genesis', full_name='ethereum.eth.v1alpha1.ListBlocksRequest.genesis', index=3,
       number=4, type=8, cpp_type=7, label=1,
@@ -380,8 +381,8 @@ _LISTBLOCKSREQUEST = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=848,
-  serialized_end=990,
+  serialized_start=966,
+  serialized_end=1201,
 )
 
 
@@ -426,8 +427,8 @@ _LISTBLOCKSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=993,
-  serialized_end=1128,
+  serialized_start=1204,
+  serialized_end=1339,
 )
 
 
@@ -458,8 +459,8 @@ _STREAMBLOCKSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1130,
-  serialized_end=1174,
+  serialized_start=1341,
+  serialized_end=1385,
 )
 
 
@@ -504,8 +505,8 @@ _BEACONBLOCKCONTAINER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1176,
-  serialized_end=1294,
+  serialized_start=1387,
+  serialized_end=1505,
 )
 
 
@@ -523,84 +524,84 @@ _CHAINHEAD = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030(github.com/prysmaticlabs/eth2-types.Slot', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='head_epoch', full_name='ethereum.eth.v1alpha1.ChainHead.head_epoch', index=1,
       number=2, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030)github.com/prysmaticlabs/eth2-types.Epoch', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='head_block_root', full_name='ethereum.eth.v1alpha1.ChainHead.head_block_root', index=2,
       number=3, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\00232', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='finalized_slot', full_name='ethereum.eth.v1alpha1.ChainHead.finalized_slot', index=3,
       number=4, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030(github.com/prysmaticlabs/eth2-types.Slot', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='finalized_epoch', full_name='ethereum.eth.v1alpha1.ChainHead.finalized_epoch', index=4,
       number=5, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030)github.com/prysmaticlabs/eth2-types.Epoch', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='finalized_block_root', full_name='ethereum.eth.v1alpha1.ChainHead.finalized_block_root', index=5,
       number=6, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\00232', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='justified_slot', full_name='ethereum.eth.v1alpha1.ChainHead.justified_slot', index=6,
       number=7, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030(github.com/prysmaticlabs/eth2-types.Slot', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='justified_epoch', full_name='ethereum.eth.v1alpha1.ChainHead.justified_epoch', index=7,
       number=8, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030)github.com/prysmaticlabs/eth2-types.Epoch', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='justified_block_root', full_name='ethereum.eth.v1alpha1.ChainHead.justified_block_root', index=8,
       number=9, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\00232', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='previous_justified_slot', full_name='ethereum.eth.v1alpha1.ChainHead.previous_justified_slot', index=9,
       number=10, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030(github.com/prysmaticlabs/eth2-types.Slot', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='previous_justified_epoch', full_name='ethereum.eth.v1alpha1.ChainHead.previous_justified_epoch', index=10,
       number=11, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030)github.com/prysmaticlabs/eth2-types.Epoch', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='previous_justified_block_root', full_name='ethereum.eth.v1alpha1.ChainHead.previous_justified_block_root', index=11,
       number=12, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\00232', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -613,8 +614,8 @@ _CHAINHEAD = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1297,
-  serialized_end=1636,
+  serialized_start=1508,
+  serialized_end=2251,
 )
 
 
@@ -632,7 +633,7 @@ _LISTCOMMITTEESREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030)github.com/prysmaticlabs/eth2-types.Epoch', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='genesis', full_name='ethereum.eth.v1alpha1.ListCommitteesRequest.genesis', index=1,
       number=2, type=8, cpp_type=7, label=1,
@@ -657,8 +658,8 @@ _LISTCOMMITTEESREQUEST = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=1638,
-  serialized_end=1713,
+  serialized_start=2253,
+  serialized_end=2375,
 )
 
 
@@ -676,7 +677,7 @@ _BEACONCOMMITTEES_COMMITTEEITEM = _descriptor.Descriptor(
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\0302github.com/prysmaticlabs/eth2-types.ValidatorIndex', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -689,8 +690,8 @@ _BEACONCOMMITTEES_COMMITTEEITEM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1860,
-  serialized_end=1902,
+  serialized_start=2569,
+  serialized_end=2667,
 )
 
 _BEACONCOMMITTEES_COMMITTEESLIST = _descriptor.Descriptor(
@@ -720,8 +721,8 @@ _BEACONCOMMITTEES_COMMITTEESLIST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1904,
-  serialized_end=1995,
+  serialized_start=2669,
+  serialized_end=2760,
 )
 
 _BEACONCOMMITTEES_COMMITTEESENTRY = _descriptor.Descriptor(
@@ -758,8 +759,8 @@ _BEACONCOMMITTEES_COMMITTEESENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1997,
-  serialized_end=2102,
+  serialized_start=2762,
+  serialized_end=2867,
 )
 
 _BEACONCOMMITTEES = _descriptor.Descriptor(
@@ -776,7 +777,7 @@ _BEACONCOMMITTEES = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030)github.com/prysmaticlabs/eth2-types.Epoch', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='committees', full_name='ethereum.eth.v1alpha1.BeaconCommittees.committees', index=1,
       number=2, type=11, cpp_type=10, label=3,
@@ -803,8 +804,8 @@ _BEACONCOMMITTEES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1716,
-  serialized_end=2102,
+  serialized_start=2378,
+  serialized_end=2867,
 )
 
 
@@ -822,7 +823,7 @@ _LISTVALIDATORBALANCESREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030)github.com/prysmaticlabs/eth2-types.Epoch', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='genesis', full_name='ethereum.eth.v1alpha1.ListValidatorBalancesRequest.genesis', index=1,
       number=2, type=8, cpp_type=7, label=1,
@@ -836,14 +837,14 @@ _LISTVALIDATORBALANCESREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\004?,48', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='indices', full_name='ethereum.eth.v1alpha1.ListValidatorBalancesRequest.indices', index=3,
       number=4, type=4, cpp_type=4, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\0302github.com/prysmaticlabs/eth2-types.ValidatorIndex', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='page_size', full_name='ethereum.eth.v1alpha1.ListValidatorBalancesRequest.page_size', index=4,
       number=5, type=5, cpp_type=1, label=1,
@@ -875,8 +876,8 @@ _LISTVALIDATORBALANCESREQUEST = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=2105,
-  serialized_end=2264,
+  serialized_start=2870,
+  serialized_end=3142,
 )
 
 
@@ -894,14 +895,14 @@ _VALIDATORBALANCES_BALANCE = _descriptor.Descriptor(
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\00248', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='index', full_name='ethereum.eth.v1alpha1.ValidatorBalances.Balance.index', index=1,
       number=2, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\0302github.com/prysmaticlabs/eth2-types.ValidatorIndex', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='balance', full_name='ethereum.eth.v1alpha1.ValidatorBalances.Balance.balance', index=2,
       number=3, type=4, cpp_type=4, label=1,
@@ -928,8 +929,8 @@ _VALIDATORBALANCES_BALANCE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2416,
-  serialized_end=2493,
+  serialized_start=3342,
+  serialized_end=3483,
 )
 
 _VALIDATORBALANCES = _descriptor.Descriptor(
@@ -946,7 +947,7 @@ _VALIDATORBALANCES = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030)github.com/prysmaticlabs/eth2-types.Epoch', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='balances', full_name='ethereum.eth.v1alpha1.ValidatorBalances.balances', index=1,
       number=2, type=11, cpp_type=10, label=3,
@@ -980,8 +981,8 @@ _VALIDATORBALANCES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2267,
-  serialized_end=2493,
+  serialized_start=3145,
+  serialized_end=3483,
 )
 
 
@@ -999,7 +1000,7 @@ _LISTVALIDATORSREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030)github.com/prysmaticlabs/eth2-types.Epoch', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='genesis', full_name='ethereum.eth.v1alpha1.ListValidatorsRequest.genesis', index=1,
       number=2, type=8, cpp_type=7, label=1,
@@ -1041,7 +1042,7 @@ _LISTVALIDATORSREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\0302github.com/prysmaticlabs/eth2-types.ValidatorIndex', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -1059,8 +1060,8 @@ _LISTVALIDATORSREQUEST = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=2496,
-  serialized_end=2664,
+  serialized_start=3486,
+  serialized_end=3757,
 )
 
 
@@ -1078,14 +1079,14 @@ _GETVALIDATORREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\0302github.com/prysmaticlabs/eth2-types.ValidatorIndex', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='public_key', full_name='ethereum.eth.v1alpha1.GetValidatorRequest.public_key', index=1,
       number=2, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\00248', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -1103,8 +1104,8 @@ _GETVALIDATORREQUEST = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=2666,
-  serialized_end=2742,
+  serialized_start=3760,
+  serialized_end=3900,
 )
 
 
@@ -1122,7 +1123,7 @@ _VALIDATORS_VALIDATORCONTAINER = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\0302github.com/prysmaticlabs/eth2-types.ValidatorIndex', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='validator', full_name='ethereum.eth.v1alpha1.Validators.ValidatorContainer.validator', index=1,
       number=2, type=11, cpp_type=10, label=1,
@@ -1142,8 +1143,8 @@ _VALIDATORS_VALIDATORCONTAINER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2897,
-  serialized_end=2985,
+  serialized_start=4103,
+  serialized_end=4247,
 )
 
 _VALIDATORS = _descriptor.Descriptor(
@@ -1160,7 +1161,7 @@ _VALIDATORS = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030)github.com/prysmaticlabs/eth2-types.Epoch', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='validator_list', full_name='ethereum.eth.v1alpha1.Validators.validator_list', index=1,
       number=2, type=11, cpp_type=10, label=3,
@@ -1194,8 +1195,8 @@ _VALIDATORS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2745,
-  serialized_end=2985,
+  serialized_start=3903,
+  serialized_end=4247,
 )
 
 
@@ -1213,7 +1214,7 @@ _GETVALIDATORACTIVESETCHANGESREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030)github.com/prysmaticlabs/eth2-types.Epoch', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='genesis', full_name='ethereum.eth.v1alpha1.GetValidatorActiveSetChangesRequest.genesis', index=1,
       number=2, type=8, cpp_type=7, label=1,
@@ -1238,8 +1239,8 @@ _GETVALIDATORACTIVESETCHANGESREQUEST = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=2987,
-  serialized_end=3076,
+  serialized_start=4250,
+  serialized_end=4386,
 )
 
 
@@ -1257,63 +1258,63 @@ _ACTIVESETCHANGES = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030)github.com/prysmaticlabs/eth2-types.Epoch', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='activated_public_keys', full_name='ethereum.eth.v1alpha1.ActiveSetChanges.activated_public_keys', index=1,
       number=2, type=12, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\004?,48', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='activated_indices', full_name='ethereum.eth.v1alpha1.ActiveSetChanges.activated_indices', index=2,
       number=3, type=4, cpp_type=4, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\0302github.com/prysmaticlabs/eth2-types.ValidatorIndex', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='exited_public_keys', full_name='ethereum.eth.v1alpha1.ActiveSetChanges.exited_public_keys', index=3,
       number=4, type=12, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\004?,48', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='exited_indices', full_name='ethereum.eth.v1alpha1.ActiveSetChanges.exited_indices', index=4,
       number=5, type=4, cpp_type=4, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\0302github.com/prysmaticlabs/eth2-types.ValidatorIndex', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='slashed_public_keys', full_name='ethereum.eth.v1alpha1.ActiveSetChanges.slashed_public_keys', index=5,
       number=6, type=12, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\004?,48', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='slashed_indices', full_name='ethereum.eth.v1alpha1.ActiveSetChanges.slashed_indices', index=6,
       number=7, type=4, cpp_type=4, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\0302github.com/prysmaticlabs/eth2-types.ValidatorIndex', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='ejected_public_keys', full_name='ethereum.eth.v1alpha1.ActiveSetChanges.ejected_public_keys', index=7,
       number=8, type=12, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\004?,48', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='ejected_indices', full_name='ethereum.eth.v1alpha1.ActiveSetChanges.ejected_indices', index=8,
       number=9, type=4, cpp_type=4, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\0302github.com/prysmaticlabs/eth2-types.ValidatorIndex', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -1326,8 +1327,8 @@ _ACTIVESETCHANGES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3079,
-  serialized_end=3330,
+  serialized_start=4389,
+  serialized_end=4951,
 )
 
 
@@ -1352,7 +1353,7 @@ _VALIDATORPERFORMANCEREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\0302github.com/prysmaticlabs/eth2-types.ValidatorIndex', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -1365,8 +1366,8 @@ _VALIDATORPERFORMANCEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3332,
-  serialized_end=3403,
+  serialized_start=4953,
+  serialized_end=5080,
 )
 
 
@@ -1391,14 +1392,14 @@ _VALIDATORPERFORMANCERESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030(github.com/prysmaticlabs/eth2-types.Slot', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='inclusion_distances', full_name='ethereum.eth.v1alpha1.ValidatorPerformanceResponse.inclusion_distances', index=2,
       number=3, type=4, cpp_type=4, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030(github.com/prysmaticlabs/eth2-types.Slot', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='correctly_voted_source', full_name='ethereum.eth.v1alpha1.ValidatorPerformanceResponse.correctly_voted_source', index=3,
       number=4, type=8, cpp_type=7, label=3,
@@ -1454,7 +1455,7 @@ _VALIDATORPERFORMANCERESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\004?,48', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -1467,8 +1468,8 @@ _VALIDATORPERFORMANCERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3406,
-  serialized_end=3794,
+  serialized_start=5083,
+  serialized_end=5573,
 )
 
 
@@ -1493,28 +1494,28 @@ _VALIDATORQUEUE = _descriptor.Descriptor(
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=b'\030\001', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\030\001\212\265\030\004?,48', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='exit_public_keys', full_name='ethereum.eth.v1alpha1.ValidatorQueue.exit_public_keys', index=2,
       number=3, type=12, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=b'\030\001', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\030\001\212\265\030\004?,48', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='activation_validator_indices', full_name='ethereum.eth.v1alpha1.ValidatorQueue.activation_validator_indices', index=3,
       number=4, type=4, cpp_type=4, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\0302github.com/prysmaticlabs/eth2-types.ValidatorIndex', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='exit_validator_indices', full_name='ethereum.eth.v1alpha1.ValidatorQueue.exit_validator_indices', index=4,
       number=5, type=4, cpp_type=4, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\0302github.com/prysmaticlabs/eth2-types.ValidatorIndex', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -1527,8 +1528,8 @@ _VALIDATORQUEUE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3797,
-  serialized_end=3970,
+  serialized_start=5576,
+  serialized_end=5877,
 )
 
 
@@ -1546,7 +1547,7 @@ _LISTVALIDATORASSIGNMENTSREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030)github.com/prysmaticlabs/eth2-types.Epoch', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='genesis', full_name='ethereum.eth.v1alpha1.ListValidatorAssignmentsRequest.genesis', index=1,
       number=2, type=8, cpp_type=7, label=1,
@@ -1560,14 +1561,14 @@ _LISTVALIDATORASSIGNMENTSREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\004?,48', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='indices', full_name='ethereum.eth.v1alpha1.ListValidatorAssignmentsRequest.indices', index=3,
       number=4, type=4, cpp_type=4, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\0302github.com/prysmaticlabs/eth2-types.ValidatorIndex', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='page_size', full_name='ethereum.eth.v1alpha1.ListValidatorAssignmentsRequest.page_size', index=4,
       number=5, type=5, cpp_type=1, label=1,
@@ -1599,8 +1600,8 @@ _LISTVALIDATORASSIGNMENTSREQUEST = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=3973,
-  serialized_end=4135,
+  serialized_start=5880,
+  serialized_end=6155,
 )
 
 
@@ -1618,42 +1619,42 @@ _VALIDATORASSIGNMENTS_COMMITTEEASSIGNMENT = _descriptor.Descriptor(
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\0302github.com/prysmaticlabs/eth2-types.ValidatorIndex', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='committee_index', full_name='ethereum.eth.v1alpha1.ValidatorAssignments.CommitteeAssignment.committee_index', index=1,
       number=2, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\0302github.com/prysmaticlabs/eth2-types.CommitteeIndex', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='attester_slot', full_name='ethereum.eth.v1alpha1.ValidatorAssignments.CommitteeAssignment.attester_slot', index=2,
       number=3, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030(github.com/prysmaticlabs/eth2-types.Slot', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='proposer_slots', full_name='ethereum.eth.v1alpha1.ValidatorAssignments.CommitteeAssignment.proposer_slots', index=3,
       number=4, type=4, cpp_type=4, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030(github.com/prysmaticlabs/eth2-types.Slot', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='public_key', full_name='ethereum.eth.v1alpha1.ValidatorAssignments.CommitteeAssignment.public_key', index=4,
       number=5, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=b'\030\001', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\030\001\212\265\030\00248', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='validator_index', full_name='ethereum.eth.v1alpha1.ValidatorAssignments.CommitteeAssignment.validator_index', index=5,
       number=6, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\0302github.com/prysmaticlabs/eth2-types.ValidatorIndex', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -1666,8 +1667,8 @@ _VALIDATORASSIGNMENTS_COMMITTEEASSIGNMENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4309,
-  serialized_end=4478,
+  serialized_start=6376,
+  serialized_end=6811,
 )
 
 _VALIDATORASSIGNMENTS = _descriptor.Descriptor(
@@ -1684,7 +1685,7 @@ _VALIDATORASSIGNMENTS = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030)github.com/prysmaticlabs/eth2-types.Epoch', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='assignments', full_name='ethereum.eth.v1alpha1.ValidatorAssignments.assignments', index=1,
       number=2, type=11, cpp_type=10, label=3,
@@ -1718,8 +1719,8 @@ _VALIDATORASSIGNMENTS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4138,
-  serialized_end=4478,
+  serialized_start=6158,
+  serialized_end=6811,
 )
 
 
@@ -1737,7 +1738,7 @@ _GETVALIDATORPARTICIPATIONREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030)github.com/prysmaticlabs/eth2-types.Epoch', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='genesis', full_name='ethereum.eth.v1alpha1.GetValidatorParticipationRequest.genesis', index=1,
       number=2, type=8, cpp_type=7, label=1,
@@ -1762,8 +1763,8 @@ _GETVALIDATORPARTICIPATIONREQUEST = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=4480,
-  serialized_end=4566,
+  serialized_start=6814,
+  serialized_end=6947,
 )
 
 
@@ -1781,7 +1782,7 @@ _VALIDATORPARTICIPATIONRESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030)github.com/prysmaticlabs/eth2-types.Epoch', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='finalized', full_name='ethereum.eth.v1alpha1.ValidatorParticipationResponse.finalized', index=1,
       number=2, type=8, cpp_type=7, label=1,
@@ -1808,8 +1809,8 @@ _VALIDATORPARTICIPATIONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4569,
-  serialized_end=4705,
+  serialized_start=6950,
+  serialized_end=7133,
 )
 
 
@@ -1847,8 +1848,8 @@ _ATTESTATIONPOOLREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4707,
-  serialized_end=4770,
+  serialized_start=7135,
+  serialized_end=7198,
 )
 
 
@@ -1893,8 +1894,8 @@ _ATTESTATIONPOOLRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4773,
-  serialized_end=4901,
+  serialized_start=7201,
+  serialized_end=7329,
 )
 
 
@@ -1932,8 +1933,8 @@ _BEACONCONFIG_CONFIGENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4984,
-  serialized_end=5029,
+  serialized_start=7412,
+  serialized_end=7457,
 )
 
 _BEACONCONFIG = _descriptor.Descriptor(
@@ -1963,8 +1964,8 @@ _BEACONCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4903,
-  serialized_end=5029,
+  serialized_start=7331,
+  serialized_end=7457,
 )
 
 
@@ -1982,7 +1983,7 @@ _SUBMITSLASHINGRESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\0302github.com/prysmaticlabs/eth2-types.ValidatorIndex', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -1995,8 +1996,8 @@ _SUBMITSLASHINGRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5031,
-  serialized_end=5080,
+  serialized_start=7459,
+  serialized_end=7564,
 )
 
 
@@ -2014,7 +2015,7 @@ _INDIVIDUALVOTESREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030)github.com/prysmaticlabs/eth2-types.Epoch', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='public_keys', full_name='ethereum.eth.v1alpha1.IndividualVotesRequest.public_keys', index=1,
       number=2, type=12, cpp_type=9, label=3,
@@ -2028,7 +2029,7 @@ _INDIVIDUALVOTESREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\0302github.com/prysmaticlabs/eth2-types.ValidatorIndex', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -2041,8 +2042,8 @@ _INDIVIDUALVOTESREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5082,
-  serialized_end=5159,
+  serialized_start=7567,
+  serialized_end=7747,
 )
 
 
@@ -2060,7 +2061,7 @@ _INDIVIDUALVOTESRESPOND_INDIVIDUALVOTE = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030)github.com/prysmaticlabs/eth2-types.Epoch', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='public_key', full_name='ethereum.eth.v1alpha1.IndividualVotesRespond.IndividualVote.public_key', index=1,
       number=2, type=12, cpp_type=9, label=1,
@@ -2074,7 +2075,7 @@ _INDIVIDUALVOTESRESPOND_INDIVIDUALVOTE = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\0302github.com/prysmaticlabs/eth2-types.ValidatorIndex', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='is_slashed', full_name='ethereum.eth.v1alpha1.IndividualVotesRespond.IndividualVote.is_slashed', index=3,
       number=4, type=8, cpp_type=7, label=1,
@@ -2151,14 +2152,14 @@ _INDIVIDUALVOTESRESPOND_INDIVIDUALVOTE = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030(github.com/prysmaticlabs/eth2-types.Slot', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='inclusion_distance', full_name='ethereum.eth.v1alpha1.IndividualVotesRespond.IndividualVote.inclusion_distance', index=14,
       number=15, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030(github.com/prysmaticlabs/eth2-types.Slot', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -2171,8 +2172,8 @@ _INDIVIDUALVOTESRESPOND_INDIVIDUALVOTE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5277,
-  serialized_end=5783,
+  serialized_start=7865,
+  serialized_end=8566,
 )
 
 _INDIVIDUALVOTESRESPOND = _descriptor.Descriptor(
@@ -2202,8 +2203,8 @@ _INDIVIDUALVOTESRESPOND = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5162,
-  serialized_end=5783,
+  serialized_start=7750,
+  serialized_end=8566,
 )
 
 
@@ -2235,7 +2236,7 @@ _WEAKSUBJECTIVITYCHECKPOINT = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\202\265\030)github.com/prysmaticlabs/eth2-types.Epoch', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -2248,8 +2249,8 @@ _WEAKSUBJECTIVITYCHECKPOINT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5785,
-  serialized_end=5868,
+  serialized_start=8569,
+  serialized_end=8699,
 )
 
 _VALIDATORCHANGESET.fields_by_name['action'].enum_type = _SETACTION
@@ -2674,12 +2675,79 @@ WeakSubjectivityCheckpoint = _reflection.GeneratedProtocolMessageType('WeakSubje
 _sym_db.RegisterMessage(WeakSubjectivityCheckpoint)
 
 
+DESCRIPTOR._options = None
+_LISTINDEXEDATTESTATIONSREQUEST.fields_by_name['epoch']._options = None
+_LISTATTESTATIONSREQUEST.fields_by_name['epoch']._options = None
+_LISTBLOCKSREQUEST.fields_by_name['slot']._options = None
+_LISTBLOCKSREQUEST.fields_by_name['epoch']._options = None
+_CHAINHEAD.fields_by_name['head_slot']._options = None
+_CHAINHEAD.fields_by_name['head_epoch']._options = None
+_CHAINHEAD.fields_by_name['head_block_root']._options = None
+_CHAINHEAD.fields_by_name['finalized_slot']._options = None
+_CHAINHEAD.fields_by_name['finalized_epoch']._options = None
+_CHAINHEAD.fields_by_name['finalized_block_root']._options = None
+_CHAINHEAD.fields_by_name['justified_slot']._options = None
+_CHAINHEAD.fields_by_name['justified_epoch']._options = None
+_CHAINHEAD.fields_by_name['justified_block_root']._options = None
+_CHAINHEAD.fields_by_name['previous_justified_slot']._options = None
+_CHAINHEAD.fields_by_name['previous_justified_epoch']._options = None
+_CHAINHEAD.fields_by_name['previous_justified_block_root']._options = None
+_LISTCOMMITTEESREQUEST.fields_by_name['epoch']._options = None
+_BEACONCOMMITTEES_COMMITTEEITEM.fields_by_name['validator_indices']._options = None
 _BEACONCOMMITTEES_COMMITTEESENTRY._options = None
+_BEACONCOMMITTEES.fields_by_name['epoch']._options = None
+_LISTVALIDATORBALANCESREQUEST.fields_by_name['epoch']._options = None
+_LISTVALIDATORBALANCESREQUEST.fields_by_name['public_keys']._options = None
+_LISTVALIDATORBALANCESREQUEST.fields_by_name['indices']._options = None
+_VALIDATORBALANCES_BALANCE.fields_by_name['public_key']._options = None
+_VALIDATORBALANCES_BALANCE.fields_by_name['index']._options = None
+_VALIDATORBALANCES.fields_by_name['epoch']._options = None
+_LISTVALIDATORSREQUEST.fields_by_name['epoch']._options = None
+_LISTVALIDATORSREQUEST.fields_by_name['indices']._options = None
+_GETVALIDATORREQUEST.fields_by_name['index']._options = None
+_GETVALIDATORREQUEST.fields_by_name['public_key']._options = None
+_VALIDATORS_VALIDATORCONTAINER.fields_by_name['index']._options = None
+_VALIDATORS.fields_by_name['epoch']._options = None
+_GETVALIDATORACTIVESETCHANGESREQUEST.fields_by_name['epoch']._options = None
+_ACTIVESETCHANGES.fields_by_name['epoch']._options = None
+_ACTIVESETCHANGES.fields_by_name['activated_public_keys']._options = None
+_ACTIVESETCHANGES.fields_by_name['activated_indices']._options = None
+_ACTIVESETCHANGES.fields_by_name['exited_public_keys']._options = None
+_ACTIVESETCHANGES.fields_by_name['exited_indices']._options = None
+_ACTIVESETCHANGES.fields_by_name['slashed_public_keys']._options = None
+_ACTIVESETCHANGES.fields_by_name['slashed_indices']._options = None
+_ACTIVESETCHANGES.fields_by_name['ejected_public_keys']._options = None
+_ACTIVESETCHANGES.fields_by_name['ejected_indices']._options = None
 _VALIDATORPERFORMANCEREQUEST.fields_by_name['public_keys']._options = None
+_VALIDATORPERFORMANCEREQUEST.fields_by_name['indices']._options = None
+_VALIDATORPERFORMANCERESPONSE.fields_by_name['inclusion_slots']._options = None
+_VALIDATORPERFORMANCERESPONSE.fields_by_name['inclusion_distances']._options = None
+_VALIDATORPERFORMANCERESPONSE.fields_by_name['public_keys']._options = None
 _VALIDATORQUEUE.fields_by_name['activation_public_keys']._options = None
 _VALIDATORQUEUE.fields_by_name['exit_public_keys']._options = None
+_VALIDATORQUEUE.fields_by_name['activation_validator_indices']._options = None
+_VALIDATORQUEUE.fields_by_name['exit_validator_indices']._options = None
+_LISTVALIDATORASSIGNMENTSREQUEST.fields_by_name['epoch']._options = None
+_LISTVALIDATORASSIGNMENTSREQUEST.fields_by_name['public_keys']._options = None
+_LISTVALIDATORASSIGNMENTSREQUEST.fields_by_name['indices']._options = None
+_VALIDATORASSIGNMENTS_COMMITTEEASSIGNMENT.fields_by_name['beacon_committees']._options = None
+_VALIDATORASSIGNMENTS_COMMITTEEASSIGNMENT.fields_by_name['committee_index']._options = None
+_VALIDATORASSIGNMENTS_COMMITTEEASSIGNMENT.fields_by_name['attester_slot']._options = None
+_VALIDATORASSIGNMENTS_COMMITTEEASSIGNMENT.fields_by_name['proposer_slots']._options = None
 _VALIDATORASSIGNMENTS_COMMITTEEASSIGNMENT.fields_by_name['public_key']._options = None
+_VALIDATORASSIGNMENTS_COMMITTEEASSIGNMENT.fields_by_name['validator_index']._options = None
+_VALIDATORASSIGNMENTS.fields_by_name['epoch']._options = None
+_GETVALIDATORPARTICIPATIONREQUEST.fields_by_name['epoch']._options = None
+_VALIDATORPARTICIPATIONRESPONSE.fields_by_name['epoch']._options = None
 _BEACONCONFIG_CONFIGENTRY._options = None
+_SUBMITSLASHINGRESPONSE.fields_by_name['slashed_indices']._options = None
+_INDIVIDUALVOTESREQUEST.fields_by_name['epoch']._options = None
+_INDIVIDUALVOTESREQUEST.fields_by_name['indices']._options = None
+_INDIVIDUALVOTESRESPOND_INDIVIDUALVOTE.fields_by_name['epoch']._options = None
+_INDIVIDUALVOTESRESPOND_INDIVIDUALVOTE.fields_by_name['validator_index']._options = None
+_INDIVIDUALVOTESRESPOND_INDIVIDUALVOTE.fields_by_name['inclusion_slot']._options = None
+_INDIVIDUALVOTESRESPOND_INDIVIDUALVOTE.fields_by_name['inclusion_distance']._options = None
+_WEAKSUBJECTIVITYCHECKPOINT.fields_by_name['epoch']._options = None
 
 _BEACONCHAIN = _descriptor.ServiceDescriptor(
   name='BeaconChain',
@@ -2688,8 +2756,8 @@ _BEACONCHAIN = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=5959,
-  serialized_end=9690,
+  serialized_start=8790,
+  serialized_end=12521,
   methods=[
   _descriptor.MethodDescriptor(
     name='ListAttestations',
