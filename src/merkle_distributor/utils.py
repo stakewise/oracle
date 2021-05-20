@@ -275,6 +275,11 @@ def get_oracles_config(
     oracles_config_url = ens_resolver.functions.text(node_id, ens_text_record).call(
         block_identifier=block_number
     )
+    if not oracles_config_url:
+        # try for the latest block
+        oracles_config_url = ens_resolver.functions.text(node_id, ens_text_record).call(
+            block_identifier="latest"
+        )
 
     if oracles_config_url.startswith(IPFS_PREFIX):
         oracles_config_url = oracles_config_url[7:]
