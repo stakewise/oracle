@@ -6,7 +6,6 @@ from ens.constants import EMPTY_ADDR_HEX
 from eth_typing import HexStr, ChecksumAddress
 from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
-from graphql import DocumentNode
 from tenacity import retry, Retrying
 from tenacity.before_sleep import before_sleep_log
 from web3 import Web3
@@ -433,7 +432,7 @@ def get_unclaimed_balances(
     stop=stop_attempts,
     before_sleep=before_sleep_log(logger, logging.WARNING),
 )
-def execute_graphql_query(client: Client, query: DocumentNode, variables: Dict) -> Dict:
+def execute_graphql_query(client: Client, query: str, variables: Dict) -> Dict:
     """Executes GraphQL query."""
     return client.execute(query, variable_values=variables)
 
