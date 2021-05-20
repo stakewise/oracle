@@ -190,7 +190,7 @@ def get_pool_validator_public_keys(
     pool_contract: Contract, block_number: BlockIdentifier = "latest"
 ) -> Set[BLSPubkey]:
     """Fetches pool validator public keys."""
-    events = pool_contract.events.ValidatorRegistered.get_logs(
+    events = pool_contract.events.ValidatorRegistered.getLogs(
         fromBlock=0, toBlock=block_number
     )
     return set(event["args"]["publicKey"] for event in events)
