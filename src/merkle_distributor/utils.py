@@ -68,7 +68,7 @@ def get_merkle_root_voting_parameters(
         dict(target=oracles.address, callData=oracles.encodeABI("currentNonce")),
         dict(
             target=reward_eth_token.address,
-            callData=oracles.encodeABI("lastUpdateBlockNumber"),
+            callData=reward_eth_token.encodeABI("lastUpdateBlockNumber"),
         ),
     ]
     response = multicall.functions.aggregate(calls).call(
