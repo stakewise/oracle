@@ -98,38 +98,31 @@ ORACLES_CONTRACT_ADDRESS: ChecksumAddress = Web3.toChecksumAddress(
         "ORACLES_CONTRACT_ADDRESS", "0x2f1C5E86B13a74f5A6E7B4b35DD77fe29Aa47514"
     )
 )
-DAO_CONTRACT_ADDRESS: ChecksumAddress = Web3.toChecksumAddress(
-    environ.get("DAO_CONTRACT_ADDRESS", "0x144a98cb1CdBb23610501fE6108858D9B7D24934")
+DAO_ADDRESS: ChecksumAddress = Web3.toChecksumAddress(
+    environ.get("DAO_ADDRESS", "0x144a98cb1CdBb23610501fE6108858D9B7D24934")
 )
 REWARD_ETH_CONTRACT_ADDRESS: ChecksumAddress = Web3.toChecksumAddress(
     environ.get(
-        "REWARD_ETH_CONTRACT_ADDRESS",
-        "0x20BC832ca081b91433ff6c17f85701B6e92486c5",
+        "REWARD_ETH_CONTRACT_ADDRESS", "0x20BC832ca081b91433ff6c17f85701B6e92486c5"
     )
 )
 STAKED_ETH_CONTRACT_ADDRESS: ChecksumAddress = Web3.toChecksumAddress(
     environ.get(
-        "STAKED_ETH_CONTRACT_ADDRESS",
-        "0xFe2e637202056d30016725477c5da089Ab0A043A",
+        "STAKED_ETH_CONTRACT_ADDRESS", "0xFe2e637202056d30016725477c5da089Ab0A043A"
     )
 )
 MULTICALL_CONTRACT_ADDRESS: ChecksumAddress = Web3.toChecksumAddress(
     environ.get(
-        "MULTICALL_CONTRACT_ADDRESS",
-        "0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441",
+        "MULTICALL_CONTRACT_ADDRESS", "0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441"
     )
 )
 # TODO: Add default Merkle Distributor contract address
 MERKLE_DISTRIBUTOR_CONTRACT_ADDRESS: ChecksumAddress = Web3.toChecksumAddress(
-    environ.get(
-        "MERKLE_DISTRIBUTOR_CONTRACT_ADDRESS",
-        "0x0",
-    )
+    environ.get("MERKLE_DISTRIBUTOR_CONTRACT_ADDRESS", "0x0")
 )
 BALANCER_VAULT_CONTRACT_ADDRESS: ChecksumAddress = Web3.toChecksumAddress(
     environ.get(
-        "BALANCER_VAULT_CONTRACT_ADDRESS",
-        "0xBA12222222228d8Ba445958a75a0704d566BF2C8",
+        "BALANCER_VAULT_CONTRACT_ADDRESS", "0xBA12222222228d8Ba445958a75a0704d566BF2C8"
     )
 )
 UNISWAP_V3_POSITION_MANAGER_CONTRACT_ADDRESS: ChecksumAddress = Web3.toChecksumAddress(
@@ -142,14 +135,10 @@ UNISWAP_V3_POSITION_MANAGER_CONTRACT_ADDRESS: ChecksumAddress = Web3.toChecksumA
 # ENS
 ENS_RESOLVER_CONTRACT_ADDRESS: ChecksumAddress = Web3.toChecksumAddress(
     environ.get(
-        "ENS_RESOLVER_CONTRACT_ADDRESS",
-        "0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41",
+        "ENS_RESOLVER_CONTRACT_ADDRESS", "0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41"
     )
 )
-ORACLES_ENS_DOMAIN: str = environ.get(
-    "ORACLES_ENS_DOMAIN",
-    "stakewise.eth",
-)
+DAO_ENS_DOMAIN: str = environ.get("DAO_ENS_DOMAIN", "stakewise.eth")
 ORACLES_ENS_TEXT_RECORD: str = environ.get("ORACLES_ENS_TEXT_RECORD", "oraclesconfig")
 
 # Subgraphs
@@ -161,6 +150,7 @@ UNISWAP_V2_SUBGRAPH_URL: str = environ.get(
     "UNISWAP_V2_SUBGRAPH_URL",
     "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2",
 )
+# TODO: point to the official subgraph
 UNISWAP_V3_SUBGRAPH_URL: str = environ.get(
     "UNISWAP_V3_SUBGRAPH_URL",
     "https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v3-subgraph",

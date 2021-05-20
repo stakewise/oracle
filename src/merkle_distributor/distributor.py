@@ -36,10 +36,10 @@ from src.settings import (
     ETH1_CONFIRMATION_BLOCKS,
     REWARD_ETH_CONTRACT_ADDRESS,
     BALANCER_VAULT_CONTRACT_ADDRESS,
-    ORACLES_ENS_DOMAIN,
+    DAO_ENS_DOMAIN,
     ORACLES_ENS_TEXT_RECORD,
     IPFS_ENDPOINT,
-    DAO_CONTRACT_ADDRESS,
+    DAO_ADDRESS,
     BALANCER_SUBGRAPH_URL,
     UNISWAP_V2_SUBGRAPH_URL,
     UNISWAP_V3_SUBGRAPH_URL,
@@ -95,8 +95,8 @@ class Distributor(object):
         self.ens_resolver = get_ens_resolver_contract(w3)
         logger.info(f"ENS resolver contract address: {self.ens_resolver.address}")
 
-        self.ens_node_id: bytes = get_ens_node_id(ORACLES_ENS_DOMAIN)
-        logger.info(f"Using Oracles ENS domain: {ORACLES_ENS_DOMAIN}")
+        self.ens_node_id: bytes = get_ens_node_id(DAO_ENS_DOMAIN)
+        logger.info(f"Using DAO ENS domain: {DAO_ENS_DOMAIN}")
 
         self.skipped_rewards_block_number: BlockIdentifier = 0
 
@@ -244,7 +244,7 @@ class Distributor(object):
                 uniswap_v2_subgraph_url=UNISWAP_V2_SUBGRAPH_URL,
                 uniswap_v3_subgraph_url=UNISWAP_V3_SUBGRAPH_URL,
                 balancer_vault_address=BALANCER_VAULT_CONTRACT_ADDRESS,
-                dao_contract_address=DAO_CONTRACT_ADDRESS,
+                dao_address=DAO_ADDRESS,
                 oracles_settings=oracles_settings,
             )
             block_rewards = tree.calculate_rewards()

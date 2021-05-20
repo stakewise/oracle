@@ -33,7 +33,7 @@ class DistributionTree(object):
         uniswap_v2_subgraph_url: str,
         uniswap_v3_subgraph_url: str,
         balancer_vault_address: ChecksumAddress,
-        dao_contract_address: ChecksumAddress,
+        dao_address: ChecksumAddress,
         oracles_settings: OraclesSettings,
     ):
         self.block_number = block_number
@@ -45,7 +45,7 @@ class DistributionTree(object):
         self.reward_eth_token_address = Web3.toChecksumAddress(reward_eth_token.address)
         self.staked_eth_token_address = Web3.toChecksumAddress(staked_eth_token.address)
         self.multicall_contract = multicall_contract
-        self.dao_contract_address = Web3.toChecksumAddress(dao_contract_address)
+        self.dao_address = Web3.toChecksumAddress(dao_address)
 
         # balancer
         self.balancer_subgraph_url = balancer_subgraph_url
@@ -231,9 +231,8 @@ class DistributionTree(object):
         balances, total_supply = self.get_balances(to)
         if total_supply <= 0:
             # no recipients for the rewards -> assign reward to the DAO
-            rewards[self.dao_contract_address][what] = Wei(
-                rewards[self.dao_contract_address].setdefault(what, Wei(0))
-                + total_reward
+            rewards[self.dao_address][what] = Wei(
+                rewards[self.dao_address].setdefault(what, Wei(0)) + total_reward
             )
             return rewards
 
