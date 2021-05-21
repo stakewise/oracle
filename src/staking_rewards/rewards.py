@@ -128,12 +128,9 @@ class Rewards(object):
             logger.info("Skipping rewards update as Oracles contract is paused")
             return
 
+        # TODO: fetch sync period from `last_update_block_number` after the first rewards update
         # fetch the sync period in number of blocks at the time of last update block number
-        if not last_update_block_number:
-            # if it's the first update, use the latest block
-            sync_period: int = get_sync_period(self.oracles, "latest")
-        else:
-            sync_period: int = get_sync_period(self.oracles, last_update_block_number)
+        sync_period: int = get_sync_period(self.oracles, "latest")
 
         # calculate next sync block number
         if not last_update_block_number:
