@@ -88,7 +88,7 @@ class DistributionTree(object):
         for account, account_rewards in rewards2.items():
             for token, token_reward in account_rewards.items():
                 rewards[account][token] = Wei(
-                    rewards[account].setdefault(token, Wei(0)) + token_reward
+                    rewards.setdefault(account, {}).setdefault(token, Wei(0)) + token_reward
                 )
 
         return rewards
@@ -263,7 +263,8 @@ class DistributionTree(object):
                 rewards = self.merge_rewards(rewards, new_rewards)
             else:
                 rewards[account][what] = Wei(
-                    rewards[account].setdefault(what, Wei(0)) + account_reward
+                    rewards.setdefault(account, {}).setdefault(what, Wei(0))
+                    + account_reward
                 )
 
             total_distributed += account_reward

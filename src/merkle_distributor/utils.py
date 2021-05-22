@@ -170,9 +170,9 @@ def get_reth_disabled_accounts(
         account = Web3.toChecksumAddress(event["args"]["account"])
         is_disabled = event["args"]["isDisabled"]
 
-        if is_disabled and account in reth_disabled_accounts:
+        if not is_disabled and account in reth_disabled_accounts:
             reth_disabled_accounts.remove(account)
-        elif not is_disabled and account not in reth_disabled_accounts:
+        elif is_disabled and account not in reth_disabled_accounts:
             reth_disabled_accounts.add(account)
 
     return reth_disabled_accounts
