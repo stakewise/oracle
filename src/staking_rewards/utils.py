@@ -135,7 +135,6 @@ def submit_oracle_rewards_vote(
     confirmation_blocks: int,
 ) -> None:
     """Submits new total rewards vote to `Oracles` contract."""
-    tx_hash = None
     for attempt in Retrying(
         reraise=True,
         wait=backoff,
@@ -143,23 +142,23 @@ def submit_oracle_rewards_vote(
         before_sleep=before_sleep_log(logger, logging.WARNING),
     ):
         with attempt:
+            account_nonce = oracles.web3.eth.getTransactionCount(
+                oracles.web3.eth.default_account
+            )
             try:
                 # check whether gas price can be estimated for the the vote
                 oracles.functions.voteForRewards(
                     current_nonce, total_rewards, activated_validators
-                ).estimateGas({"gas": gas})
+                ).estimateGas({"gas": gas, "nonce": account_nonce})
             except ContractLogicError as e:
                 # check whether nonce has changed -> new rewards were already submitted
                 if current_nonce != oracles.functions.currentNonce().call():
                     return
                 raise e
 
-            if tx_hash is None:
-                tx_hash = oracles.functions.voteForRewards(
-                    current_nonce, total_rewards, activated_validators
-                ).transact({"gas": gas})
-            else:
-                tx_hash = oracles.web3.eth.replace_transaction(tx_hash, {"gas": gas})
+            tx_hash = oracles.functions.voteForRewards(
+                current_nonce, total_rewards, activated_validators
+            ).transact({"gas": gas, "nonce": account_nonce})
 
             wait_for_transaction(
                 oracles=oracles,

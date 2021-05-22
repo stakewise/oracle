@@ -1307,7 +1307,6 @@ def submit_oracle_merkle_root_vote(
     confirmation_blocks: int,
 ) -> None:
     """Submits new merkle root vote to `Oracles` contract."""
-    tx_hash = None
     for attempt in Retrying(
         reraise=True,
         wait=backoff,
@@ -1315,23 +1314,23 @@ def submit_oracle_merkle_root_vote(
         before_sleep=before_sleep_log(logger, logging.WARNING),
     ):
         with attempt:
+            account_nonce = oracles.web3.eth.getTransactionCount(
+                oracles.web3.eth.default_account
+            )
             try:
                 # check whether gas price can be estimated for the the vote
                 oracles.functions.voteForMerkleRoot(
                     current_nonce, merkle_root, merkle_proofs
-                ).estimateGas({"gas": gas})
+                ).estimateGas({"gas": gas, "nonce": account_nonce})
             except ContractLogicError as e:
                 # check whether nonce has changed -> new merkle root was already submitted
                 if current_nonce != oracles.functions.currentNonce().call():
                     return
                 raise e
 
-            if tx_hash is None:
-                tx_hash = oracles.functions.voteForMerkleRoot(
-                    current_nonce, merkle_root, merkle_proofs
-                ).transact({"gas": gas})
-            else:
-                tx_hash = oracles.web3.eth.replace_transaction(tx_hash, {"gas": gas})
+            tx_hash = oracles.functions.voteForMerkleRoot(
+                current_nonce, merkle_root, merkle_proofs
+            ).transact({"gas": gas, "nonce": account_nonce})
 
             wait_for_transaction(
                 oracles=oracles,
