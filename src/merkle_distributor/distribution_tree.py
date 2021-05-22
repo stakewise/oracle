@@ -1,8 +1,9 @@
 import copy
-from typing import Tuple, List, Dict, Set
 
+import logging
 from cachetools.func import lru_cache
 from eth_typing import BlockNumber, HexStr, ChecksumAddress, HexAddress
+from typing import Tuple, List, Dict, Set
 from web3 import Web3
 from web3.contract import Contract
 from web3.types import Wei
@@ -18,6 +19,8 @@ from src.merkle_distributor.utils import (
     get_erc20_token_balances,
     OraclesSettings,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class DistributionTree(object):
@@ -178,18 +181,24 @@ class DistributionTree(object):
     ) -> Tuple[Dict[ChecksumAddress, Wei], Wei]:
         """Fetches balances and total supply of the contract."""
         if contract_address in self.balancer_pools:
+            logger.info(f'Fetching Balancer V2 balances:'
+                        f' pool={contract_address}, block number={self.block_number}')
             return get_balancer_pool_balances(
                 subgraph_url=self.balancer_subgraph_url,
                 pool_id=self.balancer_pools[contract_address],
                 block_number=self.block_number,
             )
         elif contract_address in self.uniswap_v2_pairs:
+            logger.info(f'Fetching Uniswap V2 balances:'
+                        f' pool={contract_address}, block number={self.block_number}')
             return get_uniswap_v2_balances(
                 subgraph_url=self.uniswap_v2_subgraph_url,
                 pair_address=contract_address,
                 block_number=self.block_number,
             )
         elif contract_address in self.uniswap_v3_pairs:
+            logger.info(f'Fetching Uniswap V3 balances:'
+                        f' pool={contract_address}, block number={self.block_number}')
             return get_uniswap_v3_balances(
                 subgraph_url=self.uniswap_v3_subgraph_url,
                 pool_address=contract_address,
@@ -198,6 +207,7 @@ class DistributionTree(object):
                 to_block=self.block_number,
             )
         elif contract_address == self.reward_eth_token_address:
+            logger.info(f'Fetching Reward ETH Token balances: block number={self.block_number}')
             return get_reward_eth_token_balances(
                 reward_eth_token=self.reward_eth_token,
                 staked_eth_token=self.staked_eth_token,
@@ -206,6 +216,8 @@ class DistributionTree(object):
                 to_block=self.block_number,
             )
         elif contract_address in self.erc20_tokens:
+            logger.info(f'Fetching ERC-20 token balances:'
+                        f' token={contract_address}, block number={self.block_number}')
             contract = get_erc20_contract(
                 w3=self.w3, contract_address=Web3.toChecksumAddress(contract_address)
             )

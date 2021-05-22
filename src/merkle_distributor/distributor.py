@@ -254,6 +254,7 @@ class Distributor(object):
                 dao_address=DAO_ADDRESS,
                 oracles_settings=oracles_settings,
             )
+            logger.info(f'Calculating reward distributions: block number={block_number}')
             block_rewards = tree.calculate_rewards()
             final_rewards = DistributionTree.merge_rewards(final_rewards, block_rewards)
 
