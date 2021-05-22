@@ -132,6 +132,10 @@ class Distributor(object):
             logger.info("Skipping merkle root update as Oracles contract is paused")
             return
 
+        logger.info(
+            f"Checking Merkle Distributor rewards up to {new_rewards_block_number} block"
+        )
+
         # fetch previous merkle update parameters
         # NB! can be `None` if it's the first update
         prev_merkle_root_parameters = get_prev_merkle_root_parameters(
@@ -153,6 +157,11 @@ class Distributor(object):
             prev_merkle_root_rewards_update_block_number: BlockNumber = (
                 prev_merkle_root_parameters[3]
             )
+            logger.info(
+                f"Merkle root previous voting block numbers:"
+                f" total rewards={prev_merkle_root_rewards_update_block_number},"
+                f" merkle root={prev_merkle_root_update_block_number}"
+            )
 
         # calculate staked eth period reward
         staked_eth_period_reward: Wei = get_staked_eth_period_reward(
@@ -161,14 +170,16 @@ class Distributor(object):
             prev_merkle_root_update_block_number=prev_merkle_root_update_block_number,
             prev_merkle_root_staking_rewards_update_block_number=prev_merkle_root_rewards_update_block_number,
         )
+        logger.info(
+            f"Calculated Merkle Distributor staked ETH period reward:"
+            f" {Web3.fromWei(staked_eth_period_reward, 'ether')} ETH"
+        )
 
         # calculated staked eth reward distributions
         if staked_eth_period_reward <= 0:
             # no period rewards
             staked_eth_distributions: List[Distribution] = []
-            logger.warning(
-                f"Skipping distribution of staked ETH rewards: period reward={staked_eth_period_reward} Wei"
-            )
+            logger.warning("No Staked ETH distributions")
         else:
             # fetch accounts that have rETH2 distributions disabled
             reth_disabled_accounts: Set[ChecksumAddress] = get_reth_disabled_accounts(
@@ -283,10 +294,10 @@ class Distributor(object):
             merkle_element: bytes = get_merkle_node(
                 w3=self.w3, index=i, tokens=tokens, account=account, amounts=amounts
             )
-            new_claims[account] = {}
-            new_claims[account]["index"] = i
-            new_claims[account]["tokens"] = tokens
-            new_claims[account]["amounts"] = [str(amount) for amount in amounts]
+            account_claim = dict(
+                index=i, tokens=tokens, amounts=[str(amount) for amount in amounts]
+            )
+            new_claims[account] = account_claim
             merkle_elements.append(merkle_element)
 
         merkle_tree = MerkleTree(merkle_elements)

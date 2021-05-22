@@ -233,7 +233,8 @@ class DistributionTree(object):
         if total_supply <= 0:
             # no recipients for the rewards -> assign reward to the DAO
             rewards[self.dao_address][what] = Wei(
-                rewards[self.dao_address].setdefault(what, Wei(0)) + total_reward
+                rewards.setdefault(self.dao_address, {}).setdefault(what, Wei(0))
+                + total_reward
             )
             return rewards
 
@@ -250,11 +251,13 @@ class DistributionTree(object):
             if account_reward <= 0:
                 continue
 
-            if (
-                account != to
-                and self.is_supported_contract(account)
-                and account not in visited
-            ):
+            if account == to or account in visited:
+                # failed to assign reward -> return it to DAO
+                rewards[self.dao_address][what] = Wei(
+                    rewards.setdefault(self.dao_address, {}).setdefault(what, Wei(0))
+                    + total_reward
+                )
+            elif self.is_supported_contract(account):
                 new_rewards = self._calculate_contract_rewards(
                     to=account,
                     what=what,
