@@ -12,6 +12,7 @@ from contracts import (
     get_multicall_contract,
     get_merkle_distributor_contract,
     get_ens_resolver_contract,
+    get_uniswap_v3_position_manager_contract,
 )
 from src.merkle_distributor.distribution_tree import DistributionTree
 from src.merkle_distributor.merkle_tree import MerkleTree
@@ -76,7 +77,7 @@ class Distributor(object):
             f"Staked ETH Token contract address: {self.staked_eth_token.address}"
         )
 
-        self.uniswap_v3_position_manager = get_multicall_contract(w3)
+        self.uniswap_v3_position_manager = get_uniswap_v3_position_manager_contract(w3)
         logger.info(
             f"Uniswap V3 Position Manager contract address: {self.uniswap_v3_position_manager.address}"
         )

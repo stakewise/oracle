@@ -980,25 +980,25 @@ def get_uniswap_v3_token_ids(
                     )
                     raise e
 
-            # process mint transactions to get a set of valid token IDs
-            for transfer_event in transfer_events:
-                tx_hash: HexStr = Web3.toHex(transfer_event["transactionHash"])
-                to_address: ChecksumAddress = Web3.toChecksumAddress(
-                    transfer_event["args"]["to"]
-                )
-                token_id: int = transfer_event["args"]["tokenId"]
-                if (
-                    to_address not in account_transactions
-                    or tx_hash not in account_transactions[to_address]
-                ):
-                    continue
+                # process mint transactions to get a set of valid token IDs
+                for transfer_event in transfer_events:
+                    tx_hash: HexStr = Web3.toHex(transfer_event["transactionHash"])
+                    to_address: ChecksumAddress = Web3.toChecksumAddress(
+                        transfer_event["args"]["to"]
+                    )
+                    token_id: int = transfer_event["args"]["tokenId"]
+                    if (
+                        to_address not in account_transactions
+                        or tx_hash not in account_transactions[to_address]
+                    ):
+                        continue
 
-                if tx_hash in visited_mint_transactions:
-                    duplicated_transactions.add(tx_hash)
-                    continue
+                    if tx_hash in visited_mint_transactions:
+                        duplicated_transactions.add(tx_hash)
+                        continue
 
-                visited_mint_transactions.add(tx_hash)
-                owner_to_token_ids.setdefault(to_address, set()).add(token_id)
+                    visited_mint_transactions.add(tx_hash)
+                    owner_to_token_ids.setdefault(to_address, set()).add(token_id)
 
     # get rid of accounts that have multiple mints in one transaction
     for tx in duplicated_transactions:
@@ -1044,16 +1044,16 @@ def get_uniswap_v3_token_ids(
                     )
                     raise e
 
-            # process mint transactions to get a set of valid token IDs
-            for transfer_event in transfer_events:
-                to_address: ChecksumAddress = Web3.toChecksumAddress(
-                    transfer_event["args"]["to"]
-                )
-                token_id: int = transfer_event["args"]["tokenId"]
-                if to_address == EMPTY_ADDR_HEX:
-                    token_id_to_owner.pop(token_id, None)
-                else:
-                    token_id_to_owner[token_id] = to_address
+                # process mint transactions to get a set of valid token IDs
+                for transfer_event in transfer_events:
+                    to_address: ChecksumAddress = Web3.toChecksumAddress(
+                        transfer_event["args"]["to"]
+                    )
+                    token_id: int = transfer_event["args"]["tokenId"]
+                    if to_address == EMPTY_ADDR_HEX:
+                        token_id_to_owner.pop(token_id, None)
+                    else:
+                        token_id_to_owner[token_id] = to_address
 
     return token_id_to_owner
 
