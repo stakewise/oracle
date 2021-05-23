@@ -731,7 +731,7 @@ def get_uniswap_v3_balances(
         return {}, Wei(0)
 
     current_tick: str = pools[0].get("tick", "")
-    if current_tick == "":
+    if not current_tick:
         return {}, Wei(0)
 
     # fetch liquidity mints that cover the current tick
