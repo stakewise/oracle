@@ -230,22 +230,20 @@ def get_staked_eth_distributions(
 
     # calculate staked eth rewards distribution
     distributions: List[Distribution] = []
-    pairs: List[Tuple[ChecksumAddress, Wei]] = list(
+    pairs: List[Tuple[ChecksumAddress, Wei]] = sorted(
         zip(reth_disabled_accounts, staked_eth_balances)
     )
     distributed: Wei = Wei(0)
     for beneficiary, staked_eth_balance in pairs:
         if beneficiary == reth_disabled_accounts[-1]:
             reward: Wei = Wei(staked_eth_period_reward - distributed)
-            if reward > 0:
-                distributions.append(
-                    Distribution(beneficiary, reward_eth_token_address, reward)
-                )
-            break
+        else:
+            reward: Wei = Wei(
+                staked_eth_period_reward
+                * staked_eth_balance
+                // total_staked_eth_balance
+            )
 
-        reward: Wei = Wei(
-            staked_eth_period_reward * staked_eth_balance // total_staked_eth_balance
-        )
         if reward <= 0:
             continue
 

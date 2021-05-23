@@ -269,7 +269,7 @@ class Distributor(object):
                 ChecksumAddress
             ] = get_merkle_distributor_claimed_addresses(
                 merkle_distributor=self.merkle_distributor,
-                from_block=prev_merkle_root_parameters[2],
+                from_block=prev_merkle_root_update_block_number,
             )
 
             # calculate unclaimed rewards

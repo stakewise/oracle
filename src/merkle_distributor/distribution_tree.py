@@ -2,7 +2,7 @@ import copy
 
 import logging
 from cachetools.func import lru_cache
-from eth_typing import BlockNumber, HexStr, ChecksumAddress, HexAddress
+from eth_typing import BlockNumber, HexStr, ChecksumAddress
 from typing import Tuple, List, Dict, Set
 from web3 import Web3
 from web3.contract import Contract
@@ -109,18 +109,16 @@ class DistributionTree(object):
         rewards: Dict[ChecksumAddress, Wei] = {}
         total_staked_eth_balance: Wei = sum(pool_shares.values())
         distributed: Wei = Wei(0)
-        for i, share in enumerate(pool_shares.items()):
-            pool_address: ChecksumAddress = ChecksumAddress(
-                HexAddress(HexStr(share[0]))
-            )
-            pool_balance: Wei = Wei(int(share[1]))
-            if i == len(pool_shares) - 1:
+        pool_addresses = sorted(pool_shares.keys())
+        for pool_address in pool_addresses:
+            pool_balance: Wei = Wei(int(pool_shares[pool_address]))
+            if pool_address == pool_addresses[-1]:
                 reward: Wei = Wei(vault_reward - distributed)
-                if reward > 0:
-                    rewards[pool_address] = reward
-                break
+            else:
+                reward: Wei = Wei(
+                    vault_reward * pool_balance // total_staked_eth_balance
+                )
 
-            reward: Wei = Wei(vault_reward * pool_balance // total_staked_eth_balance)
             if reward <= 0:
                 continue
 
@@ -167,7 +165,9 @@ class DistributionTree(object):
                 )
                 rewards = self.merge_rewards(rewards, new_rewards)
             else:
-                rewards[to][what] = Wei(rewards[to].setdefault(what, Wei(0)) + value)
+                rewards[to][what] = Wei(
+                    rewards.setdefault(to, {}).setdefault(what, Wei(0)) + value
+                )
 
         return rewards
 
@@ -246,7 +246,7 @@ class DistributionTree(object):
 
         # distribute rewards to the users or recurse for the support contracts
         total_distributed: Wei = Wei(0)
-        accounts: List[ChecksumAddress] = list(balances.keys())
+        accounts: List[ChecksumAddress] = sorted(balances.keys())
         for account in accounts:
             if account == accounts[-1]:
                 account_reward: Wei = Wei(total_reward - total_distributed)
