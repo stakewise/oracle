@@ -1,7 +1,6 @@
 import logging
-from typing import Set, Dict, List
-
 from eth_typing import HexStr, ChecksumAddress
+from typing import Set, Dict, List
 from web3 import Web3
 from web3.types import Wei, BlockNumber
 
@@ -32,6 +31,7 @@ from src.merkle_distributor.utils import (
     get_merkle_node,
     pin_claims_to_ipfs,
     submit_oracle_merkle_root_vote,
+    Rewards,
 )
 from src.settings import (
     ETH1_CONFIRMATION_BLOCKS,
@@ -205,7 +205,7 @@ class Distributor(object):
             ipfs_endpoint=IPFS_ENDPOINT,
         )
 
-        # calculate block distributions of additional tokens
+        # calculate block distributions of additional reward tokens
         block_distributions: Dict[BlockNumber, List[Distribution]] = get_distributions(
             merkle_distributor=self.merkle_distributor,
             distribution_start_block=prev_merkle_root_rewards_update_block_number,
@@ -239,7 +239,7 @@ class Distributor(object):
             return
 
         # calculate final rewards through the distribution trees
-        final_rewards: Dict[ChecksumAddress, Dict[ChecksumAddress, Wei]] = {}
+        final_rewards: Rewards = Rewards({})
         for block_number, dist in block_distributions.items():
             tree = DistributionTree(
                 block_number=block_number,
@@ -263,7 +263,7 @@ class Distributor(object):
 
         if prev_merkle_root_parameters is None:
             # it's the first merkle root update -> there are no unclaimed rewards
-            unclaimed_rewards: Dict[ChecksumAddress, Dict[ChecksumAddress, Wei]] = {}
+            unclaimed_rewards: Rewards = Rewards({})
         else:
             # fetch accounts that have claimed since last merkle root update
             claimed_accounts: Set[
@@ -274,9 +274,7 @@ class Distributor(object):
             )
 
             # calculate unclaimed rewards
-            unclaimed_rewards: Dict[
-                ChecksumAddress, Dict[ChecksumAddress, Wei]
-            ] = get_unclaimed_balances(
+            unclaimed_rewards: Rewards = get_unclaimed_balances(
                 merkle_proofs_ipfs_url=prev_merkle_root_parameters[1],
                 claimed_accounts=claimed_accounts,
                 ipfs_endpoint=IPFS_ENDPOINT,
@@ -291,25 +289,35 @@ class Distributor(object):
         # calculate merkle elements
         merkle_elements: List[bytes] = []
         accounts: List[ChecksumAddress] = sorted(final_rewards.keys())
-        new_claims: Dict[ChecksumAddress, Dict] = {}
         for i, account in enumerate(accounts):
-            tokens: List[ChecksumAddress] = sorted(final_rewards[account].keys())
-            amounts: List[Wei] = [final_rewards[account][token] for token in tokens]
+            reward_token_amounts: Dict[ChecksumAddress, Wei] = {}
+            for origin, origin_rewards in final_rewards[account].items():
+                for reward_token, value in origin_rewards.items():
+                    prev_value = reward_token_amounts.setdefault(reward_token, Wei(0))
+                    reward_token_amounts[reward_token] = Wei(prev_value + int(value))
+
+            reward_tokens: List[ChecksumAddress] = sorted(reward_token_amounts.keys())
+            amounts: List[Wei] = [
+                reward_token_amounts[token] for token in reward_tokens
+            ]
             merkle_element: bytes = get_merkle_node(
-                w3=self.w3, index=i, tokens=tokens, account=account, amounts=amounts
+                w3=self.w3,
+                index=i,
+                tokens=reward_tokens,
+                account=account,
+                amounts=amounts,
             )
-            account_claim = dict(
-                index=i, tokens=tokens, amounts=[str(amount) for amount in amounts]
-            )
-            new_claims[account] = account_claim
             merkle_elements.append(merkle_element)
 
         merkle_tree = MerkleTree(merkle_elements)
 
         # collect proofs
+        new_claims: Dict[ChecksumAddress, Dict] = {}
         for i, account in enumerate(accounts):
             proof: List[HexStr] = merkle_tree.get_hex_proof(merkle_elements[i])
-            new_claims[account]["proof"] = proof
+            new_claims[account] = dict(
+                index=i, rewards=final_rewards[account], proof=proof
+            )
 
         # calculate merkle root
         merkle_root: HexStr = merkle_tree.get_hex_root()

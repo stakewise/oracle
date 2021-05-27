@@ -18,6 +18,7 @@ from src.merkle_distributor.utils import (
     get_reward_eth_token_balances,
     get_erc20_token_balances,
     OraclesSettings,
+    Rewards,
 )
 
 logger = logging.getLogger(__name__)
@@ -76,22 +77,37 @@ class DistributionTree(object):
         ]
 
     @staticmethod
-    def merge_rewards(
-        rewards1: Dict[ChecksumAddress, Dict[ChecksumAddress, Wei]],
-        rewards2: Dict[ChecksumAddress, Dict[ChecksumAddress, Wei]],
-    ) -> Dict[ChecksumAddress, Dict[ChecksumAddress, Wei]]:
+    def merge_rewards(rewards1: Rewards, rewards2: Rewards) -> Rewards:
         """Merges two dictionaries into one."""
-        rewards: Dict[ChecksumAddress, Dict[ChecksumAddress, Wei]] = copy.deepcopy(
-            rewards1
-        )
+        merged_rewards: Rewards = copy.deepcopy(rewards1)
         for account, account_rewards in rewards2.items():
-            for token, token_reward in account_rewards.items():
-                rewards[account][token] = Wei(
-                    rewards.setdefault(account, {}).setdefault(token, Wei(0))
-                    + token_reward
-                )
+            for origin, origin_rewards in account_rewards.items():
+                for reward_token, value in origin_rewards.items():
+                    DistributionTree.add_value(
+                        rewards=merged_rewards,
+                        to=account,
+                        origin=origin,
+                        reward_token=reward_token,
+                        value=Wei(int(value)),
+                    )
 
-        return rewards
+        return merged_rewards
+
+    @staticmethod
+    def add_value(
+        rewards: Rewards,
+        to: ChecksumAddress,
+        origin: ChecksumAddress,
+        reward_token: ChecksumAddress,
+        value: Wei,
+    ) -> None:
+        """Adds reward tokens to the receiver address."""
+        prev_amount = (
+            rewards.setdefault(to, {})
+            .setdefault(origin, {})
+            .setdefault(reward_token, "0")
+        )
+        rewards[to][origin][reward_token] = str(int(prev_amount) + value)
 
     def calculate_balancer_staked_eth_rewards(
         self, vault_reward: Wei
@@ -137,14 +153,14 @@ class DistributionTree(object):
             or contract_address in self.erc20_tokens
         )
 
-    def calculate_rewards(self) -> Dict[ChecksumAddress, Dict[ChecksumAddress, Wei]]:
+    def calculate_rewards(self) -> Rewards:
         """Calculates reward for every account recursively and aggregates amounts."""
-        rewards: Dict[ChecksumAddress, Dict[ChecksumAddress, Wei]] = {}
+        rewards: Rewards = Rewards({})
         for dist in self.distributions:
-            (to, what, value) = dist
+            (origin, reward_token, value) = dist
             if (
-                to == self.balancer_vault_address
-                and what == self.reward_eth_token_address
+                origin == self.balancer_vault_address
+                and reward_token == self.reward_eth_token_address
             ):
                 # handle special case for Balancer v2 pools and rETH2 distribution
                 balancer_pool_rewards: Dict[
@@ -152,21 +168,28 @@ class DistributionTree(object):
                 ] = self.calculate_balancer_staked_eth_rewards(value)
                 for pool_address, pool_reward in balancer_pool_rewards.items():
                     new_rewards = self._calculate_contract_rewards(
-                        to=pool_address,
-                        what=what,
+                        origin=pool_address,
+                        reward_token=reward_token,
                         total_reward=pool_reward,
-                        visited={to, pool_address},
+                        visited={origin, pool_address},
                     )
                     rewards = self.merge_rewards(rewards, new_rewards)
-            elif self.is_supported_contract(to):
+            elif self.is_supported_contract(origin):
                 # calculate reward based on the contract balances
                 new_rewards = self._calculate_contract_rewards(
-                    to=to, what=what, total_reward=value, visited={to}
+                    origin=origin,
+                    reward_token=reward_token,
+                    total_reward=value,
+                    visited={origin},
                 )
                 rewards = self.merge_rewards(rewards, new_rewards)
             else:
-                rewards[to][what] = Wei(
-                    rewards.setdefault(to, {}).setdefault(what, Wei(0)) + value
+                raise ValueError(
+                    f"Failed to process distribution:"
+                    f" source={origin},"
+                    f" reward token={reward_token},"
+                    f" value={value},"
+                    f" block number={self.block_number}"
                 )
 
         return rewards
@@ -227,20 +250,23 @@ class DistributionTree(object):
 
     def _calculate_contract_rewards(
         self,
-        to: ChecksumAddress,
-        what: ChecksumAddress,
+        origin: ChecksumAddress,
+        reward_token: ChecksumAddress,
         total_reward: Wei,
         visited: Set[ChecksumAddress],
-    ) -> Dict[ChecksumAddress, Dict[ChecksumAddress, Wei]]:
-        rewards: Dict[ChecksumAddress, Dict[ChecksumAddress, Wei]] = {}
+    ) -> Rewards:
+        rewards: Rewards = Rewards({})
 
         # fetch user balances and total supply for calculation reward portions
-        balances, total_supply = self.get_balances(to)
+        balances, total_supply = self.get_balances(origin)
         if total_supply <= 0:
             # no recipients for the rewards -> assign reward to the DAO
-            rewards[self.dao_address][what] = Wei(
-                rewards.setdefault(self.dao_address, {}).setdefault(what, Wei(0))
-                + total_reward
+            self.add_value(
+                rewards=rewards,
+                to=self.dao_address,
+                origin=origin,
+                reward_token=reward_token,
+                value=total_reward,
             )
             return rewards
 
@@ -257,24 +283,30 @@ class DistributionTree(object):
             if account_reward <= 0:
                 continue
 
-            if account == to or account in visited:
+            if account == origin or account in visited:
                 # failed to assign reward -> return it to DAO
-                rewards[self.dao_address][what] = Wei(
-                    rewards.setdefault(self.dao_address, {}).setdefault(what, Wei(0))
-                    + total_reward
+                self.add_value(
+                    rewards=rewards,
+                    to=self.dao_address,
+                    origin=origin,
+                    reward_token=reward_token,
+                    value=account_reward,
                 )
             elif self.is_supported_contract(account):
                 new_rewards = self._calculate_contract_rewards(
-                    to=account,
-                    what=what,
+                    origin=account,
+                    reward_token=reward_token,
                     total_reward=account_reward,
                     visited=visited.union({account}),
                 )
                 rewards = self.merge_rewards(rewards, new_rewards)
             else:
-                rewards[account][what] = Wei(
-                    rewards.setdefault(account, {}).setdefault(what, Wei(0))
-                    + account_reward
+                self.add_value(
+                    rewards=rewards,
+                    to=account,
+                    origin=origin,
+                    reward_token=reward_token,
+                    value=account_reward,
                 )
 
             total_distributed += account_reward

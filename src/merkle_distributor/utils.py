@@ -1,13 +1,22 @@
-import logging
-from typing import Tuple, Set, Dict, Union, List, NamedTuple, TypedDict
-
 import ipfshttpclient
+import logging
 from ens.constants import EMPTY_ADDR_HEX
 from eth_typing import HexStr, ChecksumAddress
 from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
 from tenacity import retry, Retrying
 from tenacity.before_sleep import before_sleep_log
+from typing import (
+    Tuple,
+    Set,
+    Dict,
+    Union,
+    List,
+    NamedTuple,
+    TypedDict,
+    NewType,
+    Iterator,
+)
 from web3 import Web3
 from web3.contract import Contract
 from web3.exceptions import ContractLogicError
@@ -21,6 +30,10 @@ logger = logging.getLogger(__name__)
 # 1e18
 ETHER: int = Web3.toWei(1, "ether")
 IPFS_PREFIX: str = "ipfs://"
+
+Rewards = NewType(
+    "Rewards", Dict[ChecksumAddress, Dict[ChecksumAddress, Dict[ChecksumAddress, str]]]
+)
 
 
 class Distribution(NamedTuple):
@@ -201,6 +214,7 @@ def get_staked_eth_distributions(
         return []
 
     # fetch staked eth balances
+    reth_disabled_accounts = sorted(reth_disabled_accounts)
     staked_eth_balance_calls = [
         dict(
             target=staked_eth_token.address,
@@ -230,8 +244,8 @@ def get_staked_eth_distributions(
 
     # calculate staked eth rewards distribution
     distributions: List[Distribution] = []
-    pairs: List[Tuple[ChecksumAddress, Wei]] = sorted(
-        zip(reth_disabled_accounts, staked_eth_balances)
+    pairs: Iterator[Tuple[ChecksumAddress, Wei]] = zip(
+        reth_disabled_accounts, staked_eth_balances
     )
     distributed: Wei = Wei(0)
     for beneficiary, staked_eth_balance in pairs:
@@ -410,25 +424,27 @@ def get_unclaimed_balances(
     merkle_proofs_ipfs_url: str,
     claimed_accounts: Set[ChecksumAddress],
     ipfs_endpoint: str,
-) -> Dict[ChecksumAddress, Dict[ChecksumAddress, Wei]]:
+) -> Rewards:
     """Fetches balances of previous merkle drop from IPFS and removes the accounts that have already claimed."""
     if merkle_proofs_ipfs_url.startswith(IPFS_PREFIX):
         merkle_proofs_ipfs_url = merkle_proofs_ipfs_url[7:]
 
     with ipfshttpclient.connect(ipfs_endpoint) as client:
-        prev_balances: Dict[ChecksumAddress, Dict] = client.get_json(
+        prev_claims: Dict[ChecksumAddress, Dict] = client.get_json(
             merkle_proofs_ipfs_url
         )
 
-    unclaimed_balances: Dict[ChecksumAddress, Dict[ChecksumAddress, Wei]] = {}
-    for account, data in prev_balances.items():
-        account = Web3.toChecksumAddress(account)
+    unclaimed_balances: Rewards = Rewards({})
+    accounts = prev_claims.keys()
+    for account in accounts:
         if account in claimed_accounts:
             continue
 
-        unclaimed_balances[account] = {}
-        for i, token in enumerate(data["tokens"]):
-            unclaimed_balances[account][token] = Wei(int(data["amounts"][i]))
+        rewards = prev_claims.get(account, {}).get("rewards", {})
+        if not rewards:
+            continue
+
+        unclaimed_balances[account] = rewards
 
     return unclaimed_balances
 
