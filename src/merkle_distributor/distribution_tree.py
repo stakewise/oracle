@@ -19,20 +19,20 @@ from src.merkle_distributor.utils import (
     get_erc20_token_balances,
     OraclesSettings,
     Rewards,
+    get_uniswap_v3_staked_eth_balances,
 )
 
 logger = logging.getLogger(__name__)
+
+BLOCKS_IN_YEAR = 2427458
 
 
 class DistributionTree(object):
     def __init__(
         self,
-        block_number: BlockNumber,
-        distributions: List[Distribution],
         reward_eth_token: Contract,
         staked_eth_token: Contract,
         multicall_contract: Contract,
-        uniswap_v3_position_manager: Contract,
         balancer_subgraph_url: str,
         uniswap_v2_subgraph_url: str,
         uniswap_v3_subgraph_url: str,
@@ -40,12 +40,9 @@ class DistributionTree(object):
         dao_address: ChecksumAddress,
         oracles_settings: OraclesSettings,
     ):
-        self.block_number = block_number
         self.w3 = reward_eth_token.web3
-        self.distributions = distributions
         self.reward_eth_token = reward_eth_token
         self.staked_eth_token = staked_eth_token
-        self.uniswap_v3_position_manager = uniswap_v3_position_manager
         self.reward_eth_token_address = Web3.toChecksumAddress(reward_eth_token.address)
         self.staked_eth_token_address = Web3.toChecksumAddress(staked_eth_token.address)
         self.multicall_contract = multicall_contract
@@ -69,21 +66,23 @@ class DistributionTree(object):
         self.uniswap_v2_pairs: Set[ChecksumAddress] = oracles_settings[
             "uniswap_v2_pairs"
         ]
-        self.uniswap_v3_pairs: Dict[ChecksumAddress, BlockNumber] = oracles_settings[
+        self.uniswap_v3_pairs: Set[ChecksumAddress] = oracles_settings[
             "uniswap_v3_pairs"
+        ]
+        self.uniswap_v3_staked_eth_pairs: Set[ChecksumAddress] = oracles_settings[
+            "uniswap_v3_staked_eth_pairs"
         ]
         self.erc20_tokens: Dict[ChecksumAddress, BlockNumber] = oracles_settings[
             "erc20_tokens"
         ]
 
-    @staticmethod
-    def merge_rewards(rewards1: Rewards, rewards2: Rewards) -> Rewards:
+    def merge_rewards(self, rewards1: Rewards, rewards2: Rewards) -> Rewards:
         """Merges two dictionaries into one."""
         merged_rewards: Rewards = copy.deepcopy(rewards1)
         for account, account_rewards in rewards2.items():
-            for origin, origin_rewards in account_rewards.items():
-                for reward_token, value in origin_rewards.items():
-                    DistributionTree.add_value(
+            for reward_token, rewards in account_rewards.items():
+                for origin, value in rewards.items():
+                    self.add_value(
                         rewards=merged_rewards,
                         to=account,
                         origin=origin,
@@ -93,8 +92,8 @@ class DistributionTree(object):
 
         return merged_rewards
 
-    @staticmethod
     def add_value(
+        self,
         rewards: Rewards,
         to: ChecksumAddress,
         origin: ChecksumAddress,
@@ -102,15 +101,18 @@ class DistributionTree(object):
         value: Wei,
     ) -> None:
         """Adds reward tokens to the receiver address."""
+        if self.is_supported_contract(to):
+            raise ValueError(f"Invalid to address: {to}")
+
         prev_amount = (
             rewards.setdefault(to, {})
-            .setdefault(origin, {})
-            .setdefault(reward_token, "0")
+            .setdefault(reward_token, {})
+            .setdefault(origin, "0")
         )
-        rewards[to][origin][reward_token] = str(int(prev_amount) + value)
+        rewards[to][reward_token][origin] = str(int(prev_amount) + value)
 
     def calculate_balancer_staked_eth_rewards(
-        self, vault_reward: Wei
+        self, block_number: BlockNumber, vault_reward: Wei
     ) -> Dict[ChecksumAddress, Wei]:
         """Calculates rETH2 rewards for supported staked eth token pools in Balancer v2."""
         # fetch pool shares
@@ -118,7 +120,7 @@ class DistributionTree(object):
             subgraph_url=self.balancer_subgraph_url,
             token_address=self.staked_eth_token_address,
             pool_ids=self.balancer_staked_eth_pool_ids,
-            block_number=self.block_number,
+            block_number=block_number,
         )
 
         # calculates rewards portion for every supported staked eth balancer pool
@@ -153,10 +155,12 @@ class DistributionTree(object):
             or contract_address in self.erc20_tokens
         )
 
-    def calculate_rewards(self) -> Rewards:
+    def calculate_rewards(
+        self, block_number: BlockNumber, distributions: List[Distribution]
+    ) -> Rewards:
         """Calculates reward for every account recursively and aggregates amounts."""
         rewards: Rewards = Rewards({})
-        for dist in self.distributions:
+        for dist in distributions:
             (origin, reward_token, value) = dist
             if (
                 origin == self.balancer_vault_address
@@ -165,9 +169,12 @@ class DistributionTree(object):
                 # handle special case for Balancer v2 pools and rETH2 distribution
                 balancer_pool_rewards: Dict[
                     ChecksumAddress, Wei
-                ] = self.calculate_balancer_staked_eth_rewards(value)
+                ] = self.calculate_balancer_staked_eth_rewards(
+                    block_number=block_number, vault_reward=value
+                )
                 for pool_address, pool_reward in balancer_pool_rewards.items():
                     new_rewards = self._calculate_contract_rewards(
+                        block_number=block_number,
                         origin=pool_address,
                         reward_token=reward_token,
                         total_reward=pool_reward,
@@ -177,6 +184,7 @@ class DistributionTree(object):
             elif self.is_supported_contract(origin):
                 # calculate reward based on the contract balances
                 new_rewards = self._calculate_contract_rewards(
+                    block_number=block_number,
                     origin=origin,
                     reward_token=reward_token,
                     total_reward=value,
@@ -189,14 +197,17 @@ class DistributionTree(object):
                     f" source={origin},"
                     f" reward token={reward_token},"
                     f" value={value},"
-                    f" block number={self.block_number}"
+                    f" block number={block_number}"
                 )
 
         return rewards
 
     @lru_cache
     def get_balances(
-        self, contract_address: ChecksumAddress
+        self,
+        block_number: BlockNumber,
+        contract_address: ChecksumAddress,
+        reward_token: ChecksumAddress,
     ) -> Tuple[Dict[ChecksumAddress, Wei], Wei]:
         """Fetches balances and total supply of the contract."""
         if contract_address in self.balancer_pools:
@@ -204,23 +215,34 @@ class DistributionTree(object):
             return get_balancer_pool_balances(
                 subgraph_url=self.balancer_subgraph_url,
                 pool_id=self.balancer_pools[contract_address],
-                block_number=self.block_number,
+                block_number=block_number,
             )
         elif contract_address in self.uniswap_v2_pairs:
             logger.info(f"Fetching Uniswap V2 balances: pool={contract_address}")
             return get_uniswap_v2_balances(
                 subgraph_url=self.uniswap_v2_subgraph_url,
                 pair_address=contract_address,
-                block_number=self.block_number,
+                block_number=block_number,
+            )
+        elif (
+            contract_address in self.uniswap_v3_staked_eth_pairs
+            and reward_token == self.reward_eth_token_address
+        ):
+            logger.info(
+                f"Fetching Uniswap V3 staked eth balances: pool={contract_address}"
+            )
+            return get_uniswap_v3_staked_eth_balances(
+                subgraph_url=self.uniswap_v3_subgraph_url,
+                pool_address=contract_address,
+                staked_eth_token_address=self.staked_eth_token_address,
+                to_block=block_number,
             )
         elif contract_address in self.uniswap_v3_pairs:
             logger.info(f"Fetching Uniswap V3 balances: pool={contract_address}")
             return get_uniswap_v3_balances(
                 subgraph_url=self.uniswap_v3_subgraph_url,
                 pool_address=contract_address,
-                position_manager=self.uniswap_v3_position_manager,
-                from_block=self.uniswap_v3_pairs[contract_address],
-                to_block=self.block_number,
+                to_block=block_number,
             )
         elif contract_address == self.reward_eth_token_address:
             logger.info("Fetching Reward ETH Token balances")
@@ -231,7 +253,7 @@ class DistributionTree(object):
                 from_block=self.erc20_tokens[
                     Web3.toChecksumAddress(self.staked_eth_token.address)
                 ],
-                to_block=self.block_number,
+                to_block=block_number,
             )
         elif contract_address in self.erc20_tokens:
             logger.info(f"Fetching ERC-20 token balances: token={contract_address}")
@@ -241,7 +263,7 @@ class DistributionTree(object):
             return get_erc20_token_balances(
                 token=contract,
                 start_block=self.erc20_tokens[contract_address],
-                end_block=self.block_number,
+                end_block=block_number,
             )
 
         raise ValueError(
@@ -250,6 +272,7 @@ class DistributionTree(object):
 
     def _calculate_contract_rewards(
         self,
+        block_number: BlockNumber,
         origin: ChecksumAddress,
         reward_token: ChecksumAddress,
         total_reward: Wei,
@@ -258,7 +281,11 @@ class DistributionTree(object):
         rewards: Rewards = Rewards({})
 
         # fetch user balances and total supply for calculation reward portions
-        balances, total_supply = self.get_balances(origin)
+        balances, total_supply = self.get_balances(
+            block_number=block_number,
+            contract_address=origin,
+            reward_token=reward_token,
+        )
         if total_supply <= 0:
             # no recipients for the rewards -> assign reward to the DAO
             self.add_value(
@@ -294,6 +321,7 @@ class DistributionTree(object):
                 )
             elif self.is_supported_contract(account):
                 new_rewards = self._calculate_contract_rewards(
+                    block_number=block_number,
                     origin=account,
                     reward_token=reward_token,
                     total_reward=account_reward,

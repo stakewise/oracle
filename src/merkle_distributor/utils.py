@@ -22,6 +22,7 @@ from web3.contract import Contract
 from web3.exceptions import ContractLogicError
 from web3.types import Wei, BlockNumber
 
+from src.merkle_distributor.uniswap_v3 import get_amount0, get_amount1
 from src.staking_rewards.utils import backoff, stop_attempts
 from src.utils import wait_for_transaction
 
@@ -56,7 +57,10 @@ class OraclesSettings(TypedDict):
     uniswap_v2_pairs: Set[ChecksumAddress]
 
     # set of Uniswap V3 supported pairs
-    uniswap_v3_pairs: Dict[ChecksumAddress, BlockNumber]
+    uniswap_v3_pairs: Set[ChecksumAddress]
+
+    # set of Uniswap V3 supported staked ETH pairs
+    uniswap_v3_staked_eth_pairs: Set[ChecksumAddress]
 
     # dictionary of supported ERC-20 tokens and the block number when they were created
     erc20_tokens: Dict[ChecksumAddress, BlockNumber]
@@ -318,12 +322,18 @@ def get_oracles_config(
                 for pair in oracles_settings.get("uniswap_v2_pairs", [])
             ]
         ),
-        uniswap_v3_pairs={
-            Web3.toChecksumAddress(token_address): int(block_number)
-            for token_address, block_number in oracles_settings.get(
-                "uniswap_v3_pairs", {}
-            ).items()
-        },
+        uniswap_v3_pairs=set(
+            [
+                Web3.toChecksumAddress(pair)
+                for pair in oracles_settings.get("uniswap_v3_pairs", [])
+            ]
+        ),
+        uniswap_v3_staked_eth_pairs=set(
+            [
+                Web3.toChecksumAddress(pair)
+                for pair in oracles_settings.get("uniswap_v3_staked_eth_pairs", [])
+            ]
+        ),
         erc20_tokens={
             Web3.toChecksumAddress(token_address): int(block_number)
             for token_address, block_number in oracles_settings.get(
@@ -430,23 +440,25 @@ def get_unclaimed_balances(
         merkle_proofs_ipfs_url = merkle_proofs_ipfs_url[7:]
 
     with ipfshttpclient.connect(ipfs_endpoint) as client:
-        prev_claims: Dict[ChecksumAddress, Dict] = client.get_json(
-            merkle_proofs_ipfs_url
-        )
+        prev_claims: Dict = client.get_json(merkle_proofs_ipfs_url)
 
-    unclaimed_balances: Rewards = Rewards({})
-    accounts = prev_claims.keys()
-    for account in accounts:
+    unclaimed_rewards: Rewards = Rewards({})
+    for account, claim in prev_claims.items():
         if account in claimed_accounts:
             continue
 
-        rewards = prev_claims.get(account, {}).get("rewards", {})
-        if not rewards:
-            continue
+        for i, reward_token in enumerate(claim["reward_tokens"]):
+            for origin, value in zip(claim["origins"][i], claim["values"][i]):
+                prev_unclaimed = (
+                    unclaimed_rewards.setdefault(account, {})
+                    .setdefault(reward_token, {})
+                    .setdefault(origin, "0")
+                )
+                unclaimed_rewards[account][reward_token][origin] = str(
+                    int(prev_unclaimed) + int(value)
+                )
 
-        unclaimed_balances[account] = rewards
-
-    return unclaimed_balances
+    return unclaimed_rewards
 
 
 @retry(
@@ -713,11 +725,7 @@ def get_uniswap_v2_balances(
     before_sleep=before_sleep_log(logger, logging.WARNING),
 )
 def get_uniswap_v3_balances(
-    subgraph_url: str,
-    pool_address: ChecksumAddress,
-    position_manager: Contract,
-    from_block: BlockNumber,
-    to_block: BlockNumber,
+    subgraph_url: str, pool_address: ChecksumAddress, to_block: BlockNumber
 ) -> Tuple[Dict[ChecksumAddress, Wei], Wei]:
     """Fetches users' balances of the Uniswap V3 Pair that provide liquidity for the current tick."""
     transport = RequestsHTTPTransport(url=subgraph_url)
@@ -746,36 +754,162 @@ def get_uniswap_v3_balances(
     if not pools:
         return {}, Wei(0)
 
-    current_tick: str = pools[0].get("tick", "")
-    if not current_tick:
+    tick_current: str = pools[0].get("tick", "")
+    if not tick_current:
         return {}, Wei(0)
 
-    # fetch liquidity mints that cover the current tick
+    # fetch positions that cover the current tick
     query = gql(
         """
-        query getMints(
+        query getPositions(
           $block_number: Int
-          $current_tick: BigInt
-          $owner: Bytes
+          $tick_current: BigInt
           $pool_address: String
           $last_id: ID
         ) {
-          mints(
+          positions(
             first: 1000
             block: { number: $block_number }
             where: {
-              tickLower_lte: $current_tick
-              tickUpper_gte: $current_tick
-              owner: $owner
+              tickLower_lte: $tick_current
+              tickUpper_gt: $tick_current
               pool: $pool_address
               id_gt: $last_id
             }
             orderBy: id
             orderDirection: asc
           ) {
-            id
-            origin
-            transaction {
+            owner
+            liquidity
+          }
+        }
+    """
+    )
+
+    # execute the query on the transport in chunks of 1000 entities
+    last_id = ""
+    result: Dict = execute_graphql_query(
+        client=client,
+        query=query,
+        variables=dict(
+            block_number=to_block,
+            tick_current=tick_current,
+            pool_address=pool_address.lower(),
+            last_id=last_id,
+        ),
+    )
+    positions_chunk = result.get("positions", [])
+    positions = positions_chunk
+
+    # accumulate chunks
+    while len(positions_chunk) >= 1000:
+        last_id = positions_chunk[-1]["id"]
+        if not last_id:
+            break
+
+        result = execute_graphql_query(
+            client=client,
+            query=query,
+            variables=dict(
+                block_number=to_block,
+                tick_current=tick_current,
+                pool_address=pool_address.lower(),
+                last_id=last_id,
+            ),
+        )
+        positions_chunk = result.get("positions", [])
+        positions.extend(positions_chunk)
+
+    # process positions
+    account_to_liquidity: Dict[ChecksumAddress, Wei] = {}
+    total_liquidity: Wei = Wei(0)
+    for position in positions:
+        account: ChecksumAddress = position.get("owner", EMPTY_ADDR_HEX)
+        if account in (EMPTY_ADDR_HEX, ""):
+            continue
+
+        account = Web3.toChecksumAddress(account)
+        liquidity: Wei = Wei(int(position.get("liquidity", "0")))
+        if liquidity <= 0:
+            continue
+
+        account_to_liquidity[account] = Wei(
+            account_to_liquidity.setdefault(account, Wei(0)) + liquidity
+        )
+        total_liquidity += liquidity
+
+    return account_to_liquidity, total_liquidity
+
+
+@retry(
+    reraise=True,
+    wait=backoff,
+    stop=stop_attempts,
+    before_sleep=before_sleep_log(logger, logging.WARNING),
+)
+def get_uniswap_v3_staked_eth_balances(
+    subgraph_url: str,
+    pool_address: ChecksumAddress,
+    staked_eth_token_address: ChecksumAddress,
+    to_block: BlockNumber,
+) -> Tuple[Dict[ChecksumAddress, Wei], Wei]:
+    """Fetches users' staked eth balances of the Uniswap V3 Pair across all the ticks."""
+    transport = RequestsHTTPTransport(url=subgraph_url)
+
+    # create a GraphQL client using the defined transport
+    client = Client(transport=transport, fetch_schema_from_transport=True)
+
+    # fetch pool current tick and token addresses
+    query = gql(
+        """
+        query getPools($block_number: Int, $pool_address: ID) {
+          pools(block: { number: $block_number }, where: { id: $pool_address }) {
+            tick
+            sqrtPrice
+          }
+        }
+    """
+    )
+
+    # execute the query on the transport
+    result: Dict = execute_graphql_query(
+        client=client,
+        query=query,
+        variables=dict(block_number=to_block, pool_address=pool_address.lower()),
+    )
+    pools = result.get("pools", [])
+    if not pools:
+        return {}, Wei(0)
+
+    tick_current: int = pools[0].get("tick", "")
+    if not tick_current:
+        return {}, Wei(0)
+    tick_current = int(tick_current)
+
+    sqrt_price: int = pools[0].get("sqrtPrice", "")
+    if not sqrt_price:
+        return {}, Wei(0)
+    sqrt_price = int(sqrt_price)
+
+    # fetch positions that cover the current tick
+    query = gql(
+        """
+        query getPositions($block_number: Int, $pool_address: String, $last_id: ID) {
+          positions(
+            first: 1000
+            block: { number: $block_number }
+            where: { pool: $pool_address, id_gt: $last_id }
+            orderBy: id
+            orderDirection: asc
+          ) {
+            owner
+            liquidity
+            tickLower
+            tickUpper
+            token0 {
+              id
+            }
+            token1 {
               id
             }
           }
@@ -790,18 +924,16 @@ def get_uniswap_v3_balances(
         query=query,
         variables=dict(
             block_number=to_block,
-            current_tick=current_tick,
             pool_address=pool_address.lower(),
-            owner=position_manager.address.lower(),
             last_id=last_id,
         ),
     )
-    mints_chunk = result.get("mints", [])
-    mints = mints_chunk
+    positions_chunk = result.get("positions", [])
+    positions = positions_chunk
 
     # accumulate chunks
-    while len(mints_chunk) >= 1000:
-        last_id = mints_chunk[-1]["id"]
+    while len(positions_chunk) >= 1000:
+        last_id = positions_chunk[-1]["id"]
         if not last_id:
             break
 
@@ -810,268 +942,81 @@ def get_uniswap_v3_balances(
             query=query,
             variables=dict(
                 block_number=to_block,
-                current_tick=current_tick,
+                tick_current=tick_current,
                 pool_address=pool_address.lower(),
-                owner=position_manager.address.lower(),
                 last_id=last_id,
             ),
         )
-        mints_chunk = result.get("mints", [])
-        mints.extend(mints_chunk)
+        positions_chunk = result.get("positions", [])
+        positions.extend(positions_chunk)
 
-    # process mints
-    account_transactions: Dict[ChecksumAddress, Set[HexStr]] = {}
-    for mint in mints:
-        tx_hash: HexStr = mint.get("transaction", {}).get("id", "")
-        user_address: ChecksumAddress = mint.get("origin", EMPTY_ADDR_HEX)
-        if not tx_hash or user_address in (EMPTY_ADDR_HEX, ""):
+    # process positions
+    account_to_staked_eth: Dict[ChecksumAddress, Wei] = {}
+    total_staked_eth: Wei = Wei(0)
+    for position in positions:
+        account: ChecksumAddress = position.get("owner", EMPTY_ADDR_HEX)
+        if account in (EMPTY_ADDR_HEX, ""):
+            continue
+        account = Web3.toChecksumAddress(account)
+
+        liquidity: int = int(position.get("liquidity", "0"))
+        if liquidity <= 0:
             continue
 
-        user_address = Web3.toChecksumAddress(user_address)
-        account_transactions.setdefault(user_address, set()).add(tx_hash)
+        tick_lower: int = position.get("tickLower", "")
+        if tick_lower in ("", None):
+            continue
+        tick_lower = int(tick_lower)
 
-    token_id_to_owner: Dict[int, ChecksumAddress] = get_uniswap_v3_token_ids(
-        position_manager=position_manager,
-        account_transactions=account_transactions,
-        start_block=from_block,
-        end_block=to_block,
-    )
-    owner_to_liquidity: Dict[
-        ChecksumAddress, Wei
-    ] = get_uniswap_v3_token_owner_liquidity(
-        position_manager=position_manager,
-        token_id_to_owner=token_id_to_owner,
-        start_block=from_block,
-        end_block=to_block,
-    )
+        tick_upper: int = position.get("tickUpper", "")
+        if tick_upper in ("", None):
+            continue
+        tick_upper = int(tick_upper)
 
-    return owner_to_liquidity, sum(owner_to_liquidity.values())
+        token0_address: ChecksumAddress = position.get("token0", {}).get(
+            "id", EMPTY_ADDR_HEX
+        )
+        if token0_address in (EMPTY_ADDR_HEX, ""):
+            continue
 
-
-@retry(
-    reraise=True,
-    wait=backoff,
-    stop=stop_attempts,
-    before_sleep=before_sleep_log(logger, logging.WARNING),
-)
-def get_uniswap_v3_token_owner_liquidity(
-    position_manager: Contract,
-    token_id_to_owner: Dict[int, ChecksumAddress],
-    start_block: BlockNumber,
-    end_block: BlockNumber,
-) -> Dict[ChecksumAddress, Wei]:
-    """Fetches liquidity for specific Uniswap V3 token IDs and aggregates based on the owner address."""
-    # fetch liquidity positions for all the token IDs
-    argument_filters = {"tokenId": list(token_id_to_owner.keys())}
-    _start_block: BlockNumber = start_block
-    blocks_spread = 200_000
-    owner_to_liquidity: Dict[ChecksumAddress, Wei] = {}
-
-    # process increase events
-    while start_block < end_block:
-        for attempt in Retrying(
-            reraise=True,
-            wait=backoff,
-            stop=stop_attempts,
-            before_sleep=before_sleep_log(logger, logging.WARNING),
-        ):
-            if start_block + blocks_spread >= end_block:
-                to_block: BlockNumber = end_block
-            else:
-                to_block: BlockNumber = start_block + blocks_spread
-            with attempt:
-                try:
-                    decrease_events = position_manager.events.IncreaseLiquidity.getLogs(
-                        argument_filters=argument_filters,
-                        fromBlock=start_block,
-                        toBlock=to_block,
-                    )
-                    start_block = to_block + 1
-                except Exception as e:
-                    blocks_spread = blocks_spread // 2
-                    logger.warning(
-                        f"Failed to fetch liquidity increase events: from block={start_block}, to block={to_block},"
-                        f" changing blocks spread to={blocks_spread}"
-                    )
-                    raise e
-
-            # process increase liquidity events
-            for event in decrease_events:
-                liquidity: Wei = event["args"]["liquidity"]
-                token_id: int = event["args"]["tokenId"]
-                owner: ChecksumAddress = token_id_to_owner[token_id]
-                owner_to_liquidity[owner] = Wei(
-                    owner_to_liquidity.setdefault(owner, Wei(0)) + liquidity
+        if Web3.toChecksumAddress(token0_address) == staked_eth_token_address:
+            staked_eth_amount: Wei = Wei(
+                get_amount0(
+                    tick_current=tick_current,
+                    sqrt_ratio_x96=sqrt_price,
+                    tick_lower=tick_lower,
+                    tick_upper=tick_upper,
+                    liquidity=liquidity,
                 )
+            )
+            account_to_staked_eth[account] = Wei(
+                account_to_staked_eth.setdefault(account, Wei(0)) + staked_eth_amount
+            )
+            total_staked_eth += staked_eth_amount
+            continue
 
-    # process decrease events
-    blocks_spread = 200_000
-    start_block = _start_block
-    while start_block < end_block:
-        for attempt in Retrying(
-            reraise=True,
-            wait=backoff,
-            stop=stop_attempts,
-            before_sleep=before_sleep_log(logger, logging.WARNING),
-        ):
-            if start_block + blocks_spread >= end_block:
-                to_block: BlockNumber = end_block
-            else:
-                to_block: BlockNumber = start_block + blocks_spread
-            with attempt:
-                try:
-                    decrease_events = position_manager.events.DecreaseLiquidity.getLogs(
-                        argument_filters=argument_filters,
-                        fromBlock=start_block,
-                        toBlock=to_block,
-                    )
-                    start_block = to_block + 1
-                except Exception as e:
-                    blocks_spread = blocks_spread // 2
-                    logger.warning(
-                        f"Failed to fetch liquidity decrease events: from block={start_block}, to block={to_block},"
-                        f" changing blocks spread to={blocks_spread}"
-                    )
-                    raise e
+        token1_address: ChecksumAddress = position.get("token1", {}).get(
+            "id", EMPTY_ADDR_HEX
+        )
+        if token1_address in (EMPTY_ADDR_HEX, ""):
+            continue
 
-            # process decrease liquidity events
-            for event in decrease_events:
-                liquidity: Wei = event["args"]["liquidity"]
-                token_id: int = event["args"]["tokenId"]
-                owner: ChecksumAddress = token_id_to_owner[token_id]
-                prev_liquidity: Wei = owner_to_liquidity.setdefault(owner, Wei(0))
-                if prev_liquidity - liquidity <= 0:
-                    del owner_to_liquidity[owner]
-                else:
-                    owner_to_liquidity[owner] = Wei(prev_liquidity - liquidity)
+        if Web3.toChecksumAddress(token1_address) == staked_eth_token_address:
+            staked_eth_amount: Wei = Wei(
+                get_amount1(
+                    tick_current=tick_current,
+                    sqrt_ratio_x96=sqrt_price,
+                    tick_lower=tick_lower,
+                    tick_upper=tick_upper,
+                    liquidity=liquidity,
+                )
+            )
+            account_to_staked_eth[account] = Wei(
+                account_to_staked_eth.setdefault(account, Wei(0)) + staked_eth_amount
+            )
+            total_staked_eth += staked_eth_amount
 
-    return owner_to_liquidity
-
-
-@retry(
-    reraise=True,
-    wait=backoff,
-    stop=stop_attempts,
-    before_sleep=before_sleep_log(logger, logging.WARNING),
-)
-def get_uniswap_v3_token_ids(
-    position_manager: Contract,
-    account_transactions: Dict[ChecksumAddress, Set[HexStr]],
-    start_block: BlockNumber,
-    end_block: BlockNumber,
-) -> Dict[int, ChecksumAddress]:
-    """Fetches Uniswap V3 token IDs for specific accounts."""
-    argument_filters = {"from": EMPTY_ADDR_HEX, "to": list(account_transactions.keys())}
-    visited_mint_transactions: Set[HexStr] = set()
-    duplicated_transactions: Set[HexStr] = set()
-    _start_block: BlockNumber = start_block
-
-    # fetch token IDs
-    blocks_spread = 200_000
-    owner_to_token_ids: Dict[ChecksumAddress, Set[int]] = {}
-    while start_block < end_block:
-        for attempt in Retrying(
-            reraise=True,
-            wait=backoff,
-            stop=stop_attempts,
-            before_sleep=before_sleep_log(logger, logging.WARNING),
-        ):
-            if start_block + blocks_spread >= end_block:
-                to_block: BlockNumber = end_block
-            else:
-                to_block: BlockNumber = start_block + blocks_spread
-            with attempt:
-                try:
-                    transfer_events = position_manager.events.Transfer.getLogs(
-                        argument_filters=argument_filters,
-                        fromBlock=start_block,
-                        toBlock=to_block,
-                    )
-                    start_block = to_block + 1
-                except Exception as e:
-                    blocks_spread = blocks_spread // 2
-                    logger.warning(
-                        f"Failed to fetch transfer events: from block={start_block}, to block={to_block},"
-                        f" changing blocks spread to={blocks_spread}"
-                    )
-                    raise e
-
-                # process mint transactions to get a set of valid token IDs
-                for transfer_event in transfer_events:
-                    tx_hash: HexStr = Web3.toHex(transfer_event["transactionHash"])
-                    to_address: ChecksumAddress = Web3.toChecksumAddress(
-                        transfer_event["args"]["to"]
-                    )
-                    token_id: int = transfer_event["args"]["tokenId"]
-                    if (
-                        to_address not in account_transactions
-                        or tx_hash not in account_transactions[to_address]
-                    ):
-                        continue
-
-                    if tx_hash in visited_mint_transactions:
-                        duplicated_transactions.add(tx_hash)
-                        continue
-
-                    visited_mint_transactions.add(tx_hash)
-                    owner_to_token_ids.setdefault(to_address, set()).add(token_id)
-
-    # get rid of accounts that have multiple mints in one transaction
-    for tx in duplicated_transactions:
-        for to_address, mint_transactions in account_transactions.items():
-            if tx in mint_transactions:
-                del owner_to_token_ids[to_address]
-
-    token_id_to_owner: Dict[int, ChecksumAddress] = {}
-    for to_address, token_ids in owner_to_token_ids.items():
-        for token_id in token_ids:
-            token_id_to_owner[token_id] = to_address
-
-    # check for updated owners
-    argument_filters = {
-        "tokenId": list(token_id_to_owner.keys()),
-    }
-    blocks_spread = 200_000
-    start_block = _start_block
-    while start_block < end_block:
-        for attempt in Retrying(
-            reraise=True,
-            wait=backoff,
-            stop=stop_attempts,
-            before_sleep=before_sleep_log(logger, logging.WARNING),
-        ):
-            if start_block + blocks_spread >= end_block:
-                to_block: BlockNumber = end_block
-            else:
-                to_block: BlockNumber = start_block + blocks_spread
-            with attempt:
-                try:
-                    transfer_events = position_manager.events.Transfer.getLogs(
-                        argument_filters=argument_filters,
-                        fromBlock=start_block,
-                        toBlock=to_block,
-                    )
-                    start_block = to_block + 1
-                except Exception as e:
-                    blocks_spread = blocks_spread // 2
-                    logger.warning(
-                        f"Failed to fetch transfer events: from block={start_block}, to block={to_block},"
-                        f" changing blocks spread to={blocks_spread}"
-                    )
-                    raise e
-
-                # process mint transactions to get a set of valid token IDs
-                for transfer_event in transfer_events:
-                    to_address: ChecksumAddress = Web3.toChecksumAddress(
-                        transfer_event["args"]["to"]
-                    )
-                    token_id: int = transfer_event["args"]["tokenId"]
-                    if to_address == EMPTY_ADDR_HEX:
-                        token_id_to_owner.pop(token_id, None)
-                    else:
-                        token_id_to_owner[token_id] = to_address
-
-    return token_id_to_owner
+    return account_to_staked_eth, total_staked_eth
 
 
 def get_token_participated_accounts(
@@ -1297,10 +1242,7 @@ def get_merkle_node(
     return w3.keccak(primitive=encoded_data)
 
 
-def pin_claims_to_ipfs(
-    claims: Dict[ChecksumAddress, Dict],
-    ipfs_endpoint: str,
-) -> str:
+def pin_claims_to_ipfs(claims: Dict, ipfs_endpoint: str) -> str:
     """Submits claims to the IPFS and pins the file."""
     with ipfshttpclient.connect(ipfs_endpoint) as client:
         ipfs_hash = client.add_json(claims)

@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 import logging
 from eth_typing import HexStr, ChecksumAddress
 from typing import Set, Dict, List
@@ -11,7 +13,6 @@ from contracts import (
     get_multicall_contract,
     get_merkle_distributor_contract,
     get_ens_resolver_contract,
-    get_uniswap_v3_position_manager_contract,
 )
 from src.merkle_distributor.distribution_tree import DistributionTree
 from src.merkle_distributor.merkle_tree import MerkleTree
@@ -75,11 +76,6 @@ class Distributor(object):
         self.staked_eth_token = get_staked_eth_contract(w3)
         logger.info(
             f"Staked ETH Token contract address: {self.staked_eth_token.address}"
-        )
-
-        self.uniswap_v3_position_manager = get_uniswap_v3_position_manager_contract(w3)
-        logger.info(
-            f"Uniswap V3 Position Manager contract address: {self.uniswap_v3_position_manager.address}"
         )
 
         self.multicall_contract = get_multicall_contract(w3)
@@ -238,28 +234,25 @@ class Distributor(object):
             self.skipped_rewards_block_number = new_rewards_block_number
             return
 
-        # calculate final rewards through the distribution trees
+        # calculate final rewards through the distribution tree
+        tree = DistributionTree(
+            reward_eth_token=self.reward_eth_token,
+            staked_eth_token=self.staked_eth_token,
+            multicall_contract=self.multicall_contract,
+            balancer_subgraph_url=BALANCER_SUBGRAPH_URL,
+            uniswap_v2_subgraph_url=UNISWAP_V2_SUBGRAPH_URL,
+            uniswap_v3_subgraph_url=UNISWAP_V3_SUBGRAPH_URL,
+            balancer_vault_address=BALANCER_VAULT_CONTRACT_ADDRESS,
+            dao_address=DAO_ADDRESS,
+            oracles_settings=oracles_settings,
+        )
         final_rewards: Rewards = Rewards({})
         for block_number, dist in block_distributions.items():
-            tree = DistributionTree(
-                block_number=block_number,
-                distributions=dist,
-                reward_eth_token=self.reward_eth_token,
-                staked_eth_token=self.staked_eth_token,
-                multicall_contract=self.multicall_contract,
-                uniswap_v3_position_manager=self.uniswap_v3_position_manager,
-                balancer_subgraph_url=BALANCER_SUBGRAPH_URL,
-                uniswap_v2_subgraph_url=UNISWAP_V2_SUBGRAPH_URL,
-                uniswap_v3_subgraph_url=UNISWAP_V3_SUBGRAPH_URL,
-                balancer_vault_address=BALANCER_VAULT_CONTRACT_ADDRESS,
-                dao_address=DAO_ADDRESS,
-                oracles_settings=oracles_settings,
-            )
             logger.info(
                 f"Calculating reward distributions: block number={block_number}"
             )
-            block_rewards = tree.calculate_rewards()
-            final_rewards = DistributionTree.merge_rewards(final_rewards, block_rewards)
+            block_rewards = tree.calculate_rewards(block_number, dist)
+            final_rewards = tree.merge_rewards(final_rewards, block_rewards)
 
         if prev_merkle_root_parameters is None:
             # it's the first merkle root update -> there are no unclaimed rewards
@@ -282,21 +275,34 @@ class Distributor(object):
 
         # merge final rewards with unclaimed rewards
         if unclaimed_rewards:
-            final_rewards = DistributionTree.merge_rewards(
-                final_rewards, unclaimed_rewards
-            )
+            final_rewards = tree.merge_rewards(final_rewards, unclaimed_rewards)
 
         # calculate merkle elements
         merkle_elements: List[bytes] = []
         accounts: List[ChecksumAddress] = sorted(final_rewards.keys())
+        new_claims: OrderedDict = OrderedDict()
         for i, account in enumerate(accounts):
+            new_claim: OrderedDict = OrderedDict()
+            reward_tokens: List[ChecksumAddress] = sorted(final_rewards[account].keys())
             reward_token_amounts: Dict[ChecksumAddress, Wei] = {}
-            for origin, origin_rewards in final_rewards[account].items():
-                for reward_token, value in origin_rewards.items():
+            for reward_token in reward_tokens:
+                origins: List[ChecksumAddress] = sorted(
+                    final_rewards[account][reward_token].keys()
+                )
+                values: List[str] = []
+                for origin in origins:
+                    value: str = final_rewards[account][reward_token][origin]
+                    values.append(value)
                     prev_value = reward_token_amounts.setdefault(reward_token, Wei(0))
                     reward_token_amounts[reward_token] = Wei(prev_value + int(value))
 
-            reward_tokens: List[ChecksumAddress] = sorted(reward_token_amounts.keys())
+                new_claim.setdefault("origins", []).append(origins)
+                new_claim.setdefault("values", []).append(values)
+
+            new_claim["index"] = i
+            new_claim["reward_tokens"] = reward_tokens
+            new_claims[account] = new_claim
+
             amounts: List[Wei] = [
                 reward_token_amounts[token] for token in reward_tokens
             ]
@@ -312,12 +318,9 @@ class Distributor(object):
         merkle_tree = MerkleTree(merkle_elements)
 
         # collect proofs
-        new_claims: Dict[ChecksumAddress, Dict] = {}
         for i, account in enumerate(accounts):
             proof: List[HexStr] = merkle_tree.get_hex_proof(merkle_elements[i])
-            new_claims[account] = dict(
-                index=i, rewards=final_rewards[account], proof=proof
-            )
+            new_claims[account]["proof"] = proof
 
         # calculate merkle root
         merkle_root: HexStr = merkle_tree.get_hex_root()

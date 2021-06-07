@@ -13,7 +13,6 @@ from src.settings import (
     MULTICALL_CONTRACT_ADDRESS,
     MERKLE_DISTRIBUTOR_CONTRACT_ADDRESS,
     ENS_RESOLVER_CONTRACT_ADDRESS,
-    UNISWAP_V3_POSITION_MANAGER_CONTRACT_ADDRESS,
 )
 
 
@@ -78,17 +77,6 @@ def get_ens_resolver_contract(w3: Web3) -> Contract:
         abi = json.load(f)
 
     return w3.eth.contract(abi=abi, address=ENS_RESOLVER_CONTRACT_ADDRESS)
-
-
-def get_uniswap_v3_position_manager_contract(w3: Web3) -> Contract:
-    """:returns instance of `ERC-20` contract."""
-    current_dir = os.path.dirname(__file__)
-    with open(os.path.join(current_dir, "abi/UniswapV3PositionManager.json")) as f:
-        abi = json.load(f)
-
-    return w3.eth.contract(
-        abi=abi, address=UNISWAP_V3_POSITION_MANAGER_CONTRACT_ADDRESS
-    )
 
 
 def get_erc20_contract(w3: Web3, contract_address: ChecksumAddress) -> Contract:
