@@ -117,7 +117,10 @@ MULTICALL_CONTRACT_ADDRESS: ChecksumAddress = Web3.toChecksumAddress(
     )
 )
 MERKLE_DISTRIBUTOR_CONTRACT_ADDRESS: ChecksumAddress = Web3.toChecksumAddress(
-    environ.get("MERKLE_DISTRIBUTOR_CONTRACT_ADDRESS", "0xA3F21010e8b9a3930996C8849Df38f9Ca3647c20")
+    environ.get(
+        "MERKLE_DISTRIBUTOR_CONTRACT_ADDRESS",
+        "0xA3F21010e8b9a3930996C8849Df38f9Ca3647c20",
+    )
 )
 BALANCER_VAULT_CONTRACT_ADDRESS: ChecksumAddress = Web3.toChecksumAddress(
     environ.get(
