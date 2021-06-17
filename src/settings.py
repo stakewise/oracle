@@ -116,9 +116,8 @@ MULTICALL_CONTRACT_ADDRESS: ChecksumAddress = Web3.toChecksumAddress(
         "MULTICALL_CONTRACT_ADDRESS", "0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441"
     )
 )
-# TODO: Add default Merkle Distributor contract address
 MERKLE_DISTRIBUTOR_CONTRACT_ADDRESS: ChecksumAddress = Web3.toChecksumAddress(
-    environ.get("MERKLE_DISTRIBUTOR_CONTRACT_ADDRESS", "0x0")
+    environ.get("MERKLE_DISTRIBUTOR_CONTRACT_ADDRESS", "0xA3F21010e8b9a3930996C8849Df38f9Ca3647c20")
 )
 BALANCER_VAULT_CONTRACT_ADDRESS: ChecksumAddress = Web3.toChecksumAddress(
     environ.get(
@@ -144,10 +143,9 @@ UNISWAP_V2_SUBGRAPH_URL: str = environ.get(
     "UNISWAP_V2_SUBGRAPH_URL",
     "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2",
 )
-# TODO: point to the official subgraph
 UNISWAP_V3_SUBGRAPH_URL: str = environ.get(
     "UNISWAP_V3_SUBGRAPH_URL",
-    "https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v3-subgraph",
+    "https://api.thegraph.com/subgraphs/name/tsudmi/uniswap-v3",
 )
 
 # IPFS
