@@ -1,7 +1,8 @@
 import logging
 import time
+from urllib.parse import urljoin
 
-from src.oracle import Oracle
+from src.staking_rewards import Rewards, wait_prysm_ready
 from src.settings import (
     WEB3_WS_ENDPOINT,
     WEB3_WS_ENDPOINT_TIMEOUT,
@@ -20,13 +21,13 @@ from src.settings import (
     BEACON_CHAIN_RPC_ENDPOINT,
     SEND_TELEGRAM_NOTIFICATIONS,
     LOG_LEVEL,
+    ETHERSCAN_ADDRESS_BASE_URL,
 )
 from src.utils import (
     get_web3_client,
     configure_default_account,
     InterruptHandler,
     check_default_account_balance,
-    wait_prysm_ready,
     telegram,
 )
 
@@ -63,16 +64,18 @@ def main() -> None:
         # oracle maintainers know the service has restarted
         telegram.notify(
             message=f"Oracle starting with account [{web3_client.eth.default_account}]"
-            f"(https://etherscan.io/address/{web3_client.eth.default_account})",
+            f"({urljoin(ETHERSCAN_ADDRESS_BASE_URL, str(web3_client.eth.default_account))})",
             parse_mode="markdown",
             raise_on_errors=True,
             disable_web_page_preview=True,
         )
 
     # wait that node is synced before trying to do anything
-    wait_prysm_ready(interrupt_handler, BEACON_CHAIN_RPC_ENDPOINT, PROCESS_INTERVAL)
-
-    oracle = Oracle(w3=web3_client, interrupt_handler=interrupt_handler)
+    wait_prysm_ready(
+        interrupt_handler=interrupt_handler,
+        endpoint=BEACON_CHAIN_RPC_ENDPOINT,
+        process_interval=PROCESS_INTERVAL
+    )
 
     # check oracle balance
     if SEND_TELEGRAM_NOTIFICATIONS:
@@ -82,9 +85,10 @@ def main() -> None:
             error_amount=BALANCE_ERROR_THRESHOLD,
         )
 
+    staking_rewards = Rewards(w3=web3_client)
     while not interrupt_handler.exit:
-        # check and perform oracle duties
-        oracle.process()
+        # check and update staking rewards
+        staking_rewards.process()
 
         # wait until next processing time
         time.sleep(PROCESS_INTERVAL)

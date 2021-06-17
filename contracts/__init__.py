@@ -7,18 +7,9 @@ from web3.contract import Contract
 from src.settings import (
     POOL_CONTRACT_ADDRESS,
     REWARD_ETH_CONTRACT_ADDRESS,
-    STAKED_ETH_CONTRACT_ADDRESS,
     ORACLES_CONTRACT_ADDRESS,
+    MULTICALL_CONTRACT_ADDRESS,
 )
-
-
-def get_staked_eth_contract(w3: Web3) -> Contract:
-    """:returns instance of `StakedEthToken` contract."""
-    current_dir = os.path.dirname(__file__)
-    with open(os.path.join(current_dir, "abi/StakedEthToken.json")) as f:
-        abi = json.load(f)
-
-    return w3.eth.contract(abi=abi, address=STAKED_ETH_CONTRACT_ADDRESS)
 
 
 def get_reward_eth_contract(w3: Web3) -> Contract:
@@ -28,6 +19,15 @@ def get_reward_eth_contract(w3: Web3) -> Contract:
         abi = json.load(f)
 
     return w3.eth.contract(abi=abi, address=REWARD_ETH_CONTRACT_ADDRESS)
+
+
+def get_multicall_contract(w3: Web3) -> Contract:
+    """:returns instance of `Multicall` contract."""
+    current_dir = os.path.dirname(__file__)
+    with open(os.path.join(current_dir, "abi/Multicall.json")) as f:
+        abi = json.load(f)
+
+    return w3.eth.contract(abi=abi, address=MULTICALL_CONTRACT_ADDRESS)
 
 
 def get_pool_contract(w3: Web3) -> Contract:

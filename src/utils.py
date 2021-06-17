@@ -1,27 +1,24 @@
 import decimal
 import logging
 import signal
-import time
 from asyncio.exceptions import TimeoutError
-from datetime import datetime, timezone
-from enum import Enum
-from typing import Union, Any, Callable, Set, Dict
+from typing import Union, Any, Callable
 
-from eth_typing.bls import BLSPubkey
 from eth_typing.evm import ChecksumAddress
-from google.protobuf import empty_pb2
-from grpc import insecure_channel, RpcError, StatusCode
 from notifiers.core import get_notifier  # type: ignore
 from tenacity import (  # type: ignore
     retry,
     stop_after_attempt,
     wait_fixed,
     wait_random,
+    Retrying,
 )
 from tenacity.before_sleep import before_sleep_log
 from web3 import Web3
 from web3.contract import Contract
 from web3.gas_strategies.time_based import construct_time_based_gas_price_strategy
+
+# noinspection PyProtectedMember
 from web3.middleware.cache import (
     _time_based_cache_middleware,
     _latest_block_based_cache_middleware,
@@ -33,16 +30,8 @@ from web3.middleware.filter import local_filter_middleware
 from web3.middleware.geth_poa import geth_poa_middleware
 from web3.middleware.signing import construct_sign_and_send_raw_middleware
 from web3.middleware.stalecheck import make_stalecheck_middleware
-from web3.types import RPCEndpoint, Wei
+from web3.types import RPCEndpoint, Wei, BlockIdentifier, BlockData
 from websockets import ConnectionClosedError
-
-from proto.eth.v1alpha1.beacon_chain_pb2 import ListValidatorBalancesRequest
-from proto.eth.v1alpha1.beacon_chain_pb2_grpc import BeaconChainStub
-from proto.eth.v1alpha1.validator_pb2 import (
-    MultipleValidatorStatusRequest,
-    MultipleValidatorStatusResponse,
-)
-from proto.eth.v1alpha1.validator_pb2_grpc import BeaconNodeValidatorStub
 
 telegram = get_notifier("telegram")
 logger = logging.getLogger(__name__)
@@ -63,23 +52,10 @@ class InterruptHandler:
         signal.signal(signal.SIGINT, self.exit_gracefully)
         signal.signal(signal.SIGTERM, self.exit_gracefully)
 
+    # noinspection PyUnusedLocal
     def exit_gracefully(self, signum: int, frame: Any) -> None:
         logger.info(f"Received interrupt signal {signum}, exiting...")
         self.exit = True
-
-
-class ValidatorStatus(Enum):
-    """Validator statuses in beacon chain"""
-
-    UNKNOWN_STATUS = 0
-    DEPOSITED = 1
-    PENDING = 2
-    ACTIVE = 3
-    EXITING = 4
-    SLASHING = 5
-    EXITED = 6
-    INVALID = 7
-    PARTIALLY_DEPOSITED = 8
 
 
 def ws_retry_request_middleware(
@@ -193,63 +169,6 @@ def configure_default_account(w3: Web3, private_key: str) -> ChecksumAddress:
     return account.address
 
 
-def get_validator_stub(rpc_endpoint: str) -> BeaconNodeValidatorStub:
-    """Instantiates beacon node validator stub."""
-    channel = insecure_channel(rpc_endpoint)
-    return BeaconNodeValidatorStub(channel)
-
-
-def get_beacon_chain_stub(rpc_endpoint: str) -> BeaconChainStub:
-    """Instantiates beacon chain stub."""
-    channel = insecure_channel(rpc_endpoint)
-    return BeaconChainStub(channel)
-
-
-@retry(
-    reraise=True,
-    wait=backoff,
-    stop=stop_attempts,
-    before_sleep=before_sleep_log(logger, logging.WARNING),
-)
-def get_chain_config(stub: BeaconChainStub) -> Dict[str, str]:
-    """Fetches beacon chain configuration."""
-    response = stub.GetBeaconConfig(empty_pb2.Empty())
-    return response.config
-
-
-@retry(
-    reraise=True,
-    wait=backoff,
-    stop=stop_attempts,
-    before_sleep=before_sleep_log(logger, logging.WARNING),
-)
-def get_last_update_timestamp(reward_eth_token: Contract) -> int:
-    """Fetches last update timestamp from `RewardEthToken` contract."""
-    return reward_eth_token.functions.lastUpdateTimestamp().call()
-
-
-@retry(
-    reraise=True,
-    wait=backoff,
-    stop=stop_attempts,
-    before_sleep=before_sleep_log(logger, logging.WARNING),
-)
-def get_oracles_sync_period(oracles: Contract) -> int:
-    """Fetches oracles sync period from `Oracles` contract."""
-    return oracles.functions.syncPeriod().call()
-
-
-@retry(
-    reraise=True,
-    wait=backoff,
-    stop=stop_attempts,
-    before_sleep=before_sleep_log(logger, logging.WARNING),
-)
-def check_oracles_paused(oracles: Contract) -> bool:
-    """Fetches whether `Oracles` contract is paused or not."""
-    return oracles.functions.paused().call()
-
-
 @retry(
     reraise=True,
     wait=backoff,
@@ -259,83 +178,12 @@ def check_oracles_paused(oracles: Contract) -> bool:
 def check_oracle_has_vote(
     oracles: Contract,
     oracle: ChecksumAddress,
-    total_rewards: Wei,
-    activated_validators: int,
+    candidate_id: bytes,
+    block_identifier: BlockIdentifier = "latest",
 ) -> bool:
     """Checks whether oracle has submitted a vote."""
-    return oracles.functions.hasVote(oracle, total_rewards, activated_validators).call()
-
-
-@retry(
-    reraise=True,
-    wait=backoff,
-    stop=stop_attempts,
-    before_sleep=before_sleep_log(logger, logging.WARNING),
-)
-def submit_oracle_vote(
-    oracles: Contract,
-    total_rewards: Wei,
-    activated_validators: int,
-    transaction_timeout: int,
-    gas: Wei,
-) -> None:
-    """Submits oracle vote to `Oracles` contract."""
-    tx_hash = oracles.functions.vote(total_rewards, activated_validators).transact(
-        {"gas": gas}
-    )
-    oracles.web3.eth.waitForTransactionReceipt(tx_hash, timeout=transaction_timeout)
-
-
-@retry(
-    reraise=True,
-    wait=backoff,
-    stop=stop_attempts,
-    before_sleep=before_sleep_log(logger, logging.WARNING),
-)
-def get_reth_total_rewards(reward_eth_token: Contract) -> Wei:
-    """Fetches `RewardEthToken` total rewards."""
-    return reward_eth_token.functions.totalRewards().call()
-
-
-@retry(
-    reraise=True,
-    wait=backoff,
-    stop=stop_attempts,
-    before_sleep=before_sleep_log(logger, logging.WARNING),
-)
-def get_genesis_time(stub: BeaconNodeValidatorStub) -> datetime:
-    """Fetches beacon chain genesis time."""
-    chain_start = next(stub.WaitForChainStart(empty_pb2.Empty()))
-    return datetime.fromtimestamp(chain_start.genesis_time, tz=timezone.utc)
-
-
-@retry(
-    reraise=True,
-    wait=backoff,
-    stop=stop_attempts,
-    before_sleep=before_sleep_log(logger, logging.WARNING),
-)
-def get_pool_validator_public_keys(pool_contract: Contract) -> Set[BLSPubkey]:
-    """Fetches pool validator public keys."""
-    event_filter = pool_contract.events.ValidatorRegistered.createFilter(fromBlock=0)
-    events = event_filter.get_all_entries()
-    pool_contract.web3.eth.uninstallFilter(event_filter.filter_id)
-
-    return set(event["args"]["publicKey"] for event in events)
-
-
-@retry(
-    reraise=True,
-    wait=backoff,
-    stop=stop_attempts,
-    before_sleep=before_sleep_log(logger, logging.WARNING),
-)
-def get_pool_validator_statuses(
-    stub: BeaconNodeValidatorStub, public_keys: Set[BLSPubkey]
-) -> MultipleValidatorStatusResponse:  # type: ignore
-    """Fetches pool validator statuses."""
-    return stub.MultipleValidatorStatus(
-        MultipleValidatorStatusRequest(public_keys=public_keys)
+    return oracles.functions.hasVote(oracle, candidate_id).call(
+        block_identifier=block_identifier
     )
 
 
@@ -345,56 +193,17 @@ def get_pool_validator_statuses(
     stop=stop_attempts,
     before_sleep=before_sleep_log(logger, logging.WARNING),
 )
-def get_validators_total_balance(
-    stub: BeaconChainStub, epoch: int, public_keys: Set[BLSPubkey]
-) -> Wei:
-    """Fetches total balance of the validators."""
-    request = ListValidatorBalancesRequest(epoch=epoch, public_keys=public_keys)
-    total_balance: Wei = Wei(0)
-    while True:
-        response = stub.ListValidatorBalances(request)
-
-        for balance_response in response.balances:
-            total_balance = Wei(
-                total_balance + int(Web3.toWei(balance_response.balance, "gwei"))
-            )
-
-        if not response.next_page_token:
-            break
-
-        request = ListValidatorBalancesRequest(
-            epoch=epoch,
-            public_keys=public_keys,
-            page_token=response.next_page_token,
-        )
-
-    return total_balance
+def get_latest_block_number(w3: Web3, confirmation_blocks: int) -> BlockIdentifier:
+    """Gets the latest block number."""
+    return w3.eth.block_number - confirmation_blocks
 
 
-def wait_prysm_ready(
-    interrupt_handler: InterruptHandler,
-    endpoint: str,
-    process_interval: int,
-) -> None:
-    """Wait that Prysm accepts requests and is synced.
-
-    Prysm RPC APIs return unavailable until Prysm is synced.
-    """
-    beacon_chain_stub = get_beacon_chain_stub(endpoint)
-    while not interrupt_handler.exit:
-        try:
-            # This will bomb with RPC error if Prysm is not ready
-            beacon_chain_stub.GetBeaconConfig(empty_pb2.Empty())
-            break
-        except RpcError as e:
-            code = e.code()
-            if code == StatusCode.UNAVAILABLE:
-                logger.warning(
-                    f"Could not connect to {endpoint} gRPC endpoint. "
-                    f"Maybe Prysm node is not synced? "
-                    f"Will keep trying every {process_interval} seconds."
-                )
-            else:
-                logger.warning(f"Unknown gRPC error connecting to Prysm: {e}")
-
-        time.sleep(process_interval)
+@retry(
+    reraise=True,
+    wait=backoff,
+    stop=stop_attempts,
+    before_sleep=before_sleep_log(logger, logging.WARNING),
+)
+def get_block(w3: Web3, block_identifier: BlockIdentifier) -> BlockData:
+    """Fetch the specific block."""
+    return w3.eth.get_block(block_identifier)

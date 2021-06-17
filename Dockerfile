@@ -44,4 +44,4 @@ COPY --from=builder /opt/venv /opt/venv
 COPY . ./
 
 # Start application
-ENTRYPOINT ["python", "main.py"]
+ENTRYPOINT ["python", "src/main.py"]

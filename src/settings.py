@@ -15,6 +15,11 @@ WEB3_WS_ENDPOINT_TIMEOUT: int = int(environ.get("WEB3_WS_ENDPOINT_TIMEOUT", "60"
 WEB3_HTTP_ENDPOINT: str = "" if WEB3_WS_ENDPOINT else environ["WEB3_HTTP_ENDPOINT"]
 BEACON_CHAIN_RPC_ENDPOINT: str = environ["BEACON_CHAIN_RPC_ENDPOINT"]
 
+# etherscan
+ETHERSCAN_ADDRESS_BASE_URL: str = environ.get(
+    "ETHERSCAN_ADDRESS_BASE_URL", "https://etherscan.io/address/"
+)
+
 # used only in development
 INJECT_POA_MIDDLEWARE: bool = environ.get("INJECT_POA_MIDDLEWARE", "False") in (
     "true",
@@ -33,12 +38,12 @@ if INJECT_STALE_CHECK_MIDDLEWARE:
 
 # defines whether to enable sending telegram notifications
 SEND_TELEGRAM_NOTIFICATIONS: bool = environ.get(
-    "SEND_TELEGRAM_NOTIFICATIONS", "True"
+    "SEND_TELEGRAM_NOTIFICATIONS", "False"
 ) in ("True", "true")
 
 # whether to retry http or ws requests
 INJECT_RETRY_REQUEST_MIDDLEWARE: bool = environ.get(
-    "INJECT_RETRY_REQUEST_MIDDLEWARE", "False"
+    "INJECT_RETRY_REQUEST_MIDDLEWARE", "True"
 ) in ("true", "True")
 
 # whether to store filters locally instead of server-side
@@ -48,40 +53,81 @@ INJECT_LOCAL_FILTER_MIDDLEWARE: bool = environ.get(
 
 # send warning notification on low balance
 BALANCE_WARNING_THRESHOLD: Wei = Web3.toWei(
-    environ["BALANCE_WARNING_THRESHOLD"], "ether"
+    environ.get("BALANCE_WARNING_THRESHOLD", "0.1"), "ether"
 )
 
 # stop execution on too low balance
-BALANCE_ERROR_THRESHOLD: Wei = Web3.toWei(environ["BALANCE_ERROR_THRESHOLD"], "ether")
+BALANCE_ERROR_THRESHOLD: Wei = Web3.toWei(
+    environ.get("BALANCE_ERROR_THRESHOLD", "0.05"), "ether"
+)
 
 # gas price strategy
-APPLY_GAS_PRICE_STRATEGY: bool = environ.get("APPLY_GAS_PRICE_STRATEGY", "False") in (
+APPLY_GAS_PRICE_STRATEGY: bool = environ.get("APPLY_GAS_PRICE_STRATEGY", "True") in (
     "true",
     "True",
 )
-MAX_TX_WAIT_SECONDS: int = int(environ.get("MAX_TX_WAIT_SECONDS", "120"))
-
-# maximum gas spent on oracle vote
-ORACLE_VOTE_GAS_LIMIT: Wei = Wei(int(environ["ORACLE_VOTE_GAS_LIMIT"]))
+MAX_TX_WAIT_SECONDS: int = int(environ.get("MAX_TX_WAIT_SECONDS", "180"))
 
 # how long to wait for transaction to mine
-TRANSACTION_TIMEOUT: int = int(environ["TRANSACTION_TIMEOUT"])
+TRANSACTION_TIMEOUT: int = int(environ.get("TRANSACTION_TIMEOUT", "1800"))
 
-# how long to wait before processing again
-PROCESS_INTERVAL: int = int(environ["PROCESS_INTERVAL"])
+# required ETH1 confirmation blocks
+ETH1_CONFIRMATION_BLOCKS: int = int(environ.get("ETH1_CONFIRMATION_BLOCKS", "12"))
+
+# required ETH2 confirmation epochs
+ETH2_CONFIRMATION_EPOCHS: int = int(environ.get("ETH2_CONFIRMATION_EPOCHS", "3"))
+
+# how long to wait before processing again (in seconds)
+PROCESS_INTERVAL: int = int(environ.get("PROCESS_INTERVAL", "300"))
+
+# how long to wait for other oracles to vote (in seconds)
+VOTING_TIMEOUT: int = int(environ.get("VOTING_TIMEOUT", "3600"))
+
+# delay in ETH1 blocks applied to the next update due to negative balance or no activated validators
+# ~1 hour with block time of 13 seconds
+SYNC_BLOCKS_DELAY: int = int(environ.get("SYNC_BLOCKS_DELAY", "277"))
+
+# maximum gas spent on oracle vote
+ORACLE_VOTE_GAS_LIMIT: Wei = Wei(int(environ.get("ORACLE_VOTE_GAS_LIMIT", "250000")))
 
 # contracts
 POOL_CONTRACT_ADDRESS: ChecksumAddress = ChecksumAddress(
-    HexAddress(HexStr(environ["POOL_CONTRACT_ADDRESS"]))
+    HexAddress(
+        HexStr(
+            environ.get(
+                "POOL_CONTRACT_ADDRESS", "0xC874b064f465bdD6411D45734b56fac750Cda29A"
+            )
+        )
+    )
 )
 ORACLES_CONTRACT_ADDRESS: ChecksumAddress = ChecksumAddress(
-    HexAddress(HexStr(environ["ORACLES_CONTRACT_ADDRESS"]))
+    HexAddress(
+        HexStr(
+            environ.get(
+                "ORACLES_CONTRACT_ADDRESS", "0x2f1C5E86B13a74f5A6E7B4b35DD77fe29Aa47514"
+            )
+        )
+    )
 )
 REWARD_ETH_CONTRACT_ADDRESS: ChecksumAddress = ChecksumAddress(
-    HexAddress(HexStr(environ["REWARD_ETH_CONTRACT_ADDRESS"]))
+    HexAddress(
+        HexStr(
+            environ.get(
+                "REWARD_ETH_CONTRACT_ADDRESS",
+                "0x20BC832ca081b91433ff6c17f85701B6e92486c5",
+            )
+        )
+    )
 )
-STAKED_ETH_CONTRACT_ADDRESS: ChecksumAddress = ChecksumAddress(
-    HexAddress(HexStr(environ["STAKED_ETH_CONTRACT_ADDRESS"]))
+MULTICALL_CONTRACT_ADDRESS: ChecksumAddress = ChecksumAddress(
+    HexAddress(
+        HexStr(
+            environ.get(
+                "MULTICALL_CONTRACT_ADDRESS",
+                "0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441",
+            )
+        )
+    )
 )
 
 # credentials
