@@ -1,7 +1,7 @@
 ###########
 # Builder #
 ###########
-FROM python:3.8.8-slim AS builder
+FROM python:3.8.10-slim AS builder
 
 # This is where pip will install to
 ENV PYROOT /pyroot
@@ -30,7 +30,7 @@ RUN pip install --upgrade --no-cache-dir pip wheel && \
 ####################
 # Production image #
 ####################
-FROM python:3.8.8-slim
+FROM python:3.8.10-slim
 
 # Dependencies path
 ENV PATH="/opt/venv/bin:$PATH"
@@ -44,4 +44,4 @@ COPY --from=builder /opt/venv /opt/venv
 COPY . ./
 
 # Start application
-ENTRYPOINT ["python", "src/main.py"]
+ENTRYPOINT ["python", "main.py"]

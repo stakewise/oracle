@@ -1,8 +1,7 @@
 from os import environ
 from typing import Union
 
-from eth_typing.encoding import HexStr
-from eth_typing.evm import ChecksumAddress, HexAddress
+from eth_typing.evm import ChecksumAddress
 from web3 import Web3
 from web3.types import Wei
 
@@ -91,44 +90,69 @@ SYNC_BLOCKS_DELAY: int = int(environ.get("SYNC_BLOCKS_DELAY", "277"))
 ORACLE_VOTE_GAS_LIMIT: Wei = Wei(int(environ.get("ORACLE_VOTE_GAS_LIMIT", "250000")))
 
 # contracts
-POOL_CONTRACT_ADDRESS: ChecksumAddress = ChecksumAddress(
-    HexAddress(
-        HexStr(
-            environ.get(
-                "POOL_CONTRACT_ADDRESS", "0xC874b064f465bdD6411D45734b56fac750Cda29A"
-            )
-        )
+POOL_CONTRACT_ADDRESS: ChecksumAddress = Web3.toChecksumAddress(
+    environ.get("POOL_CONTRACT_ADDRESS", "0xC874b064f465bdD6411D45734b56fac750Cda29A")
+)
+ORACLES_CONTRACT_ADDRESS: ChecksumAddress = Web3.toChecksumAddress(
+    environ.get(
+        "ORACLES_CONTRACT_ADDRESS", "0x2f1C5E86B13a74f5A6E7B4b35DD77fe29Aa47514"
     )
 )
-ORACLES_CONTRACT_ADDRESS: ChecksumAddress = ChecksumAddress(
-    HexAddress(
-        HexStr(
-            environ.get(
-                "ORACLES_CONTRACT_ADDRESS", "0x2f1C5E86B13a74f5A6E7B4b35DD77fe29Aa47514"
-            )
-        )
+DAO_ADDRESS: ChecksumAddress = Web3.toChecksumAddress(
+    environ.get("DAO_ADDRESS", "0x144a98cb1CdBb23610501fE6108858D9B7D24934")
+)
+REWARD_ETH_CONTRACT_ADDRESS: ChecksumAddress = Web3.toChecksumAddress(
+    environ.get(
+        "REWARD_ETH_CONTRACT_ADDRESS", "0x20BC832ca081b91433ff6c17f85701B6e92486c5"
     )
 )
-REWARD_ETH_CONTRACT_ADDRESS: ChecksumAddress = ChecksumAddress(
-    HexAddress(
-        HexStr(
-            environ.get(
-                "REWARD_ETH_CONTRACT_ADDRESS",
-                "0x20BC832ca081b91433ff6c17f85701B6e92486c5",
-            )
-        )
+STAKED_ETH_CONTRACT_ADDRESS: ChecksumAddress = Web3.toChecksumAddress(
+    environ.get(
+        "STAKED_ETH_CONTRACT_ADDRESS", "0xFe2e637202056d30016725477c5da089Ab0A043A"
     )
 )
-MULTICALL_CONTRACT_ADDRESS: ChecksumAddress = ChecksumAddress(
-    HexAddress(
-        HexStr(
-            environ.get(
-                "MULTICALL_CONTRACT_ADDRESS",
-                "0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441",
-            )
-        )
+MULTICALL_CONTRACT_ADDRESS: ChecksumAddress = Web3.toChecksumAddress(
+    environ.get(
+        "MULTICALL_CONTRACT_ADDRESS", "0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441"
     )
 )
+MERKLE_DISTRIBUTOR_CONTRACT_ADDRESS: ChecksumAddress = Web3.toChecksumAddress(
+    environ.get(
+        "MERKLE_DISTRIBUTOR_CONTRACT_ADDRESS",
+        "0xA3F21010e8b9a3930996C8849Df38f9Ca3647c20",
+    )
+)
+BALANCER_VAULT_CONTRACT_ADDRESS: ChecksumAddress = Web3.toChecksumAddress(
+    environ.get(
+        "BALANCER_VAULT_CONTRACT_ADDRESS", "0xBA12222222228d8Ba445958a75a0704d566BF2C8"
+    )
+)
+
+# ENS
+ENS_RESOLVER_CONTRACT_ADDRESS: ChecksumAddress = Web3.toChecksumAddress(
+    environ.get(
+        "ENS_RESOLVER_CONTRACT_ADDRESS", "0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41"
+    )
+)
+DAO_ENS_DOMAIN: str = environ.get("DAO_ENS_DOMAIN", "stakewise.eth")
+ORACLES_ENS_TEXT_RECORD: str = environ.get("ORACLES_ENS_TEXT_RECORD", "oraclesconfig")
+
+# Subgraphs
+BALANCER_SUBGRAPH_URL: str = environ.get(
+    "BALANCER_SUBGRAPH_URL",
+    "https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-v2",
+)
+UNISWAP_V2_SUBGRAPH_URL: str = environ.get(
+    "UNISWAP_V2_SUBGRAPH_URL",
+    "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2",
+)
+UNISWAP_V3_SUBGRAPH_URL: str = environ.get(
+    "UNISWAP_V3_SUBGRAPH_URL",
+    "https://api.thegraph.com/subgraphs/name/tsudmi/uniswap-v3",
+)
+
+# IPFS
+IPFS_ENDPOINT: str = environ.get("IPFS_ENDPOINT", "/dns/ipfs.infura.io/tcp/5001/https")
 
 # credentials
 # TODO: consider reading from file

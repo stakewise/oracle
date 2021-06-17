@@ -15,17 +15,18 @@ _sym_db = _symbol_database.Default()
 from google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
+from eth.ext import options_pb2 as eth_dot_ext_dot_options__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='eth/v1alpha1/node.proto',
   package='ethereum.eth.v1alpha1',
   syntax='proto3',
-  serialized_options=None,
+  serialized_options=b'\n\031org.ethereum.eth.v1alpha1B\tNodeProtoP\001Z6github.com/prysmaticlabs/ethereumapis/eth/v1alpha1;eth\252\002\025Ethereum.Eth.v1alpha1\312\002\025Ethereum\\Eth\\v1alpha1',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x17\x65th/v1alpha1/node.proto\x12\x15\x65thereum.eth.v1alpha1\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x1d\n\nSyncStatus\x12\x0f\n\x07syncing\x18\x01 \x01(\x08\"~\n\x07Genesis\x12\x30\n\x0cgenesis_time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12 \n\x18\x64\x65posit_contract_address\x18\x02 \x01(\x0c\x12\x1f\n\x17genesis_validators_root\x18\x03 \x01(\x0c\",\n\x07Version\x12\x0f\n\x07version\x18\x01 \x01(\t\x12\x10\n\x08metadata\x18\x02 \x01(\t\"\'\n\x13ImplementedServices\x12\x10\n\x08services\x18\x01 \x03(\t\"\x1e\n\x0bPeerRequest\x12\x0f\n\x07peer_id\x18\x01 \x01(\t\"3\n\x05Peers\x12*\n\x05peers\x18\x01 \x03(\x0b\x32\x1b.ethereum.eth.v1alpha1.Peer\"\xb0\x01\n\x04Peer\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\x12\x37\n\tdirection\x18\x02 \x01(\x0e\x32$.ethereum.eth.v1alpha1.PeerDirection\x12@\n\x10\x63onnection_state\x18\x03 \x01(\x0e\x32&.ethereum.eth.v1alpha1.ConnectionState\x12\x0f\n\x07peer_id\x18\x04 \x01(\t\x12\x0b\n\x03\x65nr\x18\x05 \x01(\t\";\n\x08HostData\x12\x11\n\taddresses\x18\x01 \x03(\t\x12\x0f\n\x07peer_id\x18\x02 \x01(\t\x12\x0b\n\x03\x65nr\x18\x03 \x01(\t*7\n\rPeerDirection\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0b\n\x07INBOUND\x10\x01\x12\x0c\n\x08OUTBOUND\x10\x02*U\n\x0f\x43onnectionState\x12\x10\n\x0c\x44ISCONNECTED\x10\x00\x12\x11\n\rDISCONNECTING\x10\x01\x12\r\n\tCONNECTED\x10\x02\x12\x0e\n\nCONNECTING\x10\x03\x32\x85\x06\n\x04Node\x12n\n\rGetSyncStatus\x12\x16.google.protobuf.Empty\x1a!.ethereum.eth.v1alpha1.SyncStatus\"\"\x82\xd3\xe4\x93\x02\x1c\x12\x1a/eth/v1alpha1/node/syncing\x12h\n\nGetGenesis\x12\x16.google.protobuf.Empty\x1a\x1e.ethereum.eth.v1alpha1.Genesis\"\"\x82\xd3\xe4\x93\x02\x1c\x12\x1a/eth/v1alpha1/node/genesis\x12h\n\nGetVersion\x12\x16.google.protobuf.Empty\x1a\x1e.ethereum.eth.v1alpha1.Version\"\"\x82\xd3\xe4\x93\x02\x1c\x12\x1a/eth/v1alpha1/node/version\x12\x82\x01\n\x17ListImplementedServices\x12\x16.google.protobuf.Empty\x1a*.ethereum.eth.v1alpha1.ImplementedServices\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/eth/v1alpha1/node/services\x12\x62\n\x07GetHost\x12\x16.google.protobuf.Empty\x1a\x1f.ethereum.eth.v1alpha1.HostData\"\x1e\x82\xd3\xe4\x93\x02\x18\x12\x16/eth/v1alpha1/node/p2p\x12k\n\x07GetPeer\x12\".ethereum.eth.v1alpha1.PeerRequest\x1a\x1b.ethereum.eth.v1alpha1.Peer\"\x1f\x82\xd3\xe4\x93\x02\x19\x12\x17/eth/v1alpha1/node/peer\x12\x63\n\tListPeers\x12\x16.google.protobuf.Empty\x1a\x1c.ethereum.eth.v1alpha1.Peers\" \x82\xd3\xe4\x93\x02\x1a\x12\x18/eth/v1alpha1/node/peersb\x06proto3'
+  serialized_pb=b'\n\x17\x65th/v1alpha1/node.proto\x12\x15\x65thereum.eth.v1alpha1\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x15\x65th/ext/options.proto\"\x1d\n\nSyncStatus\x12\x0f\n\x07syncing\x18\x01 \x01(\x08\"\x86\x01\n\x07Genesis\x12\x30\n\x0cgenesis_time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12 \n\x18\x64\x65posit_contract_address\x18\x02 \x01(\x0c\x12\'\n\x17genesis_validators_root\x18\x03 \x01(\x0c\x42\x06\x8a\xb5\x18\x02\x33\x32\",\n\x07Version\x12\x0f\n\x07version\x18\x01 \x01(\t\x12\x10\n\x08metadata\x18\x02 \x01(\t\"\'\n\x13ImplementedServices\x12\x10\n\x08services\x18\x01 \x03(\t\"\x1e\n\x0bPeerRequest\x12\x0f\n\x07peer_id\x18\x01 \x01(\t\"3\n\x05Peers\x12*\n\x05peers\x18\x01 \x03(\x0b\x32\x1b.ethereum.eth.v1alpha1.Peer\"\xb0\x01\n\x04Peer\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\x12\x37\n\tdirection\x18\x02 \x01(\x0e\x32$.ethereum.eth.v1alpha1.PeerDirection\x12@\n\x10\x63onnection_state\x18\x03 \x01(\x0e\x32&.ethereum.eth.v1alpha1.ConnectionState\x12\x0f\n\x07peer_id\x18\x04 \x01(\t\x12\x0b\n\x03\x65nr\x18\x05 \x01(\t\";\n\x08HostData\x12\x11\n\taddresses\x18\x01 \x03(\t\x12\x0f\n\x07peer_id\x18\x02 \x01(\t\x12\x0b\n\x03\x65nr\x18\x03 \x01(\t*7\n\rPeerDirection\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0b\n\x07INBOUND\x10\x01\x12\x0c\n\x08OUTBOUND\x10\x02*U\n\x0f\x43onnectionState\x12\x10\n\x0c\x44ISCONNECTED\x10\x00\x12\x11\n\rDISCONNECTING\x10\x01\x12\r\n\tCONNECTED\x10\x02\x12\x0e\n\nCONNECTING\x10\x03\x32\x85\x06\n\x04Node\x12n\n\rGetSyncStatus\x12\x16.google.protobuf.Empty\x1a!.ethereum.eth.v1alpha1.SyncStatus\"\"\x82\xd3\xe4\x93\x02\x1c\x12\x1a/eth/v1alpha1/node/syncing\x12h\n\nGetGenesis\x12\x16.google.protobuf.Empty\x1a\x1e.ethereum.eth.v1alpha1.Genesis\"\"\x82\xd3\xe4\x93\x02\x1c\x12\x1a/eth/v1alpha1/node/genesis\x12h\n\nGetVersion\x12\x16.google.protobuf.Empty\x1a\x1e.ethereum.eth.v1alpha1.Version\"\"\x82\xd3\xe4\x93\x02\x1c\x12\x1a/eth/v1alpha1/node/version\x12\x82\x01\n\x17ListImplementedServices\x12\x16.google.protobuf.Empty\x1a*.ethereum.eth.v1alpha1.ImplementedServices\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/eth/v1alpha1/node/services\x12\x62\n\x07GetHost\x12\x16.google.protobuf.Empty\x1a\x1f.ethereum.eth.v1alpha1.HostData\"\x1e\x82\xd3\xe4\x93\x02\x18\x12\x16/eth/v1alpha1/node/p2p\x12k\n\x07GetPeer\x12\".ethereum.eth.v1alpha1.PeerRequest\x1a\x1b.ethereum.eth.v1alpha1.Peer\"\x1f\x82\xd3\xe4\x93\x02\x19\x12\x17/eth/v1alpha1/node/peer\x12\x63\n\tListPeers\x12\x16.google.protobuf.Empty\x1a\x1c.ethereum.eth.v1alpha1.Peers\" \x82\xd3\xe4\x93\x02\x1a\x12\x18/eth/v1alpha1/node/peersB\x90\x01\n\x19org.ethereum.eth.v1alpha1B\tNodeProtoP\x01Z6github.com/prysmaticlabs/ethereumapis/eth/v1alpha1;eth\xaa\x02\x15\x45thereum.Eth.v1alpha1\xca\x02\x15\x45thereum\\Eth\\v1alpha1b\x06proto3'
   ,
-  dependencies=[google_dot_api_dot_annotations__pb2.DESCRIPTOR,google_dot_protobuf_dot_empty__pb2.DESCRIPTOR,google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,])
+  dependencies=[google_dot_api_dot_annotations__pb2.DESCRIPTOR,google_dot_protobuf_dot_empty__pb2.DESCRIPTOR,google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,eth_dot_ext_dot_options__pb2.DESCRIPTOR,])
 
 _PEERDIRECTION = _descriptor.EnumDescriptor(
   name='PeerDirection',
@@ -52,8 +53,8 @@ _PEERDIRECTION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=713,
-  serialized_end=768,
+  serialized_start=745,
+  serialized_end=800,
 )
 _sym_db.RegisterEnumDescriptor(_PEERDIRECTION)
 
@@ -88,8 +89,8 @@ _CONNECTIONSTATE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=770,
-  serialized_end=855,
+  serialized_start=802,
+  serialized_end=887,
 )
 _sym_db.RegisterEnumDescriptor(_CONNECTIONSTATE)
 
@@ -131,8 +132,8 @@ _SYNCSTATUS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=142,
-  serialized_end=171,
+  serialized_start=165,
+  serialized_end=194,
 )
 
 
@@ -164,7 +165,7 @@ _GENESIS = _descriptor.Descriptor(
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\212\265\030\00232', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -177,8 +178,8 @@ _GENESIS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=173,
-  serialized_end=299,
+  serialized_start=197,
+  serialized_end=331,
 )
 
 
@@ -216,8 +217,8 @@ _VERSION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=301,
-  serialized_end=345,
+  serialized_start=333,
+  serialized_end=377,
 )
 
 
@@ -248,8 +249,8 @@ _IMPLEMENTEDSERVICES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=347,
-  serialized_end=386,
+  serialized_start=379,
+  serialized_end=418,
 )
 
 
@@ -280,8 +281,8 @@ _PEERREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=388,
-  serialized_end=418,
+  serialized_start=420,
+  serialized_end=450,
 )
 
 
@@ -312,8 +313,8 @@ _PEERS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=420,
-  serialized_end=471,
+  serialized_start=452,
+  serialized_end=503,
 )
 
 
@@ -372,8 +373,8 @@ _PEER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=474,
-  serialized_end=650,
+  serialized_start=506,
+  serialized_end=682,
 )
 
 
@@ -418,8 +419,8 @@ _HOSTDATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=652,
-  serialized_end=711,
+  serialized_start=684,
+  serialized_end=743,
 )
 
 _GENESIS.fields_by_name['genesis_time'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
@@ -495,6 +496,8 @@ HostData = _reflection.GeneratedProtocolMessageType('HostData', (_message.Messag
 _sym_db.RegisterMessage(HostData)
 
 
+DESCRIPTOR._options = None
+_GENESIS.fields_by_name['genesis_validators_root']._options = None
 
 _NODE = _descriptor.ServiceDescriptor(
   name='Node',
@@ -503,8 +506,8 @@ _NODE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=858,
-  serialized_end=1631,
+  serialized_start=890,
+  serialized_end=1663,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetSyncStatus',

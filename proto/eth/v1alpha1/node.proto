@@ -11,15 +11,26 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-syntax = "proto3";
 
 // https://github.com/prysmaticlabs/ethereumapis/blob/master/eth/v1alpha1/node.proto
-// Commit: f52a0ef
+// Commit: 89fcd65
+
+syntax = "proto3";
+
 package ethereum.eth.v1alpha1;
 
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
+
+import "eth/ext/options.proto";
+
+option csharp_namespace = "Ethereum.Eth.v1alpha1";
+option go_package = "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1;eth";
+option java_multiple_files = true;
+option java_outer_classname = "NodeProto";
+option java_package = "org.ethereum.eth.v1alpha1";
+option php_namespace = "Ethereum\\Eth\\v1alpha1";
 
 // Node service API
 //
@@ -96,7 +107,7 @@ message Genesis {
 
     // Root of the genesis validators deposits; used for domain separation
     // when signing data structures for this chain.
-    bytes genesis_validators_root = 3;
+    bytes genesis_validators_root = 3 [(ethereum.eth.ext.ssz_size) = "32"];
 }
 
 // Information about the node version.
