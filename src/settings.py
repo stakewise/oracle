@@ -148,7 +148,7 @@ UNISWAP_V2_SUBGRAPH_URL: str = environ.get(
 )
 UNISWAP_V3_SUBGRAPH_URL: str = environ.get(
     "UNISWAP_V3_SUBGRAPH_URL",
-    "https://api.thegraph.com/subgraphs/name/tsudmi/uniswap-v3",
+    "https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3",
 )
 
 # IPFS
