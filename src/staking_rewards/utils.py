@@ -7,7 +7,7 @@ from google.protobuf import empty_pb2
 from grpc import insecure_channel, RpcError, StatusCode
 from tenacity import retry, Retrying
 from tenacity.before_sleep import before_sleep_log
-from typing import Set, Dict, Tuple, Callable
+from typing import Set, Dict, Tuple
 from web3 import Web3
 from web3.contract import Contract, ContractFunction
 from web3.exceptions import ContractLogicError
