@@ -7,9 +7,9 @@ from google.protobuf import empty_pb2
 from grpc import insecure_channel, RpcError, StatusCode
 from tenacity import retry, Retrying
 from tenacity.before_sleep import before_sleep_log
-from typing import Set, Dict, Tuple
+from typing import Set, Dict, Tuple, Callable
 from web3 import Web3
-from web3.contract import Contract
+from web3.contract import Contract, ContractFunction
 from web3.exceptions import ContractLogicError
 from web3.types import Wei, BlockNumber, Timestamp, BlockIdentifier
 
@@ -240,6 +240,25 @@ def get_validators_total_balance(
         )
 
     return total_balance
+
+
+def wait_contracts_ready(
+    test_query: ContractFunction,
+    interrupt_handler: InterruptHandler,
+    process_interval: int,
+) -> None:
+    """
+    Wait that smart contracts are ready to for interactions.
+    """
+    while not interrupt_handler.exit:
+        try:
+            # This will bomb with ContractLogicError if contract are not ready
+            test_query.call()
+            break
+        except ContractLogicError:
+            logger.warning("Waiting for contracts to be upgraded...")
+
+        time.sleep(process_interval)
 
 
 def wait_prysm_ready(

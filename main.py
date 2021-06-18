@@ -3,6 +3,7 @@ from urllib.parse import urljoin
 
 import time
 
+from contracts import get_reward_eth_contract
 from src.merkle_distributor.distributor import Distributor
 from src.settings import (
     WEB3_WS_ENDPOINT,
@@ -25,7 +26,7 @@ from src.settings import (
     ETHERSCAN_ADDRESS_BASE_URL,
 )
 from src.staking_rewards.rewards import Rewards
-from src.staking_rewards.utils import wait_prysm_ready
+from src.staking_rewards.utils import wait_prysm_ready, wait_contracts_ready
 from src.utils import (
     get_web3_client,
     configure_default_account,
@@ -72,6 +73,14 @@ def main() -> None:
             raise_on_errors=True,
             disable_web_page_preview=True,
         )
+
+    # wait for contracts to be upgraded to the oracles supported version
+    reward_eth = get_reward_eth_contract(web3_client)
+    wait_contracts_ready(
+        test_query=reward_eth.functions.lastUpdateBlockNumber(),
+        interrupt_handler=interrupt_handler,
+        process_interval=PROCESS_INTERVAL,
+    )
 
     # wait that node is synced before trying to do anything
     wait_prysm_ready(
