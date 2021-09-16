@@ -1,0 +1,50 @@
+[tool.poetry]
+name = "oracle"
+version = "2.0.0"
+description = "StakeWise Oracles are responsible for submitting off-chain data."
+authors = ["Dmitri Tsumak <tsumak.dmitri@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "==3.8.11"
+python-decouple = "==3.4"
+web3 = "==5.23.1"
+py-ecc = "==5.2.0"
+tenacity = "==8.0.1"
+gql = {version = "3.0.0a6", allow-prereleases = true, extras = ["aiohttp"]}
+backoff = "==1.11.1"
+aiohttp = {version = "==3.7.4.post0", extras = ["speedups"]}
+
+[tool.poetry.dev-dependencies]
+mypy = "==0.910"
+black = "==21.9b0"
+flake8 = "==3.9.2"
+isort = "==5.9.3"
+flake8-black = "==0.2.3"
+flake8-bugbear = "==21.9.1"
+pre-commit = "==2.15.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+profile = "black"
+
+[tool.black]
+line-length = 88
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
