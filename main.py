@@ -1,114 +1,110 @@
+import asyncio
 import logging
-from urllib.parse import urljoin
+import signal
+from typing import Any
 
-import time
+import aiohttp
 
-from contracts import get_reward_eth_contract
-from src.merkle_distributor.distributor import Distributor
-from src.settings import (
-    WEB3_WS_ENDPOINT,
-    WEB3_WS_ENDPOINT_TIMEOUT,
-    WEB3_HTTP_ENDPOINT,
-    INJECT_POA_MIDDLEWARE,
-    INJECT_STALE_CHECK_MIDDLEWARE,
-    INJECT_RETRY_REQUEST_MIDDLEWARE,
-    INJECT_LOCAL_FILTER_MIDDLEWARE,
-    STALE_CHECK_MIDDLEWARE_ALLOWABLE_DELAY,
-    ORACLE_PRIVATE_KEY,
-    BALANCE_WARNING_THRESHOLD,
-    BALANCE_ERROR_THRESHOLD,
-    APPLY_GAS_PRICE_STRATEGY,
-    MAX_TX_WAIT_SECONDS,
-    PROCESS_INTERVAL,
-    BEACON_CHAIN_RPC_ENDPOINT,
-    SEND_TELEGRAM_NOTIFICATIONS,
-    LOG_LEVEL,
-    ETHERSCAN_ADDRESS_BASE_URL,
-)
-from src.staking_rewards.rewards import Rewards
-from src.staking_rewards.utils import wait_prysm_ready, wait_contracts_ready
-from src.utils import (
-    get_web3_client,
-    configure_default_account,
-    InterruptHandler,
-    check_default_account_balance,
-    telegram,
-)
+from src.distributor.controller import DistributorController
+from src.eth1 import check_oracle_account, get_finalized_block, get_voting_parameters
+from src.ipfs import check_or_create_ipns_keys
+from src.rewards.controller import RewardsController
+from src.rewards.eth2 import get_finality_checkpoints, get_genesis
+from src.settings import LOG_LEVEL, PROCESS_INTERVAL
+from src.validators.controller import ValidatorsController
 
 logging.basicConfig(
     format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
     datefmt="%m-%d %H:%M",
     level=LOG_LEVEL,
 )
+logging.getLogger("backoff").addHandler(logging.StreamHandler())
+
+logger = logging.getLogger(__name__)
 
 
-def main() -> None:
-    # setup Web3 client
-    web3_client = get_web3_client(
-        http_endpoint=WEB3_HTTP_ENDPOINT,
-        ws_endpoint=WEB3_WS_ENDPOINT,
-        ws_endpoint_timeout=WEB3_WS_ENDPOINT_TIMEOUT,
-        apply_gas_price_strategy=APPLY_GAS_PRICE_STRATEGY,
-        max_tx_wait_seconds=MAX_TX_WAIT_SECONDS,
-        inject_retry_request=INJECT_RETRY_REQUEST_MIDDLEWARE,
-        inject_poa=INJECT_POA_MIDDLEWARE,
-        inject_local_filter=INJECT_LOCAL_FILTER_MIDDLEWARE,
-        inject_stale_check=INJECT_STALE_CHECK_MIDDLEWARE,
-        stale_check_allowable_delay=STALE_CHECK_MIDDLEWARE_ALLOWABLE_DELAY,
-    )
+class InterruptHandler:
+    """
+    Tracks SIGINT and SIGTERM signals.
+    https://stackoverflow.com/a/31464349
+    """
 
-    # setup default account
-    configure_default_account(web3_client, ORACLE_PRIVATE_KEY)
+    exit = False
+
+    def __init__(self) -> None:
+        signal.signal(signal.SIGINT, self.exit_gracefully)
+        signal.signal(signal.SIGTERM, self.exit_gracefully)
+
+    # noinspection PyUnusedLocal
+    def exit_gracefully(self, signum: int, frame: Any) -> None:
+        logger.info(f"Received interrupt signal {signum}, exiting...")
+        self.exit = True
+
+
+async def main() -> None:
+    # aiohttp session
+    session = aiohttp.ClientSession()
+
+    # check stakewise graphql connection
+    await get_finalized_block()
+
+    # check ETH2 API connection
+    await get_finality_checkpoints(session)
+
+    # check whether oracle has IPNS keys or create new ones
+    ipns_keys = check_or_create_ipns_keys()
+
+    # check whether oracle is part of the oracles set
+    await check_oracle_account()
 
     # wait for interrupt
     interrupt_handler = InterruptHandler()
 
-    if SEND_TELEGRAM_NOTIFICATIONS:
-        # Notify Telegram the oracle is warming up, so that
-        # oracle maintainers know the service has restarted
-        telegram.notify(
-            message=f"Oracle starting with account [{web3_client.eth.default_account}]"
-            f"({urljoin(ETHERSCAN_ADDRESS_BASE_URL, str(web3_client.eth.default_account))})",
-            parse_mode="markdown",
-            raise_on_errors=True,
-            disable_web_page_preview=True,
-        )
+    # fetch ETH2 genesis
+    genesis = await get_genesis(session)
 
-    # wait for contracts to be upgraded to the oracles supported version
-    reward_eth = get_reward_eth_contract(web3_client)
-    wait_contracts_ready(
-        test_query=reward_eth.functions.lastUpdateBlockNumber(),
-        interrupt_handler=interrupt_handler,
-        process_interval=PROCESS_INTERVAL,
+    rewards_controller = RewardsController(
+        aiohttp_session=session,
+        genesis_timestamp=int(genesis["genesis_time"]),
+        ipns_key_id=ipns_keys["rewards_key_id"],
+    )
+    distributor_controller = DistributorController(
+        ipns_key_id=ipns_keys["distributor_key_id"]
+    )
+    validators_controller = ValidatorsController(
+        initialize_ipns_key_id=ipns_keys["validator_initialize_key_id"],
+        finalize_ipns_key_id=ipns_keys["validator_finalize_key_id"],
     )
 
-    # wait that node is synced before trying to do anything
-    wait_prysm_ready(
-        interrupt_handler=interrupt_handler,
-        endpoint=BEACON_CHAIN_RPC_ENDPOINT,
-        process_interval=PROCESS_INTERVAL,
-    )
-
-    # check oracle balance
-    if SEND_TELEGRAM_NOTIFICATIONS:
-        check_default_account_balance(
-            w3=web3_client,
-            warning_amount=BALANCE_WARNING_THRESHOLD,
-            error_amount=BALANCE_ERROR_THRESHOLD,
-        )
-
-    staking_rewards = Rewards(w3=web3_client)
-    merkle_distributor = Distributor(w3=web3_client)
     while not interrupt_handler.exit:
-        # check and update staking rewards
-        staking_rewards.process()
+        # fetch current finalized ETH1 block data
+        finalized_block = await get_finalized_block()
+        current_block_number = finalized_block["block_number"]
+        current_timestamp = finalized_block["timestamp"]
+        voting_parameters = await get_voting_parameters(current_block_number)
 
-        # check and update merkle distributor
-        merkle_distributor.process()
-
+        await asyncio.gather(
+            # check and update staking rewards
+            rewards_controller.process(
+                voting_params=voting_parameters["rewards"],
+                current_block_number=current_block_number,
+                current_timestamp=current_timestamp,
+            ),
+            # check and update merkle distributor
+            distributor_controller.process(voting_parameters["distributor"]),
+            # initializes validators
+            validators_controller.initialize(
+                voting_params=voting_parameters["initialize_validator"],
+                current_block_number=current_block_number,
+            ),
+            # finalizes validators
+            validators_controller.finalize(voting_parameters["finalize_validator"]),
+        )
         # wait until next processing time
-        time.sleep(PROCESS_INTERVAL)
+        await asyncio.sleep(PROCESS_INTERVAL)
+
+    await session.close()
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
