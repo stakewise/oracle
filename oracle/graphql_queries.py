@@ -72,7 +72,7 @@ FINALIZED_VALIDATORS_QUERY = gql(
 ORACLE_QUERY = gql(
     """
     query getOracles($oracle_address: ID) {
-      oracles(first: 1, where: {id: $oracle_address) {
+      oracles(first: 1, where: {id: $oracle_address}) {
         id
       }
     }
@@ -264,7 +264,7 @@ OPERATORS_QUERY = gql(
 
 VALIDATOR_REGISTRATIONS_QUERY = gql(
     """
-    query getValidatorRegistrations($block_number: Int, public_key: Bytes) {
+    query getValidatorRegistrations($block_number: Int, $public_key: Bytes) {
       validatorRegistrations(
         block: { number: $block_number }
         where: { id: $public_key }

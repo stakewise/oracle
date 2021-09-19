@@ -4,8 +4,8 @@ from typing import Dict
 import backoff
 from web3.types import BlockNumber
 
-from src.clients import execute_graphql_query, sw_gql_client
-from src.graphql_queries import FINALIZED_VALIDATORS_QUERY
+from oracle.clients import execute_sw_gql_query
+from oracle.graphql_queries import FINALIZED_VALIDATORS_QUERY
 
 from .types import FinalizedValidatorsPublicKeys
 
@@ -18,8 +18,7 @@ async def get_finalized_validators_public_keys(
 ) -> FinalizedValidatorsPublicKeys:
     """Fetches pool validators public keys."""
     last_id = ""
-    result: Dict = await execute_graphql_query(
-        client=sw_gql_client,
+    result: Dict = await execute_sw_gql_query(
         query=FINALIZED_VALIDATORS_QUERY,
         variables=dict(block_number=block_number, last_id=last_id),
     )
@@ -32,8 +31,7 @@ async def get_finalized_validators_public_keys(
         if not last_id:
             break
 
-        result: Dict = await execute_graphql_query(
-            client=sw_gql_client,
+        result: Dict = await execute_sw_gql_query(
             query=FINALIZED_VALIDATORS_QUERY,
             variables=dict(block_number=block_number, last_id=last_id),
         )

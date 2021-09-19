@@ -7,7 +7,7 @@ from eth_account.signers.local import LocalAccount
 from web3 import Web3
 from web3.types import BlockNumber, Timestamp
 
-from .clients import execute_graphql_query, sw_gql_client
+from .clients import execute_sw_gql_query
 from .distributor.types import DistributorVotingParameters
 from .graphql_queries import (
     FINALIZED_BLOCK_QUERY,
@@ -41,8 +41,7 @@ class VotingParameters(TypedDict):
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def get_finalized_block() -> FinalizedBlock:
     """Gets the finalized block number and its timestamp."""
-    result: Dict = await execute_graphql_query(
-        client=sw_gql_client,
+    result: Dict = await execute_sw_gql_query(
         query=FINALIZED_BLOCK_QUERY,
         variables=dict(
             confirmation_blocks=ETH1_CONFIRMATION_BLOCKS,
@@ -57,8 +56,7 @@ async def get_finalized_block() -> FinalizedBlock:
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def get_voting_parameters(block_number: BlockNumber) -> VotingParameters:
     """Fetches rewards voting parameters."""
-    result: Dict = await execute_graphql_query(
-        client=sw_gql_client,
+    result: Dict = await execute_sw_gql_query(
         query=VOTING_PARAMETERS_QUERY,
         variables=dict(
             block_number=block_number,
@@ -119,8 +117,7 @@ async def check_oracle_account() -> None:
     """Checks whether oracle is part of the oracles set."""
     oracle_lowered_address = oracle.address.lower()
     result: List = (
-        await execute_graphql_query(
-            client=sw_gql_client,
+        await execute_sw_gql_query(
             query=ORACLE_QUERY,
             variables=dict(
                 oracle_address=oracle_lowered_address,

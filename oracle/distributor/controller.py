@@ -3,8 +3,11 @@ import logging
 
 from web3 import Web3
 
-from src.ipfs import submit_ipns_vote
-from src.settings import REWARD_ETH_TOKEN_CONTRACT_ADDRESS, SWISE_TOKEN_CONTRACT_ADDRESS
+from oracle.ipfs import submit_ipns_vote
+from oracle.settings import (
+    REWARD_ETH_TOKEN_CONTRACT_ADDRESS,
+    SWISE_TOKEN_CONTRACT_ADDRESS,
+)
 
 from .eth1 import (
     get_active_tokens_allocations,

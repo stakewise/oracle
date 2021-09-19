@@ -1,7 +1,8 @@
 /.git
 /.idea
 /.github
-venv
+/venv
+/dist
 .mypy_cache
 Dockerfile
 .dockerignore

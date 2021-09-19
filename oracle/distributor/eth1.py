@@ -6,14 +6,14 @@ from eth_typing import ChecksumAddress, HexStr
 from web3 import Web3
 from web3.types import BlockNumber, Wei
 
-from src.clients import execute_graphql_query, sw_gql_client
-from src.graphql_queries import (
+from oracle.clients import execute_sw_gql_query
+from oracle.graphql_queries import (
     ACTIVE_TOKEN_DISTRIBUTIONS_QUERY,
     DISABLED_STAKER_ACCOUNTS_QUERY,
     DISTRIBUTOR_CLAIMED_ACCOUNTS_QUERY,
     SWISE_HOLDERS_QUERY,
 )
-from src.settings import (
+from oracle.settings import (
     REWARD_ETH_TOKEN_CONTRACT_ADDRESS,
     STAKED_ETH_TOKEN_CONTRACT_ADDRESS,
     SWISE_TOKEN_CONTRACT_ADDRESS,
@@ -36,8 +36,7 @@ async def get_active_tokens_allocations(
 ) -> TokenAllocations:
     """Fetches active token allocations."""
     last_id = ""
-    result: Dict = await execute_graphql_query(
-        client=sw_gql_client,
+    result: Dict = await execute_sw_gql_query(
         query=ACTIVE_TOKEN_DISTRIBUTIONS_QUERY,
         variables=dict(from_block=from_block, to_block=to_block, last_id=last_id),
     )
@@ -50,8 +49,7 @@ async def get_active_tokens_allocations(
         if not last_id:
             break
 
-        result: Dict = await execute_graphql_query(
-            client=sw_gql_client,
+        result: Dict = await execute_sw_gql_query(
             query=ACTIVE_TOKEN_DISTRIBUTIONS_QUERY,
             variables=dict(from_block=from_block, to_block=to_block, last_id=last_id),
         )
@@ -89,8 +87,7 @@ async def get_disabled_stakers_reward_eth_distributions(
         return []
 
     last_id = ""
-    result: Dict = await execute_graphql_query(
-        client=sw_gql_client,
+    result: Dict = await execute_sw_gql_query(
         query=DISABLED_STAKER_ACCOUNTS_QUERY,
         variables=dict(block_number=to_block, last_id=last_id),
     )
@@ -103,8 +100,7 @@ async def get_disabled_stakers_reward_eth_distributions(
         if not last_id:
             break
 
-        result: Dict = await execute_graphql_query(
-            client=sw_gql_client,
+        result: Dict = await execute_sw_gql_query(
             query=DISABLED_STAKER_ACCOUNTS_QUERY,
             variables=dict(block_number=to_block, last_id=last_id),
         )
@@ -128,7 +124,7 @@ async def get_disabled_stakers_reward_eth_distributions(
             continue
 
         principals[staker_address] = staker_principal
-        distributor_principal += staker_principal
+        distributor_principal += Wei(staker_principal)
 
     if distributor_principal <= 0:
         return []
@@ -154,7 +150,7 @@ async def get_disabled_stakers_reward_eth_distributions(
             reward=reward,
         )
         distributions.append(distribution)
-        distributed += reward
+        distributed += Wei(reward)
 
     return distributions
 
@@ -163,8 +159,7 @@ async def get_disabled_stakers_reward_eth_distributions(
 async def get_distributor_claimed_accounts(merkle_root: HexStr) -> ClaimedAccounts:
     """Fetches addresses that have claimed their tokens from the `MerkleDistributor` contract."""
     last_id = ""
-    result: Dict = await execute_graphql_query(
-        client=sw_gql_client,
+    result: Dict = await execute_sw_gql_query(
         query=DISTRIBUTOR_CLAIMED_ACCOUNTS_QUERY,
         variables=dict(merkle_root=merkle_root, last_id=last_id),
     )
@@ -177,8 +172,7 @@ async def get_distributor_claimed_accounts(merkle_root: HexStr) -> ClaimedAccoun
         if not last_id:
             break
 
-        result: Dict = await execute_graphql_query(
-            client=sw_gql_client,
+        result: Dict = await execute_sw_gql_query(
             query=DISTRIBUTOR_CLAIMED_ACCOUNTS_QUERY,
             variables=dict(merkle_root=merkle_root, last_id=last_id),
         )
@@ -194,8 +188,7 @@ async def get_swise_holders(
 ) -> Balances:
     """Fetches SWISE holding points."""
     last_id = ""
-    result: Dict = await execute_graphql_query(
-        client=sw_gql_client,
+    result: Dict = await execute_sw_gql_query(
         query=SWISE_HOLDERS_QUERY,
         variables=dict(block_number=to_block, last_id=last_id),
     )
@@ -208,8 +201,7 @@ async def get_swise_holders(
         if not last_id:
             break
 
-        result: Dict = await execute_graphql_query(
-            client=sw_gql_client,
+        result: Dict = await execute_sw_gql_query(
             query=SWISE_HOLDERS_QUERY,
             variables=dict(block_number=to_block, last_id=last_id),
         )
@@ -241,18 +233,25 @@ async def get_swise_holders(
         total_points += account_holding_points
 
     # process unclaimed SWISE
-    for account, rewards in unclaimed_rewards.items():
-        balance = int(rewards.get(SWISE_TOKEN_CONTRACT_ADDRESS, "0"))
-        if balance <= 0:
-            continue
-
-        account_holding_points = balance * (to_block - from_block)
-        if account_holding_points <= 0:
-            continue
-
-        holding_points[account] = (
-            holding_points.setdefault(account, 0) + account_holding_points
+    for account in unclaimed_rewards:
+        origins = unclaimed_rewards.get(account, {}).get(
+            SWISE_TOKEN_CONTRACT_ADDRESS, {}
         )
-        total_points += account_holding_points
+        if not origins:
+            continue
+
+        for origin, balance in origins.items():
+            balance = int(balance)
+            if balance <= 0:
+                continue
+
+            account_holding_points = balance * (to_block - from_block)
+            if account_holding_points <= 0:
+                continue
+
+            holding_points[account] = (
+                holding_points.setdefault(account, 0) + account_holding_points
+            )
+            total_points += account_holding_points
 
     return Balances(total_supply=total_points, balances=holding_points)
