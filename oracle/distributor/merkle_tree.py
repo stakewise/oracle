@@ -101,7 +101,7 @@ def get_merkle_node(
     index: int,
     tokens: List[ChecksumAddress],
     account: ChecksumAddress,
-    values: List[str],
+    values: List[int],
 ) -> bytes:
     """Generates node for merkle tree."""
     encoded_data: bytes = w3.codec.encode_abi(
@@ -117,16 +117,31 @@ def calculate_merkle_root(rewards: Rewards) -> Tuple[HexStr, Claims]:
     accounts: List[ChecksumAddress] = sorted(rewards.keys())
     claims: Claims = OrderedDict()
     for i, account in enumerate(accounts):
-        tokens: List[ChecksumAddress] = sorted(rewards[account].keys())
-        values: List[str] = [rewards[account][token] for token in tokens]
-        claim: Claim = OrderedDict(index=i, tokens=tokens, values=values)
+        reward_tokens: List[ChecksumAddress] = sorted(rewards[account].keys())
+        claim: Claim = OrderedDict(index=i, reward_tokens=reward_tokens)
+
+        reward_token_amounts: Dict[ChecksumAddress, int] = {}
+        for reward_token in reward_tokens:
+            origins: List[ChecksumAddress] = sorted(
+                rewards[account][reward_token].keys()
+            )
+            values: List[str] = []
+            for origin in origins:
+                value: str = rewards[account][reward_token][origin]
+                values.append(value)
+                prev_value = reward_token_amounts.setdefault(reward_token, 0)
+                reward_token_amounts[reward_token] = prev_value + int(value)
+
+            claim.setdefault("origins", []).append(origins)
+            claim.setdefault("values", []).append(values)
+
         claims[account] = claim
 
-        merkle_element = get_merkle_node(
+        merkle_element: bytes = get_merkle_node(
             index=i,
             account=account,
-            tokens=tokens,
-            values=values,
+            tokens=reward_tokens,
+            values=[reward_token_amounts[token] for token in reward_tokens],
         )
         merkle_elements.append(merkle_element)
 

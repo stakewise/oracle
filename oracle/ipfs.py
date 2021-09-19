@@ -120,12 +120,7 @@ def check_or_create_ipns_keys() -> IPNSKeys:
 def submit_ipns_vote(
     encoded_data: bytes,
     vote: Union[RewardsVote, DistributorVote, ValidatorVote],
-    key_id: Union[
-        IPNS_REWARDS_KEY_NAME,
-        IPNS_DISTRIBUTOR_KEY_NAME,
-        IPNS_VALIDATOR_INITIALIZE_KEY_NAME,
-        IPNS_VALIDATOR_FINALIZE_KEY_NAME,
-    ],
+    key_id: str,
 ) -> IPNSRecord:
     """Submits vote to the IPFS and publishes to the IPNS."""
     # generate candidate ID

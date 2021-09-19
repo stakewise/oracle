@@ -7,14 +7,14 @@ from eth_typing import BlockNumber, ChecksumAddress
 from web3 import Web3
 from web3.types import Wei
 
-from src.clients import execute_graphql_query, uniswap_v3_gql_client
-from src.graphql_queries import (
+from oracle.clients import execute_uniswap_v3_gql_query
+from oracle.graphql_queries import (
     UNISWAP_V3_CURRENT_TICK_POSITIONS_QUERY,
     UNISWAP_V3_POOL_QUERY,
     UNISWAP_V3_POOLS_QUERY,
     UNISWAP_V3_POSITIONS_QUERY,
 )
-from src.settings import (
+from oracle.settings import (
     REWARD_ETH_TOKEN_CONTRACT_ADDRESS,
     STAKED_ETH_TOKEN_CONTRACT_ADDRESS,
     SWISE_TOKEN_CONTRACT_ADDRESS,
@@ -29,7 +29,7 @@ from .types import (
 )
 
 # NB! Changing BLOCKS_INTERVAL while distributions are still active can lead to invalid allocations
-BLOCKS_INTERVAL: int = 300
+BLOCKS_INTERVAL: BlockNumber = BlockNumber(300)
 MIN_TICK: int = -887272
 MAX_TICK: int = -MIN_TICK
 MAX_UINT_256 = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
@@ -41,8 +41,7 @@ Q96 = 2 ** 96
 async def get_uniswap_v3_pools(block_number: BlockNumber) -> UniswapV3Pools:
     """Fetches Uniswap V3 pools."""
     last_id = ""
-    result: Dict = await execute_graphql_query(
-        client=uniswap_v3_gql_client,
+    result: Dict = await execute_uniswap_v3_gql_query(
         query=UNISWAP_V3_POOLS_QUERY,
         variables=dict(block_number=block_number, last_id=last_id),
     )
@@ -55,8 +54,7 @@ async def get_uniswap_v3_pools(block_number: BlockNumber) -> UniswapV3Pools:
         if not last_id:
             break
 
-        result: Dict = await execute_graphql_query(
-            client=uniswap_v3_gql_client,
+        result: Dict = await execute_uniswap_v3_gql_query(
             query=UNISWAP_V3_POOLS_QUERY,
             variables=dict(block_number=block_number, last_id=last_id),
         )
@@ -80,7 +78,7 @@ async def get_uniswap_v3_pools(block_number: BlockNumber) -> UniswapV3Pools:
             elif pool_token == SWISE_TOKEN_CONTRACT_ADDRESS:
                 uni_v3_pools["swise_pools"].add(pool_address)
 
-    return UniswapV3Pools(**uni_v3_pools)
+    return uni_v3_pools
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
@@ -125,7 +123,7 @@ async def get_uniswap_v3_distributions(
                     reward: Wei = Wei(reward_per_block * interval)
                     if end == alloc_to_block:
                         # collect left overs
-                        reward += total_reward - (reward_per_block * total_blocks)
+                        reward += Wei(total_reward - (reward_per_block * total_blocks))
 
                     if reward > 0:
                         distribution = Distribution(
@@ -158,8 +156,7 @@ async def get_uniswap_v3_liquidity_points(
 ) -> Balances:
     """Fetches users' liquidity points of the Uniswap V3 pool in the current tick."""
     lowered_pool_address = pool_address.lower()
-    result: Dict = await execute_graphql_query(
-        client=uniswap_v3_gql_client,
+    result: Dict = await execute_uniswap_v3_gql_query(
         query=UNISWAP_V3_POOL_QUERY,
         variables=dict(block_number=block_number, pool_address=lowered_pool_address),
     )
@@ -174,8 +171,7 @@ async def get_uniswap_v3_liquidity_points(
         return Balances(total_supply=0, balances={})
 
     last_id = ""
-    result: Dict = await execute_graphql_query(
-        client=uniswap_v3_gql_client,
+    result: Dict = await execute_uniswap_v3_gql_query(
         query=UNISWAP_V3_CURRENT_TICK_POSITIONS_QUERY,
         variables=dict(
             block_number=block_number,
@@ -193,8 +189,7 @@ async def get_uniswap_v3_liquidity_points(
         if not last_id:
             break
 
-        result: Dict = await execute_graphql_query(
-            client=uniswap_v3_gql_client,
+        result: Dict = await execute_uniswap_v3_gql_query(
             query=UNISWAP_V3_CURRENT_TICK_POSITIONS_QUERY,
             variables=dict(
                 block_number=block_number,
@@ -231,8 +226,7 @@ async def get_uniswap_v3_single_token_balances(
 ) -> Balances:
     """Fetches users' single token balances of the Uniswap V3 pair across all the ticks."""
     lowered_pool_address = pool_address.lower()
-    result: Dict = await execute_graphql_query(
-        client=uniswap_v3_gql_client,
+    result: Dict = await execute_uniswap_v3_gql_query(
         query=UNISWAP_V3_POOL_QUERY,
         variables=dict(block_number=block_number, pool_address=lowered_pool_address),
     )
@@ -255,8 +249,7 @@ async def get_uniswap_v3_single_token_balances(
     token1_address: ChecksumAddress = Web3.toChecksumAddress(pool["token1"])
 
     last_id = ""
-    result: Dict = await execute_graphql_query(
-        client=uniswap_v3_gql_client,
+    result: Dict = await execute_uniswap_v3_gql_query(
         query=UNISWAP_V3_POSITIONS_QUERY,
         variables=dict(
             block_number=block_number,
@@ -275,8 +268,7 @@ async def get_uniswap_v3_single_token_balances(
         if not last_id:
             break
 
-        result: Dict = await execute_graphql_query(
-            client=uniswap_v3_gql_client,
+        result: Dict = await execute_uniswap_v3_gql_query(
             query=UNISWAP_V3_POSITIONS_QUERY,
             variables=dict(
                 block_number=block_number,
@@ -288,8 +280,8 @@ async def get_uniswap_v3_single_token_balances(
         positions.extend(positions_chunk)
 
     # process positions
-    balances: Dict[ChecksumAddress, Wei] = {}
-    total_supply: Wei = Wei(0)
+    balances: Dict[ChecksumAddress, int] = {}
+    total_supply = 0
     for position in positions:
         account = Web3.toChecksumAddress(position["owner"])
         if account == EMPTY_ADDR_HEX:
@@ -306,32 +298,25 @@ async def get_uniswap_v3_single_token_balances(
             continue
 
         if token0_address == token:
-            token0_amount: Wei = Wei(
-                get_amount0(
-                    tick_current=tick_current,
-                    sqrt_ratio_x96=sqrt_price,
-                    tick_lower=tick_lower,
-                    tick_upper=tick_upper,
-                    liquidity=liquidity,
-                )
+            token0_amount = get_amount0(
+                tick_current=tick_current,
+                sqrt_ratio_x96=sqrt_price,
+                tick_lower=tick_lower,
+                tick_upper=tick_upper,
+                liquidity=liquidity,
             )
-            balances[account] = Wei(
-                balances.setdefault(account, Wei(0)) + token0_amount
-            )
+            balances[account] = balances.setdefault(account, 0) + token0_amount
             total_supply += token0_amount
         elif token1_address == token:
-            token1_amount: Wei = Wei(
-                get_amount1(
-                    tick_current=tick_current,
-                    sqrt_ratio_x96=sqrt_price,
-                    tick_lower=tick_lower,
-                    tick_upper=tick_upper,
-                    liquidity=liquidity,
-                )
+            token1_amount = get_amount1(
+                tick_current=tick_current,
+                sqrt_ratio_x96=sqrt_price,
+                tick_lower=tick_lower,
+                tick_upper=tick_upper,
+                liquidity=liquidity,
             )
-            balances[account] = Wei(
-                balances.setdefault(account, Wei(0)) + token1_amount
-            )
+
+            balances[account] = balances.setdefault(account, 0) + token1_amount
             total_supply += token1_amount
 
     return Balances(total_supply=total_supply, balances=balances)

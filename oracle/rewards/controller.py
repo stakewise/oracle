@@ -8,7 +8,7 @@ from eth_typing import BlockNumber, HexStr
 from web3 import Web3
 from web3.types import Timestamp, Wei
 
-from src.ipfs import submit_ipns_vote
+from oracle.ipfs import submit_ipns_vote
 
 from .eth1 import SYNC_PERIOD, get_finalized_validators_public_keys
 from .eth2 import (

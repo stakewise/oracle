@@ -6,7 +6,7 @@ import ipfshttpclient
 from eth_typing import HexStr
 from ipfshttpclient.exceptions import ErrorResponse
 
-from src.settings import IPFS_ENDPOINT
+from oracle.settings import IPFS_ENDPOINT
 
 from .types import ValidatorVote
 

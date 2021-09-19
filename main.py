@@ -5,13 +5,13 @@ from typing import Any
 
 import aiohttp
 
-from src.distributor.controller import DistributorController
-from src.eth1 import check_oracle_account, get_finalized_block, get_voting_parameters
-from src.ipfs import check_or_create_ipns_keys
-from src.rewards.controller import RewardsController
-from src.rewards.eth2 import get_finality_checkpoints, get_genesis
-from src.settings import LOG_LEVEL, PROCESS_INTERVAL
-from src.validators.controller import ValidatorsController
+from oracle.distributor.controller import DistributorController
+from oracle.eth1 import check_oracle_account, get_finalized_block, get_voting_parameters
+from oracle.ipfs import check_or_create_ipns_keys
+from oracle.rewards.controller import RewardsController
+from oracle.rewards.eth2 import get_finality_checkpoints, get_genesis
+from oracle.settings import LOG_LEVEL, PROCESS_INTERVAL
+from oracle.validators.controller import ValidatorsController
 
 logging.basicConfig(
     format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
@@ -42,11 +42,11 @@ class InterruptHandler:
 
 
 async def main() -> None:
-    # aiohttp session
-    session = aiohttp.ClientSession()
-
     # check stakewise graphql connection
     await get_finalized_block()
+
+    # aiohttp session
+    session = aiohttp.ClientSession()
 
     # check ETH2 API connection
     await get_finality_checkpoints(session)

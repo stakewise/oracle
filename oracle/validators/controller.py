@@ -4,7 +4,7 @@ from eth_typing import BlockNumber
 from web3 import Web3
 from web3.types import Wei
 
-from src.ipfs import submit_ipns_vote
+from oracle.ipfs import submit_ipns_vote
 
 from .eth1 import can_finalize_validator, select_validator
 from .ipfs import get_last_vote_public_key

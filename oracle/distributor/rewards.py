@@ -4,7 +4,7 @@ from typing import List, Set
 
 from eth_typing import BlockNumber, ChecksumAddress
 
-from src.settings import (
+from oracle.settings import (
     DISTRIBUTOR_FALLBACK_ADDRESS,
     REWARD_ETH_TOKEN_CONTRACT_ADDRESS,
     STAKED_ETH_TOKEN_CONTRACT_ADDRESS,
@@ -51,25 +51,32 @@ class DistributorRewards(object):
     def add_value(
         rewards: Rewards,
         to: ChecksumAddress,
+        origin: ChecksumAddress,
         reward_token: ChecksumAddress,
         amount: int,
     ) -> None:
         """Adds reward token to the beneficiary address."""
-        prev_amount = rewards.setdefault(to, {}).setdefault(reward_token, "0")
-        rewards[to][reward_token] = str(int(prev_amount) + amount)
+        prev_amount = (
+            rewards.setdefault(to, {})
+            .setdefault(reward_token, {})
+            .setdefault(origin, "0")
+        )
+        rewards[to][reward_token][origin] = str(int(prev_amount) + amount)
 
     @staticmethod
     def merge_rewards(rewards1: Rewards, rewards2: Rewards) -> Rewards:
         """Merges two dictionaries into one."""
         merged_rewards: Rewards = copy.deepcopy(rewards1)
         for account, account_rewards in rewards2.items():
-            for token, amount in account_rewards.items():
-                DistributorRewards.add_value(
-                    rewards=merged_rewards,
-                    to=account,
-                    reward_token=token,
-                    amount=int(amount),
-                )
+            for reward_token, rewards in account_rewards.items():
+                for origin, value in rewards.items():
+                    DistributorRewards.add_value(
+                        rewards=merged_rewards,
+                        to=account,
+                        origin=origin,
+                        reward_token=reward_token,
+                        amount=int(value),
+                    )
 
         return merged_rewards
 
@@ -89,6 +96,7 @@ class DistributorRewards(object):
         self.add_value(
             rewards=rewards,
             to=DISTRIBUTOR_FALLBACK_ADDRESS,
+            origin=contract_address,
             reward_token=self.reward_token,
             amount=reward,
         )
@@ -159,6 +167,7 @@ class DistributorRewards(object):
             self.add_value(
                 rewards=rewards,
                 to=DISTRIBUTOR_FALLBACK_ADDRESS,
+                origin=contract_address,
                 reward_token=self.reward_token,
                 amount=total_reward,
             )
@@ -185,6 +194,7 @@ class DistributorRewards(object):
                 self.add_value(
                     rewards=rewards,
                     to=DISTRIBUTOR_FALLBACK_ADDRESS,
+                    origin=contract_address,
                     reward_token=self.reward_token,
                     amount=account_reward,
                 )
@@ -200,6 +210,7 @@ class DistributorRewards(object):
                 self.add_value(
                     rewards=rewards,
                     to=account,
+                    origin=contract_address,
                     reward_token=self.reward_token,
                     amount=account_reward,
                 )

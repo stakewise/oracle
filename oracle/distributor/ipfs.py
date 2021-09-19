@@ -1,10 +1,9 @@
 import logging
-from typing import Dict
 
 import backoff
 import ipfshttpclient
 
-from src.settings import IPFS_ENDPOINT
+from oracle.settings import IPFS_ENDPOINT
 
 from .types import ClaimedAccounts, Claims, Rewards
 
@@ -19,20 +18,23 @@ def get_unclaimed_balances(
     merkle_proofs = merkle_proofs.replace("ipfs://", "").replace("/ipfs/", "")
 
     with ipfshttpclient.connect(IPFS_ENDPOINT) as client:
-        prev_claims: Dict = client.get_json(merkle_proofs)
+        prev_claims: Claims = client.get_json(merkle_proofs)
 
-    unclaimed_rewards: Rewards = Rewards({})
+    unclaimed_rewards: Rewards = {}
     for account, claim in prev_claims.items():
         if account in claimed_accounts:
             continue
 
-        # TODO: remove after first v2 merkle root update
-        key = "reward_tokens" if "reward_tokens" in claim else "tokens"
-        for token, reward in zip(claim[key], claim["values"]):
-            prev_unclaimed = unclaimed_rewards.setdefault(account, {}).setdefault(
-                token, "0"
-            )
-            unclaimed_rewards[account][token] = str(int(prev_unclaimed) + int(reward))
+        for i, reward_token in enumerate(claim["reward_tokens"]):
+            for origin, value in zip(claim["origins"][i], claim["values"][i]):
+                prev_unclaimed = (
+                    unclaimed_rewards.setdefault(account, {})
+                    .setdefault(reward_token, {})
+                    .setdefault(origin, "0")
+                )
+                unclaimed_rewards[account][reward_token][origin] = str(
+                    int(prev_unclaimed) + int(value)
+                )
 
     return unclaimed_rewards
 
@@ -40,6 +42,7 @@ def get_unclaimed_balances(
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
 def upload_claims(claims: Claims) -> str:
     """Submits claims to the IPFS and pins the file."""
+    # TODO: split claims into files up to 1000 entries
     with ipfshttpclient.connect(IPFS_ENDPOINT) as client:
         ipfs_id = client.add_json(claims)
         client.pin.add(ipfs_id)
