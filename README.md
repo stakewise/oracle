@@ -94,9 +94,10 @@ poetry run python main.py
 | NETWORK                   | The network that the oracle is currently operating on. Choices are goerli, mainnet | No       | mainnet                                                              |
 | ORACLE_PRIVATE_KEY        | The ETH1 private key of the operator                                               | Yes      | -                                                                    |
 | IPFS_ENDPOINT             | The IPFS endpoint                                                                  | No       | /dns/localhost/tcp/5001/http                                         |
-| ETH2_ENDPOINT             | The ETH2 node endpoint                                                             | No       | https://eth2-beacon-mainnet.infura.io                                |
+| ETH2_ENDPOINT             | The ETH2 node endpoint                                                             | No       | http://localhost:3501                                                |
 | STAKEWISE_SUBGRAPH_URL    | The StakeWise subgraph URL                                                         | No       | https://api.thegraph.com/subgraphs/name/stakewise/stakewise-mainnet  |
 | UNISWAP_V3_SUBGRAPH_URL   | The Uniswap V3 subgraph URL                                                        | No       | https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-mainnet |
+| ETHEREUM_SUBGRAPH_URL     | The Ethereum subgraph URL                                                          | No       | https://api.thegraph.com/subgraphs/name/stakewise/ethereum-mainnet   |
 | KEEPER_ORACLES_SOURCE_URL | The Keeper source URL where IPNS records for the oracles are stored                | No       | https://github.com/stakewise/keeper/README.md                        |
 | PROCESS_INTERVAL          | How long to wait before processing again (in seconds)                              | No       | 180                                                                  |
 | ETH1_CONFIRMATION_BLOCKS  | The required number of ETH1 confirmation blocks used to fetch the data              | No       | 15                                                                   |

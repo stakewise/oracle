@@ -132,9 +132,7 @@ def submit_ipns_vote(
     with ipfshttpclient.connect(IPFS_ENDPOINT) as client:
         ipfs_id = client.add_json(vote)
         client.pin.add(ipfs_id)
-        ipns_id = client.name.publish(ipfs_path=ipfs_id, lifetime="72h", key=key_id)[
-            "Name"
-        ]
+        ipns_id = client.name.publish(ipfs_path=ipfs_id, key=key_id)["Name"]
 
     if not ipfs_id.startswith("/ipfs/"):
         ipfs_id = "/ipfs/" + ipfs_id
