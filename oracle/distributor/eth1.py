@@ -254,4 +254,11 @@ async def get_swise_holders(
             )
             total_points += account_holding_points
 
+    # require holding at least 1 SWISE for the max duration
+    min_swise_holding_points = Web3.toWei(1, "ether") * (to_block - from_block)
+    for account, points in list(holding_points.items()):
+        if points < min_swise_holding_points:
+            del holding_points[account]
+            total_points -= points
+
     return Balances(total_supply=total_points, balances=holding_points)

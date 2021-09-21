@@ -5,7 +5,7 @@ from eth_typing import HexStr
 from web3 import Web3
 from web3.types import BlockNumber
 
-from oracle.clients import execute_sw_gql_query
+from oracle.clients import execute_ethereum_gql_query, execute_sw_gql_query
 from oracle.graphql_queries import OPERATORS_QUERY, VALIDATOR_REGISTRATIONS_QUERY
 from oracle.settings import WITHDRAWAL_CREDENTIALS
 
@@ -42,7 +42,7 @@ async def select_validator(block_number: BlockNumber) -> Union[None, Validator]:
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def can_finalize_validator(block_number: BlockNumber, public_key: HexStr) -> bool:
     """Checks whether it's safe to finalize the validator registration."""
-    result: Dict = await execute_sw_gql_query(
+    result: Dict = await execute_ethereum_gql_query(
         query=VALIDATOR_REGISTRATIONS_QUERY,
         variables=dict(block_number=block_number, public_key=public_key),
     )

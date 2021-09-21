@@ -20,7 +20,7 @@ KEEPER_ORACLES_SOURCE_URL = config(
     "KEEPER_ORACLES_SOURCE_URL", default="https://github.com/stakewise/keeper/README.md"
 )
 
-ETH2_ENDPOINT = config("ETH2_ENDPOINT", default="https://eth2-beacon-mainnet.infura.io")
+ETH2_ENDPOINT = config("ETH2_ENDPOINT", default="http://localhost:3501")
 
 ORACLE_PRIVATE_KEY = config("ORACLE_PRIVATE_KEY")
 
@@ -53,6 +53,10 @@ if NETWORK == MAINNET:
         "UNISWAP_V3_SUBGRAPH_URL",
         default="https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-mainnet",
     )
+    ETHEREUM_SUBGRAPH_URL = config(
+        "ETHEREUM_SUBGRAPH_URL",
+        default="https://api.thegraph.com/subgraphs/name/stakewise/ethereum-mainnet",
+    )
 elif NETWORK == GOERLI:
     SWISE_TOKEN_CONTRACT_ADDRESS = Web3.toChecksumAddress(
         "0x0e2497aACec2755d831E4AFDEA25B4ef1B823855"
@@ -76,4 +80,8 @@ elif NETWORK == GOERLI:
     UNISWAP_V3_SUBGRAPH_URL = config(
         "UNISWAP_V3_SUBGRAPH_URL",
         default="https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-goerli",
+    )
+    ETHEREUM_SUBGRAPH_URL = config(
+        "ETHEREUM_SUBGRAPH_URL",
+        default="https://api.thegraph.com/subgraphs/name/stakewise/ethereum-goerli",
     )
