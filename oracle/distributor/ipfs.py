@@ -1,7 +1,9 @@
 import logging
+from typing import Dict
 
 import backoff
 import ipfshttpclient
+from eth_typing import ChecksumAddress
 
 from oracle.settings import IPFS_ENDPOINT
 
@@ -37,6 +39,15 @@ def get_unclaimed_balances(
                 )
 
     return unclaimed_rewards
+
+
+@backoff.on_exception(backoff.expo, Exception, max_time=900)
+def get_one_time_rewards_allocations(rewards: str) -> Dict[ChecksumAddress, str]:
+    """Fetches one time rewards from IPFS."""
+    rewards = rewards.replace("ipfs://", "").replace("/ipfs/", "")
+
+    with ipfshttpclient.connect(IPFS_ENDPOINT) as client:
+        return client.get_json(rewards)
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)

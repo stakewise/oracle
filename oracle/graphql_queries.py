@@ -42,7 +42,7 @@ VOTING_PARAMETERS_QUERY = gql(
       }
       validators(
         block: { number: $block_number }
-        where: { registrationStatus: "Initialized" }
+        where: { registrationStatus: Initialized }
       ) {
         id
         operator {
@@ -58,7 +58,7 @@ FINALIZED_VALIDATORS_QUERY = gql(
     query getValidators($block_number: Int, $last_id: ID) {
       validators(
         block: { number: $block_number }
-        where: { registrationStatus: "Finalized", id_gt: $last_id }
+        where: { registrationStatus: Finalized, id_gt: $last_id }
         first: 1000
         orderBy: id
         orderDirection: asc
@@ -100,10 +100,14 @@ DISABLED_STAKER_ACCOUNTS_QUERY = gql(
 """
 )
 
-ACTIVE_TOKEN_DISTRIBUTIONS_QUERY = gql(
+PERIODIC_DISTRIBUTIONS_QUERY = gql(
     """
-    query getTokenDistributions($from_block: Int, $to_block: Int, $last_id: ID) {
-      tokenDistributions(
+    query getPeriodicDistributions(
+      $from_block: BigInt
+      $to_block: BigInt
+      $last_id: ID
+    ) {
+      periodicDistributions(
         where: {
           id_gt: $last_id
           startedAtBlock_lt: $to_block
@@ -119,6 +123,30 @@ ACTIVE_TOKEN_DISTRIBUTIONS_QUERY = gql(
         amount
         startedAtBlock
         endedAtBlock
+      }
+    }
+"""
+)
+
+ONE_TIME_DISTRIBUTIONS_QUERY = gql(
+    """
+    query getOneTimeDistributions($from_block: BigInt, $to_block: BigInt, $last_id: ID) {
+      oneTimeDistributions(
+        where: {
+          id_gt: $last_id
+          distributedAtBlock_gt: $from_block
+          distributedAtBlock_lte: $to_block
+        }
+        first: 1000
+        orderBy: id
+        orderDirection: asc
+      ) {
+        id
+        token
+        origin
+        rewards
+        amount
+        distributedAtBlock
       }
     }
 """
@@ -212,7 +240,7 @@ UNISWAP_V3_POSITIONS_QUERY = gql(
 
 DISTRIBUTOR_CLAIMED_ACCOUNTS_QUERY = gql(
     """
-    query getDistributorClaims($merkle_root: String, $last_id: ID) {
+    query getDistributorClaims($merkle_root: Bytes, $last_id: ID) {
       merkleDistributorClaims(
         where: { merkleRoot: $merkle_root, id_gt: $last_id }
         first: 1000
@@ -238,7 +266,8 @@ SWISE_HOLDERS_QUERY = gql(
       ) {
         id
         balance
-        holdingPoints
+        isContract
+        distributorPoints
         updatedAtBlock
       }
     }
@@ -255,8 +284,23 @@ OPERATORS_QUERY = gql(
       ) {
         id
         validatorsCount
+        revenueShare
+        distributorPoints
         initializeMerkleProofs
         depositDataIndex
+      }
+    }
+"""
+)
+
+PARTNERS_QUERY = gql(
+    """
+    query getPartners($block_number: Int) {
+      partners(block: { number: $block_number }) {
+        id
+        contributedAmount
+        revenueShare
+        distributorPoints
       }
     }
 """

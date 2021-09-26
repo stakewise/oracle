@@ -10,15 +10,18 @@ from oracle.settings import (
 )
 
 from .eth1 import (
-    get_active_tokens_allocations,
     get_disabled_stakers_reward_eth_distributions,
     get_distributor_claimed_accounts,
+    get_one_time_rewards,
+    get_operators_rewards,
+    get_partners_rewards,
+    get_periodic_allocations,
     get_swise_holders,
 )
 from .ipfs import get_unclaimed_balances, upload_claims
 from .merkle_tree import calculate_merkle_root
 from .rewards import DistributorRewards
-from .types import Distribution, DistributorVote, DistributorVotingParameters, Rewards
+from .types import DistributorVote, DistributorVotingParameters, Rewards
 from .uniswap_v3 import get_uniswap_v3_distributions, get_uniswap_v3_pools
 
 logger = logging.getLogger(__name__)
@@ -47,8 +50,8 @@ class DistributorController(object):
             f"Voting for Merkle Distributor rewards: from block={from_block}, to block={to_block}"
         )
 
-        # fetch active token allocations for the Distributor
-        active_allocations = await get_active_tokens_allocations(
+        # fetch active periodic allocations
+        active_allocations = await get_periodic_allocations(
             from_block=from_block, to_block=to_block
         )
         uniswap_v3_pools = await get_uniswap_v3_pools(to_block)
@@ -70,51 +73,8 @@ class DistributorController(object):
         )
         all_distributions.extend(disabled_stakers_distributions)
 
-        # fetch protocol reward distributions
-        protocol_reward = voting_params["protocol_reward"]
-        if protocol_reward > 0:
-            all_distributions.append(
-                Distribution(
-                    contract=SWISE_TOKEN_CONTRACT_ADDRESS,
-                    block_number=to_block,
-                    uni_v3_token=SWISE_TOKEN_CONTRACT_ADDRESS,
-                    reward_token=REWARD_ETH_TOKEN_CONTRACT_ADDRESS,
-                    reward=protocol_reward,
-                )
-            )
-
         last_merkle_root = voting_params["last_merkle_root"]
         last_merkle_proofs = voting_params["last_merkle_proofs"]
-        if not all_distributions:
-            if last_merkle_root is None or last_merkle_proofs is None:
-                logger.warning(
-                    f"Skipping merkle root update: no distributions"
-                    f" after rewards update with block number={to_block}"
-                )
-            else:
-                # the rewards distributions has not change, update with the previous merkle root parameters
-                # to re-enable claiming for the users
-                logger.warning("Voting for the same merkle root: no new distributions")
-                encoded_data: bytes = w3.codec.encode_abi(
-                    ["uint256", "string", "bytes32"],
-                    [current_nonce, last_merkle_proofs, last_merkle_root],
-                )
-                vote = DistributorVote(
-                    rewards_updated_at_block=to_block,
-                    nonce=current_nonce,
-                    merkle_root=last_merkle_root,
-                    merkle_proofs=last_merkle_proofs,
-                )
-                ipns_record = submit_ipns_vote(
-                    encoded_data=encoded_data, vote=vote, key_id=self.ipns_key_id
-                )
-                logger.info(
-                    f"Distributor vote has been successfully submitted:"
-                    f" ipfs={ipns_record['ipfs_id']},"
-                    f" ipns={ipns_record['ipns_id']}"
-                )
-            return
-
         if last_merkle_root is not None and last_merkle_proofs is not None:
             # fetch accounts that have claimed since last merkle root update
             claimed_accounts = await get_distributor_claimed_accounts(last_merkle_root)
@@ -148,10 +108,31 @@ class DistributorController(object):
             )
             tasks.append(task)
 
+        # process one time rewards
+        tasks.append(get_one_time_rewards(from_block=from_block, to_block=to_block))
+
         # merge results
         results = await asyncio.gather(*tasks)
         final_rewards: Rewards = {}
         for rewards in results:
+            final_rewards = DistributorRewards.merge_rewards(final_rewards, rewards)
+
+        protocol_reward = voting_params["protocol_reward"]
+        operators_rewards, left_reward = await get_operators_rewards(
+            from_block=from_block, to_block=to_block, total_reward=protocol_reward
+        )
+        partners_rewards, left_reward = await get_partners_rewards(
+            from_block=from_block, to_block=to_block, total_reward=left_reward
+        )
+        swise_holders_rewards = await DistributorRewards(
+            uniswap_v3_pools=uniswap_v3_pools,
+            swise_holders=swise_holders,
+            block_number=to_block,
+            uni_v3_token=SWISE_TOKEN_CONTRACT_ADDRESS,
+            reward_token=REWARD_ETH_TOKEN_CONTRACT_ADDRESS,
+        ).get_rewards(SWISE_TOKEN_CONTRACT_ADDRESS, left_reward)
+
+        for rewards in [operators_rewards, partners_rewards, swise_holders_rewards]:
             final_rewards = DistributorRewards.merge_rewards(final_rewards, rewards)
 
         # merge final rewards with unclaimed rewards

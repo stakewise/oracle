@@ -5,7 +5,6 @@ import backoff
 from ens.constants import EMPTY_ADDR_HEX
 from eth_typing import BlockNumber, ChecksumAddress
 from web3 import Web3
-from web3.types import Wei
 
 from oracle.clients import execute_uniswap_v3_gql_query
 from oracle.graphql_queries import (
@@ -29,7 +28,7 @@ from .types import (
 )
 
 # NB! Changing BLOCKS_INTERVAL while distributions are still active can lead to invalid allocations
-BLOCKS_INTERVAL: BlockNumber = BlockNumber(300)
+BLOCKS_INTERVAL: BlockNumber = BlockNumber(277)
 MIN_TICK: int = -887272
 MAX_TICK: int = -MIN_TICK
 MAX_UINT_256 = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
@@ -114,16 +113,16 @@ async def get_uniswap_v3_distributions(
             # calculate reward allocation for spread of `BLOCKS_INTERVAL`
             total_reward = allocation["reward"]
             reward_per_block = total_reward // total_blocks
-            interval_reward: Wei = Wei(reward_per_block * BLOCKS_INTERVAL)
+            interval_reward = reward_per_block * BLOCKS_INTERVAL
             start: BlockNumber = max(alloc_from_block, from_block)
             end: BlockNumber = min(alloc_to_block, to_block)
             while start != end:
                 if start + BLOCKS_INTERVAL > end:
                     interval = end - start
-                    reward: Wei = Wei(reward_per_block * interval)
+                    reward = reward_per_block * interval
                     if end == alloc_to_block:
                         # collect left overs
-                        reward += Wei(total_reward - (reward_per_block * total_blocks))
+                        reward += total_reward - (reward_per_block * total_blocks)
 
                     if reward > 0:
                         distribution = Distribution(

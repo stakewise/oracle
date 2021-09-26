@@ -5,7 +5,7 @@ import backoff
 from eth_account import Account
 from eth_account.signers.local import LocalAccount
 from web3 import Web3
-from web3.types import BlockNumber, Timestamp
+from web3.types import BlockNumber, Timestamp, Wei
 
 from .clients import execute_ethereum_gql_query, execute_sw_gql_query
 from .distributor.types import DistributorVotingParameters
@@ -90,14 +90,14 @@ async def get_voting_parameters(block_number: BlockNumber) -> VotingParameters:
         last_updated_at_block=BlockNumber(int(distributor["updatedAtBlock"])),
         last_merkle_root=distributor["merkleRoot"],
         last_merkle_proofs=distributor["merkleProofs"],
-        protocol_reward=Web3.toWei(distributor["protocolPeriodReward"], "ether"),
-        distributor_reward=Web3.toWei(distributor["distributorPeriodReward"], "ether"),
+        protocol_reward=Wei(int(reward_eth_token["protocolPeriodReward"])),
+        distributor_reward=Wei(int(reward_eth_token["distributorPeriodReward"])),
     )
     initialize_validator = InitializeValidatorVotingParameters(
         validator_index=int(pool["pendingValidators"])
         + int(pool["activatedValidators"]),
         validators_nonce=int(network["oraclesValidatorsNonce"]),
-        pool_balance=Web3.toWei(pool["balance"], "ether"),
+        pool_balance=Wei(int(pool["balance"])),
     )
     finalize_validator = FinalizeValidatorVotingParameters(
         validators_nonce=int(network["oraclesValidatorsNonce"]),

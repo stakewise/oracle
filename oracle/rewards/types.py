@@ -1,4 +1,4 @@
-from typing import Set, TypedDict
+from typing import List, TypedDict
 
 from eth_typing import HexStr
 from web3.types import Timestamp
@@ -16,4 +16,4 @@ class RewardsVote(TypedDict):
     total_rewards: str
 
 
-FinalizedValidatorsPublicKeys = Set[HexStr]
+FinalizedValidatorsPublicKeys = List[HexStr]

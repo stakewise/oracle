@@ -1,10 +1,10 @@
 import asyncio
 import logging
 from datetime import datetime
-from typing import Set, Union
+from typing import Union
 
 from aiohttp import ClientSession
-from eth_typing import BlockNumber, HexStr
+from eth_typing import BlockNumber
 from web3 import Web3
 from web3.types import Timestamp, Wei
 
@@ -16,7 +16,7 @@ from .eth2 import (
     SECONDS_PER_EPOCH,
     SLOTS_PER_EPOCH,
     get_finality_checkpoints,
-    get_validator,
+    get_validators,
 )
 from .types import RewardsVote, RewardsVotingParameters
 
@@ -73,44 +73,42 @@ class RewardsController(object):
             return
 
         # fetch pool validator BLS public keys
-        public_keys: Set[HexStr] = await get_finalized_validators_public_keys(
-            current_block_number
-        )
+        public_keys = await get_finalized_validators_public_keys(current_block_number)
 
         # calculate current ETH2 epoch
         update_timestamp = int(next_update_time.timestamp())
-        current_epoch: int = int(
-            (update_timestamp - self.genesis_timestamp) / SECONDS_PER_EPOCH
-        )
+        update_epoch: int = (
+            update_timestamp - self.genesis_timestamp
+        ) // SECONDS_PER_EPOCH
 
         logger.info(
             f"Voting for new total rewards with parameters:"
-            f" timestamp={update_timestamp}, epoch={current_epoch}"
+            f" timestamp={update_timestamp}, epoch={update_epoch}"
         )
 
         # wait for the epoch to get finalized
         checkpoints = await get_finality_checkpoints(self.aiohttp_session)
-        while current_epoch < int(checkpoints["finalized"]["epoch"]):
-            logger.info(f"Waiting for the epoch {current_epoch} to finalize...")
+        while update_epoch > int(checkpoints["finalized"]["epoch"]):
+            logger.info(f"Waiting for the epoch {update_epoch} to finalize...")
             await asyncio.sleep(360)
             checkpoints = await get_finality_checkpoints(self.aiohttp_session)
 
-        # TODO: execute in batch for validators that were already activated since last check
-        state_id = str(current_epoch * SLOTS_PER_EPOCH)
+        state_id = str(update_epoch * SLOTS_PER_EPOCH)
         total_rewards: Wei = Wei(0)
         activated_validators = 0
-        for public_key in public_keys:
-            validator = await get_validator(
-                session=self.aiohttp_session, public_key=public_key, state_id=state_id
+        # fetch balances in chunks of 100 keys
+        for i in range(0, len(public_keys), 100):
+            validators = await get_validators(
+                session=self.aiohttp_session,
+                public_keys=public_keys[i : i + 100],
+                state_id=state_id,
             )
-            if validator is None:
-                continue
-
-            total_rewards += Wei(
-                Web3.toWei(validator["balance"], "gwei") - self.deposit_amount
-            )
-            if validator["status"] not in PENDING_STATUSES:
-                activated_validators += 1
+            for validator in validators:
+                total_rewards += Wei(
+                    Web3.toWei(validator["balance"], "gwei") - self.deposit_amount
+                )
+                if validator["status"] not in PENDING_STATUSES:
+                    activated_validators += 1
 
         pretty_total_rewards = format_ether(total_rewards)
         log_msg = f"Retrieved pool validator rewards: total={pretty_total_rewards}"
