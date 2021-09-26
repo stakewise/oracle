@@ -29,6 +29,9 @@ PROCESS_INTERVAL = config("PROCESS_INTERVAL", default=180, cast=int)
 # required ETH1 confirmation blocks
 ETH1_CONFIRMATION_BLOCKS: int = config("ETH1_CONFIRMATION_BLOCKS", default=15, cast=int)
 
+OPERATORS_ORIGIN_ADDRESS = config("OPERATORS_ORIGIN_ADDRESS", default="0x" + "11" * 20)
+PARTNERS_ORIGIN_ADDRESS = config("PARTNERS_ORIGIN_ADDRESS", default="0x" + "22" * 20)
+
 if NETWORK == MAINNET:
     SWISE_TOKEN_CONTRACT_ADDRESS = Web3.toChecksumAddress(
         "0x48C3399719B582dD63eB5AADf12A40B4C3f52FA2"

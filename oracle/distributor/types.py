@@ -20,16 +20,14 @@ class Distribution(TypedDict):
     block_number: BlockNumber
     uni_v3_token: ChecksumAddress
     reward_token: ChecksumAddress
-    # TODO: migrate to int if there will be tokens with more than 18 decimals
-    reward: Wei
+    reward: int
 
 
 class TokenAllocation(TypedDict):
     from_block: BlockNumber
     to_block: BlockNumber
     reward_token: ChecksumAddress
-    # TODO: migrate to int if there will be tokens with more than 18 decimals
-    reward: Wei
+    reward: int
 
 
 class Balances(TypedDict):

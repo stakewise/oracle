@@ -38,4 +38,4 @@ async def get_finalized_validators_public_keys(
         validators_chunk = result.get("validators", [])
         validators.extend(validators_chunk)
 
-    return set([val["id"] for val in validators])
+    return list(set([val["id"] for val in validators]))

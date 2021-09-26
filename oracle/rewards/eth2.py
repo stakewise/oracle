@@ -1,8 +1,8 @@
 from enum import Enum
-from typing import Dict, Union
+from typing import Dict, List
 
 import backoff
-from aiohttp import ClientResponseError, ClientSession
+from aiohttp import ClientSession
 from eth_typing import HexStr
 
 from oracle.settings import ETH2_ENDPOINT
@@ -40,26 +40,17 @@ async def get_finality_checkpoints(
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
-async def get_validator(
-    session: ClientSession, public_key: HexStr, state_id: str = "head"
-) -> Union[Dict, None]:
-    """
-    Fetches validator.
-    :returns validator if exists or None if it doesn't
-    """
-    endpoint = (
-        f"{ETH2_ENDPOINT}/eth/v1/beacon/states/{state_id}/validators?id={public_key}"
-    )
-    try:
-        async with session.get(endpoint) as response:
-            response.raise_for_status()
-            return (await response.json())["data"][0]
-    except ClientResponseError as e:
-        if e.status == 400:
-            # validator does not exist
-            return None
+async def get_validators(
+    session: ClientSession, public_keys: List[HexStr], state_id: str = "head"
+) -> List[Dict]:
+    """Fetches validators."""
+    if not public_keys:
+        return []
 
-        raise e
+    endpoint = f"{ETH2_ENDPOINT}/eth/v1/beacon/states/{state_id}/validators?id={'&id='.join(public_keys)}"
+    async with session.get(endpoint) as response:
+        response.raise_for_status()
+        return (await response.json())["data"]
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
