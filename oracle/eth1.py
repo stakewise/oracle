@@ -79,6 +79,7 @@ async def get_voting_parameters(block_number: BlockNumber) -> VotingParameters:
 
     rewards = RewardsVotingParameters(
         rewards_nonce=int(network["oraclesRewardsNonce"]),
+        total_rewards=Wei(int(reward_eth_token["totalRewards"])),
         rewards_updated_at_timestamp=Timestamp(
             int(reward_eth_token["updatedAtTimestamp"])
         ),
