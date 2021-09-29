@@ -91,6 +91,7 @@ class DistributorController(object):
             from_block=from_block,
             to_block=to_block,
             unclaimed_rewards=unclaimed_rewards,
+            uniswap_v3_pools=uniswap_v3_pools,
         )
 
         # calculate reward distributions with coroutines

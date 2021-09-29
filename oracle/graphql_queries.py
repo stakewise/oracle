@@ -35,6 +35,7 @@ VOTING_PARAMETERS_QUERY = gql(
         rewardsUpdatedAtBlock
       }
       rewardEthTokens(block: { number: $block_number }) {
+        totalRewards
         distributorPeriodReward
         protocolPeriodReward
         updatedAtBlock
@@ -144,7 +145,7 @@ ONE_TIME_DISTRIBUTIONS_QUERY = gql(
         id
         token
         origin
-        rewards
+        rewardsLink
         amount
         distributedAtBlock
       }
@@ -274,19 +275,32 @@ SWISE_HOLDERS_QUERY = gql(
 """
 )
 
-OPERATORS_QUERY = gql(
+OPERATORS_REWARDS_QUERY = gql(
     """
-    query getOperators($block_number: Int) {
-      operators(
-        block: { number: $block_number }
-        orderBy: validatorsCount
-        orderDirection: asc
-      ) {
+    query getOperatorsRewards($block_number: Int) {
+      operators(block: { number: $block_number }) {
         id
         validatorsCount
         revenueShare
         distributorPoints
+        updatedAtBlock
+      }
+    }
+"""
+)
+
+OPERATORS_QUERY = gql(
+    """
+    query getOperators($block_number: Int, $min_collateral: BigInt) {
+      operators(
+        block: { number: $block_number }
+        where: { collateral_ge: $min_collateral }
+        orderBy: validatorsCount
+        orderDirection: asc
+      ) {
+        id
         initializeMerkleProofs
+        collateral
         depositDataIndex
       }
     }
@@ -301,6 +315,7 @@ PARTNERS_QUERY = gql(
         contributedAmount
         revenueShare
         distributorPoints
+        updatedAtBlock
       }
     }
 """

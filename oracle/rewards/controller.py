@@ -124,6 +124,15 @@ class RewardsController(object):
             )
         logger.info(log_msg)
 
+        if total_rewards < voting_params["total_rewards"]:
+            # rewards were reduced -> don't mint new ones
+            logger.warning(
+                f"Total rewards decreased since the previous update:"
+                f" current={pretty_total_rewards},"
+                f' previous={format_ether(voting_params["total_rewards"])}'
+            )
+            total_rewards = voting_params["total_rewards"]
+
         # submit vote
         logger.info(
             f"Submitting rewards vote:"

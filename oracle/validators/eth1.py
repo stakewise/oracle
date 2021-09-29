@@ -12,6 +12,8 @@ from oracle.settings import WITHDRAWAL_CREDENTIALS
 from .ipfs import get_validator_deposit_data_public_key
 from .types import Validator
 
+INITIALIZE_DEPOSIT = Web3.toWei(1, "ether")
+
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def select_validator(block_number: BlockNumber) -> Union[None, Validator]:
@@ -20,12 +22,13 @@ async def select_validator(block_number: BlockNumber) -> Union[None, Validator]:
         query=OPERATORS_QUERY,
         variables=dict(
             block_number=block_number,
+            min_collateral=INITIALIZE_DEPOSIT,
         ),
     )
     operators = result["operators"]
     for operator in operators:
         merkle_proofs = operator["initializeMerkleProofs"]
-        if not merkle_proofs:
+        if not merkle_proofs or int(operator["collateral"]) < INITIALIZE_DEPOSIT:
             continue
 
         operator_address = Web3.toChecksumAddress(operator["id"])

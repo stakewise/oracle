@@ -12,7 +12,7 @@ from oracle.graphql_queries import (
     DISABLED_STAKER_ACCOUNTS_QUERY,
     DISTRIBUTOR_CLAIMED_ACCOUNTS_QUERY,
     ONE_TIME_DISTRIBUTIONS_QUERY,
-    OPERATORS_QUERY,
+    OPERATORS_REWARDS_QUERY,
     PARTNERS_QUERY,
     PERIODIC_DISTRIBUTIONS_QUERY,
     SWISE_HOLDERS_QUERY,
@@ -280,7 +280,7 @@ async def get_swise_holders(
     for account, account_points in list(points.items()):
         if account_points < min_swise_holding_points:
             del points[account]
-            total_points -= points
+            total_points -= account_points
 
     return Balances(total_supply=total_points, balances=points)
 
@@ -293,7 +293,7 @@ async def get_operators_rewards(
 ) -> Tuple[Rewards, Wei]:
     """Fetches operators rewards."""
     result: Dict = await execute_sw_gql_query(
-        query=OPERATORS_QUERY,
+        query=OPERATORS_REWARDS_QUERY,
         variables=dict(
             block_number=to_block,
         ),
@@ -484,7 +484,7 @@ async def get_one_time_rewards(
         rewards: Rewards = {}
         try:
             allocated_rewards = get_one_time_rewards_allocations(
-                distribution["rewards"]
+                distribution["rewardsLink"]
             )
             for beneficiary, amount in allocated_rewards.items():
                 if beneficiary == EMPTY_ADDR_HEX:
