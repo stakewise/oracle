@@ -86,6 +86,9 @@ VOTING_TIMEOUT: int = int(environ.get("VOTING_TIMEOUT", "3600"))
 # ~1 hour with block time of 13 seconds
 SYNC_BLOCKS_DELAY: int = int(environ.get("SYNC_BLOCKS_DELAY", "277"))
 
+# number of ETH2 epochs that won't be possible to fetch from the node starting from the current epoch
+TOO_FAR_EPOCHS_SPAN: int = int(environ.get("TOO_FAR_EPOCHS_NUMBER", "15"))
+
 # maximum gas spent on oracle vote
 ORACLE_VOTE_GAS_LIMIT: Wei = Wei(int(environ.get("ORACLE_VOTE_GAS_LIMIT", "250000")))
 
