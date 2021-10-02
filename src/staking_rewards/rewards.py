@@ -1,4 +1,5 @@
 import logging
+import time
 from typing import Set
 
 from eth_typing.bls import BLSPubkey
@@ -155,11 +156,6 @@ class Rewards(object):
             # skip updating if the time hasn't come yet
             return
 
-        # fetch pool validator BLS public keys
-        public_keys: Set[BLSPubkey] = get_pool_validator_public_keys(
-            pool_contract=self.pool, block_number=next_sync_block_number
-        )
-
         # calculate finalized epoch to fetch validator balances at
         next_sync_timestamp: Timestamp = get_block(
             w3=self.w3, block_number=next_sync_block_number
@@ -174,6 +170,20 @@ class Rewards(object):
         logger.info(
             f"Voting for new total rewards with parameters:"
             f" block number={next_sync_block_number}, epoch={epoch}"
+        )
+        current_epoch: int = (
+            int((int(time.time()) - self.genesis_timestamp) / self.seconds_per_epoch)
+            - ETH2_CONFIRMATION_EPOCHS
+        )
+
+        if epoch < current_epoch - 15:
+            # Wait for next update round as the required epoch is too far behind
+            logger.info(f'Waiting for the next rewards update...')
+            return
+
+        # fetch pool validator BLS public keys
+        public_keys: Set[BLSPubkey] = get_pool_validator_public_keys(
+            pool_contract=self.pool, block_number=next_sync_block_number
         )
 
         # fetch activated validators from the beacon chain
