@@ -179,7 +179,7 @@ class Rewards(object):
 
         if epoch < current_epoch - TOO_FAR_EPOCHS_SPAN:
             # Wait for next update round as the required epoch is too far behind
-            logger.info(f"Waiting for the next rewards update...")
+            logger.info("Waiting for the next rewards update...")
             return
 
         # fetch pool validator BLS public keys
