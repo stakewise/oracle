@@ -172,9 +172,8 @@ class Rewards(object):
             f"Voting for new total rewards with parameters:"
             f" block number={next_sync_block_number}, epoch={epoch}"
         )
-        current_epoch: int = (
-            int((int(time.time()) - self.genesis_timestamp) / self.seconds_per_epoch)
-            - ETH2_CONFIRMATION_EPOCHS
+        current_epoch: int = int(
+            (int(time.time()) - self.genesis_timestamp) / self.seconds_per_epoch
         )
 
         if epoch < current_epoch - TOO_FAR_EPOCHS_SPAN:
