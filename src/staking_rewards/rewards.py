@@ -23,6 +23,7 @@ from src.settings import (
     SYNC_BLOCKS_DELAY,
     ETH1_CONFIRMATION_BLOCKS,
     ETH2_CONFIRMATION_EPOCHS,
+    TOO_FAR_EPOCHS_SPAN,
 )
 from src.staking_rewards.utils import (
     get_validator_stub,
@@ -176,7 +177,7 @@ class Rewards(object):
             - ETH2_CONFIRMATION_EPOCHS
         )
 
-        if epoch < current_epoch - 15:
+        if epoch < current_epoch - TOO_FAR_EPOCHS_SPAN:
             # Wait for next update round as the required epoch is too far behind
             logger.info(f'Waiting for the next rewards update...')
             return
