@@ -488,7 +488,7 @@ def get_balancer_vault_pool_shares(
     transport = RequestsHTTPTransport(url=subgraph_url)
 
     # create a GraphQL client using the defined transport
-    client = Client(transport=transport, fetch_schema_from_transport=True)
+    client = Client(transport=transport, fetch_schema_from_transport=False)
 
     # provide a GraphQL query
     query = gql(
@@ -546,7 +546,7 @@ def get_balancer_pool_balances(
     transport = RequestsHTTPTransport(url=subgraph_url)
 
     # create a GraphQL client using the defined transport
-    client = Client(transport=transport, fetch_schema_from_transport=True)
+    client = Client(transport=transport, fetch_schema_from_transport=False)
 
     # provide a GraphQL query
     query = gql(
@@ -638,7 +638,7 @@ def get_uniswap_v2_balances(
     transport = RequestsHTTPTransport(url=subgraph_url)
 
     # create a GraphQL client using the defined transport
-    client = Client(transport=transport, fetch_schema_from_transport=True)
+    client = Client(transport=transport, fetch_schema_from_transport=False)
 
     # provide a GraphQL query
     query = gql(
@@ -731,7 +731,7 @@ def get_uniswap_v3_balances(
     transport = RequestsHTTPTransport(url=subgraph_url)
 
     # create a GraphQL client using the defined transport
-    client = Client(transport=transport, fetch_schema_from_transport=True)
+    client = Client(transport=transport, fetch_schema_from_transport=False)
 
     # fetch pool current tick and token addresses
     query = gql(
@@ -857,7 +857,7 @@ def get_uniswap_v3_staked_eth_balances(
     transport = RequestsHTTPTransport(url=subgraph_url)
 
     # create a GraphQL client using the defined transport
-    client = Client(transport=transport, fetch_schema_from_transport=True)
+    client = Client(transport=transport, fetch_schema_from_transport=False)
 
     # fetch pool current tick and token addresses
     query = gql(
