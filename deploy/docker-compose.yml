@@ -1,0 +1,25 @@
+version: '3.1'
+
+volumes:
+  ipfs:
+    driver: local
+
+services:
+  ipfs:
+    image: ipfs/go-ipfs:v0.10.0
+    restart: always
+    ports:
+      - '5001:5001'
+    volumes:
+      - ipfs:/data/ipfs
+      - ./ipfs-entrypoint.sh:/usr/local/bin/start_ipfs
+
+  oracle:
+    build:
+      context: ./../
+      dockerfile: Dockerfile
+    restart: "no"
+    env_file:
+      - .env
+    depends_on:
+      - ipfs

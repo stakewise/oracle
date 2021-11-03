@@ -1,0 +1,24 @@
+version: '3.1'
+
+volumes:
+  lighthouse:
+    driver: local
+
+services:
+  lighthouse:
+    image: sigp/lighthouse:v2.0.1
+    restart: always
+    ports:
+      - 4000:4000
+    command:
+      - lighthouse
+      - --network
+      - mainnet
+      - beacon
+      - --http
+      - --http-address
+      - 0.0.0.0
+      - --eth1-endpoints
+      - http://geth:8545
+    volumes:
+      - lighthouse:/root/.lighthouse
