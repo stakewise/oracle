@@ -32,6 +32,8 @@ services:
     build:
       context: ../../subgraphs/
       dockerfile: Dockerfile
+      args:
+        NETWORK: "goerli"
     env_file:
       - .env
     restart: "no"
