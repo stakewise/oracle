@@ -18,7 +18,7 @@ services:
     build:
       context: ./../
       dockerfile: Dockerfile
-    restart: "no"
+    restart: always
     env_file:
       - .env
     depends_on:
