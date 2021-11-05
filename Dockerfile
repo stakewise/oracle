@@ -62,5 +62,8 @@ COPY --from=builder-base $PYSETUP_PATH $PYSETUP_PATH
 # Copy source code
 COPY . ./
 
+# set env
+ENV PYTHONPATH="${PYTHONPATH}:/app"
+
 # Start application
-ENTRYPOINT ["python", "main.py"]
+CMD ["python", "oracle/main.py"]

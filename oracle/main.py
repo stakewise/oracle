@@ -1,16 +1,18 @@
 import asyncio
 import logging
 import signal
+import threading
 from typing import Any
 
 import aiohttp
 
 from oracle.distributor.controller import DistributorController
 from oracle.eth1 import check_oracle_account, get_finalized_block, get_voting_parameters
+from oracle.health_server import aiohttp_server, run_server
 from oracle.ipfs import check_or_create_ipns_keys
 from oracle.rewards.controller import RewardsController
 from oracle.rewards.eth2 import get_finality_checkpoints, get_genesis
-from oracle.settings import LOG_LEVEL, PROCESS_INTERVAL
+from oracle.settings import ENABLE_HEALTH_SERVER, LOG_LEVEL, PROCESS_INTERVAL
 from oracle.validators.controller import ValidatorsController
 
 logging.basicConfig(
@@ -98,7 +100,10 @@ async def main() -> None:
                 current_block_number=current_block_number,
             ),
             # finalizes validators
-            validators_controller.finalize(voting_parameters["finalize_validator"]),
+            validators_controller.finalize(
+                voting_params=voting_parameters["finalize_validator"],
+                current_block_number=current_block_number,
+            ),
         )
         # wait until next processing time
         await asyncio.sleep(PROCESS_INTERVAL)
@@ -107,4 +112,7 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
+    if ENABLE_HEALTH_SERVER:
+        t = threading.Thread(target=run_server, args=(aiohttp_server(),))
+        t.start()
     asyncio.run(main())

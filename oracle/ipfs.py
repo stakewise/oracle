@@ -9,7 +9,7 @@ from web3 import Web3
 from .distributor.types import DistributorVote
 from .eth1 import oracle
 from .rewards.types import RewardsVote
-from .settings import IPFS_ENDPOINT, KEEPER_ORACLES_SOURCE_URL
+from .settings import IPFS_ENDPOINT, KEEPER_SOURCE_URL
 from .validators.types import ValidatorVote
 
 logger = logging.getLogger(__name__)
@@ -104,8 +104,7 @@ def check_or_create_ipns_keys() -> IPNSKeys:
 
         logger.info(
             f"NB! The keeper must be aware of the IPNS IDs to aggregate the votes from your oracle."
-            f" Please update {KEEPER_ORACLES_SOURCE_URL} with"
-            f" oracle address={oracle.address} and IPNS IDs from the above"
+            f" Please update {KEEPER_SOURCE_URL} with IPNS IDs from the above"
         )
 
         return IPNSKeys(

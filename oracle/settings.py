@@ -16,8 +16,8 @@ NETWORK = config(
 
 IPFS_ENDPOINT = config("IPFS_ENDPOINT", default=DEFAULT_ADDR)
 
-KEEPER_ORACLES_SOURCE_URL = config(
-    "KEEPER_ORACLES_SOURCE_URL", default="https://github.com/stakewise/keeper/README.md"
+KEEPER_SOURCE_URL = config(
+    "KEEPER_SOURCE_URL", default="https://github.com/stakewise/keeper"
 )
 
 ETH2_ENDPOINT = config("ETH2_ENDPOINT", default="http://localhost:3501")
@@ -25,6 +25,11 @@ ETH2_ENDPOINT = config("ETH2_ENDPOINT", default="http://localhost:3501")
 ORACLE_PRIVATE_KEY = config("ORACLE_PRIVATE_KEY")
 
 PROCESS_INTERVAL = config("PROCESS_INTERVAL", default=180, cast=int)
+
+# health server settings
+ENABLE_HEALTH_SERVER = config("ENABLE_HEALTH_SERVER", default=False, cast=bool)
+HEALTH_SERVER_PORT = config("HEALTH_SERVER_PORT", default=8080, cast=int)
+HEALTH_SERVER_HOST = config("HEALTH_SERVER_HOST", default="127.0.0.1", cast=str)
 
 # required ETH1 confirmation blocks
 ETH1_CONFIRMATION_BLOCKS: int = config("ETH1_CONFIRMATION_BLOCKS", default=15, cast=int)
