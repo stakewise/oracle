@@ -6,7 +6,11 @@ from web3.types import Wei
 
 from oracle.ipfs import submit_ipns_vote
 
-from .eth1 import can_finalize_validator, select_validator
+from .eth1 import (
+    can_finalize_validator,
+    get_finalize_validator_deposit_data,
+    select_validator,
+)
 from .ipfs import get_last_vote_public_key
 from .types import (
     FinalizeValidatorVotingParameters,
@@ -42,26 +46,24 @@ class ValidatorsController(object):
 
         # select next validator
         # TODO: implement scoring system based on the operators performance
-        validator = await select_validator(current_block_number)
-        if validator is None:
+        validator_deposit_data = await select_validator(current_block_number)
+        if validator_deposit_data is None:
             logger.warning("Failed to find the next validator to initialize")
             return
 
-        public_key = validator["public_key"]
+        public_key = validator_deposit_data["public_key"]
         if self.last_vote_public_key == public_key:
             # already voted for the validator initialization
             return
 
         # submit vote
         current_nonce = voting_params["validators_nonce"]
-        operator = validator["operator"]
+        operator = validator_deposit_data["operator"]
         encoded_data: bytes = w3.codec.encode_abi(
             ["uint256", "bytes", "address"],
             [current_nonce, public_key, operator],
         )
-        vote = ValidatorVote(
-            nonce=current_nonce, operator=operator, public_key=public_key
-        )
+        vote = ValidatorVote(deposit_data=validator_deposit_data, nonce=current_nonce)
         logger.info(
             f"Voting for the next validator initialization: operator={operator}, public key={public_key}"
         )
@@ -77,7 +79,11 @@ class ValidatorsController(object):
         # skip voting for the same validator in the next check
         self.last_vote_public_key = public_key
 
-    async def finalize(self, voting_params: FinalizeValidatorVotingParameters) -> None:
+    async def finalize(
+        self,
+        voting_params: FinalizeValidatorVotingParameters,
+        current_block_number: BlockNumber,
+    ) -> None:
         """Decides on the operator to host the next validator and submits the vote to the IPFS."""
         current_public_key = voting_params["public_key"]
         if current_public_key in (None, self.last_finalized_public_key):
@@ -99,9 +105,10 @@ class ValidatorsController(object):
             ["uint256", "bytes", "address"],
             [current_nonce, current_public_key, operator],
         )
-        vote = ValidatorVote(
-            nonce=current_nonce, operator=operator, public_key=current_public_key
+        validator_deposit_data = await get_finalize_validator_deposit_data(
+            block_number=current_block_number, operator_address=operator
         )
+        vote = ValidatorVote(deposit_data=validator_deposit_data, nonce=current_nonce)
         logger.info(
             f"Voting for the next validator finalization: operator={operator}, public key={current_public_key}"
         )

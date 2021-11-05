@@ -289,18 +289,33 @@ OPERATORS_REWARDS_QUERY = gql(
 """
 )
 
-OPERATORS_QUERY = gql(
+INITIALIZE_OPERATORS_QUERY = gql(
     """
     query getOperators($block_number: Int, $min_collateral: BigInt) {
       operators(
         block: { number: $block_number }
-        where: { collateral_ge: $min_collateral }
+        where: { collateral_ge: $min_collateral, committed: true }
         orderBy: validatorsCount
         orderDirection: asc
       ) {
         id
         initializeMerkleProofs
         collateral
+        depositDataIndex
+      }
+    }
+"""
+)
+
+FINALIZE_OPERATOR_QUERY = gql(
+    """
+    query getOperators($block_number: Int, $address: ID) {
+      operators(
+        block: { number: $block_number }
+        where: { id: $address }
+      ) {
+        id
+        finalizeMerkleProofs
         depositDataIndex
       }
     }
@@ -328,6 +343,7 @@ VALIDATOR_REGISTRATIONS_QUERY = gql(
         block: { number: $block_number }
         where: { id: $public_key }
       ) {
+        id
         withdrawalCredentials
       }
     }

@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 async def execute_sw_gql_query(query: DocumentNode, variables: Dict) -> Dict:
     """Executes GraphQL query."""
     transport = AIOHTTPTransport(url=STAKEWISE_SUBGRAPH_URL)
-    async with Client(transport=transport, fetch_schema_from_transport=True) as session:
+    async with Client(transport=transport) as session:
         return await session.execute(query, variable_values=variables)
 
 
@@ -27,7 +27,7 @@ async def execute_sw_gql_query(query: DocumentNode, variables: Dict) -> Dict:
 async def execute_uniswap_v3_gql_query(query: DocumentNode, variables: Dict) -> Dict:
     """Executes GraphQL query."""
     transport = AIOHTTPTransport(url=UNISWAP_V3_SUBGRAPH_URL)
-    async with Client(transport=transport, fetch_schema_from_transport=True) as session:
+    async with Client(transport=transport) as session:
         return await session.execute(query, variable_values=variables)
 
 
@@ -35,5 +35,5 @@ async def execute_uniswap_v3_gql_query(query: DocumentNode, variables: Dict) -> 
 async def execute_ethereum_gql_query(query: DocumentNode, variables: Dict) -> Dict:
     """Executes GraphQL query."""
     transport = AIOHTTPTransport(url=ETHEREUM_SUBGRAPH_URL)
-    async with Client(transport=transport, fetch_schema_from_transport=True) as session:
+    async with Client(transport=transport) as session:
         return await session.execute(query, variable_values=variables)
