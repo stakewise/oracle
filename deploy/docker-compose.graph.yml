@@ -33,7 +33,7 @@ services:
       context: ../../subgraphs/
       dockerfile: Dockerfile
       args:
-        NETWORK: "goerli"
+        NETWORK: "mainnet"
     env_file:
       - .env
     restart: "no"
