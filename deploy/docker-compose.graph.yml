@@ -6,7 +6,7 @@ volumes:
 
 services:
   graph-node:
-    image: graphprotocol/graph-node
+    image: graphprotocol/graph-node:v0.24.2
     restart: always
     ports:
       - '8000:8000'
@@ -19,7 +19,7 @@ services:
     depends_on:
       - postgres
   postgres:
-    image: postgres
+    image: postgres:14.0
     restart: always
     ports:
       - '5432:5432'

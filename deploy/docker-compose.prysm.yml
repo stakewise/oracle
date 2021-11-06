@@ -6,7 +6,7 @@ volumes:
 
 services:
   prysm:
-    image: gcr.io/prysmaticlabs/prysm/beacon-chain:stable
+    image: gcr.io/prysmaticlabs/prysm/beacon-chain:v2.0.2
     restart: always
     ports:
       - 4000:4000
