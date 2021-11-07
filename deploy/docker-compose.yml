@@ -10,6 +10,12 @@ services:
     restart: always
     ports:
       - '5001:5001'
+    environment:
+      - .env
+    ulimits:
+      nofile:
+        soft: 8192
+        hard: 8192
     volumes:
       - ipfs:/data/ipfs
       - ./ipfs-entrypoint.sh:/usr/local/bin/start_ipfs

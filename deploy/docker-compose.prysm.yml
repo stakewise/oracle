@@ -15,6 +15,7 @@ services:
       - --rpc-host=0.0.0.0
       - --monitoring-host=0.0.0.0
       - --http-web3provider=http://geth:8545
+      - --slots-per-archive-point=64
       - --accept-terms-of-use
     volumes:
       - prysm:/data
