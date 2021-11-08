@@ -10,7 +10,7 @@ services:
     restart: always
     ports:
       - '5001:5001'
-    environment:
+    env_file:
       - .env
     ulimits:
       nofile:
