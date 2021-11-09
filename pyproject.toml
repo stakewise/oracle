@@ -14,6 +14,7 @@ py-ecc = "==5.2.0"
 gql = {version = "3.0.0b0", allow-prereleases = true, extras = ["aiohttp"]}
 backoff = "==1.11.1"
 aiohttp = {version = "==3.7.4.post0", extras = ["speedups"]}
+boto3 = {version = "==1.19.12", extras = ["awscrt"]}
 
 [tool.poetry.dev-dependencies]
 mypy = "==0.910"

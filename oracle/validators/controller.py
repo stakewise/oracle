@@ -1,17 +1,20 @@
 import logging
 
-from eth_typing import BlockNumber
+from eth_typing import BlockNumber, HexStr
 from web3 import Web3
 from web3.types import Wei
 
-from oracle.ipfs import submit_ipns_vote
+from common.settings import (
+    FINALIZE_VALIDATOR_VOTE_FILENAME,
+    INIT_VALIDATOR_VOTE_FILENAME,
+)
 
+from ..eth1 import submit_vote
 from .eth1 import (
     can_finalize_validator,
     get_finalize_validator_deposit_data,
     select_validator,
 )
-from .ipfs import get_last_vote_public_key
 from .types import (
     FinalizeValidatorVotingParameters,
     InitializeValidatorVotingParameters,
@@ -25,13 +28,10 @@ w3 = Web3()
 class ValidatorsController(object):
     """Submits new validators registrations to the IPFS."""
 
-    def __init__(self, initialize_ipns_key_id: str, finalize_ipns_key_id: str) -> None:
-        self.initialize_ipns_key_id = initialize_ipns_key_id
-        self.finalize_ipns_key_id = finalize_ipns_key_id
+    def __init__(self) -> None:
         self.validator_deposit: Wei = Web3.toWei(32, "ether")
-
-        self.last_vote_public_key = get_last_vote_public_key(initialize_ipns_key_id)
-        self.last_finalized_public_key = get_last_vote_public_key(finalize_ipns_key_id)
+        self.last_vote_public_key = None
+        self.last_finalized_public_key = None
 
     async def initialize(
         self,
@@ -63,18 +63,17 @@ class ValidatorsController(object):
             ["uint256", "bytes", "address"],
             [current_nonce, public_key, operator],
         )
-        vote = ValidatorVote(deposit_data=validator_deposit_data, nonce=current_nonce)
+        vote = ValidatorVote(
+            signature=HexStr(""), nonce=current_nonce, **validator_deposit_data
+        )
         logger.info(
             f"Voting for the next validator initialization: operator={operator}, public key={public_key}"
         )
 
-        ipns_record = submit_ipns_vote(
-            encoded_data=encoded_data, vote=vote, key_id=self.initialize_ipns_key_id
+        submit_vote(
+            encoded_data=encoded_data, vote=vote, name=INIT_VALIDATOR_VOTE_FILENAME
         )
-        logger.info(
-            f"Submitted validator initialization vote:"
-            f' ipfs={ipns_record["ipfs_id"]}, ipns={ipns_record["ipns_id"]}'
-        )
+        logger.info("Submitted validator initialization vote")
 
         # skip voting for the same validator in the next check
         self.last_vote_public_key = public_key
@@ -108,17 +107,17 @@ class ValidatorsController(object):
         validator_deposit_data = await get_finalize_validator_deposit_data(
             block_number=current_block_number, operator_address=operator
         )
-        vote = ValidatorVote(deposit_data=validator_deposit_data, nonce=current_nonce)
+        vote = ValidatorVote(
+            signature=HexStr(""), nonce=current_nonce, **validator_deposit_data
+        )
         logger.info(
             f"Voting for the next validator finalization: operator={operator}, public key={current_public_key}"
         )
 
-        ipns_record = submit_ipns_vote(
-            encoded_data=encoded_data, vote=vote, key_id=self.finalize_ipns_key_id
+        submit_vote(
+            encoded_data=encoded_data, vote=vote, path=FINALIZE_VALIDATOR_VOTE_FILENAME
         )
-        logger.info(
-            f"Submitted validator finalization vote:"
-            f' ipfs={ipns_record["ipfs_id"]}, ipns={ipns_record["ipns_id"]}'
-        )
+        logger.info("Submitted validator finalization vote")
 
+        # skip voting for the same validator in the next check
         self.last_finalized_public_key = current_public_key

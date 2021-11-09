@@ -474,7 +474,7 @@ async def get_one_time_rewards(
     final_rewards: Rewards = {}
     for distribution in distributions:
         distributed_at_block = BlockNumber(int(distribution["distributedAtBlock"]))
-        if not from_block < distributed_at_block <= to_block:
+        if not (from_block < distributed_at_block <= to_block):
             continue
 
         total_amount = int(distribution["amount"])
@@ -483,7 +483,7 @@ async def get_one_time_rewards(
         origin = Web3.toChecksumAddress(distribution["origin"])
         rewards: Rewards = {}
         try:
-            allocated_rewards = get_one_time_rewards_allocations(
+            allocated_rewards = await get_one_time_rewards_allocations(
                 distribution["rewardsLink"]
             )
             for beneficiary, amount in allocated_rewards.items():

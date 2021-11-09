@@ -1,14 +1,16 @@
 import asyncio
 import logging
 
+from eth_typing import HexStr
 from web3 import Web3
 
-from oracle.ipfs import submit_ipns_vote
+from common.settings import DISTRIBUTOR_VOTE_FILENAME
 from oracle.settings import (
     REWARD_ETH_TOKEN_CONTRACT_ADDRESS,
     SWISE_TOKEN_CONTRACT_ADDRESS,
 )
 
+from ..eth1 import submit_vote
 from .eth1 import (
     get_disabled_stakers_reward_eth_distributions,
     get_distributor_claimed_accounts,
@@ -31,9 +33,8 @@ w3 = Web3()
 class DistributorController(object):
     """Updates merkle root and submits proofs to the IPFS."""
 
-    def __init__(self, ipns_key_id: str) -> None:
+    def __init__(self) -> None:
         self.last_to_block = None
-        self.ipns_key_id = ipns_key_id
 
     async def process(self, voting_params: DistributorVotingParameters) -> None:
         """Submits vote for the new merkle root and merkle proofs to the IPFS."""
@@ -80,7 +81,7 @@ class DistributorController(object):
             claimed_accounts = await get_distributor_claimed_accounts(last_merkle_root)
 
             # calculate unclaimed rewards
-            unclaimed_rewards = get_unclaimed_balances(
+            unclaimed_rewards = await get_unclaimed_balances(
                 claimed_accounts=claimed_accounts,
                 merkle_proofs=last_merkle_proofs,
             )
@@ -146,7 +147,7 @@ class DistributorController(object):
         merkle_root, claims = calculate_merkle_root(final_rewards)
         logger.info(f"Generated new merkle root: {merkle_root}")
 
-        claims_link = upload_claims(claims)
+        claims_link = await upload_claims(claims)
         logger.info(f"Claims uploaded to: {claims_link}")
 
         # submit vote
@@ -155,18 +156,14 @@ class DistributorController(object):
             [current_nonce, claims_link, merkle_root],
         )
         vote = DistributorVote(
-            rewards_updated_at_block=to_block,
+            signature=HexStr(""),
             nonce=current_nonce,
             merkle_root=merkle_root,
             merkle_proofs=claims_link,
         )
-        ipns_record = submit_ipns_vote(
-            encoded_data=encoded_data, vote=vote, key_id=self.ipns_key_id
+        submit_vote(
+            encoded_data=encoded_data, vote=vote, name=DISTRIBUTOR_VOTE_FILENAME
         )
-        logger.info(
-            f"Distributor vote has been successfully submitted:"
-            f" ipfs={ipns_record['ipfs_id']},"
-            f" ipns={ipns_record['ipns_id']}"
-        )
+        logger.info("Distributor vote has been successfully submitted")
 
         self.last_to_block = to_block

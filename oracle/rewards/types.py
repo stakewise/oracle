@@ -10,9 +10,10 @@ class RewardsVotingParameters(TypedDict):
     rewards_updated_at_timestamp: Timestamp
 
 
-class RewardsVote(TypedDict):
-    timestamp: int
+class RewardVote(TypedDict):
     nonce: int
+    signature: HexStr
+
     activated_validators: int
     total_rewards: str
 

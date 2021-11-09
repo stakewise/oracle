@@ -40,7 +40,7 @@ class Claim(TypedDict):
     reward_tokens: List[ChecksumAddress]
     origins: List[List[ChecksumAddress]]
     values: List[List[str]]
-    proof: List[HexStr]
+    proof: str
 
 
 class UniswapV3Pools(TypedDict):
@@ -50,8 +50,8 @@ class UniswapV3Pools(TypedDict):
 
 
 class DistributorVote(TypedDict):
-    rewards_updated_at_block: int
     nonce: int
+    signature: HexStr
     merkle_root: HexStr
     merkle_proofs: str
 

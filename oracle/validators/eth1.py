@@ -64,7 +64,7 @@ async def select_validator(
                 public_key=selected_deposit_data["public_key"],
                 withdrawal_credentials=selected_deposit_data["withdrawal_credentials"],
                 deposit_data_root=selected_deposit_data["deposit_data_root"],
-                signature=selected_deposit_data["signature"],
+                deposit_data_signature=selected_deposit_data["signature"],
                 proof=selected_deposit_data["proof"],
             )
 
@@ -92,7 +92,7 @@ async def get_finalize_validator_deposit_data(
         public_key=selected_deposit_data["public_key"],
         withdrawal_credentials=selected_deposit_data["withdrawal_credentials"],
         deposit_data_root=selected_deposit_data["deposit_data_root"],
-        signature=selected_deposit_data["signature"],
+        deposit_data_signature=selected_deposit_data["signature"],
         proof=selected_deposit_data["proof"],
     )
 
