@@ -22,7 +22,7 @@ async def health(request):
             oracles=params.oracles,
         )
 
-        # 3. Check whether there are not submitted votes
+        # 3. Check whether there are no submitted votes
         counter = Counter(
             [
                 (vote["total_rewards"], vote["activated_validators"])

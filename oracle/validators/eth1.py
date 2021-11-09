@@ -108,7 +108,7 @@ async def can_initialize_validator(
     )
     registrations = result["validatorRegistrations"]
 
-    return False if registrations else True
+    return len(registrations) == 0
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
