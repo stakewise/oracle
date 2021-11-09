@@ -6,13 +6,14 @@ from typing import Any
 
 import aiohttp
 
+from common.health_server import create_health_server_runner, start_health_server
+from common.settings import ENABLE_HEALTH_SERVER, LOG_LEVEL
 from oracle.distributor.controller import DistributorController
 from oracle.eth1 import check_oracle_account, get_finalized_block, get_voting_parameters
-from oracle.health_server import aiohttp_server, run_server
-from oracle.ipfs import check_or_create_ipns_keys
+from oracle.health_server import oracle_routes
 from oracle.rewards.controller import RewardsController
 from oracle.rewards.eth2 import get_finality_checkpoints, get_genesis
-from oracle.settings import ENABLE_HEALTH_SERVER, LOG_LEVEL, PROCESS_INTERVAL
+from oracle.settings import PROCESS_INTERVAL
 from oracle.validators.controller import ValidatorsController
 
 logging.basicConfig(
@@ -21,6 +22,7 @@ logging.basicConfig(
     level=LOG_LEVEL,
 )
 logging.getLogger("backoff").addHandler(logging.StreamHandler())
+logging.getLogger("gql.transport.aiohttp").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
@@ -53,9 +55,6 @@ async def main() -> None:
     # check ETH2 API connection
     await get_finality_checkpoints(session)
 
-    # check whether oracle has IPNS keys or create new ones
-    ipns_keys = check_or_create_ipns_keys()
-
     # check whether oracle is part of the oracles set
     await check_oracle_account()
 
@@ -66,17 +65,10 @@ async def main() -> None:
     genesis = await get_genesis(session)
 
     rewards_controller = RewardsController(
-        aiohttp_session=session,
-        genesis_timestamp=int(genesis["genesis_time"]),
-        ipns_key_id=ipns_keys["rewards_key_id"],
+        aiohttp_session=session, genesis_timestamp=int(genesis["genesis_time"])
     )
-    distributor_controller = DistributorController(
-        ipns_key_id=ipns_keys["distributor_key_id"]
-    )
-    validators_controller = ValidatorsController(
-        initialize_ipns_key_id=ipns_keys["validator_initialize_key_id"],
-        finalize_ipns_key_id=ipns_keys["validator_finalize_key_id"],
-    )
+    distributor_controller = DistributorController()
+    validators_controller = ValidatorsController()
 
     while not interrupt_handler.exit:
         # fetch current finalized ETH1 block data
@@ -113,6 +105,9 @@ async def main() -> None:
 
 if __name__ == "__main__":
     if ENABLE_HEALTH_SERVER:
-        t = threading.Thread(target=run_server, args=(aiohttp_server(),))
+        t = threading.Thread(
+            target=start_health_server,
+            args=(create_health_server_runner(oracle_routes),),
+        )
         t.start()
     asyncio.run(main())

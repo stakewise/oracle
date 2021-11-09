@@ -150,7 +150,7 @@ def calculate_merkle_root(rewards: Rewards) -> Tuple[HexStr, Claims]:
     # collect proofs
     for i, account in enumerate(accounts):
         proof: List[HexStr] = merkle_tree.get_hex_proof(merkle_elements[i])
-        claims[account]["proof"] = proof
+        claims[account]["proof"] = ",".join(proof)
 
     # calculate merkle root
     merkle_root: HexStr = merkle_tree.get_hex_root()

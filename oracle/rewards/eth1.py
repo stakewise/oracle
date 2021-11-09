@@ -1,4 +1,3 @@
-from datetime import timedelta
 from typing import Dict
 
 import backoff
@@ -8,8 +7,6 @@ from oracle.clients import execute_sw_gql_query
 from oracle.graphql_queries import FINALIZED_VALIDATORS_QUERY
 
 from .types import FinalizedValidatorsPublicKeys
-
-SYNC_PERIOD = timedelta(days=1)
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)

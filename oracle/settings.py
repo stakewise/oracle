@@ -1,43 +1,44 @@
-from decouple import Choices, config
+from datetime import timedelta
+
+from decouple import Csv, config
 from eth_typing import HexStr
-from ipfshttpclient import DEFAULT_ADDR
 from web3 import Web3
 
-LOG_LEVEL = config("LOG_LEVEL", default="INFO")
+from common.settings import GOERLI, MAINNET, NETWORK
 
-# supported networks
-MAINNET = "mainnet"
-GOERLI = "goerli"
-NETWORK = config(
-    "NETWORK",
-    default=MAINNET,
-    cast=Choices([MAINNET, GOERLI], cast=lambda net: net.lower()),
+IPFS_ENDPOINT = config("IPFS_ENDPOINT", default="/dns/ipfs.infura.io/tcp/5001/https")
+IPFS_FETCH_ENDPOINTS = config(
+    "IPFS_FETCH_ENDPOINTS",
+    cast=Csv(),
+    default="https://gateway.pinata.cloud,http://cloudflare-ipfs.com,https://ipfs.io",
 )
 
-IPFS_ENDPOINT = config("IPFS_ENDPOINT", default=DEFAULT_ADDR)
-
-KEEPER_SOURCE_URL = config(
-    "KEEPER_SOURCE_URL", default="https://github.com/stakewise/keeper"
+# extra pins to pinata for redundancy
+IPFS_PINATA_PIN_ENDPOINT = config(
+    "IPFS_PINATA_ENDPOINT", default="https://api.pinata.cloud/pinning/pinJSONToIPFS"
+)
+IPFS_PINATA_API_KEY = config("IPFS_PINATA_API_KEY", default="")
+IPFS_PINATA_SECRET_KEY = config(
+    "IPFS_PINATA_API_KEY",
+    default="",
 )
 
 ETH2_ENDPOINT = config("ETH2_ENDPOINT", default="http://localhost:3501")
 
+# credentials
 ORACLE_PRIVATE_KEY = config("ORACLE_PRIVATE_KEY")
 
+# S3 credentials
+AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")
+
 PROCESS_INTERVAL = config("PROCESS_INTERVAL", default=180, cast=int)
-
-# health server settings
-ENABLE_HEALTH_SERVER = config("ENABLE_HEALTH_SERVER", default=False, cast=bool)
-HEALTH_SERVER_PORT = config("HEALTH_SERVER_PORT", default=8080, cast=int)
-HEALTH_SERVER_HOST = config("HEALTH_SERVER_HOST", default="127.0.0.1", cast=str)
-
-# required ETH1 confirmation blocks
-ETH1_CONFIRMATION_BLOCKS: int = config("ETH1_CONFIRMATION_BLOCKS", default=15, cast=int)
 
 OPERATORS_ORIGIN_ADDRESS = config("OPERATORS_ORIGIN_ADDRESS", default="0x" + "11" * 20)
 PARTNERS_ORIGIN_ADDRESS = config("PARTNERS_ORIGIN_ADDRESS", default="0x" + "22" * 20)
 
 if NETWORK == MAINNET:
+    SYNC_PERIOD = timedelta(days=1)
     SWISE_TOKEN_CONTRACT_ADDRESS = Web3.toChecksumAddress(
         "0x48C3399719B582dD63eB5AADf12A40B4C3f52FA2"
     )
@@ -66,6 +67,7 @@ if NETWORK == MAINNET:
         default="https://api.thegraph.com/subgraphs/name/stakewise/ethereum-mainnet",
     )
 elif NETWORK == GOERLI:
+    SYNC_PERIOD = timedelta(hours=1)
     SWISE_TOKEN_CONTRACT_ADDRESS = Web3.toChecksumAddress(
         "0x0e2497aACec2755d831E4AFDEA25B4ef1B823855"
     )

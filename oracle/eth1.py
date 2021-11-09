@@ -1,24 +1,29 @@
+import json
 import logging
-from typing import Dict, List, TypedDict
+from typing import Dict, List, TypedDict, Union
 
 import backoff
 from eth_account import Account
+from eth_account.messages import encode_defunct
 from eth_account.signers.local import LocalAccount
 from web3 import Web3
 from web3.types import BlockNumber, Timestamp, Wei
 
-from .clients import execute_ethereum_gql_query, execute_sw_gql_query
-from .distributor.types import DistributorVotingParameters
+from common.settings import AWS_S3_BUCKET_NAME, ETH1_CONFIRMATION_BLOCKS
+
+from .clients import execute_ethereum_gql_query, execute_sw_gql_query, s3_client
+from .distributor.types import DistributorVote, DistributorVotingParameters
 from .graphql_queries import (
     FINALIZED_BLOCK_QUERY,
     ORACLE_QUERY,
     VOTING_PARAMETERS_QUERY,
 )
-from .rewards.types import RewardsVotingParameters
-from .settings import ETH1_CONFIRMATION_BLOCKS, ORACLE_PRIVATE_KEY
+from .rewards.types import RewardsVotingParameters, RewardVote
+from .settings import ORACLE_PRIVATE_KEY
 from .validators.types import (
     FinalizeValidatorVotingParameters,
     InitializeValidatorVotingParameters,
+    ValidatorVote,
 )
 
 logger = logging.getLogger(__name__)
@@ -132,3 +137,28 @@ async def check_oracle_account() -> None:
             f"NB! Oracle {oracle.address} is not part of the oracles set."
             f" Please create DAO proposal to include it."
         )
+
+
+@backoff.on_exception(backoff.expo, Exception, max_time=900)
+def submit_vote(
+    encoded_data: bytes,
+    vote: Union[RewardVote, DistributorVote, ValidatorVote],
+    name: str,
+) -> None:
+    """Submits vote to the votes aggregator."""
+    # generate candidate ID
+    candidate_id: bytes = Web3.keccak(primitive=encoded_data)
+    message = encode_defunct(primitive=candidate_id)
+    signed_message = oracle.sign_message(message)
+    vote["signature"] = signed_message.signature.hex()
+
+    bucket_key = f"{oracle.address}/{name}"
+    s3_client.put_object(
+        Bucket=AWS_S3_BUCKET_NAME,
+        Key=bucket_key,
+        Body=json.dumps(vote),
+        ACL="public-read",
+    )
+    s3_client.get_waiter("object_exists").wait(
+        Bucket=AWS_S3_BUCKET_NAME, Key=bucket_key
+    )

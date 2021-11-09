@@ -1,26 +1,31 @@
+import json
 import logging
 from typing import Dict
 
 import backoff
 import ipfshttpclient
+from aiohttp import ClientSession
 from eth_typing import ChecksumAddress
 
-from oracle.settings import IPFS_ENDPOINT
+from oracle.settings import (
+    IPFS_ENDPOINT,
+    IPFS_PINATA_API_KEY,
+    IPFS_PINATA_PIN_ENDPOINT,
+    IPFS_PINATA_SECRET_KEY,
+)
 
+from ..clients import ipfs_fetch
 from .types import ClaimedAccounts, Claims, Rewards
 
 logger = logging.getLogger(__name__)
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
-def get_unclaimed_balances(
+async def get_unclaimed_balances(
     merkle_proofs: str, claimed_accounts: ClaimedAccounts
 ) -> Rewards:
     """Fetches balances of previous merkle drop from IPFS and removes the accounts that have already claimed."""
-    merkle_proofs = merkle_proofs.replace("ipfs://", "").replace("/ipfs/", "")
-
-    with ipfshttpclient.connect(IPFS_ENDPOINT) as client:
-        prev_claims: Claims = client.get_json(merkle_proofs)
+    prev_claims: Claims = await ipfs_fetch(merkle_proofs)
 
     unclaimed_rewards: Rewards = {}
     for account, claim in prev_claims.items():
@@ -42,23 +47,60 @@ def get_unclaimed_balances(
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
-def get_one_time_rewards_allocations(rewards: str) -> Dict[ChecksumAddress, str]:
+async def get_one_time_rewards_allocations(rewards: str) -> Dict[ChecksumAddress, str]:
     """Fetches one time rewards from IPFS."""
-    rewards = rewards.replace("ipfs://", "").replace("/ipfs/", "")
-
-    with ipfshttpclient.connect(IPFS_ENDPOINT) as client:
-        return client.get_json(rewards)
+    return await ipfs_fetch(rewards)
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
-def upload_claims(claims: Claims) -> str:
+async def upload_claims(claims: Claims) -> str:
     """Submits claims to the IPFS and pins the file."""
     # TODO: split claims into files up to 1000 entries
-    with ipfshttpclient.connect(IPFS_ENDPOINT) as client:
-        ipfs_id = client.add_json(claims)
-        client.pin.add(ipfs_id)
+    submitted = False
 
-    if not ipfs_id.startswith("/ipfs/"):
-        ipfs_id = "/ipfs/" + ipfs_id
+    try:
+        with ipfshttpclient.connect(IPFS_ENDPOINT) as client:
+            ipfs_id1 = client.add_json(claims)
+            client.pin.add(ipfs_id1)
+            submitted = True
+    except Exception as e:
+        logger.error(e)
+        logger.error(f"Failed to submit claims to ${IPFS_ENDPOINT}")
 
-    return ipfs_id
+    if not (IPFS_PINATA_API_KEY and IPFS_PINATA_SECRET_KEY):
+        if not submitted:
+            raise RuntimeError("Failed to submit claims to IPFS")
+        return ipfs_id1
+
+    headers = {
+        "pinata_api_key": IPFS_PINATA_API_KEY,
+        "pinata_secret_api_key": IPFS_PINATA_SECRET_KEY,
+        "Content-Type": "application/json",
+    }
+
+    try:
+        async with ClientSession(headers=headers) as session:
+            response = await session.post(
+                url=IPFS_PINATA_PIN_ENDPOINT,
+                data=json.dumps({"pinataContent": claims}, sort_keys=True),
+            )
+            response.raise_for_status()
+            response = await response.json()
+            ipfs_id2 = response["IpfsHash"]
+            submitted = True
+    except:  # noqa: E722
+        pass
+
+    if not submitted:
+        raise RuntimeError("Failed to submit claims to IPFS")
+
+    if ipfs_id1 and not ipfs_id1.startswith("/ipfs/"):
+        ipfs_id1 = "/ipfs/" + ipfs_id1
+
+    if ipfs_id2 and not ipfs_id2.startswith("/ipfs/"):
+        ipfs_id2 = "/ipfs/" + ipfs_id2
+
+    if (ipfs_id1 and ipfs_id2) and not ipfs_id1 == ipfs_id2:
+        raise RuntimeError(f"Received different ipfs IDs: {ipfs_id1}, {ipfs_id2}")
+
+    return ipfs_id1
