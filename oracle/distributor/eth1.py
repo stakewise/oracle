@@ -275,8 +275,8 @@ async def get_swise_holders(
             points[account] = points.setdefault(account, 0) + account_points
             total_points += account_points
 
-    # require holding at least 1 SWISE for the max duration
-    min_swise_holding_points = Web3.toWei(1, "ether") * (to_block - from_block)
+    # require holding at least 1000 SWISE for the max duration
+    min_swise_holding_points = Web3.toWei(1000, "ether") * (to_block - from_block)
     for account, account_points in list(points.items()):
         if account_points < min_swise_holding_points:
             del points[account]
@@ -322,10 +322,10 @@ async def get_operators_rewards(
         account_points = prev_account_points + (
             validators_count * revenue_share * (to_block - updated_at_block)
         )
-        if prev_account_points <= 0:
+        if account_points <= 0:
             continue
 
-        points[account] = account_points
+        points[account] = points.get(account, 0) + account_points
         total_points += account_points
 
     if total_validators <= 0:

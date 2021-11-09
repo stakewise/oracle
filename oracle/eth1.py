@@ -152,6 +152,7 @@ def submit_vote(
     signed_message = oracle.sign_message(message)
     vote["signature"] = signed_message.signature.hex()
 
+    # TODO: support more aggregators (GCP, Azure, etc.)
     bucket_key = f"{oracle.address}/{name}"
     s3_client.put_object(
         Bucket=AWS_S3_BUCKET_NAME,

@@ -19,7 +19,7 @@ IPFS_PINATA_PIN_ENDPOINT = config(
 )
 IPFS_PINATA_API_KEY = config("IPFS_PINATA_API_KEY", default="")
 IPFS_PINATA_SECRET_KEY = config(
-    "IPFS_PINATA_API_KEY",
+    "IPFS_PINATA_SECRET_KEY",
     default="",
 )
 

@@ -179,6 +179,7 @@ def get_oracles_votes(
                 check_validator_vote,
             ),
         ]:
+            # TODO: support more aggregators (GCP, Azure, etc.)
             bucket_key = f"{oracle}/{filename}"
             try:
                 response = s3_client.get_object(
