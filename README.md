@@ -114,8 +114,8 @@ poetry run python oracle/main.py
 
 ## Keeper
 
-Keeper is responsible for aggregating votes that were submitted by all the oracles and will submit the update transaction.
-The keeper does not require any additional role in the smart contracts and can be executed by anyone.
+Keeper is an oracle that aggregates votes that were submitted by all the oracles and submits the update transaction.
+The keeper does not require any additional role, and can be executed by any of the oracles.
 
 ### Dependencies
 
@@ -154,7 +154,7 @@ poetry install --no-dev
 cat >./local.env <<EOL
 NETWORK=mainnet
 WEB3_ENDPOINT=http://localhost:3500
-KEEPER_PRIVATE_KEY=0x<private_key>
+ORACLE_PRIVATE_KEY=0x<private_key>
 EOL
 ```
 
@@ -187,7 +187,7 @@ poetry run python keeper/main.py
 | ENABLE_HEALTH_SERVER     | Defines whether to enable health server                                            | No       | True      |
 | HEALTH_SERVER_PORT       | The port where the health server will run                                          | No       | 8080      |
 | HEALTH_SERVER_HOST       | The host where the health server will run                                          | No       | 127.0.0.1 |
-| KEEPER_PRIVATE_KEY       | The ETH1 private key of the keeper                                                 | Yes      | -         |
+| ORACLE_PRIVATE_KEY       | The ETH1 private key of the oracle                                                 | Yes      | -         |
 | PROCESS_INTERVAL         | How long to wait before processing again (in seconds)                              | No       | 180       |
 | ETH1_CONFIRMATION_BLOCKS | The required number of ETH1 confirmation blocks used to fetch the data             | No       | 15        |
 | LOG_LEVEL                | The log level of the keeper                                                        | No       | INFO      |

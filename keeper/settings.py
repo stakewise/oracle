@@ -5,7 +5,7 @@ from common.settings import GOERLI, MAINNET, NETWORK
 
 WEB3_ENDPOINT = config("WEB3_ENDPOINT")
 
-KEEPER_PRIVATE_KEY = config("KEEPER_PRIVATE_KEY")
+ORACLE_PRIVATE_KEY = config("ORACLE_PRIVATE_KEY")
 
 PROCESS_INTERVAL = config("PROCESS_INTERVAL", default=180, cast=int)
 
