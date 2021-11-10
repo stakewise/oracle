@@ -7,5 +7,5 @@ route:
 receivers:
   - name: pushover
     pushover_configs:
-      - token: a8hdizrw2vrpgamamcicaxs4vj633u
-        user_key: upnnaexiimnrz14jsf1d2h8kaava32
+      - token: token
+        user_key: user_key
