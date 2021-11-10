@@ -66,4 +66,4 @@ COPY . ./
 ENV PYTHONPATH="${PYTHONPATH}:/app"
 
 # Start application
-CMD ["python", "oracle/main.py"]
+ENTRYPOINT ["python"]
