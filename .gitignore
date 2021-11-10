@@ -4,5 +4,4 @@ dist
 .mypy_cache
 .idea
 local.env
-
 *.env
