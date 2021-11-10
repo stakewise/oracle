@@ -1,0 +1,18 @@
+version: '3.1'
+
+volumes:
+  openethereum:
+    driver: local
+
+services:
+  openethereum:
+    image: openethereum/openethereum:v3.2.6
+    restart: always
+    ports:
+      - 8545:8545
+    command:
+      - --jsonrpc-interface=all
+      - --jsonrpc-hosts=all
+      - --no-warp
+    volumes:
+      - openethereum:/home/openethereum
