@@ -17,15 +17,15 @@ services:
     env_file:
       - .env
 
-  keeper:
-    build:
-      context: ./../
-      dockerfile: Dockerfile
-    restart: always
-    entrypoint: ["python"]
-    command: ["keeper/main.py"]
-    env_file:
-      - .env
+  # keeper:
+  #   build:
+  #     context: ./../
+  #     dockerfile: Dockerfile
+  #   restart: always
+  #   entrypoint: ["python"]
+  #   command: ["keeper/main.py"]
+  #   env_file:
+  #     - .env
 
   prometheus:
     image: bitnami/prometheus:2
