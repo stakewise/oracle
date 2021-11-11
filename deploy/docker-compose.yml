@@ -1,0 +1,55 @@
+version: '3.1'
+
+volumes:
+  prometheus:
+    driver: local
+  alertmanager:
+    driver: local
+
+services:
+  oracle:
+    build:
+      context: ./../
+      dockerfile: Dockerfile
+    restart: always
+    entrypoint: ["python"]
+    command: ["oracle/main.py"]
+    env_file:
+      - .env
+
+  # keeper:
+  #   build:
+  #     context: ./../
+  #     dockerfile: Dockerfile
+  #   restart: always
+  #   entrypoint: ["python"]
+  #   command: ["keeper/main.py"]
+  #   env_file:
+  #     - .env
+
+  prometheus:
+    image: bitnami/prometheus:2
+    restart: always
+    ports:
+      - '9090:9090'
+    env_file:
+      - .env
+    volumes:
+      - prometheus:/opt/bitnami/prometheus/data
+      - ./configs/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml
+      - ./configs/rules.yml:/opt/bitnami/prometheus/conf/rules.yml
+    depends_on:
+      - keeper
+
+  alertmanager:
+    image: bitnami/alertmanager:0
+    restart: always
+    ports:
+      - '9093:9093'
+    env_file:
+      - .env
+    volumes:
+      - alertmanager:/opt/bitnami/alertmanager/data
+      - ./configs/alertmanager.yml:/opt/bitnami/alertmanager/conf/config.yml
+    depends_on:
+      - prometheus

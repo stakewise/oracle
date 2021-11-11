@@ -1,0 +1,11 @@
+route:
+  group_by: ['alertname']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 1h
+  receiver: 'pushover'
+receivers:
+  - name: pushover
+    pushover_configs:
+      - token: token
+        user_key: user_key
