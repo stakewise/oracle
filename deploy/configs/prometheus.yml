@@ -12,10 +12,10 @@ scrape_configs:
   - job_name: "prometheus"
     static_configs:
       - targets: ["localhost:9090"]
-  - job_name: "keeper"
-    metrics_path: /
-    static_configs:
-      - targets: ["keeper:8080"]
+  # - job_name: "keeper"
+  #   metrics_path: /
+  #   static_configs:
+  #     - targets: ["keeper:8080"]
   - job_name: "oracle"
     metrics_path: /
     static_configs:
