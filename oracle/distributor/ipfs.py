@@ -56,19 +56,17 @@ async def get_one_time_rewards_allocations(rewards: str) -> Dict[ChecksumAddress
 async def upload_claims(claims: Claims) -> str:
     """Submits claims to the IPFS and pins the file."""
     # TODO: split claims into files up to 1000 entries
-    submitted = False
-
     try:
         with ipfshttpclient.connect(IPFS_ENDPOINT) as client:
             ipfs_id1 = client.add_json(claims)
             client.pin.add(ipfs_id1)
-            submitted = True
     except Exception as e:
         logger.error(e)
         logger.error(f"Failed to submit claims to ${IPFS_ENDPOINT}")
+        ipfs_id1 = None
 
     if not (IPFS_PINATA_API_KEY and IPFS_PINATA_SECRET_KEY):
-        if not submitted:
+        if ipfs_id1 is None:
             raise RuntimeError("Failed to submit claims to IPFS")
         return ipfs_id1
 
@@ -87,11 +85,10 @@ async def upload_claims(claims: Claims) -> str:
             response.raise_for_status()
             response = await response.json()
             ipfs_id2 = response["IpfsHash"]
-            submitted = True
     except:  # noqa: E722
-        pass
+        ipfs_id2 = None
 
-    if not submitted:
+    if not (ipfs_id1 or ipfs_id2):
         raise RuntimeError("Failed to submit claims to IPFS")
 
     if ipfs_id1 and not ipfs_id1.startswith("/ipfs/"):
