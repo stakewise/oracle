@@ -152,7 +152,7 @@ def check_validator_vote(vote: ValidatorVote, oracle: ChecksumAddress) -> bool:
 def get_oracles_votes(
     rewards_nonce: int, validators_nonce: int, oracles: List[ChecksumAddress]
 ) -> OraclesVotes:
-    """Fetches oracle votes from the IPFS that match current nonces."""
+    """Fetches oracle votes that match current nonces."""
     votes = OraclesVotes(
         rewards=[], distributor=[], initialize_validator=[], finalize_validator=[]
     )

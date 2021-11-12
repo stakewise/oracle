@@ -12,6 +12,8 @@ services:
       context: ./../
       dockerfile: Dockerfile
     restart: always
+    ports:
+      - '8080:8080'
     entrypoint: ["python"]
     command: ["oracle/main.py"]
     env_file:
@@ -38,8 +40,8 @@ services:
       - prometheus:/opt/bitnami/prometheus/data
       - ./configs/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml
       - ./configs/rules.yml:/opt/bitnami/prometheus/conf/rules.yml
-    depends_on:
-      - keeper
+  # depends_on:
+  #   - keeper
 
   alertmanager:
     image: bitnami/alertmanager:0

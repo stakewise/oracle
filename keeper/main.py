@@ -7,7 +7,7 @@ from typing import Any
 from common.health_server import create_health_server_runner, start_health_server
 from common.settings import ENABLE_HEALTH_SERVER, LOG_LEVEL
 from keeper.health_server import keeper_routes
-from keeper.settings import PROCESS_INTERVAL
+from keeper.settings import KEEPER_PROCESS_INTERVAL
 from keeper.utils import get_keeper_params, get_oracles_votes, submit_votes
 
 logging.basicConfig(
@@ -46,7 +46,7 @@ def main() -> None:
         # 1. Fetch current nonces of the validators, rewards and the total number of oracles
         params = get_keeper_params()
         if params.paused:
-            time.sleep(PROCESS_INTERVAL)
+            time.sleep(KEEPER_PROCESS_INTERVAL)
             continue
 
         # 2. Resolve and fetch latest votes of the oracles for validators and rewards
@@ -62,7 +62,7 @@ def main() -> None:
             total_oracles=len(params.oracles),
         )
 
-        time.sleep(PROCESS_INTERVAL)
+        time.sleep(KEEPER_PROCESS_INTERVAL)
 
 
 if __name__ == "__main__":
