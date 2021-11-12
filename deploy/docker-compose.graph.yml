@@ -34,6 +34,10 @@ services:
       dockerfile: Dockerfile
       args:
         NETWORK: "mainnet"
+    command: >
+      /bin/sh -c "until nc -vz graph-node 8020; do echo 'Waiting graph-node'; sleep 2; done
+      && yarn create:local
+      && yarn deploy:local"
     env_file:
       - .env
     restart: "no"
