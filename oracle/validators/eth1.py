@@ -5,7 +5,7 @@ from eth_typing import ChecksumAddress, HexStr
 from web3 import Web3
 from web3.types import BlockNumber
 
-from oracle.clients import execute_ethereum_gql_query, execute_sw_gql_query
+from oracle.clients import execute_ethereum_gql_query, execute_sw_gql_query, ipfs_fetch
 from oracle.graphql_queries import (
     FINALIZE_OPERATOR_QUERY,
     INITIALIZE_OPERATORS_QUERY,
@@ -13,7 +13,6 @@ from oracle.graphql_queries import (
 )
 from oracle.settings import WITHDRAWAL_CREDENTIALS
 
-from .ipfs import get_operator_deposit_datum
 from .types import ValidatorDepositData
 
 INITIALIZE_DEPOSIT = Web3.toWei(1, "ether")
@@ -39,7 +38,7 @@ async def select_validator(
 
         operator_address = Web3.toChecksumAddress(operator["id"])
         deposit_data_index = int(operator["depositDataIndex"])
-        deposit_datum = get_operator_deposit_datum(merkle_proofs)
+        deposit_datum = await ipfs_fetch(merkle_proofs)
 
         max_deposit_data_index = len(deposit_datum) - 1
         if deposit_data_index > max_deposit_data_index:
@@ -84,7 +83,7 @@ async def get_finalize_validator_deposit_data(
     operator = result["operators"][0]
     merkle_proofs = operator["finalizeMerkleProofs"]
     deposit_data_index = int(operator["depositDataIndex"])
-    deposit_datum = get_operator_deposit_datum(merkle_proofs)
+    deposit_datum = await ipfs_fetch(merkle_proofs)
     selected_deposit_data = deposit_datum[deposit_data_index]
 
     return ValidatorDepositData(

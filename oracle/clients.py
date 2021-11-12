@@ -12,11 +12,11 @@ from oracle.settings import (
     AWS_ACCESS_KEY_ID,
     AWS_SECRET_ACCESS_KEY,
     ETHEREUM_SUBGRAPH_URL,
+    IPFS_FETCH_ENDPOINTS,
+    IPFS_PIN_ENDPOINTS,
     STAKEWISE_SUBGRAPH_URL,
     UNISWAP_V3_SUBGRAPH_URL,
 )
-
-from .settings import IPFS_ENDPOINT, IPFS_FETCH_ENDPOINTS
 
 s3_client = boto3.client(
     "s3",
@@ -54,8 +54,9 @@ async def ipfs_fetch(ipfs_hash: str) -> Union[Dict[Any, Any], List[Dict[Any, Any
     """Tries to fetch IPFS hash from different sources."""
     _ipfs_hash = ipfs_hash.replace("ipfs://", "").replace("/ipfs/", "")
     try:
-        with ipfshttpclient.connect(IPFS_ENDPOINT) as client:
-            return client.get_json(_ipfs_hash)
+        for ipfs_endpoint in IPFS_PIN_ENDPOINTS:
+            with ipfshttpclient.connect(ipfs_endpoint) as client:
+                return client.get_json(_ipfs_hash)
     except ipfshttpclient.exceptions.TimeoutError:
         async with ClientSession() as session:
             for endpoint in IPFS_FETCH_ENDPOINTS:

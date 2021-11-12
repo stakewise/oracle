@@ -92,25 +92,27 @@ poetry run python oracle/main.py
 
 ### Settings
 
-| Variable                 | Description                                                                        | Required | Default                                                              |
-|--------------------------|------------------------------------------------------------------------------------|----------|----------------------------------------------------------------------|
-| NETWORK                  | The network that the oracle is currently operating on. Choices are goerli, mainnet | No       | mainnet                                                              |
-| ENABLE_HEALTH_SERVER     | Defines whether to enable health server                                            | No       | True                                                                 |
-| HEALTH_SERVER_PORT       | The port where the health server will run                                          | No       | 8080                                                                 |
-| HEALTH_SERVER_HOST       | The host where the health server will run                                          | No       | 127.0.0.1                                                            |
-| IPFS_ENDPOINT            | The IPFS endpoint where reward votes will be uploaded                              |          | /dns/ipfs.infura.io/tcp/5001/https                                   |
-| IPFS_PINATA_API_KEY      | The Pinata API key for uploading reward proofs for the redundancy                  | No       | -                                                                    |
-| IPFS_PINATA_SECRET_KEY   | The Pinata Secret key for uploading reward proofs for the redundancy               | No       | -                                                                    |
-| ETH2_ENDPOINT            | The ETH2 node endpoint                                                             | No       | http://localhost:3501                                                |
-| ORACLE_PRIVATE_KEY       | The ETH1 private key of the oracle                                                 | Yes      | -                                                                    |
-| AWS_ACCESS_KEY_ID        | The AWS access key used to make the oracle vote public                             | Yes      | -                                                                    |
-| AWS_SECRET_ACCESS_KEY    | The AWS secret access key used to make the oracle vote public                      | Yes      | -                                                                    |
-| STAKEWISE_SUBGRAPH_URL   | The StakeWise subgraph URL                                                         | No       | https://api.thegraph.com/subgraphs/name/stakewise/stakewise-mainnet  |
-| UNISWAP_V3_SUBGRAPH_URL  | The Uniswap V3 subgraph URL                                                        | No       | https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-mainnet |
-| ETHEREUM_SUBGRAPH_URL    | The Ethereum subgraph URL                                                          | No       | https://api.thegraph.com/subgraphs/name/stakewise/ethereum-mainnet   |
-| PROCESS_INTERVAL         | How long to wait before processing again (in seconds)                              | No       | 180                                                                  |
-| ETH1_CONFIRMATION_BLOCKS | The required number of ETH1 confirmation blocks used to fetch the data             | No       | 15                                                                   |
-| LOG_LEVEL                | The log level of the oracle                                                        | No       | INFO                                                                 |
+| Variable                 | Description                                                                        | Required | Default                                                                 |
+|--------------------------|------------------------------------------------------------------------------------|----------|-------------------------------------------------------------------------|
+| NETWORK                  | The network that the oracle is currently operating on. Choices are goerli, mainnet | No       | mainnet                                                                 |
+| ENABLE_HEALTH_SERVER     | Defines whether to enable health server                                            | No       | True                                                                    |
+| HEALTH_SERVER_PORT       | The port where the health server will run                                          | No       | 8080                                                                    |
+| HEALTH_SERVER_HOST       | The host where the health server will run                                          | No       | 127.0.0.1                                                               |
+| IPFS_PIN_ENDPOINTS       | The IPFS endpoint where the rewards will be uploaded                               | No       | /dns/ipfs.infura.io/tcp/5001/https                                      |
+| IPFS_FETCH_ENDPOINTS     | The IPFS endpoints from where the rewards will be fetched                          | No       | https://gateway.pinata.cloud,http://cloudflare-ipfs.com,https://ipfs.io |
+| IPFS_PINATA_API_KEY      | The Pinata API key for uploading reward proofs for the redundancy                  | No       | -                                                                       |
+| IPFS_PINATA_SECRET_KEY   | The Pinata Secret key for uploading reward proofs for the redundancy               | No       | -                                                                       |
+| ETH2_ENDPOINT            | The ETH2 node endpoint                                                             | No       | http://localhost:3501                                                   |
+| ETH2_CLIENT              | The ETH2 client used. Choices are prysm, lighthouse, teku.                         | No       | prysm                                                                   |
+| ORACLE_PRIVATE_KEY       | The ETH1 private key of the oracle                                                 | Yes      | -                                                                       |
+| AWS_ACCESS_KEY_ID        | The AWS access key used to make the oracle vote public                             | Yes      | -                                                                       |
+| AWS_SECRET_ACCESS_KEY    | The AWS secret access key used to make the oracle vote public                      | Yes      | -                                                                       |
+| STAKEWISE_SUBGRAPH_URL   | The StakeWise subgraph URL                                                         | No       | https://api.thegraph.com/subgraphs/name/stakewise/stakewise-mainnet     |
+| UNISWAP_V3_SUBGRAPH_URL  | The Uniswap V3 subgraph URL                                                        | No       | https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-mainnet    |
+| ETHEREUM_SUBGRAPH_URL    | The Ethereum subgraph URL                                                          | No       | https://api.thegraph.com/subgraphs/name/stakewise/ethereum-mainnet      |
+| ORACLE_PROCESS_INTERVAL  | How long to wait before processing again (in seconds)                              | No       | 180                                                                     |
+| ETH1_CONFIRMATION_BLOCKS | The required number of ETH1 confirmation blocks used to fetch the data             | No       | 15                                                                      |
+| LOG_LEVEL                | The log level of the oracle                                                        | No       | INFO                                                                    |
 
 ## Keeper
 
@@ -188,6 +190,6 @@ poetry run python keeper/main.py
 | HEALTH_SERVER_PORT       | The port where the health server will run                                          | No       | 8080      |
 | HEALTH_SERVER_HOST       | The host where the health server will run                                          | No       | 127.0.0.1 |
 | ORACLE_PRIVATE_KEY       | The ETH1 private key of the oracle                                                 | Yes      | -         |
-| PROCESS_INTERVAL         | How long to wait before processing again (in seconds)                              | No       | 180       |
+| KEEPER_PROCESS_INTERVAL  | How long to wait before processing again (in seconds)                              | No       | 180       |
 | ETH1_CONFIRMATION_BLOCKS | The required number of ETH1 confirmation blocks used to fetch the data             | No       | 15        |
 | LOG_LEVEL                | The log level of the keeper                                                        | No       | INFO      |

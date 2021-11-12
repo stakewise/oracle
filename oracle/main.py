@@ -13,7 +13,7 @@ from oracle.eth1 import check_oracle_account, get_finalized_block, get_voting_pa
 from oracle.health_server import oracle_routes
 from oracle.rewards.controller import RewardsController
 from oracle.rewards.eth2 import get_finality_checkpoints, get_genesis
-from oracle.settings import PROCESS_INTERVAL
+from oracle.settings import ORACLE_PROCESS_INTERVAL
 from oracle.validators.controller import ValidatorsController
 
 logging.basicConfig(
@@ -98,7 +98,7 @@ async def main() -> None:
             ),
         )
         # wait until next processing time
-        await asyncio.sleep(PROCESS_INTERVAL)
+        await asyncio.sleep(ORACLE_PROCESS_INTERVAL)
 
     await session.close()
 

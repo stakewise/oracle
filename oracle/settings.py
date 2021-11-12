@@ -1,12 +1,14 @@
 from datetime import timedelta
 
-from decouple import Csv, config
+from decouple import Choices, Csv, config
 from eth_typing import HexStr
 from web3 import Web3
 
 from common.settings import GOERLI, MAINNET, NETWORK
 
-IPFS_ENDPOINT = config("IPFS_ENDPOINT", default="/dns/ipfs.infura.io/tcp/5001/https")
+IPFS_PIN_ENDPOINTS = config(
+    "IPFS_PIN_ENDPOINTS", cast=Csv(), default="/dns/ipfs.infura.io/tcp/5001/https"
+)
 IPFS_FETCH_ENDPOINTS = config(
     "IPFS_FETCH_ENDPOINTS",
     cast=Csv(),
@@ -23,7 +25,18 @@ IPFS_PINATA_SECRET_KEY = config(
     default="",
 )
 
+# ETH2 settings
 ETH2_ENDPOINT = config("ETH2_ENDPOINT", default="http://localhost:3501")
+
+# TODO: Check whether can be removed after https://github.com/sigp/lighthouse/issues/2739 is resolved
+LIGHTHOUSE = "lighthouse"
+PRYSM = "prysm"
+TEKU = "teku"
+ETH2_CLIENT = config(
+    "ETH2_CLIENT",
+    default=PRYSM,
+    cast=Choices([LIGHTHOUSE, PRYSM, TEKU], cast=lambda client: client.lower()),
+)
 
 # credentials
 ORACLE_PRIVATE_KEY = config("ORACLE_PRIVATE_KEY")
@@ -32,7 +45,7 @@ ORACLE_PRIVATE_KEY = config("ORACLE_PRIVATE_KEY")
 AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")
 
-PROCESS_INTERVAL = config("PROCESS_INTERVAL", default=180, cast=int)
+ORACLE_PROCESS_INTERVAL = config("ORACLE_PROCESS_INTERVAL", default=180, cast=int)
 
 OPERATORS_ORIGIN_ADDRESS = config("OPERATORS_ORIGIN_ADDRESS", default="0x" + "11" * 20)
 PARTNERS_ORIGIN_ADDRESS = config("PARTNERS_ORIGIN_ADDRESS", default="0x" + "22" * 20)
