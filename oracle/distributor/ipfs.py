@@ -8,7 +8,7 @@ from aiohttp import ClientSession
 from eth_typing import ChecksumAddress
 
 from oracle.settings import (
-    IPFS_ENDPOINT,
+    IPFS_PIN_ENDPOINTS,
     IPFS_PINATA_API_KEY,
     IPFS_PINATA_PIN_ENDPOINT,
     IPFS_PINATA_SECRET_KEY,
@@ -52,52 +52,56 @@ async def get_one_time_rewards_allocations(rewards: str) -> Dict[ChecksumAddress
     return await ipfs_fetch(rewards)
 
 
+def add_ipfs_prefix(ipfs_id: str) -> str:
+    if ipfs_id.startswith("ipfs://"):
+        ipfs_id = ipfs_id[len("ipfs://") :]
+
+    if not ipfs_id.startswith("/ipfs/"):
+        ipfs_id = "/ipfs/" + ipfs_id
+
+    return ipfs_id
+
+
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def upload_claims(claims: Claims) -> str:
     """Submits claims to the IPFS and pins the file."""
     # TODO: split claims into files up to 1000 entries
-    try:
-        with ipfshttpclient.connect(IPFS_ENDPOINT) as client:
-            ipfs_id1 = client.add_json(claims)
-            client.pin.add(ipfs_id1)
-    except Exception as e:
-        logger.error(e)
-        logger.error(f"Failed to submit claims to ${IPFS_ENDPOINT}")
-        ipfs_id1 = None
+    ipfs_ids = []
+    for pin_endpoint in IPFS_PIN_ENDPOINTS:
+        try:
+            with ipfshttpclient.connect(pin_endpoint) as client:
+                ipfs_id = client.add_json(claims)
+                client.pin.add(ipfs_id)
+                ipfs_ids.append(ipfs_id)
+        except Exception as e:
+            logger.error(e)
+            logger.error(f"Failed to submit claims to {pin_endpoint}")
 
-    if not (IPFS_PINATA_API_KEY and IPFS_PINATA_SECRET_KEY):
-        if ipfs_id1 is None:
-            raise RuntimeError("Failed to submit claims to IPFS")
-        return ipfs_id1
+    if IPFS_PINATA_API_KEY and IPFS_PINATA_SECRET_KEY:
+        headers = {
+            "pinata_api_key": IPFS_PINATA_API_KEY,
+            "pinata_secret_api_key": IPFS_PINATA_SECRET_KEY,
+            "Content-Type": "application/json",
+        }
+        try:
+            async with ClientSession(headers=headers) as session:
+                response = await session.post(
+                    url=IPFS_PINATA_PIN_ENDPOINT,
+                    data=json.dumps({"pinataContent": claims}, sort_keys=True),
+                )
+                response.raise_for_status()
+                response = await response.json()
+                ipfs_id = response["IpfsHash"]
+                ipfs_ids.append(ipfs_id)
+        except Exception as e:  # noqa: E722
+            logger.error(e)
+            logger.error("Failed to submit claims to Pinata")
 
-    headers = {
-        "pinata_api_key": IPFS_PINATA_API_KEY,
-        "pinata_secret_api_key": IPFS_PINATA_SECRET_KEY,
-        "Content-Type": "application/json",
-    }
-
-    try:
-        async with ClientSession(headers=headers) as session:
-            response = await session.post(
-                url=IPFS_PINATA_PIN_ENDPOINT,
-                data=json.dumps({"pinataContent": claims}, sort_keys=True),
-            )
-            response.raise_for_status()
-            response = await response.json()
-            ipfs_id2 = response["IpfsHash"]
-    except:  # noqa: E722
-        ipfs_id2 = None
-
-    if not (ipfs_id1 or ipfs_id2):
+    if not ipfs_ids:
         raise RuntimeError("Failed to submit claims to IPFS")
 
-    if ipfs_id1 and not ipfs_id1.startswith("/ipfs/"):
-        ipfs_id1 = "/ipfs/" + ipfs_id1
+    ipfs_ids = set(map(add_ipfs_prefix, ipfs_ids))
+    if len(ipfs_ids) != 1:
+        raise RuntimeError(f"Received different ipfs IDs: {','.join(ipfs_ids)}")
 
-    if ipfs_id2 and not ipfs_id2.startswith("/ipfs/"):
-        ipfs_id2 = "/ipfs/" + ipfs_id2
-
-    if (ipfs_id1 and ipfs_id2) and not ipfs_id1 == ipfs_id2:
-        raise RuntimeError(f"Received different ipfs IDs: {ipfs_id1}, {ipfs_id2}")
-
-    return ipfs_id1
+    return ipfs_ids.pop()

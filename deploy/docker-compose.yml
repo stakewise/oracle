@@ -38,8 +38,8 @@ services:
       - prometheus:/opt/bitnami/prometheus/data
       - ./configs/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml
       - ./configs/rules.yml:/opt/bitnami/prometheus/conf/rules.yml
-    depends_on:
-      - keeper
+  # depends_on:
+  #   - keeper
 
   alertmanager:
     image: bitnami/alertmanager:0

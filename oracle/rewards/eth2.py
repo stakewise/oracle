@@ -5,7 +5,7 @@ import backoff
 from aiohttp import ClientSession
 from eth_typing import HexStr
 
-from oracle.settings import ETH2_ENDPOINT
+from oracle.settings import ETH2_CLIENT, ETH2_ENDPOINT, LIGHTHOUSE
 
 
 class ValidatorStatus(Enum):
@@ -47,7 +47,11 @@ async def get_validators(
     if not public_keys:
         return []
 
-    endpoint = f"{ETH2_ENDPOINT}/eth/v1/beacon/states/{state_id}/validators?id={'&id='.join(public_keys)}"
+    if ETH2_CLIENT == LIGHTHOUSE:
+        endpoint = f"{ETH2_ENDPOINT}/eth/v1/beacon/states/{state_id}/validators?id={','.join(public_keys)}"
+    else:
+        endpoint = f"{ETH2_ENDPOINT}/eth/v1/beacon/states/{state_id}/validators?id={'&id='.join(public_keys)}"
+
     async with session.get(endpoint) as response:
         response.raise_for_status()
         return (await response.json())["data"]
