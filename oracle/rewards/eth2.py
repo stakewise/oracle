@@ -48,7 +48,7 @@ async def get_validators(
         return []
 
     if ETH2_CLIENT == LIGHTHOUSE:
-        endpoint = f"{ETH2_ENDPOINT}/eth/v1/beacon/states/{state_id}/validators?id={',id='.join(public_keys)}"
+        endpoint = f"{ETH2_ENDPOINT}/eth/v1/beacon/states/{state_id}/validators?id={','.join(public_keys)}"
     else:
         endpoint = f"{ETH2_ENDPOINT}/eth/v1/beacon/states/{state_id}/validators?id={'&id='.join(public_keys)}"
 
