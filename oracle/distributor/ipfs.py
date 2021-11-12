@@ -69,13 +69,13 @@ async def upload_claims(claims: Claims) -> str:
     ipfs_ids = []
     for pin_endpoint in IPFS_PIN_ENDPOINTS:
         try:
-            with ipfshttpclient.connect(IPFS_PIN_ENDPOINTS) as client:
+            with ipfshttpclient.connect(pin_endpoint) as client:
                 ipfs_id = client.add_json(claims)
                 client.pin.add(ipfs_id)
                 ipfs_ids.append(ipfs_id)
         except Exception as e:
             logger.error(e)
-            logger.error(f"Failed to submit claims to ${pin_endpoint}")
+            logger.error(f"Failed to submit claims to {pin_endpoint}")
 
     if IPFS_PINATA_API_KEY and IPFS_PINATA_SECRET_KEY:
         headers = {
