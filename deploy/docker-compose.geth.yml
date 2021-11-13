@@ -9,7 +9,7 @@ services:
     image: ethereum/client-go:v1.10.11
     restart: always
     ports:
-      - 8545:8545
+      - '127.0.0.1:8545:8545'
     command:
       - --syncmode=fast
       - --http
