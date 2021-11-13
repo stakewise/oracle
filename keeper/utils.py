@@ -79,7 +79,7 @@ def get_keeper_params() -> Parameters:
     response = multicall_contract.functions.aggregate(calls).call()[1]
     oracles: List[ChecksumAddress] = []
     for addr in response:
-        oracles.append(Web3.toChecksumAddress(addr))
+        oracles.append(Web3.toChecksumAddress(Web3.toBytes(Web3.toInt(addr))))
 
     return Parameters(
         paused=paused,
