@@ -8,8 +8,6 @@ services:
   openethereum:
     image: openethereum/openethereum:v3.2.6
     restart: always
-    ports:
-      - '127.0.0.1:8545:8545'
     command:
       - --jsonrpc-interface=all
       - --jsonrpc-hosts=all

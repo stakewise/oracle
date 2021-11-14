@@ -30,8 +30,6 @@ services:
   prometheus:
     image: bitnami/prometheus:2
     restart: always
-    ports:
-      - '127.0.0.1:9090:9090'
     env_file:
       - .env
     volumes:
