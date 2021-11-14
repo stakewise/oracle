@@ -8,8 +8,6 @@ services:
   ipfs:
     image: ipfs/go-ipfs:v0.10.0
     restart: always
-    ports:
-      - '5001:5001'
     env_file:
       - .env
     ulimits:
