@@ -24,10 +24,11 @@ services:
     build:
       context: ../../subgraphs/
       dockerfile: Dockerfile
-      args:
-        NETWORK: "mainnet"
     command: >
       /bin/sh -c "until nc -vz graph-node 8020; do echo 'Waiting graph-node'; sleep 2; done
+      && yarn prepare:${NETWORK}
+      && yarn codegen
+      && yarn build
       && yarn create:local
       && yarn deploy:local"
     env_file:
