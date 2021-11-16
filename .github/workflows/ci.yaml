@@ -1,0 +1,27 @@
+name: CI
+
+on: [pull_request, push]
+
+jobs:
+  pre-commit:
+    name: Linting
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+    - uses: pre-commit/action@v2.0.0
+  docker:
+    runs-on: ubuntu-latest
+    needs: pre-commit
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Build and push
+        uses: docker/build-push-action@v1
+        with:
+          username: _json_key
+          password: ${{ secrets.GAR_JSON_KEY }}
+          registry: europe-west4-docker.pkg.dev
+          repository: stakewiselabs/public/oracle
+          tag_with_ref: true
+          tag_with_sha: true
