@@ -62,6 +62,9 @@ class OraclesSettings(TypedDict):
     # set of Uniswap V3 supported staked ETH pairs
     uniswap_v3_staked_eth_pairs: Set[ChecksumAddress]
 
+    # set of Uniswap V3 full range pairs
+    uniswap_v3_full_range_pairs: Set[ChecksumAddress]
+
     # dictionary of supported ERC-20 tokens and the block number when they were created
     erc20_tokens: Dict[ChecksumAddress, BlockNumber]
 
@@ -332,6 +335,12 @@ def get_oracles_config(
             [
                 Web3.toChecksumAddress(pair)
                 for pair in oracles_settings.get("uniswap_v3_staked_eth_pairs", [])
+            ]
+        ),
+        uniswap_v3_full_range_pairs=set(
+            [
+                Web3.toChecksumAddress(pair)
+                for pair in oracles_settings.get("uniswap_v3_full_range_pairs", [])
             ]
         ),
         erc20_tokens={
@@ -813,6 +822,101 @@ def get_uniswap_v3_balances(
             variables=dict(
                 block_number=to_block,
                 tick_current=tick_current,
+                pool_address=pool_address.lower(),
+                last_id=last_id,
+            ),
+        )
+        positions_chunk = result.get("positions", [])
+        positions.extend(positions_chunk)
+
+    # process positions
+    account_to_liquidity: Dict[ChecksumAddress, Wei] = {}
+    total_liquidity: Wei = Wei(0)
+    for position in positions:
+        account: ChecksumAddress = position.get("owner", EMPTY_ADDR_HEX)
+        if account in (EMPTY_ADDR_HEX, ""):
+            continue
+
+        account = Web3.toChecksumAddress(account)
+        liquidity: Wei = Wei(int(position.get("liquidity", "0")))
+        if liquidity <= 0:
+            continue
+
+        account_to_liquidity[account] = Wei(
+            account_to_liquidity.setdefault(account, Wei(0)) + liquidity
+        )
+        total_liquidity += liquidity
+
+    return account_to_liquidity, total_liquidity
+
+
+@retry(
+    reraise=True,
+    wait=backoff,
+    stop=stop_attempts,
+    before_sleep=before_sleep_log(logger, logging.WARNING),
+)
+def get_uniswap_v3_full_range_balances(
+    subgraph_url: str, pool_address: ChecksumAddress, to_block: BlockNumber
+) -> Tuple[Dict[ChecksumAddress, Wei], Wei]:
+    """Fetches balances of the Uniswap V3 positions with full range."""
+    transport = RequestsHTTPTransport(url=subgraph_url)
+
+    # create a GraphQL client using the defined transport
+    client = Client(transport=transport, fetch_schema_from_transport=False)
+
+    # fetch positions that cover the current tick
+    query = gql(
+        """
+        query getPositions(
+          $block_number: Int
+          $pool_address: String
+          $last_id: ID
+        ) {
+          positions(
+            first: 1000
+            block: { number: $block_number }
+            where: {
+              tickLower: -887220
+              tickUpper: 887220
+              pool: $pool_address
+              id_gt: $last_id
+            }
+            orderBy: id
+            orderDirection: asc
+          ) {
+            owner
+            liquidity
+          }
+        }
+    """
+    )
+
+    # execute the query on the transport in chunks of 1000 entities
+    last_id = ""
+    result: Dict = execute_graphql_query(
+        client=client,
+        query=query,
+        variables=dict(
+            block_number=to_block,
+            pool_address=pool_address.lower(),
+            last_id=last_id,
+        ),
+    )
+    positions_chunk = result.get("positions", [])
+    positions = positions_chunk
+
+    # accumulate chunks
+    while len(positions_chunk) >= 1000:
+        last_id = positions_chunk[-1]["id"]
+        if not last_id:
+            break
+
+        result = execute_graphql_query(
+            client=client,
+            query=query,
+            variables=dict(
+                block_number=to_block,
                 pool_address=pool_address.lower(),
                 last_id=last_id,
             ),

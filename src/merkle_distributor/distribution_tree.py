@@ -20,6 +20,7 @@ from src.merkle_distributor.utils import (
     OraclesSettings,
     Rewards,
     get_uniswap_v3_staked_eth_balances,
+    get_uniswap_v3_full_range_balances
 )
 
 logger = logging.getLogger(__name__)
@@ -71,6 +72,9 @@ class DistributionTree(object):
         ]
         self.uniswap_v3_staked_eth_pairs: Set[ChecksumAddress] = oracles_settings[
             "uniswap_v3_staked_eth_pairs"
+        ]
+        self.uniswap_v3_full_range_pairs: Set[ChecksumAddress] = oracles_settings[
+            "uniswap_v3_full_range_pairs"
         ]
         self.erc20_tokens: Dict[ChecksumAddress, BlockNumber] = oracles_settings[
             "erc20_tokens"
@@ -235,6 +239,13 @@ class DistributionTree(object):
                 subgraph_url=self.uniswap_v3_subgraph_url,
                 pool_address=contract_address,
                 staked_eth_token_address=self.staked_eth_token_address,
+                to_block=block_number,
+            )
+        elif contract_address in self.uniswap_v3_full_range_pairs:
+            logger.info(f"Fetching Uniswap V3 infinity positions balances: pool={contract_address}")
+            return get_uniswap_v3_full_range_balances(
+                subgraph_url=self.uniswap_v3_subgraph_url,
+                pool_address=contract_address,
                 to_block=block_number,
             )
         elif contract_address in self.uniswap_v3_pairs:
