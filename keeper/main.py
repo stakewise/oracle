@@ -11,7 +11,7 @@ from keeper.settings import KEEPER_PROCESS_INTERVAL
 from keeper.utils import get_keeper_params, get_oracles_votes, submit_votes
 
 logging.basicConfig(
-    format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
+    format="%(asctime)s %(levelname)-8s %(message)s",
     datefmt="%m-%d %H:%M",
     level=LOG_LEVEL,
 )

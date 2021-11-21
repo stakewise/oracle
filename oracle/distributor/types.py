@@ -40,7 +40,7 @@ class Claim(TypedDict):
     reward_tokens: List[ChecksumAddress]
     origins: List[List[ChecksumAddress]]
     values: List[List[str]]
-    proof: str
+    proof: List[HexStr]
 
 
 class UniswapV3Pools(TypedDict):

@@ -17,7 +17,7 @@ from oracle.settings import ORACLE_PROCESS_INTERVAL
 from oracle.validators.controller import ValidatorsController
 
 logging.basicConfig(
-    format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
+    format="%(asctime)s %(levelname)-8s %(message)s",
     datefmt="%m-%d %H:%M",
     level=LOG_LEVEL,
 )

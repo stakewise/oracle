@@ -1,4 +1,4 @@
-from typing import TypedDict, Union
+from typing import List, TypedDict, Union
 
 from eth_typing import ChecksumAddress, HexStr
 from web3.types import Wei
@@ -22,7 +22,7 @@ class MerkleDepositData(TypedDict):
     amount: str
     withdrawal_credentials: HexStr
     deposit_data_root: HexStr
-    proof: str
+    proof: List[HexStr]
 
 
 class ValidatorDepositData(TypedDict):
@@ -31,7 +31,7 @@ class ValidatorDepositData(TypedDict):
     withdrawal_credentials: HexStr
     deposit_data_root: HexStr
     deposit_data_signature: HexStr
-    proof: str
+    proof: List[HexStr]
 
 
 class ValidatorVote(ValidatorDepositData):
