@@ -155,6 +155,7 @@ class DistributionTree(object):
             contract_address in self.balancer_pools
             or contract_address in self.uniswap_v2_pairs
             or contract_address in self.uniswap_v3_pairs
+            or contract_address in self.uniswap_v3_full_range_pairs
             or contract_address == self.reward_eth_token_address
             or contract_address in self.erc20_tokens
         )
