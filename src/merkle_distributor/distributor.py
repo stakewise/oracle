@@ -196,7 +196,6 @@ class Distributor(object):
         oracles_settings: OraclesSettings = get_oracles_config(
             node_id=self.ens_node_id,
             ens_resolver=self.ens_resolver,
-            block_number=new_rewards_block_number,
             ens_text_record=ORACLES_ENS_TEXT_RECORD,
             ipfs_endpoint=IPFS_ENDPOINT,
         )

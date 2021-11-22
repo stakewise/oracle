@@ -285,20 +285,12 @@ def get_staked_eth_distributions(
 def get_oracles_config(
     node_id: bytes,
     ens_resolver: Contract,
-    block_number: BlockNumber,
     ens_text_record: str,
     ipfs_endpoint: str,
 ) -> OraclesSettings:
     """Fetches oracles config from the DAO's ENS text record."""
     # fetch IPFS URL
-    oracles_config_url = ens_resolver.functions.text(node_id, ens_text_record).call(
-        block_identifier=block_number
-    )
-    if not oracles_config_url:
-        # try for the latest block
-        oracles_config_url = ens_resolver.functions.text(node_id, ens_text_record).call(
-            block_identifier="latest"
-        )
+    oracles_config_url = ens_resolver.functions.text(node_id, ens_text_record).call(block_identifier="latest")
 
     if oracles_config_url.startswith(IPFS_PREFIX):
         oracles_config_url = oracles_config_url[7:]
