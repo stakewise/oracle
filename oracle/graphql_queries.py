@@ -215,6 +215,35 @@ UNISWAP_V3_CURRENT_TICK_POSITIONS_QUERY = gql(
 """
 )
 
+UNISWAP_V3_RANGE_POSITIONS_QUERY = gql(
+    """
+    query getPositions(
+      $block_number: Int
+      $tick_lower: BigInt
+      $tick_upper: BigInt
+      $pool_address: String
+      $last_id: ID
+    ) {
+      positions(
+        block: { number: $block_number }
+        where: {
+          tickLower: $tick_lower
+          tickUpper: $tick_upper
+          pool: $pool_address
+          id_gt: $last_id
+        }
+        first: 1000
+        orderBy: id
+        orderDirection: asc
+      ) {
+        id
+        owner
+        liquidity
+      }
+    }
+"""
+)
+
 UNISWAP_V3_POSITIONS_QUERY = gql(
     """
     query getPositions(

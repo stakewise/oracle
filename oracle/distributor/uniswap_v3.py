@@ -12,6 +12,7 @@ from oracle.graphql_queries import (
     UNISWAP_V3_POOL_QUERY,
     UNISWAP_V3_POOLS_QUERY,
     UNISWAP_V3_POSITIONS_QUERY,
+    UNISWAP_V3_RANGE_POSITIONS_QUERY,
 )
 from oracle.settings import (
     REWARD_ETH_TOKEN_CONTRACT_ADDRESS,
@@ -193,6 +194,68 @@ async def get_uniswap_v3_liquidity_points(
             variables=dict(
                 block_number=block_number,
                 tick_current=tick_current,
+                pool_address=lowered_pool_address,
+                last_id=last_id,
+            ),
+        )
+        positions_chunk = result.get("positions", [])
+        positions.extend(positions_chunk)
+
+    # process positions
+    balances: Dict[ChecksumAddress, int] = {}
+    total_supply = 0
+    for position in positions:
+        account = Web3.toChecksumAddress(position["owner"])
+        if account == EMPTY_ADDR_HEX:
+            continue
+
+        liquidity = int(position.get("liquidity", "0"))
+        if liquidity <= 0:
+            continue
+
+        balances[account] = balances.setdefault(account, 0) + liquidity
+
+        total_supply += liquidity
+
+    return Balances(total_supply=total_supply, balances=balances)
+
+
+@backoff.on_exception(backoff.expo, Exception, max_time=900)
+async def get_uniswap_v3_range_liquidity_points(
+    tick_lower: int,
+    tick_upper: int,
+    pool_address: ChecksumAddress,
+    block_number: BlockNumber,
+) -> Balances:
+    """Fetches users' liquidity points of the Uniswap V3 pool in the specific range."""
+    lowered_pool_address = pool_address.lower()
+
+    last_id = ""
+    result: Dict = await execute_uniswap_v3_gql_query(
+        query=UNISWAP_V3_RANGE_POSITIONS_QUERY,
+        variables=dict(
+            block_number=block_number,
+            tick_lower=tick_lower,
+            tick_upper=tick_upper,
+            pool_address=lowered_pool_address,
+            last_id=last_id,
+        ),
+    )
+    positions_chunk = result.get("positions", [])
+    positions = positions_chunk
+
+    # accumulate chunks of positions
+    while len(positions_chunk) >= 1000:
+        last_id = positions_chunk[-1]["id"]
+        if not last_id:
+            break
+
+        result: Dict = await execute_uniswap_v3_gql_query(
+            query=UNISWAP_V3_RANGE_POSITIONS_QUERY,
+            variables=dict(
+                block_number=block_number,
+                tick_lower=tick_lower,
+                tick_upper=tick_upper,
                 pool_address=lowered_pool_address,
                 last_id=last_id,
             ),

@@ -2,6 +2,7 @@ import copy
 import logging
 from typing import List, Set
 
+from ens.constants import EMPTY_ADDR_HEX
 from eth_typing import BlockNumber, ChecksumAddress
 
 from oracle.settings import (
@@ -14,6 +15,7 @@ from oracle.settings import (
 from .types import Balances, Rewards, UniswapV3Pools
 from .uniswap_v3 import (
     get_uniswap_v3_liquidity_points,
+    get_uniswap_v3_range_liquidity_points,
     get_uniswap_v3_single_token_balances,
 )
 
@@ -133,6 +135,19 @@ class DistributorRewards(object):
             return await get_uniswap_v3_single_token_balances(
                 pool_address=contract_address,
                 token=SWISE_TOKEN_CONTRACT_ADDRESS,
+                block_number=self.block_number,
+            )
+        elif (
+            self.uni_v3_token == EMPTY_ADDR_HEX
+            and contract_address in self.uni_v3_swise_pools
+        ):
+            logger.info(
+                f"Fetching Uniswap V3 full range liquidity points: pool={contract_address}"
+            )
+            return await get_uniswap_v3_range_liquidity_points(
+                tick_lower=-887220,
+                tick_upper=887220,
+                pool_address=contract_address,
                 block_number=self.block_number,
             )
         elif contract_address in self.uni_v3_pools:
