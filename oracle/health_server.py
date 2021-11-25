@@ -1,8 +1,11 @@
+import logging
+
 from aiohttp import web
 
 from oracle.clients import ipfs_fetch
 from oracle.eth1 import get_finalized_block, get_voting_parameters
 
+logger = logging.getLogger(__name__)
 oracle_routes = web.RouteTableDef()
 
 
@@ -19,7 +22,8 @@ async def health(request):
         await ipfs_fetch(last_merkle_proofs)
 
         return web.Response(text="oracle 0")
-    except:  # noqa: E722
+    except Exception as e:  # noqa: E722
+        logger.error(e)
         pass
 
     return web.Response(text="oracle 1")
