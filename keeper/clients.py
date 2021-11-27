@@ -2,9 +2,9 @@ import logging
 
 import boto3
 from web3 import Web3
-from web3.middleware import geth_poa_middleware
+from web3.middleware import construct_sign_and_send_raw_middleware, geth_poa_middleware
 
-from keeper.settings import GOERLI, NETWORK, WEB3_ENDPOINT
+from keeper.settings import GOERLI, NETWORK, ORACLE_PRIVATE_KEY, WEB3_ENDPOINT
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +26,13 @@ def get_web3_client() -> Web3:
     if NETWORK == GOERLI:
         w3.middleware_onion.inject(geth_poa_middleware, layer=0)
         logger.warning("Injected POA middleware")
+
+    account = w3.eth.account.from_key(ORACLE_PRIVATE_KEY)
+    w3.middleware_onion.add(construct_sign_and_send_raw_middleware(account))
+    logger.warning("Injected middleware for capturing transactions and sending as raw")
+
+    w3.eth.default_account = account.address
+    logger.info(f"Configured default account {w3.eth.default_account}")
 
     return w3
 

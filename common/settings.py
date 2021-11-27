@@ -21,6 +21,8 @@ if NETWORK == MAINNET:
 elif NETWORK == GOERLI:
     AWS_S3_BUCKET_NAME = config("AWS_S3_BUCKET_NAME", default="oracle-votes-goerli")
 
+AWS_S3_REGION = config("AWS_S3_REGION", default="eu-central-1")
+
 # health server settings
 ENABLE_HEALTH_SERVER = config("ENABLE_HEALTH_SERVER", default=False, cast=bool)
 HEALTH_SERVER_PORT = config("HEALTH_SERVER_PORT", default=8080, cast=int)

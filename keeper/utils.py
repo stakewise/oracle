@@ -1,4 +1,3 @@
-import json
 import logging
 import time
 from collections import Counter
@@ -6,6 +5,7 @@ from typing import List
 
 import backoff
 import boto3
+import requests
 from eth_account.messages import encode_defunct
 from eth_typing import BlockNumber, ChecksumAddress, HexStr
 from hexbytes import HexBytes
@@ -15,6 +15,7 @@ from web3.types import TxParams
 
 from common.settings import (
     AWS_S3_BUCKET_NAME,
+    AWS_S3_REGION,
     DISTRIBUTOR_VOTE_FILENAME,
     ETH1_CONFIRMATION_BLOCKS,
     FINALIZE_VALIDATOR_VOTE_FILENAME,
@@ -182,10 +183,11 @@ def get_oracles_votes(
             # TODO: support more aggregators (GCP, Azure, etc.)
             bucket_key = f"{oracle}/{filename}"
             try:
-                response = s3_client.get_object(
-                    Bucket=AWS_S3_BUCKET_NAME, Key=bucket_key
+                response = requests.get(
+                    f"https://{AWS_S3_BUCKET_NAME}.s3.{AWS_S3_REGION}.amazonaws.com/{bucket_key}"
                 )
-                vote = json.loads(response["Body"].read().decode("utf-8"))
+                response.raise_for_status()
+                vote = response.json()
                 if "nonce" not in vote or vote["nonce"] != correct_nonce:
                     continue
                 if not vote_checker(vote, oracle):
@@ -269,9 +271,8 @@ def submit_votes(votes: OraclesVotes, total_oracles: int) -> None:
             f" activated validators={activated_validators}"
         )
         submit_update(
-            oracles_contract.web3,
             oracles_contract.functions.submitRewards(
-                total_rewards, activated_validators, signatures
+                int(total_rewards), int(activated_validators), signatures
             ),
         )
 
@@ -296,7 +297,6 @@ def submit_votes(votes: OraclesVotes, total_oracles: int) -> None:
             f"Submitting distributor update: merkle root={merkle_root}, merkle proofs={merkle_proofs}"
         )
         submit_update(
-            oracles_contract.web3,
             oracles_contract.functions.submitMerkleRoot(
                 merkle_root, merkle_proofs, signatures
             ),
@@ -334,7 +334,6 @@ def submit_votes(votes: OraclesVotes, total_oracles: int) -> None:
                 f"Submitting {func_name}: operator={operator}, public key={public_key}"
             )
             submit_update(
-                oracles_contract.web3,
                 getattr(oracles_contract.functions, func_name)(
                     dict(
                         operator=validator_vote["operator"],
