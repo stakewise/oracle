@@ -227,11 +227,25 @@ def wait_for_transaction(tx_hash: HexBytes) -> None:
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
-def submit_update(function_call: ContractFunction) -> None:
+def get_transaction_params() -> TxParams:
     account_nonce = web3_client.eth.getTransactionCount(web3_client.eth.default_account)
-    tx_params = TxParams(
-        nonce=account_nonce, maxPriorityFeePerGas=web3_client.eth.max_priority_fee
+    latest_block = web3_client.eth.get_block("latest")
+    max_priority_fee = web3_client.eth.max_priority_fee
+
+    base_fee = latest_block["baseFeePerGas"]
+    priority_fee = int(str(max_priority_fee), 16)
+    max_fee_per_gas = priority_fee + 2 * base_fee
+
+    return TxParams(
+        nonce=account_nonce,
+        maxPriorityFeePerGas=web3_client.eth.max_priority_fee,
+        maxFeePerGas=hex(max_fee_per_gas),
     )
+
+
+@backoff.on_exception(backoff.expo, Exception, max_time=900)
+def submit_update(function_call: ContractFunction) -> None:
+    tx_params = get_transaction_params()
     estimated_gas = function_call.estimateGas(tx_params)
 
     # add 10% margin to the estimated gas
@@ -239,6 +253,7 @@ def submit_update(function_call: ContractFunction) -> None:
 
     # execute transaction
     tx_hash = function_call.transact(tx_params)
+    logger.info(f"Submitted transaction: {Web3.toHex(tx_hash)}")
     wait_for_transaction(tx_hash)
 
 
@@ -275,6 +290,7 @@ def submit_votes(votes: OraclesVotes, total_oracles: int) -> None:
                 int(total_rewards), int(activated_validators), signatures
             ),
         )
+        logger.info("Total rewards has been successfully updated")
 
     counter = Counter(
         [(vote["merkle_root"], vote["merkle_proofs"]) for vote in votes.distributor]
@@ -301,6 +317,7 @@ def submit_votes(votes: OraclesVotes, total_oracles: int) -> None:
                 merkle_root, merkle_proofs, signatures
             ),
         )
+        logger.info("Merkle Distributor has been successfully updated")
 
     for validator_votes, func_name in [
         (votes.initialize_validator, "initializeValidator"),
@@ -346,3 +363,4 @@ def submit_votes(votes: OraclesVotes, total_oracles: int) -> None:
                     signatures,
                 ),
             )
+            logger.info(f"{func_name} has been successfully executed")
