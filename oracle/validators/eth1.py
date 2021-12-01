@@ -27,7 +27,7 @@ async def select_validator(
         query=INITIALIZE_OPERATORS_QUERY,
         variables=dict(
             block_number=block_number,
-            min_collateral=INITIALIZE_DEPOSIT,
+            min_collateral=str(INITIALIZE_DEPOSIT),
         ),
     )
     operators = result["operators"]

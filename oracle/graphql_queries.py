@@ -323,7 +323,7 @@ INITIALIZE_OPERATORS_QUERY = gql(
     query getOperators($block_number: Int, $min_collateral: BigInt) {
       operators(
         block: { number: $block_number }
-        where: { collateral_ge: $min_collateral, committed: true }
+        where: { collateral_gte: $min_collateral, committed: true }
         orderBy: validatorsCount
         orderDirection: asc
       ) {
