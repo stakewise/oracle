@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Tuple
+from typing import Dict, Set, Tuple
 
 import backoff
 from ens.constants import EMPTY_ADDR_HEX
@@ -232,14 +232,17 @@ async def get_swise_holders(
     )
     points: Dict[ChecksumAddress, int] = {}
     total_points = 0
+    contracts: Set[ChecksumAddress] = set()
     for swise_holder in swise_holders:
         account = Web3.toChecksumAddress(swise_holder["id"])
         if account == EMPTY_ADDR_HEX:
             continue
 
         is_contract = swise_holder.get("isContract", False)
-        if is_contract and account not in all_uni_pools:
-            continue
+        if is_contract:
+            contracts.add(account)
+            if account not in all_uni_pools:
+                continue
 
         balance = int(swise_holder["balance"])
         prev_account_points = int(swise_holder["distributorPoints"])
@@ -257,6 +260,9 @@ async def get_swise_holders(
 
     # process unclaimed SWISE
     for account in unclaimed_rewards:
+        if account in contracts:
+            continue
+
         origins = unclaimed_rewards.get(account, {}).get(
             SWISE_TOKEN_CONTRACT_ADDRESS, {}
         )
