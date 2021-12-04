@@ -37,9 +37,8 @@ class Balances(TypedDict):
 
 class Claim(TypedDict):
     index: int
-    reward_tokens: List[ChecksumAddress]
-    origins: List[List[ChecksumAddress]]
-    values: List[List[str]]
+    tokens: List[ChecksumAddress]
+    values: List[str]
     proof: List[HexStr]
 
 
@@ -59,6 +58,6 @@ class DistributorVote(TypedDict):
 TokenAllocations = Dict[ChecksumAddress, List[TokenAllocation]]
 Distributions = List[Distribution]
 ClaimedAccounts = Set[ChecksumAddress]
-# account -> reward token -> origin -> amount
-Rewards = Dict[ChecksumAddress, Dict[ChecksumAddress, Dict[ChecksumAddress, str]]]
+# account -> reward token -> amount
+Rewards = Dict[ChecksumAddress, Dict[ChecksumAddress, str]]
 Claims = Dict[ChecksumAddress, Claim]

@@ -19,8 +19,6 @@ from oracle.graphql_queries import (
 )
 from oracle.settings import (
     DISTRIBUTOR_FALLBACK_ADDRESS,
-    OPERATORS_ORIGIN_ADDRESS,
-    PARTNERS_ORIGIN_ADDRESS,
     REWARD_ETH_TOKEN_CONTRACT_ADDRESS,
     STAKED_ETH_TOKEN_CONTRACT_ADDRESS,
     SWISE_TOKEN_CONTRACT_ADDRESS,
@@ -263,23 +261,18 @@ async def get_swise_holders(
         if account in contracts:
             continue
 
-        origins = unclaimed_rewards.get(account, {}).get(
-            SWISE_TOKEN_CONTRACT_ADDRESS, {}
+        balance = int(
+            unclaimed_rewards.get(account, {}).get(SWISE_TOKEN_CONTRACT_ADDRESS, "0")
         )
-        if not origins:
+        if balance <= 0:
             continue
 
-        for origin, balance in origins.items():
-            balance = int(balance)
-            if balance <= 0:
-                continue
+        account_points = balance * (to_block - from_block)
+        if account_points <= 0:
+            continue
 
-            account_points = balance * (to_block - from_block)
-            if account_points <= 0:
-                continue
-
-            points[account] = points.setdefault(account, 0) + account_points
-            total_points += account_points
+        points[account] = points.setdefault(account, 0) + account_points
+        total_points += account_points
 
     # require holding at least 1000 SWISE for the max duration
     min_swise_holding_points = Web3.toWei(1000, "ether") * (to_block - from_block)
@@ -348,7 +341,6 @@ async def get_operators_rewards(
         points=points,
         total_points=total_points,
         reward_token=REWARD_ETH_TOKEN_CONTRACT_ADDRESS,
-        origin=OPERATORS_ORIGIN_ADDRESS,
     )
 
     return rewards, Wei(total_reward - operators_reward)
@@ -409,7 +401,6 @@ async def get_partners_rewards(
         points=points,
         total_points=total_points,
         reward_token=REWARD_ETH_TOKEN_CONTRACT_ADDRESS,
-        origin=PARTNERS_ORIGIN_ADDRESS,
     )
 
     return rewards, Wei(total_reward - partners_reward)
@@ -420,7 +411,6 @@ def calculate_points_based_rewards(
     points: Dict[ChecksumAddress, int],
     total_points: int,
     reward_token: ChecksumAddress,
-    origin: ChecksumAddress,
 ) -> Rewards:
     """Calculates points based rewards."""
     if total_reward <= 0 or total_points <= 0:
@@ -441,7 +431,6 @@ def calculate_points_based_rewards(
         DistributorRewards.add_value(
             rewards=rewards,
             to=account,
-            origin=origin,
             reward_token=reward_token,
             amount=reward,
         )
@@ -486,7 +475,6 @@ async def get_one_time_rewards(
         total_amount = int(distribution["amount"])
         distributed_amount = 0
         token = Web3.toChecksumAddress(distribution["token"])
-        origin = Web3.toChecksumAddress(distribution["origin"])
         rewards: Rewards = {}
         try:
             allocated_rewards = await get_one_time_rewards_allocations(
@@ -496,9 +484,7 @@ async def get_one_time_rewards(
                 if beneficiary == EMPTY_ADDR_HEX:
                     continue
 
-                rewards.setdefault(beneficiary, {}).setdefault(token, {})[
-                    origin
-                ] = amount
+                rewards.setdefault(beneficiary, {})[token] = amount
                 distributed_amount += int(amount)
 
             if total_amount != distributed_amount:
@@ -506,7 +492,7 @@ async def get_one_time_rewards(
                     f'Failed to process one time distribution: {distribution["id"]}. Invalid rewards.'
                 )
                 rewards: Rewards = {
-                    DISTRIBUTOR_FALLBACK_ADDRESS: {token: {origin: str(total_amount)}}
+                    DISTRIBUTOR_FALLBACK_ADDRESS: {token: str(total_amount)}
                 }
         except Exception as e:
             logger.error(e)
@@ -514,7 +500,7 @@ async def get_one_time_rewards(
                 f'Failed to process one time distribution: {distribution["id"]}. Exception occurred.'
             )
             rewards: Rewards = {
-                DISTRIBUTOR_FALLBACK_ADDRESS: {token: {origin: str(total_amount)}}
+                DISTRIBUTOR_FALLBACK_ADDRESS: {token: str(total_amount)}
             }
 
         final_rewards = DistributorRewards.merge_rewards(final_rewards, rewards)

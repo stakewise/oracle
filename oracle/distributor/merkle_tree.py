@@ -117,31 +117,17 @@ def calculate_merkle_root(rewards: Rewards) -> Tuple[HexStr, Claims]:
     accounts: List[ChecksumAddress] = sorted(rewards.keys())
     claims: Claims = OrderedDict()
     for i, account in enumerate(accounts):
-        reward_tokens: List[ChecksumAddress] = sorted(rewards[account].keys())
-        claim: Claim = OrderedDict(index=i, reward_tokens=reward_tokens)
-
-        reward_token_amounts: Dict[ChecksumAddress, int] = {}
-        for reward_token in reward_tokens:
-            origins: List[ChecksumAddress] = sorted(
-                rewards[account][reward_token].keys()
-            )
-            values: List[str] = []
-            for origin in origins:
-                value: str = rewards[account][reward_token][origin]
-                values.append(value)
-                prev_value = reward_token_amounts.setdefault(reward_token, 0)
-                reward_token_amounts[reward_token] = prev_value + int(value)
-
-            claim.setdefault("origins", []).append(origins)
-            claim.setdefault("values", []).append(values)
-
+        tokens: List[ChecksumAddress] = sorted(rewards[account].keys())
+        claim: Claim = OrderedDict(
+            index=i, tokens=tokens, values=[rewards[account][t] for t in tokens]
+        )
         claims[account] = claim
 
         merkle_element: bytes = get_merkle_node(
             index=i,
             account=account,
-            tokens=reward_tokens,
-            values=[reward_token_amounts[token] for token in reward_tokens],
+            tokens=tokens,
+            values=[int(val) for val in claim["values"]],
         )
         merkle_elements.append(merkle_element)
 
@@ -150,7 +136,7 @@ def calculate_merkle_root(rewards: Rewards) -> Tuple[HexStr, Claims]:
     # collect proofs
     for i, account in enumerate(accounts):
         proof: List[HexStr] = merkle_tree.get_hex_proof(merkle_elements[i])
-        claims[account]["proof"] = ",".join(proof)
+        claims[account]["proof"] = proof
 
     # calculate merkle root
     merkle_root: HexStr = merkle_tree.get_hex_root()

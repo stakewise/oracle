@@ -144,7 +144,6 @@ ONE_TIME_DISTRIBUTIONS_QUERY = gql(
       ) {
         id
         token
-        origin
         rewardsLink
         amount
         distributedAtBlock
