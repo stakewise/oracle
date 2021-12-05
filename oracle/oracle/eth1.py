@@ -3,7 +3,6 @@ import logging
 from typing import Dict, List, TypedDict, Union
 
 import backoff
-from eth_account import Account
 from eth_account.messages import encode_defunct
 from eth_account.signers.local import LocalAccount
 from web3 import Web3
@@ -19,7 +18,6 @@ from .graphql_queries import (
     VOTING_PARAMETERS_QUERY,
 )
 from .rewards.types import RewardsVotingParameters, RewardVote
-from .settings import ORACLE_PRIVATE_KEY
 from .validators.types import (
     FinalizeValidatorVotingParameters,
     InitializeValidatorVotingParameters,
@@ -27,8 +25,6 @@ from .validators.types import (
 )
 
 logger = logging.getLogger(__name__)
-
-oracle: LocalAccount = Account.from_key(ORACLE_PRIVATE_KEY)
 
 
 class FinalizedBlock(TypedDict):
@@ -119,7 +115,7 @@ async def get_voting_parameters(block_number: BlockNumber) -> VotingParameters:
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
-async def check_oracle_account() -> None:
+async def check_oracle_account(oracle: LocalAccount) -> None:
     """Checks whether oracle is part of the oracles set."""
     oracle_lowered_address = oracle.address.lower()
     result: List = (
@@ -141,6 +137,7 @@ async def check_oracle_account() -> None:
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
 def submit_vote(
+    oracle: LocalAccount,
     encoded_data: bytes,
     vote: Union[RewardVote, DistributorVote, ValidatorVote],
     name: str,

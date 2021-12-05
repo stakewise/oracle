@@ -1,5 +1,6 @@
 import logging
 
+from eth_account.signers.local import LocalAccount
 from eth_typing import BlockNumber, HexStr
 from web3 import Web3
 from web3.types import Wei
@@ -28,10 +29,11 @@ w3 = Web3()
 class ValidatorsController(object):
     """Submits new validators registrations to the IPFS."""
 
-    def __init__(self) -> None:
+    def __init__(self, oracle: LocalAccount) -> None:
         self.validator_deposit: Wei = Web3.toWei(32, "ether")
         self.last_vote_public_key = None
         self.last_finalized_public_key = None
+        self.oracle = oracle
 
     async def initialize(
         self,
@@ -115,7 +117,10 @@ class ValidatorsController(object):
         )
 
         submit_vote(
-            encoded_data=encoded_data, vote=vote, path=FINALIZE_VALIDATOR_VOTE_FILENAME
+            oracle=self.oracle,
+            encoded_data=encoded_data,
+            vote=vote,
+            path=FINALIZE_VALIDATOR_VOTE_FILENAME,
         )
         logger.info("Submitted validator finalization vote")
 

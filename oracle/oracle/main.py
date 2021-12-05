@@ -5,6 +5,9 @@ import threading
 from typing import Any
 
 import aiohttp
+from decouple import UndefinedValueError
+from eth_account import Account
+from eth_account.signers.local import LocalAccount
 
 from oracle.common.health_server import create_health_server_runner, start_health_server
 from oracle.common.settings import ENABLE_HEALTH_SERVER, LOG_LEVEL
@@ -17,7 +20,12 @@ from oracle.oracle.eth1 import (
 from oracle.oracle.health_server import oracle_routes
 from oracle.oracle.rewards.controller import RewardsController
 from oracle.oracle.rewards.eth2 import get_finality_checkpoints, get_genesis
-from oracle.oracle.settings import ORACLE_PROCESS_INTERVAL
+from oracle.oracle.settings import (
+    AWS_ACCESS_KEY_ID,
+    AWS_SECRET_ACCESS_KEY,
+    ORACLE_PRIVATE_KEY,
+    ORACLE_PROCESS_INTERVAL,
+)
 from oracle.oracle.validators.controller import ValidatorsController
 
 logging.basicConfig(
@@ -50,6 +58,13 @@ class InterruptHandler:
 
 
 async def main() -> None:
+    oracle: LocalAccount = Account.from_key(ORACLE_PRIVATE_KEY)
+
+    if not (AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY):
+        raise UndefinedValueError(
+            "AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY env variables must be specified"
+        )
+
     # check stakewise graphql connection
     await get_finalized_block()
 
@@ -60,7 +75,7 @@ async def main() -> None:
     await get_finality_checkpoints(session)
 
     # check whether oracle is part of the oracles set
-    await check_oracle_account()
+    await check_oracle_account(oracle)
 
     # wait for interrupt
     interrupt_handler = InterruptHandler()
@@ -69,10 +84,12 @@ async def main() -> None:
     genesis = await get_genesis(session)
 
     rewards_controller = RewardsController(
-        aiohttp_session=session, genesis_timestamp=int(genesis["genesis_time"])
+        aiohttp_session=session,
+        genesis_timestamp=int(genesis["genesis_time"]),
+        oracle=oracle,
     )
-    distributor_controller = DistributorController()
-    validators_controller = ValidatorsController()
+    distributor_controller = DistributorController(oracle)
+    validators_controller = ValidatorsController(oracle)
 
     while not interrupt_handler.exit:
         # fetch current finalized ETH1 block data

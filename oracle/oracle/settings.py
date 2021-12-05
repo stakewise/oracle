@@ -39,11 +39,11 @@ ETH2_CLIENT = config(
 )
 
 # credentials
-ORACLE_PRIVATE_KEY = config("ORACLE_PRIVATE_KEY")
+ORACLE_PRIVATE_KEY = config("ORACLE_PRIVATE_KEY", default="")
 
 # S3 credentials
-AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")
+AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID", default="")
+AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY", default="")
 
 ORACLE_PROCESS_INTERVAL = config("ORACLE_PROCESS_INTERVAL", default=180, cast=int)
 

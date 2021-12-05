@@ -1,6 +1,7 @@
 import asyncio
 import logging
 
+from eth_account.signers.local import LocalAccount
 from eth_typing import HexStr
 from web3 import Web3
 
@@ -33,8 +34,9 @@ w3 = Web3()
 class DistributorController(object):
     """Updates merkle root and submits proofs to the IPFS."""
 
-    def __init__(self) -> None:
+    def __init__(self, oracle: LocalAccount) -> None:
         self.last_to_block = None
+        self.oracle = oracle
 
     async def process(self, voting_params: DistributorVotingParameters) -> None:
         """Submits vote for the new merkle root and merkle proofs to the IPFS."""
@@ -162,7 +164,10 @@ class DistributorController(object):
             merkle_proofs=claims_link,
         )
         submit_vote(
-            encoded_data=encoded_data, vote=vote, name=DISTRIBUTOR_VOTE_FILENAME
+            oracle=self.oracle,
+            encoded_data=encoded_data,
+            vote=vote,
+            name=DISTRIBUTOR_VOTE_FILENAME,
         )
         logger.info("Distributor vote has been successfully submitted")
 

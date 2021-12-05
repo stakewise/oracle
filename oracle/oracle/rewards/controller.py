@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from typing import Union
 
 from aiohttp import ClientSession
+from eth_account.signers.local import LocalAccount
 from eth_typing import BlockNumber, HexStr
 from web3 import Web3
 from web3.types import Timestamp, Wei
@@ -40,10 +41,16 @@ def format_ether(value: Union[str, int, Wei], sign="ETH") -> str:
 class RewardsController(object):
     """Updates total rewards and activated validators number."""
 
-    def __init__(self, aiohttp_session: ClientSession, genesis_timestamp: int) -> None:
+    def __init__(
+        self,
+        aiohttp_session: ClientSession,
+        genesis_timestamp: int,
+        oracle: LocalAccount,
+    ) -> None:
         self.deposit_amount: Wei = Web3.toWei(32, "ether")
         self.aiohttp_session = aiohttp_session
         self.genesis_timestamp = genesis_timestamp
+        self.oracle = oracle
 
         self.last_vote_total_rewards = None
         self.last_vote_update_time = None
@@ -154,7 +161,12 @@ class RewardsController(object):
             activated_validators=activated_validators,
             total_rewards=str(total_rewards),
         )
-        submit_vote(encoded_data=encoded_data, vote=vote, name=REWARD_VOTE_FILENAME)
+        submit_vote(
+            oracle=self.oracle,
+            encoded_data=encoded_data,
+            vote=vote,
+            name=REWARD_VOTE_FILENAME,
+        )
         logger.info("Rewards vote has been successfully submitted")
 
         self.last_vote_total_rewards = total_rewards
