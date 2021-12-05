@@ -2,8 +2,8 @@ import logging
 
 from aiohttp import web
 
-from oracle.clients import ipfs_fetch
-from oracle.eth1 import get_finalized_block, get_voting_parameters
+from oracle.oracle.clients import ipfs_fetch
+from oracle.oracle.eth1 import get_finalized_block, get_voting_parameters
 
 logger = logging.getLogger(__name__)
 oracle_routes = web.RouteTableDef()

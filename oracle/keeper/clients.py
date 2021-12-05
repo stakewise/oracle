@@ -4,7 +4,7 @@ import boto3
 from web3 import Web3
 from web3.middleware import construct_sign_and_send_raw_middleware, geth_poa_middleware
 
-from keeper.settings import GOERLI, NETWORK, ORACLE_PRIVATE_KEY, WEB3_ENDPOINT
+from oracle.keeper.settings import GOERLI, NETWORK, ORACLE_PRIVATE_KEY, WEB3_ENDPOINT
 
 logger = logging.getLogger(__name__)
 

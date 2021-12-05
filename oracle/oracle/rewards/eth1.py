@@ -3,8 +3,8 @@ from typing import Dict
 import backoff
 from web3.types import BlockNumber
 
-from oracle.clients import execute_sw_gql_query
-from oracle.graphql_queries import FINALIZED_VALIDATORS_QUERY
+from oracle.oracle.clients import execute_sw_gql_query
+from oracle.oracle.graphql_queries import FINALIZED_VALIDATORS_QUERY
 
 from .types import FinalizedValidatorsPublicKeys
 

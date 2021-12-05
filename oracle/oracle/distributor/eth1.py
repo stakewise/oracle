@@ -7,8 +7,8 @@ from eth_typing import ChecksumAddress, HexStr
 from web3 import Web3
 from web3.types import BlockNumber, Wei
 
-from oracle.clients import execute_sw_gql_query
-from oracle.graphql_queries import (
+from oracle.oracle.clients import execute_sw_gql_query
+from oracle.oracle.graphql_queries import (
     DISABLED_STAKER_ACCOUNTS_QUERY,
     DISTRIBUTOR_CLAIMED_ACCOUNTS_QUERY,
     ONE_TIME_DISTRIBUTIONS_QUERY,
@@ -17,7 +17,7 @@ from oracle.graphql_queries import (
     PERIODIC_DISTRIBUTIONS_QUERY,
     SWISE_HOLDERS_QUERY,
 )
-from oracle.settings import (
+from oracle.oracle.settings import (
     DISTRIBUTOR_FALLBACK_ADDRESS,
     REWARD_ETH_TOKEN_CONTRACT_ADDRESS,
     STAKED_ETH_TOKEN_CONTRACT_ADDRESS,

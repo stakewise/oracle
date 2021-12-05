@@ -4,7 +4,7 @@ from eth_typing import BlockNumber, HexStr
 from web3 import Web3
 from web3.types import Wei
 
-from common.settings import (
+from oracle.common.settings import (
     FINALIZE_VALIDATOR_VOTE_FILENAME,
     INIT_VALIDATOR_VOTE_FILENAME,
 )

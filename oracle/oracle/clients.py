@@ -8,7 +8,7 @@ from gql import Client
 from gql.transport.aiohttp import AIOHTTPTransport
 from graphql import DocumentNode
 
-from oracle.settings import (
+from oracle.oracle.settings import (
     AWS_ACCESS_KEY_ID,
     AWS_SECRET_ACCESS_KEY,
     ETHEREUM_SUBGRAPH_URL,

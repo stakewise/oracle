@@ -6,15 +6,19 @@ from typing import Any
 
 import aiohttp
 
-from common.health_server import create_health_server_runner, start_health_server
-from common.settings import ENABLE_HEALTH_SERVER, LOG_LEVEL
-from oracle.distributor.controller import DistributorController
-from oracle.eth1 import check_oracle_account, get_finalized_block, get_voting_parameters
-from oracle.health_server import oracle_routes
-from oracle.rewards.controller import RewardsController
-from oracle.rewards.eth2 import get_finality_checkpoints, get_genesis
-from oracle.settings import ORACLE_PROCESS_INTERVAL
-from oracle.validators.controller import ValidatorsController
+from oracle.common.health_server import create_health_server_runner, start_health_server
+from oracle.common.settings import ENABLE_HEALTH_SERVER, LOG_LEVEL
+from oracle.oracle.distributor.controller import DistributorController
+from oracle.oracle.eth1 import (
+    check_oracle_account,
+    get_finalized_block,
+    get_voting_parameters,
+)
+from oracle.oracle.health_server import oracle_routes
+from oracle.oracle.rewards.controller import RewardsController
+from oracle.oracle.rewards.eth2 import get_finality_checkpoints, get_genesis
+from oracle.oracle.settings import ORACLE_PROCESS_INTERVAL
+from oracle.oracle.validators.controller import ValidatorsController
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(message)s",

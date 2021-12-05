@@ -13,7 +13,7 @@ from web3 import Web3
 from web3.contract import ContractFunction
 from web3.types import TxParams
 
-from common.settings import (
+from oracle.common.settings import (
     AWS_S3_BUCKET_NAME,
     AWS_S3_REGION,
     DISTRIBUTOR_VOTE_FILENAME,
@@ -22,13 +22,13 @@ from common.settings import (
     INIT_VALIDATOR_VOTE_FILENAME,
     REWARD_VOTE_FILENAME,
 )
-from keeper.clients import web3_client
-from keeper.contracts import multicall_contract, oracles_contract
-from keeper.settings import TRANSACTION_TIMEOUT
-from keeper.typings import OraclesVotes, Parameters
-from oracle.distributor.types import DistributorVote
-from oracle.rewards.types import RewardVote
-from oracle.validators.types import ValidatorVote
+from oracle.keeper.clients import web3_client
+from oracle.keeper.contracts import multicall_contract, oracles_contract
+from oracle.keeper.settings import TRANSACTION_TIMEOUT
+from oracle.keeper.typings import OraclesVotes, Parameters
+from oracle.oracle.distributor.types import DistributorVote
+from oracle.oracle.rewards.types import RewardVote
+from oracle.oracle.validators.types import ValidatorVote
 
 logger = logging.getLogger(__name__)
 s3_client = boto3.client(

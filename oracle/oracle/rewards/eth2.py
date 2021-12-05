@@ -5,7 +5,7 @@ import backoff
 from aiohttp import ClientSession
 from eth_typing import HexStr
 
-from oracle.settings import ETH2_CLIENT, ETH2_ENDPOINT, LIGHTHOUSE
+from oracle.oracle.settings import ETH2_CLIENT, ETH2_ENDPOINT, LIGHTHOUSE
 
 
 class ValidatorStatus(Enum):

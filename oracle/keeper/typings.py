@@ -2,9 +2,9 @@ from typing import List, NamedTuple
 
 from eth_typing import ChecksumAddress
 
-from oracle.distributor.types import DistributorVote
-from oracle.rewards.types import RewardVote
-from oracle.validators.types import ValidatorVote
+from oracle.oracle.distributor.types import DistributorVote
+from oracle.oracle.rewards import RewardVote
+from oracle.oracle.validators.types import ValidatorVote
 
 
 class Parameters(NamedTuple):

@@ -5,7 +5,7 @@ from typing import List, Set
 from ens.constants import EMPTY_ADDR_HEX
 from eth_typing import BlockNumber, ChecksumAddress
 
-from oracle.settings import (
+from oracle.oracle.settings import (
     DISTRIBUTOR_FALLBACK_ADDRESS,
     REWARD_ETH_TOKEN_CONTRACT_ADDRESS,
     STAKED_ETH_TOKEN_CONTRACT_ADDRESS,

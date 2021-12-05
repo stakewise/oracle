@@ -7,7 +7,7 @@ import ipfshttpclient
 from aiohttp import ClientSession
 from eth_typing import ChecksumAddress
 
-from oracle.settings import (
+from oracle.oracle.settings import (
     IPFS_PIN_ENDPOINTS,
     IPFS_PINATA_API_KEY,
     IPFS_PINATA_PIN_ENDPOINT,

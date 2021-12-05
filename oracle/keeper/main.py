@@ -4,11 +4,11 @@ import threading
 import time
 from typing import Any
 
-from common.health_server import create_health_server_runner, start_health_server
-from common.settings import ENABLE_HEALTH_SERVER, LOG_LEVEL
-from keeper.health_server import keeper_routes
-from keeper.settings import KEEPER_PROCESS_INTERVAL
-from keeper.utils import get_keeper_params, get_oracles_votes, submit_votes
+from oracle.common.health_server import create_health_server_runner, start_health_server
+from oracle.common.settings import ENABLE_HEALTH_SERVER, LOG_LEVEL
+from oracle.keeper.health_server import keeper_routes
+from oracle.keeper.settings import KEEPER_PROCESS_INTERVAL
+from oracle.keeper.utils import get_keeper_params, get_oracles_votes, submit_votes
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(message)s",

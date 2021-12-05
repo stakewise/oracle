@@ -8,8 +8,8 @@ from eth_typing import BlockNumber, HexStr
 from web3 import Web3
 from web3.types import Timestamp, Wei
 
-from common.settings import REWARD_VOTE_FILENAME
-from oracle.eth1 import submit_vote
+from oracle.common.settings import REWARD_VOTE_FILENAME
+from oracle.oracle.eth1 import submit_vote
 
 from ..settings import SYNC_PERIOD
 from .eth1 import get_finalized_validators_public_keys

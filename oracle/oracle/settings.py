@@ -4,7 +4,7 @@ from decouple import Choices, Csv, config
 from eth_typing import HexStr
 from web3 import Web3
 
-from common.settings import GOERLI, MAINNET, NETWORK
+from oracle.common.settings import GOERLI, MAINNET, NETWORK
 
 IPFS_PIN_ENDPOINTS = config(
     "IPFS_PIN_ENDPOINTS", cast=Csv(), default="/dns/ipfs.infura.io/tcp/5001/https"

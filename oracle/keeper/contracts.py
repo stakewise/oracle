@@ -1,7 +1,7 @@
 from web3.contract import Contract
 
-from keeper.clients import web3_client
-from keeper.settings import MULTICALL_CONTRACT_ADDRESS, ORACLES_CONTRACT_ADDRESS
+from oracle.keeper.clients import web3_client
+from oracle.keeper.settings import MULTICALL_CONTRACT_ADDRESS, ORACLES_CONTRACT_ADDRESS
 
 
 def get_multicall_contract() -> Contract:

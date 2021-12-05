@@ -2,7 +2,7 @@ from collections import Counter
 
 from aiohttp import web
 
-from keeper.utils import can_submit, get_keeper_params, get_oracles_votes
+from oracle.keeper.utils import can_submit, get_keeper_params, get_oracles_votes
 
 keeper_routes = web.RouteTableDef()
 

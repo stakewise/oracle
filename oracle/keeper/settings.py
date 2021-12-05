@@ -1,7 +1,7 @@
 from decouple import config
 from web3 import Web3
 
-from common.settings import GOERLI, MAINNET, NETWORK
+from oracle.common.settings import GOERLI, MAINNET, NETWORK
 
 WEB3_ENDPOINT = config("WEB3_ENDPOINT")
 

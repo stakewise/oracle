@@ -9,7 +9,7 @@ from eth_account.signers.local import LocalAccount
 from web3 import Web3
 from web3.types import BlockNumber, Timestamp, Wei
 
-from common.settings import AWS_S3_BUCKET_NAME, ETH1_CONFIRMATION_BLOCKS
+from oracle.common.settings import AWS_S3_BUCKET_NAME, ETH1_CONFIRMATION_BLOCKS
 
 from .clients import execute_ethereum_gql_query, execute_sw_gql_query, s3_client
 from .distributor.types import DistributorVote, DistributorVotingParameters

@@ -6,15 +6,15 @@ from ens.constants import EMPTY_ADDR_HEX
 from eth_typing import BlockNumber, ChecksumAddress
 from web3 import Web3
 
-from oracle.clients import execute_uniswap_v3_gql_query
-from oracle.graphql_queries import (
+from oracle.oracle.clients import execute_uniswap_v3_gql_query
+from oracle.oracle.graphql_queries import (
     UNISWAP_V3_CURRENT_TICK_POSITIONS_QUERY,
     UNISWAP_V3_POOL_QUERY,
     UNISWAP_V3_POOLS_QUERY,
     UNISWAP_V3_POSITIONS_QUERY,
     UNISWAP_V3_RANGE_POSITIONS_QUERY,
 )
-from oracle.settings import (
+from oracle.oracle.settings import (
     REWARD_ETH_TOKEN_CONTRACT_ADDRESS,
     STAKED_ETH_TOKEN_CONTRACT_ADDRESS,
     SWISE_TOKEN_CONTRACT_ADDRESS,

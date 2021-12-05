@@ -4,8 +4,8 @@ import logging
 from eth_typing import HexStr
 from web3 import Web3
 
-from common.settings import DISTRIBUTOR_VOTE_FILENAME
-from oracle.settings import (
+from oracle.common.settings import DISTRIBUTOR_VOTE_FILENAME
+from oracle.oracle.settings import (
     REWARD_ETH_TOKEN_CONTRACT_ADDRESS,
     SWISE_TOKEN_CONTRACT_ADDRESS,
 )

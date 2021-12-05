@@ -5,13 +5,17 @@ from eth_typing import ChecksumAddress, HexStr
 from web3 import Web3
 from web3.types import BlockNumber
 
-from oracle.clients import execute_ethereum_gql_query, execute_sw_gql_query, ipfs_fetch
-from oracle.graphql_queries import (
+from oracle.oracle.clients import (
+    execute_ethereum_gql_query,
+    execute_sw_gql_query,
+    ipfs_fetch,
+)
+from oracle.oracle.graphql_queries import (
     FINALIZE_OPERATOR_QUERY,
     INITIALIZE_OPERATORS_QUERY,
     VALIDATOR_REGISTRATIONS_QUERY,
 )
-from oracle.settings import WITHDRAWAL_CREDENTIALS
+from oracle.oracle.settings import WITHDRAWAL_CREDENTIALS
 
 from .types import ValidatorDepositData
 
