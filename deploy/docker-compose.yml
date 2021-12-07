@@ -13,7 +13,7 @@ services:
       dockerfile: Dockerfile
     restart: always
     entrypoint: ["python"]
-    command: ["oracle/main.py"]
+    command: ["oracle/oracle/main.py"]
     env_file:
       - .env
 
@@ -23,7 +23,7 @@ services:
   #     dockerfile: Dockerfile
   #   restart: always
   #   entrypoint: ["python"]
-  #   command: ["keeper/main.py"]
+  #   command: ["oracle/keeper/main.py"]
   #   env_file:
   #     - .env
 
