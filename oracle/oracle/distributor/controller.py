@@ -78,7 +78,7 @@ class DistributorController(object):
 
         last_merkle_root = voting_params["last_merkle_root"]
         last_merkle_proofs = voting_params["last_merkle_proofs"]
-        if last_merkle_root is not None and last_merkle_proofs is not None:
+        if w3.toInt(hexstr=last_merkle_root) and last_merkle_proofs:
             # fetch accounts that have claimed since last merkle root update
             claimed_accounts = await get_distributor_claimed_accounts(last_merkle_root)
 

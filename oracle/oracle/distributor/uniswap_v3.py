@@ -51,9 +51,6 @@ async def get_uniswap_v3_pools(block_number: BlockNumber) -> UniswapV3Pools:
     # accumulate chunks of pools
     while len(pools_chunk) >= 1000:
         last_id = pools_chunk[-1]["id"]
-        if not last_id:
-            break
-
         result: Dict = await execute_uniswap_v3_gql_query(
             query=UNISWAP_V3_POOLS_QUERY,
             variables=dict(block_number=block_number, last_id=last_id),
@@ -186,9 +183,6 @@ async def get_uniswap_v3_liquidity_points(
     # accumulate chunks of positions
     while len(positions_chunk) >= 1000:
         last_id = positions_chunk[-1]["id"]
-        if not last_id:
-            break
-
         result: Dict = await execute_uniswap_v3_gql_query(
             query=UNISWAP_V3_CURRENT_TICK_POSITIONS_QUERY,
             variables=dict(
@@ -247,9 +241,6 @@ async def get_uniswap_v3_range_liquidity_points(
     # accumulate chunks of positions
     while len(positions_chunk) >= 1000:
         last_id = positions_chunk[-1]["id"]
-        if not last_id:
-            break
-
         result: Dict = await execute_uniswap_v3_gql_query(
             query=UNISWAP_V3_RANGE_POSITIONS_QUERY,
             variables=dict(
@@ -327,9 +318,6 @@ async def get_uniswap_v3_single_token_balances(
     # accumulate chunks of positions
     while len(positions_chunk) >= 1000:
         last_id = positions_chunk[-1]["id"]
-        if not last_id:
-            break
-
         result: Dict = await execute_uniswap_v3_gql_query(
             query=UNISWAP_V3_POSITIONS_QUERY,
             variables=dict(

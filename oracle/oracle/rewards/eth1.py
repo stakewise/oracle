@@ -25,9 +25,6 @@ async def get_finalized_validators_public_keys(
     # accumulate chunks of validators
     while len(validators_chunk) >= 1000:
         last_id = validators_chunk[-1]["id"]
-        if not last_id:
-            break
-
         result: Dict = await execute_sw_gql_query(
             query=FINALIZED_VALIDATORS_QUERY,
             variables=dict(block_number=block_number, last_id=last_id),

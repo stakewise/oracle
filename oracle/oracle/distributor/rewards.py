@@ -79,6 +79,9 @@ class DistributorRewards(object):
         self, contract_address: ChecksumAddress, reward: int
     ) -> Rewards:
         """Calculates reward for every account recursively and aggregates amounts."""
+        if reward <= 0:
+            return {}
+
         if self.is_supported_contract(contract_address):
             return await self._get_rewards(
                 contract_address=contract_address,

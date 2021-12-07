@@ -56,9 +56,6 @@ async def get_periodic_allocations(
     # accumulate chunks of distributions
     while len(distributions_chunk) >= 1000:
         last_id = distributions_chunk[-1]["id"]
-        if not last_id:
-            break
-
         result: Dict = await execute_sw_gql_query(
             query=PERIODIC_DISTRIBUTIONS_QUERY,
             variables=dict(from_block=from_block, to_block=to_block, last_id=last_id),
@@ -107,9 +104,6 @@ async def get_disabled_stakers_reward_eth_distributions(
     # accumulate chunks of validators
     while len(stakers_chunk) >= 1000:
         last_id = stakers_chunk[-1]["id"]
-        if not last_id:
-            break
-
         result: Dict = await execute_sw_gql_query(
             query=DISABLED_STAKER_ACCOUNTS_QUERY,
             variables=dict(block_number=to_block, last_id=last_id),
@@ -180,9 +174,6 @@ async def get_distributor_claimed_accounts(merkle_root: HexStr) -> ClaimedAccoun
     # accumulate chunks of claims
     while len(claims_chunk) >= 1000:
         last_id = claims_chunk[-1]["id"]
-        if not last_id:
-            break
-
         result: Dict = await execute_sw_gql_query(
             query=DISTRIBUTOR_CLAIMED_ACCOUNTS_QUERY,
             variables=dict(merkle_root=merkle_root, last_id=last_id),
@@ -212,9 +203,6 @@ async def get_swise_holders(
     # accumulate chunks
     while len(swise_holders_chunk) >= 1000:
         last_id = swise_holders_chunk[-1]["id"]
-        if not last_id:
-            break
-
         result: Dict = await execute_sw_gql_query(
             query=SWISE_HOLDERS_QUERY,
             variables=dict(block_number=to_block, last_id=last_id),
@@ -455,9 +443,6 @@ async def get_one_time_rewards(
     # accumulate chunks of distributions
     while len(distributions_chunk) >= 1000:
         last_id = distributions_chunk[-1]["id"]
-        if not last_id:
-            break
-
         result: Dict = await execute_sw_gql_query(
             query=ONE_TIME_DISTRIBUTIONS_QUERY,
             variables=dict(from_block=from_block, to_block=to_block, last_id=last_id),
