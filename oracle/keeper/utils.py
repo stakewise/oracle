@@ -344,7 +344,7 @@ def submit_votes(votes: OraclesVotes, total_oracles: int) -> None:
             validator_vote: ValidatorVote = next(
                 vote
                 for vote in validator_votes
-                if vote["public_key"] == (public_key, operator)
+                if (vote["public_key"], vote["operator"]) == (public_key, operator)
             )
 
             logger.info(
