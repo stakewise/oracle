@@ -46,6 +46,12 @@ class ValidatorsController(object):
             # not enough balance to initiate next validator
             return
 
+        if voting_params["finalizing_validator"]:
+            logger.info(
+                "Waiting for the current validator to finalize before voting for the next"
+            )
+            return
+
         # select next validator
         # TODO: implement scoring system based on the operators performance
         validator_deposit_data = await select_validator(current_block_number)

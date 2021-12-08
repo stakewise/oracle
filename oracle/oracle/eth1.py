@@ -100,6 +100,7 @@ async def get_voting_parameters(block_number: BlockNumber) -> VotingParameters:
         + int(pool["activatedValidators"]),
         validators_nonce=int(network["oraclesValidatorsNonce"]),
         pool_balance=Wei(int(pool["balance"])),
+        finalizing_validator=public_key is not None,
     )
     finalize_validator = FinalizeValidatorVotingParameters(
         validators_nonce=int(network["oraclesValidatorsNonce"]),

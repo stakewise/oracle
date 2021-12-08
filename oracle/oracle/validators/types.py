@@ -7,6 +7,7 @@ from web3.types import Wei
 class InitializeValidatorVotingParameters(TypedDict):
     validator_index: int
     validators_nonce: int
+    finalizing_validator: bool
     pool_balance: Wei
 
 
