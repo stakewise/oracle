@@ -94,7 +94,10 @@ class ValidatorsController(object):
             # already voted for the validator with the current public key or no validator to finalize
             return
 
-        can_finalize = await can_finalize_validator(current_public_key)
+        can_finalize = await can_finalize_validator(
+            block_number=current_block_number,
+            public_key=current_public_key,
+        )
         if not can_finalize:
             logger.warning(
                 f"Cannot finalize validator registration: public key={current_public_key}"

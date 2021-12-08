@@ -322,7 +322,7 @@ INITIALIZE_OPERATORS_QUERY = gql(
     query getOperators($block_number: Int, $min_collateral: BigInt) {
       operators(
         block: { number: $block_number }
-        where: { collateral_gte: $min_collateral, committed: true }
+        where: { collateral_gte: $min_collateral, committed: true, locked: false }
         orderBy: validatorsCount
         orderDirection: asc
       ) {
@@ -337,10 +337,10 @@ INITIALIZE_OPERATORS_QUERY = gql(
 
 FINALIZE_OPERATOR_QUERY = gql(
     """
-    query getOperators($block_number: Int, $address: ID) {
+    query getOperators($block_number: Int, $operator: ID) {
       operators(
         block: { number: $block_number }
-        where: { id: $address }
+        where: { id: $operator, locked: true }
       ) {
         id
         finalizeMerkleProofs
