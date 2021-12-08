@@ -18,6 +18,7 @@ from .eth2 import (
     PENDING_STATUSES,
     SECONDS_PER_EPOCH,
     SLOTS_PER_EPOCH,
+    ValidatorStatus,
     get_finality_checkpoints,
     get_validators,
 )
@@ -112,11 +113,13 @@ class RewardsController(object):
                 state_id=state_id,
             )
             for validator in validators:
+                if ValidatorStatus(validator["status"]) in PENDING_STATUSES:
+                    continue
+
+                activated_validators += 1
                 total_rewards += Wei(
                     Web3.toWei(validator["balance"], "gwei") - self.deposit_amount
                 )
-                if validator["status"] not in PENDING_STATUSES:
-                    activated_validators += 1
 
         pretty_total_rewards = format_ether(total_rewards)
         log_msg = f"Retrieved pool validator rewards: total={pretty_total_rewards}"
