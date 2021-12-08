@@ -126,7 +126,7 @@ class ValidatorsController(object):
             oracle=self.oracle,
             encoded_data=encoded_data,
             vote=vote,
-            path=FINALIZE_VALIDATOR_VOTE_FILENAME,
+            name=FINALIZE_VALIDATOR_VOTE_FILENAME,
         )
         logger.info("Submitted validator finalization vote")
 
