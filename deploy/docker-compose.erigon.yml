@@ -13,6 +13,8 @@ services:
       - --maxpeers=100
       - --datadir=/home/erigon/.local/share/erigon
       - --batchSize=512M
+      - --prune.r.before=11184524
+      - --prune=htc
     volumes:
       - erigon:/home/erigon/.local/share/erigon
     restart: always
