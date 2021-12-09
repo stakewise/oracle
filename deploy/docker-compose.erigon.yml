@@ -1,0 +1,32 @@
+version: '3.1'
+
+volumes:
+  erigon:
+    driver: local
+
+services:
+  erigon:
+    image: thorax/erigon:v2021.12.01
+    command:
+      - erigon
+      - --private.api.addr=0.0.0.0:9090
+      - --maxpeers=100
+      - --datadir=/home/erigon/.local/share/erigon
+      - --batchSize=512M
+    volumes:
+      - erigon:/home/erigon/.local/share/erigon
+    restart: always
+
+  erigon-rpcdaemon:
+    image: thorax/erigon:v2021.12.01
+    command:
+      - rpcdaemon
+      - --private.api.addr=erigon:9090
+      - --http.addr=0.0.0.0
+      - --http.vhosts=*
+      - --http.corsdomain=*
+      - --http.api=eth,erigon,web3,net,txpool
+      - --ws
+    restart: always
+    depends_on:
+      - erigon
