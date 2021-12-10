@@ -70,8 +70,8 @@ async def health(request):
                 and can_submit(most_voted_finalize_validator[0][1], len(params.oracles))
             )
         ):
-            return web.Response(text="keeper 0")
+            return web.Response(text="keeper 1")
     except:  # noqa: E722
         pass
 
-    return web.Response(text="keeper 1")
+    return web.Response(text="keeper 0")

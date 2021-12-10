@@ -21,9 +21,9 @@ async def health(request):
         # check IPFS connection
         await ipfs_fetch(last_merkle_proofs)
 
-        return web.Response(text="oracle 0")
+        return web.Response(text="oracle 1")
     except Exception as e:  # noqa: E722
         logger.error(e)
         pass
 
-    return web.Response(text="oracle 1")
+    return web.Response(text="oracle 0")
