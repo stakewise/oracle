@@ -7,11 +7,6 @@ root and proofs for the additional token distributions through the
 [Merkle Distributor](https://github.com/stakewise/contracts/blob/master/contracts/merkles/MerkleDistributor.sol)
 contract.
 
-### Onboarding
-
-To get onboarded as an oracle, you have to get approved and included by the DAO. You can read more about
-responsibilities and benefits of being an oracle [here](link to forum post about becoming an oracle).
-
 ### Dependencies
 
 #### IPFS Node
@@ -36,61 +31,29 @@ supports [ETH2 Beacon Node API specification](https://ethereum.github.io/beacon-
 - [Teku](https://launchpad.ethereum.org/en/teku)
 - [Infura](https://infura.io/docs/eth2) (hosted)
 
-### Installation
-
-#### Option 1. Run with [Docker](https://www.docker.com/get-started)
-
-Run the following command locally to build the docker image:
-
-```shell script
-docker build -f Dockerfile-oracle --pull -t stakewise-oracle:latest .
-```
-
-**You can also use [pre-build images](https://console.cloud.google.com/gcr/images/stakewiselabs/GLOBAL/oracle)**
-
-#### Option 2. Build with [Poetry](https://python-poetry.org/docs/)
-
-```shell script
-poetry install --no-dev
-```
-
 ### Usage
 
-#### 1. Create an environment file with [Settings](#settings)
+1. Move to `deploy` directory
 
 ```shell script
-cat >./local.env <<EOL
-NETWORK=mainnet
-ETH2_ENDPOINT=http://localhost:4000
-IPFS_PINATA_API_KEY=<pinata api key>
-IPFS_PINATA_SECRET_KEY=<pinata secret key>
-AWS_ACCESS_KEY_ID=<aws key id>
-AWS_SECRET_ACCESS_KEY=<aws secret access key>
-ORACLE_PRIVATE_KEY=0x<private_key>
-EOL
+cd deploy
 ```
 
-#### 2. Start Oracle
-
-Option 1. Run with Docker
-
-Run the following command locally to start the oracle:
+2. Create an edit environment file (see `Oracle Settings` below)
 
 ```shell script
-docker run --env-file ./local.env gcr.io/stakewiselabs/oracle:latest
+cp .env.example .env
 ```
 
-where `local.env` is an environment file with [Settings](#settings).
+3. Enable `pushover` alerts in `configs/alertmanager.yml`
 
-Option 2. Run with Poetry
-
-Run the following command locally to start the oracle:
+4. Run with [docker-compose](https://docs.docker.com/compose/)
 
 ```shell script
-poetry run python oracle/main.py
+docker-compose -f docker-compose.yml up -d
 ```
 
-### Settings
+### Oracle Settings
 
 | Variable                 | Description                                                                        | Required | Default                                                                 |
 |--------------------------|------------------------------------------------------------------------------------|----------|-------------------------------------------------------------------------|
@@ -130,57 +93,35 @@ The ETH1 node is used to submit the transactions on chain. Any of the ETH1 clien
 - [Infura](https://infura.io/docs/eth2) (hosted)
 - [Alchemy](https://www.alchemy.com/) (hosted)
 
-### Installation
-
-#### Option 1. Build with [Docker](https://www.docker.com/get-started)
-
-Run the following command locally to build the docker image:
-
-```shell script
-docker build -f Dockerfile-keeper --pull -t stakewise-keeper:latest .
-```
-
-**You can also use [pre-build images](https://console.cloud.google.com/gcr/images/stakewiselabs/GLOBAL/keeper)**
-
-#### Option 2. Build with [Poetry](https://python-poetry.org/docs/)
-
-```shell script
-poetry install --no-dev
-```
-
 ### Usage
 
-#### 1. Create an environment file with [Settings](#settings)
+1. Move to `deploy` directory
 
 ```shell script
-cat >./local.env <<EOL
-NETWORK=mainnet
-WEB3_ENDPOINT=http://localhost:3500
-ORACLE_PRIVATE_KEY=0x<private_key>
-EOL
+cd deploy
 ```
 
-#### 2. Start Keeper
-
-Option 1. Run with Docker
-
-Run the following command locally to start the keeper:
+2. Create an edit environment file (see `Keeper Settings` below)
 
 ```shell script
-docker run --env-file ./local.env gcr.io/stakewiselabs/keeper:latest
+cp .env.example .env
 ```
 
-where `local.env` is an environment file with [Settings](#settings).
+3. Enable `pushover` alerts in `configs/alertmanager.yml`
 
-Option 2. Run with Poetry
+4. Uncomment `keeper` sections in the following files:
+   * configs/rules.yml
+   * configs/prometheus.yml
+   * configs/rules.yml
+   * docker-compose.yml
 
-Run the following command locally to start the keeper:
+5. Run with [docker-compose](https://docs.docker.com/compose/)
 
 ```shell script
-poetry run python keeper/main.py
+docker-compose -f docker-compose.yml up -d
 ```
 
-### Settings
+### Keeper Settings
 
 | Variable                 | Description                                                                        | Required | Default   |
 |--------------------------|------------------------------------------------------------------------------------|----------|-----------|
