@@ -9,7 +9,7 @@ services:
     image: ethereum/client-go:v1.10.11
     restart: always
     command:
-      - --syncmode=fast
+      - --syncmode=full
       - --http
       - --http.addr=0.0.0.0
       - --http.vhosts=*
