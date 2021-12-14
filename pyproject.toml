@@ -11,14 +11,14 @@ python = "==3.8.12"
 python-decouple = "==3.5"
 web3 = "==5.25.0"
 py-ecc = "==5.2.0"
-gql = {version = "3.0.0b1", allow-prereleases = true, extras = ["aiohttp"]}
+gql = {version = "3.0.0rc0", allow-prereleases = true, extras = ["aiohttp"]}
 backoff = "==1.11.1"
-aiohttp = {version = "==3.7.4.post0", extras = ["speedups"]}
-boto3 = {version = "==1.20.20", extras = ["awscrt"]}
+aiohttp = {version = "==3.8.1", extras = ["speedups"]}
+boto3 = {version = "==1.20.24", extras = ["awscrt"]}
 
 [tool.poetry.dev-dependencies]
 mypy = "==0.910"
-black = "==21.11b1"
+black = "==21.12b0"
 flake8 = "==4.0.1"
 isort = "==5.10.1"
 flake8-black = "==0.2.3"
