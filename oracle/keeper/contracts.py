@@ -55,6 +55,15 @@ def get_oracles_contract() -> Contract:
             },
             {
                 "inputs": [
+                    {"internalType": "address", "name": "account", "type": "address"}
+                ],
+                "name": "isOracle",
+                "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
+                "stateMutability": "view",
+                "type": "function",
+            },
+            {
+                "inputs": [
                     {
                         "components": [
                             {

@@ -9,6 +9,10 @@ ORACLE_PRIVATE_KEY = config("ORACLE_PRIVATE_KEY")
 
 KEEPER_PROCESS_INTERVAL = config("KEEPER_PROCESS_INTERVAL", default=180, cast=int)
 
+KEEPER_MIN_BALANCE_WEI = config(
+    "KEEPER_MIN_BALANCE_WEI", default=Web3.toWei(0.1, "ether"), cast=int
+)
+
 TRANSACTION_TIMEOUT = config("TRANSACTION_TIMEOUT", default=900, cast=int)
 
 if NETWORK == MAINNET:

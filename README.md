@@ -133,4 +133,5 @@ docker-compose -f docker-compose.yml up -d
 | ORACLE_PRIVATE_KEY       | The ETH1 private key of the oracle                                                 | Yes      | -         |
 | KEEPER_PROCESS_INTERVAL  | How long to wait before processing again (in seconds)                              | No       | 180       |
 | ETH1_CONFIRMATION_BLOCKS | The required number of ETH1 confirmation blocks used to fetch the data             | No       | 15        |
+| KEEPER_MIN_BALANCE_WEI   | The minimum balance keeper must have for votes submission                          | No       | 0.1 ETH   |
 | LOG_LEVEL                | The log level of the keeper                                                        | No       | INFO      |
