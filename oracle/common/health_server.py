@@ -17,5 +17,5 @@ def start_health_server(runner):
 def create_health_server_runner(routes):
     app = web.Application()
     app.add_routes(routes)
-    runner = web.AppRunner(app)
+    runner = web.AppRunner(app, access_log=None)
     return runner
