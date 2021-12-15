@@ -3,7 +3,7 @@
 The deployment directory contains a set of docker-compose files for deploying `oracle` and `keeper` (by default, only `oracle` will be deployed). Oracle requires eth2 node, graph node and ipfs as dependencies, if you do not use cloud solutions, you can deploy self-hosted dependencies:
 
 ```console
-$ COMPOSE_PROFILES=geth,prysm,graph docker-compose up -d
+$ COMPOSE_PROFILES=oracle,geth,prysm,graph docker-compose up -d
 ```
 
 If you want to run the keeper service:

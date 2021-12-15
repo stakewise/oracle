@@ -26,14 +26,16 @@ services:
     entrypoint: ["python"]
     command: ["oracle/oracle/main.py"]
     env_file: [".env"]
+    profiles: ["oracle"]
 
-  # keeper:
-  #   container_name: keeper
-  #   image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:feature-oracle-v2
-  #   restart: always
-  #   entrypoint: ["python"]
-  #   command: ["oracle/keeper/main.py"]
-  #   env_file: [".env"]
+  keeper:
+    container_name: keeper
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:feature-oracle-v2
+    restart: always
+    entrypoint: ["python"]
+    command: ["oracle/keeper/main.py"]
+    env_file: [".env"]
+    profiles: ["keeper"]
 
   prometheus:
     container_name: prometheus
