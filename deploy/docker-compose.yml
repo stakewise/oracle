@@ -62,7 +62,7 @@ services:
       - ./configs/alertmanager.yml:/opt/bitnami/alertmanager/conf/config.yml
     depends_on: ["prometheus"]
 
-  graph-node:
+  graph_node:
     container_name: graph_node
     image: graphprotocol/graph-node:v0.24.2
     restart: always
@@ -83,7 +83,7 @@ services:
     container_name: subgraphs
     image: europe-west4-docker.pkg.dev/stakewiselabs/public/subgraphs:v1.0.0
     command: >
-      /bin/sh -c "until nc -vz graph-node 8020; do echo 'Waiting graph-node'; sleep 2; done
+      /bin/sh -c "until nc -vz graph_node 8020; do echo 'Waiting graph_node'; sleep 2; done
       && yarn prepare:${NETWORK}
       && yarn codegen
       && yarn build
@@ -91,7 +91,7 @@ services:
       && yarn deploy:local"
     env_file: [".env"]
     restart: "no"
-    depends_on: ["graph-node","ipfs"]
+    depends_on: ["graph_node","ipfs"]
     profiles: ["graph"]
 
   ipfs:
