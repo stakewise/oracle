@@ -60,7 +60,7 @@ services:
       - alertmanager:/opt/bitnami/alertmanager/data
       - ./configs/alertmanager.yml:/opt/bitnami/alertmanager/conf/config.yml
     depends_on: ["prometheus"]
-  
+
   graph-node:
     container_name: graph-node
     image: graphprotocol/graph-node:v0.24.2
@@ -92,7 +92,7 @@ services:
     restart: "no"
     depends_on: ["graph-node","ipfs"]
     profiles: ["graph"]
-  
+
   ipfs:
     container_name: ipfs
     image: ipfs/go-ipfs:v0.10.0
@@ -104,7 +104,7 @@ services:
         hard: 8192
     volumes: ["ipfs:/data/ipfs","./configs/ipfs-entrypoint.sh:/usr/local/bin/start_ipfs"]
     profiles: ["graph"]
-  
+
   geth:
     container_name: geth
     image: ethereum/client-go:v1.10.13
@@ -164,7 +164,7 @@ services:
       - --accept-terms-of-use
     volumes: ["prysm:/data"]
     profiles: ["prysm"]
-  
+
   lighthouse:
     container_name: lighthouse
     image: sigp/lighthouse:v2.0.1
