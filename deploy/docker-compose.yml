@@ -21,9 +21,6 @@ volumes:
 services:
   oracle:
     container_name: oracle
-    # build:
-    #   context: ./../
-    #   dockerfile: Dockerfile
     image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:feature-oracle-v2
     restart: always
     entrypoint: ["python"]
@@ -32,9 +29,6 @@ services:
 
   # keeper:
   #   container_name: keeper
-  #   build:
-  #     context: ./../
-  #     dockerfile: Dockerfile
   #   image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:feature-oracle-v2
   #   restart: always
   #   entrypoint: ["python"]
