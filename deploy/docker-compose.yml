@@ -63,7 +63,7 @@ services:
     depends_on: ["prometheus"]
 
   graph-node:
-    container_name: graph-node
+    container_name: graph_node
     image: graphprotocol/graph-node:v0.24.2
     restart: always
     env_file: [".env"]
