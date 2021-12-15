@@ -35,6 +35,7 @@ services:
   #   build:
   #     context: ./../
   #     dockerfile: Dockerfile
+  #   image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:feature-oracle-v2
   #   restart: always
   #   entrypoint: ["python"]
   #   command: ["oracle/keeper/main.py"]
