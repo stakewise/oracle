@@ -1,5 +1,7 @@
 __pycache__/
 venv
+dist
 .mypy_cache
 .idea
-settings.txt
+local.env
+*.env

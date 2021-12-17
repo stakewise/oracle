@@ -1,8 +1,0 @@
-notifiers==1.2.1
-web3==5.24.0
-grpcio==1.41.0
-protobuf===3.18.0
-google-api-core==1.27.0
-tenacity==7.0.0
-ipfshttpclient==0.8.0a2
-gql==2.0.0

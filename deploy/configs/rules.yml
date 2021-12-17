@@ -1,0 +1,28 @@
+groups:
+- name: oracle_keeper
+  rules:
+  # Alert for any instance that is unreachable for >2 minutes.
+  - alert: ExporterDown
+    expr: up == 0
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Exporter {{ $labels.instance }} down"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 2 minutes."
+  - alert: OracleDown
+    expr: oracle == 0
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Oracle {{ $labels.instance }} down"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 2 minutes."
+  # - alert: KeeperDown
+  #   expr: keeper == 0
+  #   for: 2m
+  #   labels:
+  #     severity: critical
+  #   annotations:
+  #     summary: "Keeper {{ $labels.instance }} down"
+  #     description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 2 minutes."
