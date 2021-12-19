@@ -7,7 +7,7 @@ from web3.types import Wei
 
 from oracle.common.settings import VALIDATOR_VOTE_FILENAME
 
-from ..eth1 import get_latest_block, submit_vote
+from ..eth1 import submit_vote
 from .eth1 import get_validators_count, get_voting_parameters, select_validator
 from .types import ValidatorVote
 
@@ -26,8 +26,8 @@ class ValidatorsController(object):
 
     async def process(self) -> None:
         """Process validators registration."""
-        latest_block_number = (await get_latest_block())["block_number"]
         voting_params = await get_voting_parameters()
+        latest_block_number = voting_params["latest_block_number"]
         pool_balance = voting_params["pool_balance"]
         if pool_balance < self.validator_deposit:
             # not enough balance to register next validator

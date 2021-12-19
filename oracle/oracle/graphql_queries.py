@@ -56,12 +56,17 @@ VOTING_PARAMETERS_QUERY = gql(
 
 VALIDATOR_VOTING_PARAMETERS_QUERY = gql(
     """
-    query getVotingParameters($block_number: Int) {
-      networks(block: { number: $block_number }) {
+    query getVotingParameters {
+      networks {
         oraclesValidatorsNonce
       }
-      pools(block: { number: $block_number }) {
+      pools {
         balance
+      }
+      _meta {
+        block {
+          number
+        }
       }
     }
 """
@@ -356,6 +361,19 @@ PARTNERS_QUERY = gql(
         revenueShare
         distributorPoints
         updatedAtBlock
+      }
+    }
+"""
+)
+
+VALIDATOR_REGISTRATIONS_QUERY = gql(
+    """
+    query getValidatorRegistrations($block_number: Int, $public_key: Bytes) {
+      validatorRegistrations(
+        block: { number: $block_number }
+        where: { id: $public_key }
+      ) {
+        id
       }
     }
 """
