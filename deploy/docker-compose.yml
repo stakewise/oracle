@@ -100,7 +100,7 @@ services:
         soft: 8192
         hard: 8192
     volumes: ["ipfs:/data/ipfs","./configs/ipfs-entrypoint.sh:/usr/local/bin/start_ipfs"]
-    profiles: ["graph"]
+    profiles: ["oracle"]
 
   geth:
     container_name: geth

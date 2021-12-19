@@ -21,19 +21,19 @@ from .types import ValidatorDepositData, ValidatorVotingParameters
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
-async def get_voting_parameters(block_number: BlockNumber) -> ValidatorVotingParameters:
+async def get_voting_parameters() -> ValidatorVotingParameters:
     """Fetches validator voting parameters."""
     result: Dict = await execute_sw_gql_query(
         query=VALIDATOR_VOTING_PARAMETERS_QUERY,
-        variables=dict(
-            block_number=block_number,
-        ),
+        variables={},
     )
     network = result["networks"][0]
     pool = result["pools"][0]
+    meta = result["_meta"]
     return ValidatorVotingParameters(
         validators_nonce=int(network["oraclesValidatorsNonce"]),
         pool_balance=Wei(int(pool["balance"])),
+        latest_block_number=BlockNumber(int(meta["block"]["number"])),
     )
 
 
