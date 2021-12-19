@@ -72,6 +72,18 @@ VALIDATOR_VOTING_PARAMETERS_QUERY = gql(
 """
 )
 
+VALIDATOR_REGISTRATIONS_SYNC_BLOCK_QUERY = gql(
+    """
+    query getMeta {
+      _meta {
+        block {
+          number
+        }
+      }
+    }
+"""
+)
+
 REGISTERED_VALIDATORS_QUERY = gql(
     """
     query getValidators($block_number: Int, $last_id: ID) {
