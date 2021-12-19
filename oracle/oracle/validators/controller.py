@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from eth_account.signers.local import LocalAccount
@@ -8,7 +9,12 @@ from web3.types import Wei
 from oracle.common.settings import VALIDATOR_VOTE_FILENAME
 
 from ..eth1 import submit_vote
-from .eth1 import get_validators_count, get_voting_parameters, select_validator
+from .eth1 import (
+    get_validators_count,
+    get_voting_parameters,
+    has_synced_block,
+    select_validator,
+)
 from .types import ValidatorVote
 
 logger = logging.getLogger(__name__)
@@ -32,6 +38,9 @@ class ValidatorsController(object):
         if pool_balance < self.validator_deposit:
             # not enough balance to register next validator
             return
+
+        while not (await has_synced_block(latest_block_number)):
+            await asyncio.sleep(5)
 
         # select next validator
         # TODO: implement scoring system based on the operators performance

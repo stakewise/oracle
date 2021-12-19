@@ -14,6 +14,7 @@ from oracle.oracle.graphql_queries import (
     OPERATORS_QUERY,
     VALIDATOR_REGISTRATIONS_LATEST_INDEX_QUERY,
     VALIDATOR_REGISTRATIONS_QUERY,
+    VALIDATOR_REGISTRATIONS_SYNC_BLOCK_QUERY,
     VALIDATOR_VOTING_PARAMETERS_QUERY,
 )
 
@@ -94,6 +95,16 @@ async def can_register_validator(block_number: BlockNumber, public_key: HexStr) 
     registrations = result["validatorRegistrations"]
 
     return len(registrations) == 0
+
+
+async def has_synced_block(block_number: BlockNumber) -> bool:
+    result: Dict = await execute_ethereum_gql_query(
+        query=VALIDATOR_REGISTRATIONS_SYNC_BLOCK_QUERY,
+        variables={},
+    )
+    meta = result["_meta"]
+
+    return block_number <= BlockNumber(int(meta["block"]["number"]))
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
