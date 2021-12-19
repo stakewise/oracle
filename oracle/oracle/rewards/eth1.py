@@ -4,19 +4,19 @@ import backoff
 from web3.types import BlockNumber
 
 from oracle.oracle.clients import execute_sw_gql_query
-from oracle.oracle.graphql_queries import FINALIZED_VALIDATORS_QUERY
+from oracle.oracle.graphql_queries import REGISTERED_VALIDATORS_QUERY
 
-from .types import FinalizedValidatorsPublicKeys
+from .types import RegisteredValidatorsPublicKeys
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
-async def get_finalized_validators_public_keys(
+async def get_registered_validators_public_keys(
     block_number: BlockNumber,
-) -> FinalizedValidatorsPublicKeys:
+) -> RegisteredValidatorsPublicKeys:
     """Fetches pool validators public keys."""
     last_id = ""
     result: Dict = await execute_sw_gql_query(
-        query=FINALIZED_VALIDATORS_QUERY,
+        query=REGISTERED_VALIDATORS_QUERY,
         variables=dict(block_number=block_number, last_id=last_id),
     )
     validators_chunk = result.get("validators", [])
@@ -26,7 +26,7 @@ async def get_finalized_validators_public_keys(
     while len(validators_chunk) >= 1000:
         last_id = validators_chunk[-1]["id"]
         result: Dict = await execute_sw_gql_query(
-            query=FINALIZED_VALIDATORS_QUERY,
+            query=REGISTERED_VALIDATORS_QUERY,
             variables=dict(block_number=block_number, last_id=last_id),
         )
         validators_chunk = result.get("validators", [])

@@ -16,17 +16,26 @@ FINALIZED_BLOCK_QUERY = gql(
 """
 )
 
+LATEST_BLOCK_QUERY = gql(
+    """
+    query getBlock {
+      blocks(
+        first: 1
+        orderBy: id
+        orderDirection: desc
+      ) {
+        id
+        timestamp
+      }
+    }
+"""
+)
+
 VOTING_PARAMETERS_QUERY = gql(
     """
     query getVotingParameters($block_number: Int) {
       networks(block: { number: $block_number }) {
         oraclesRewardsNonce
-        oraclesValidatorsNonce
-      }
-      pools(block: { number: $block_number }) {
-        pendingValidators
-        activatedValidators
-        balance
       }
       merkleDistributors(block: { number: $block_number }) {
         merkleRoot
@@ -41,25 +50,29 @@ VOTING_PARAMETERS_QUERY = gql(
         updatedAtBlock
         updatedAtTimestamp
       }
-      validators(
-        block: { number: $block_number }
-        where: { registrationStatus: Initialized }
-      ) {
-        id
-        operator {
-          id
-        }
+    }
+"""
+)
+
+VALIDATOR_VOTING_PARAMETERS_QUERY = gql(
+    """
+    query getVotingParameters($block_number: Int) {
+      networks(block: { number: $block_number }) {
+        oraclesValidatorsNonce
+      }
+      pools(block: { number: $block_number }) {
+        balance
       }
     }
 """
 )
 
-FINALIZED_VALIDATORS_QUERY = gql(
+REGISTERED_VALIDATORS_QUERY = gql(
     """
     query getValidators($block_number: Int, $last_id: ID) {
       validators(
         block: { number: $block_number }
-        where: { registrationStatus: Finalized, id_gt: $last_id }
+        where: { id_gt: $last_id }
         first: 1000
         orderBy: id
         orderDirection: asc
@@ -317,33 +330,17 @@ OPERATORS_REWARDS_QUERY = gql(
 """
 )
 
-INITIALIZE_OPERATORS_QUERY = gql(
+OPERATORS_QUERY = gql(
     """
-    query getOperators($block_number: Int, $min_collateral: BigInt) {
+    query getOperators($block_number: Int) {
       operators(
         block: { number: $block_number }
-        where: { collateral_gte: $min_collateral, committed: true, locked: false }
+        where: { committed: true }
         orderBy: validatorsCount
         orderDirection: asc
       ) {
         id
-        initializeMerkleProofs
-        collateral
-        depositDataIndex
-      }
-    }
-"""
-)
-
-FINALIZE_OPERATOR_QUERY = gql(
-    """
-    query getOperators($block_number: Int, $operator: ID) {
-      operators(
-        block: { number: $block_number }
-        where: { id: $operator, locked: true }
-      ) {
-        id
-        finalizeMerkleProofs
+        depositDataMerkleProofs
         depositDataIndex
       }
     }
@@ -364,15 +361,16 @@ PARTNERS_QUERY = gql(
 """
 )
 
-VALIDATOR_REGISTRATIONS_QUERY = gql(
+VALIDATOR_REGISTRATIONS_LATEST_INDEX_QUERY = gql(
     """
-    query getValidatorRegistrations($block_number: Int, $public_key: Bytes) {
+    query getValidatorRegistrations($block_number: Int) {
       validatorRegistrations(
         block: { number: $block_number }
-        where: { id: $public_key }
+        first: 1
+        orderBy: createdAtBlock
+        orderDirection: desc
       ) {
-        id
-        withdrawalCredentials
+        index
       }
     }
 """

@@ -14,20 +14,17 @@ from .clients import execute_ethereum_gql_query, execute_sw_gql_query, s3_client
 from .distributor.types import DistributorVote, DistributorVotingParameters
 from .graphql_queries import (
     FINALIZED_BLOCK_QUERY,
+    LATEST_BLOCK_QUERY,
     ORACLE_QUERY,
     VOTING_PARAMETERS_QUERY,
 )
 from .rewards.types import RewardsVotingParameters, RewardVote
-from .validators.types import (
-    FinalizeValidatorVotingParameters,
-    InitializeValidatorVotingParameters,
-    ValidatorVote,
-)
+from .validators.types import ValidatorVote
 
 logger = logging.getLogger(__name__)
 
 
-class FinalizedBlock(TypedDict):
+class Block(TypedDict):
     block_number: BlockNumber
     timestamp: Timestamp
 
@@ -35,12 +32,10 @@ class FinalizedBlock(TypedDict):
 class VotingParameters(TypedDict):
     rewards: RewardsVotingParameters
     distributor: DistributorVotingParameters
-    initialize_validator: InitializeValidatorVotingParameters
-    finalize_validator: FinalizeValidatorVotingParameters
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
-async def get_finalized_block() -> FinalizedBlock:
+async def get_finalized_block() -> Block:
     """Gets the finalized block number and its timestamp."""
     result: Dict = await execute_ethereum_gql_query(
         query=FINALIZED_BLOCK_QUERY,
@@ -48,7 +43,22 @@ async def get_finalized_block() -> FinalizedBlock:
             confirmation_blocks=ETH1_CONFIRMATION_BLOCKS,
         ),
     )
-    return FinalizedBlock(
+    return Block(
+        block_number=BlockNumber(int(result["blocks"][0]["id"])),
+        timestamp=Timestamp(int(result["blocks"][0]["timestamp"])),
+    )
+
+
+@backoff.on_exception(backoff.expo, Exception, max_time=900)
+async def get_latest_block() -> Block:
+    """Gets the latest block number and its timestamp."""
+    result: Dict = await execute_ethereum_gql_query(
+        query=LATEST_BLOCK_QUERY,
+        variables=dict(
+            confirmation_blocks=ETH1_CONFIRMATION_BLOCKS,
+        ),
+    )
+    return Block(
         block_number=BlockNumber(int(result["blocks"][0]["id"])),
         timestamp=Timestamp(int(result["blocks"][0]["timestamp"])),
     )
@@ -66,17 +76,6 @@ async def get_voting_parameters(block_number: BlockNumber) -> VotingParameters:
     network = result["networks"][0]
     distributor = result["merkleDistributors"][0]
     reward_eth_token = result["rewardEthTokens"][0]
-    pool = result["pools"][0]
-
-    validators = result["validators"]
-    if validators:
-        operator = validators[0].get("operator", {}).get("id", None)
-        if operator is not None:
-            operator = Web3.toChecksumAddress(operator)
-        public_key = validators[0].get("id", None)
-    else:
-        operator = None
-        public_key = None
 
     rewards = RewardsVotingParameters(
         rewards_nonce=int(network["oraclesRewardsNonce"]),
@@ -95,24 +94,7 @@ async def get_voting_parameters(block_number: BlockNumber) -> VotingParameters:
         protocol_reward=Wei(int(reward_eth_token["protocolPeriodReward"])),
         distributor_reward=Wei(int(reward_eth_token["distributorPeriodReward"])),
     )
-    initialize_validator = InitializeValidatorVotingParameters(
-        validator_index=int(pool["pendingValidators"])
-        + int(pool["activatedValidators"]),
-        validators_nonce=int(network["oraclesValidatorsNonce"]),
-        pool_balance=Wei(int(pool["balance"])),
-        finalizing_validator=public_key is not None,
-    )
-    finalize_validator = FinalizeValidatorVotingParameters(
-        validators_nonce=int(network["oraclesValidatorsNonce"]),
-        operator=operator,
-        public_key=public_key,
-    )
-    return VotingParameters(
-        rewards=rewards,
-        distributor=distributor,
-        initialize_validator=initialize_validator,
-        finalize_validator=finalize_validator,
-    )
+    return VotingParameters(rewards=rewards, distributor=distributor)
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)

@@ -18,9 +18,8 @@ from oracle.common.settings import (
     AWS_S3_REGION,
     DISTRIBUTOR_VOTE_FILENAME,
     ETH1_CONFIRMATION_BLOCKS,
-    FINALIZE_VALIDATOR_VOTE_FILENAME,
-    INIT_VALIDATOR_VOTE_FILENAME,
     REWARD_VOTE_FILENAME,
+    VALIDATOR_VOTE_FILENAME,
 )
 from oracle.keeper.clients import web3_client
 from oracle.keeper.contracts import multicall_contract, oracles_contract
@@ -141,8 +140,13 @@ def check_validator_vote(vote: ValidatorVote, oracle: ChecksumAddress) -> bool:
     """Checks whether oracle's validator vote is correct."""
     try:
         encoded_data: bytes = web3_client.codec.encode_abi(
-            ["uint256", "bytes", "address"],
-            [int(vote["nonce"]), vote["public_key"], vote["operator"]],
+            ["uint256", "bytes", "address", "bytes32"],
+            [
+                int(vote["nonce"]),
+                vote["public_key"],
+                vote["operator"],
+                vote["validators_count"],
+            ],
         )
         return validate_vote_signature(encoded_data, oracle, vote["signature"])
     except:  # noqa: E722
@@ -154,9 +158,7 @@ def get_oracles_votes(
     rewards_nonce: int, validators_nonce: int, oracles: List[ChecksumAddress]
 ) -> OraclesVotes:
     """Fetches oracle votes that match current nonces."""
-    votes = OraclesVotes(
-        rewards=[], distributor=[], initialize_validator=[], finalize_validator=[]
-    )
+    votes = OraclesVotes(rewards=[], distributor=[], validator=[])
 
     for oracle in oracles:
         for arr, filename, correct_nonce, vote_checker in [
@@ -168,14 +170,8 @@ def get_oracles_votes(
                 check_distributor_vote,
             ),
             (
-                votes.initialize_validator,
-                INIT_VALIDATOR_VOTE_FILENAME,
-                validators_nonce,
-                check_validator_vote,
-            ),
-            (
-                votes.finalize_validator,
-                FINALIZE_VALIDATOR_VOTE_FILENAME,
+                votes.validator,
+                VALIDATOR_VOTE_FILENAME,
                 validators_nonce,
                 check_validator_vote,
             ),
@@ -319,48 +315,55 @@ def submit_votes(votes: OraclesVotes, total_oracles: int) -> None:
         )
         logger.info("Merkle Distributor has been successfully updated")
 
-    for validator_votes, func_name in [
-        (votes.initialize_validator, "initializeValidator"),
-        (votes.finalize_validator, "finalizeValidator"),
-    ]:
-        counter = Counter(
-            [(vote["public_key"], vote["operator"]) for vote in validator_votes]
+    counter = Counter(
+        [
+            (vote["public_key"], vote["operator"], vote["validators_count"])
+            for vote in votes.validator
+        ]
+    )
+    most_voted = counter.most_common(1)
+    if most_voted and can_submit(most_voted[0][1], total_oracles):
+        public_key, operator, validators_count = most_voted[0][0]
+        signatures = []
+        i = 0
+        while not can_submit(len(signatures), total_oracles):
+            vote = votes.validator[i]
+            if (public_key, operator, validators_count) == (
+                vote["public_key"],
+                vote["operator"],
+                vote["validators_count"],
+            ):
+                signatures.append(vote["signature"])
+            i += 1
+
+        validator_vote: ValidatorVote = next(
+            vote
+            for vote in votes.validator
+            if (public_key, operator, validators_count)
+            == (
+                vote["public_key"],
+                vote["operator"],
+                vote["validators_count"],
+            )
         )
-        most_voted = counter.most_common(1)
-        if most_voted and can_submit(most_voted[0][1], total_oracles):
-            public_key, operator = most_voted[0][0]
-
-            signatures = []
-            i = 0
-            while not can_submit(len(signatures), total_oracles):
-                vote = validator_votes[i]
-                if (public_key, operator) == (
-                    vote["public_key"],
-                    vote["operator"],
-                ):
-                    signatures.append(vote["signature"])
-                i += 1
-
-            validator_vote: ValidatorVote = next(
-                vote
-                for vote in validator_votes
-                if (vote["public_key"], vote["operator"]) == (public_key, operator)
-            )
-
-            logger.info(
-                f"Submitting {func_name}: operator={operator}, public key={public_key}"
-            )
-            submit_update(
-                getattr(oracles_contract.functions, func_name)(
-                    dict(
-                        operator=validator_vote["operator"],
-                        withdrawalCredentials=validator_vote["withdrawal_credentials"],
-                        depositDataRoot=validator_vote["deposit_data_root"],
-                        publicKey=validator_vote["public_key"],
-                        signature=validator_vote["deposit_data_signature"],
-                    ),
-                    validator_vote["proof"],
-                    signatures,
+        logger.info(
+            f"Submitting validator registration: "
+            f"operator={operator}, "
+            f"public key={public_key}, "
+            f"validator count={validators_count}"
+        )
+        submit_update(
+            oracles_contract.functions.registerValidator(
+                dict(
+                    operator=validator_vote["operator"],
+                    withdrawalCredentials=validator_vote["withdrawal_credentials"],
+                    depositDataRoot=validator_vote["deposit_data_root"],
+                    publicKey=validator_vote["public_key"],
+                    signature=validator_vote["deposit_data_signature"],
                 ),
-            )
-            logger.info(f"{func_name} has been successfully executed")
+                validator_vote["proof"],
+                validators_count,
+                signatures,
+            ),
+        )
+        logger.info("Validator registration has been successfully submitted")

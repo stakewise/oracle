@@ -7,7 +7,9 @@ from web3 import Web3
 from oracle.common.settings import GOERLI, MAINNET, NETWORK
 
 IPFS_PIN_ENDPOINTS = config(
-    "IPFS_PIN_ENDPOINTS", cast=Csv(), default="/dns/ipfs.infura.io/tcp/5001/https"
+    "IPFS_PIN_ENDPOINTS",
+    cast=Csv(),
+    default="/dns/ipfs.infura.io/tcp/5001/https,/dns/ipfs/tcp/5001/http",
 )
 IPFS_FETCH_ENDPOINTS = config(
     "IPFS_FETCH_ENDPOINTS",
@@ -45,7 +47,7 @@ ORACLE_PRIVATE_KEY = config("ORACLE_PRIVATE_KEY", default="")
 AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID", default="")
 AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY", default="")
 
-ORACLE_PROCESS_INTERVAL = config("ORACLE_PROCESS_INTERVAL", default=180, cast=int)
+ORACLE_PROCESS_INTERVAL = config("ORACLE_PROCESS_INTERVAL", default=30, cast=int)
 
 if NETWORK == MAINNET:
     SYNC_PERIOD = timedelta(days=1)

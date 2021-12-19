@@ -107,16 +107,8 @@ async def main() -> None:
             ),
             # check and update merkle distributor
             distributor_controller.process(voting_parameters["distributor"]),
-            # initializes validators
-            validators_controller.initialize(
-                voting_params=voting_parameters["initialize_validator"],
-                current_block_number=current_block_number,
-            ),
-            # finalizes validators
-            validators_controller.finalize(
-                voting_params=voting_parameters["finalize_validator"],
-                current_block_number=current_block_number,
-            ),
+            # process validators registration
+            validators_controller.process(),
         )
         # wait until next processing time
         await asyncio.sleep(ORACLE_PROCESS_INTERVAL)

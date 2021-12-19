@@ -17,5 +17,4 @@ class Parameters(NamedTuple):
 class OraclesVotes(NamedTuple):
     rewards: List[RewardVote]
     distributor: List[DistributorVote]
-    initialize_validator: List[ValidatorVote]
-    finalize_validator: List[ValidatorVote]
+    validator: List[ValidatorVote]
