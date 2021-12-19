@@ -77,7 +77,7 @@ services:
 
   subgraphs:
     container_name: subgraphs
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/subgraphs:v1.0.1
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/subgraphs:v1.0.2
     command: >
       /bin/sh -c "until nc -vz graph-node 8020; do echo 'Waiting graph-node'; sleep 2; done
       && yarn prepare:${NETWORK}
