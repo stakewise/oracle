@@ -18,4 +18,4 @@ class RewardVote(TypedDict):
     total_rewards: str
 
 
-FinalizedValidatorsPublicKeys = List[HexStr]
+RegisteredValidatorsPublicKeys = List[HexStr]

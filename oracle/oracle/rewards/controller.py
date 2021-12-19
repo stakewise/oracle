@@ -13,7 +13,7 @@ from oracle.common.settings import REWARD_VOTE_FILENAME
 from oracle.oracle.eth1 import submit_vote
 
 from ..settings import SYNC_PERIOD
-from .eth1 import get_finalized_validators_public_keys
+from .eth1 import get_registered_validators_public_keys
 from .eth2 import (
     PENDING_STATUSES,
     SECONDS_PER_EPOCH,
@@ -80,7 +80,7 @@ class RewardsController(object):
             return
 
         # fetch pool validator BLS public keys
-        public_keys = await get_finalized_validators_public_keys(current_block_number)
+        public_keys = await get_registered_validators_public_keys(current_block_number)
 
         # calculate current ETH2 epoch
         update_timestamp = int(
