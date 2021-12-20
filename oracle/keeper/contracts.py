@@ -64,56 +64,6 @@ def get_oracles_contract() -> Contract:
             },
             {
                 "inputs": [
-                    {
-                        "components": [
-                            {
-                                "internalType": "address",
-                                "name": "operator",
-                                "type": "address",
-                            },
-                            {
-                                "internalType": "bytes32",
-                                "name": "withdrawalCredentials",
-                                "type": "bytes32",
-                            },
-                            {
-                                "internalType": "bytes32",
-                                "name": "depositDataRoot",
-                                "type": "bytes32",
-                            },
-                            {
-                                "internalType": "bytes",
-                                "name": "publicKey",
-                                "type": "bytes",
-                            },
-                            {
-                                "internalType": "bytes",
-                                "name": "signature",
-                                "type": "bytes",
-                            },
-                        ],
-                        "internalType": "struct IPoolValidators.DepositData",
-                        "name": "depositData",
-                        "type": "tuple",
-                    },
-                    {
-                        "internalType": "bytes32[]",
-                        "name": "merkleProof",
-                        "type": "bytes32[]",
-                    },
-                    {
-                        "internalType": "bytes[]",
-                        "name": "signatures",
-                        "type": "bytes[]",
-                    },
-                ],
-                "name": "finalizeValidator",
-                "outputs": [],
-                "stateMutability": "nonpayable",
-                "type": "function",
-            },
-            {
-                "inputs": [
                     {"internalType": "bytes32", "name": "role", "type": "bytes32"}
                 ],
                 "name": "getRoleMemberCount",
@@ -129,56 +79,6 @@ def get_oracles_contract() -> Contract:
                 "name": "getRoleMember",
                 "outputs": [{"internalType": "address", "name": "", "type": "address"}],
                 "stateMutability": "view",
-                "type": "function",
-            },
-            {
-                "inputs": [
-                    {
-                        "components": [
-                            {
-                                "internalType": "address",
-                                "name": "operator",
-                                "type": "address",
-                            },
-                            {
-                                "internalType": "bytes32",
-                                "name": "withdrawalCredentials",
-                                "type": "bytes32",
-                            },
-                            {
-                                "internalType": "bytes32",
-                                "name": "depositDataRoot",
-                                "type": "bytes32",
-                            },
-                            {
-                                "internalType": "bytes",
-                                "name": "publicKey",
-                                "type": "bytes",
-                            },
-                            {
-                                "internalType": "bytes",
-                                "name": "signature",
-                                "type": "bytes",
-                            },
-                        ],
-                        "internalType": "struct IPoolValidators.DepositData",
-                        "name": "depositData",
-                        "type": "tuple",
-                    },
-                    {
-                        "internalType": "bytes32[]",
-                        "name": "merkleProof",
-                        "type": "bytes32[]",
-                    },
-                    {
-                        "internalType": "bytes[]",
-                        "name": "signatures",
-                        "type": "bytes[]",
-                    },
-                ],
-                "name": "initializeValidator",
-                "outputs": [],
-                "stateMutability": "nonpayable",
                 "type": "function",
             },
             {
@@ -230,6 +130,61 @@ def get_oracles_contract() -> Contract:
                     },
                 ],
                 "name": "submitRewards",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function",
+            },
+            {
+                "inputs": [
+                    {
+                        "components": [
+                            {
+                                "internalType": "address",
+                                "name": "operator",
+                                "type": "address",
+                            },
+                            {
+                                "internalType": "bytes32",
+                                "name": "withdrawalCredentials",
+                                "type": "bytes32",
+                            },
+                            {
+                                "internalType": "bytes32",
+                                "name": "depositDataRoot",
+                                "type": "bytes32",
+                            },
+                            {
+                                "internalType": "bytes",
+                                "name": "publicKey",
+                                "type": "bytes",
+                            },
+                            {
+                                "internalType": "bytes",
+                                "name": "signature",
+                                "type": "bytes",
+                            },
+                        ],
+                        "internalType": "struct IPoolValidators.DepositData",
+                        "name": "depositData",
+                        "type": "tuple",
+                    },
+                    {
+                        "internalType": "bytes32[]",
+                        "name": "merkleProof",
+                        "type": "bytes32[]",
+                    },
+                    {
+                        "internalType": "bytes32",
+                        "name": "validatorsDepositCount",
+                        "type": "bytes32",
+                    },
+                    {
+                        "internalType": "bytes[]",
+                        "name": "signatures",
+                        "type": "bytes[]",
+                    },
+                ],
+                "name": "registerValidator",
                 "outputs": [],
                 "stateMutability": "nonpayable",
                 "type": "function",

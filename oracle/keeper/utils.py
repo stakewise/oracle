@@ -239,7 +239,6 @@ def get_transaction_params() -> TxParams:
     )
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=900)
 def submit_update(function_call: ContractFunction) -> None:
     tx_params = get_transaction_params()
     estimated_gas = function_call.estimateGas(tx_params)
