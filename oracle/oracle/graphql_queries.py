@@ -383,9 +383,9 @@ VALIDATOR_REGISTRATIONS_QUERY = gql(
     query getValidatorRegistrations($block_number: Int, $public_key: Bytes) {
       validatorRegistrations(
         block: { number: $block_number }
-        where: { id: $public_key }
+        where: { publicKey: $public_key }
       ) {
-        id
+        publicKey
       }
     }
 """
