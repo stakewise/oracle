@@ -7,7 +7,7 @@ WEB3_ENDPOINT = config("WEB3_ENDPOINT")
 
 ORACLE_PRIVATE_KEY = config("ORACLE_PRIVATE_KEY")
 
-KEEPER_PROCESS_INTERVAL = config("KEEPER_PROCESS_INTERVAL", default=30, cast=int)
+KEEPER_PROCESS_INTERVAL = config("KEEPER_PROCESS_INTERVAL", default=10, cast=int)
 
 KEEPER_MIN_BALANCE_WEI = config(
     "KEEPER_MIN_BALANCE_WEI", default=Web3.toWei(0.1, "ether"), cast=int

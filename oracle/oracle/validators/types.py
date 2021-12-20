@@ -30,5 +30,5 @@ class ValidatorDepositData(TypedDict):
 
 class ValidatorVote(ValidatorDepositData):
     nonce: int
-    validators_count: HexStr
+    validators_deposit_root: HexStr
     signature: HexStr

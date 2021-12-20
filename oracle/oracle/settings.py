@@ -47,7 +47,7 @@ ORACLE_PRIVATE_KEY = config("ORACLE_PRIVATE_KEY", default="")
 AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID", default="")
 AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY", default="")
 
-ORACLE_PROCESS_INTERVAL = config("ORACLE_PROCESS_INTERVAL", default=30, cast=int)
+ORACLE_PROCESS_INTERVAL = config("ORACLE_PROCESS_INTERVAL", default=10, cast=int)
 
 if NETWORK == MAINNET:
     SYNC_PERIOD = timedelta(days=1)

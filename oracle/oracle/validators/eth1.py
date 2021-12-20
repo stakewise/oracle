@@ -108,19 +108,10 @@ async def has_synced_block(block_number: BlockNumber) -> bool:
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
-async def get_validators_count(block_number: BlockNumber) -> HexStr:
-    """Fetches validators count for protecting against operator submitting deposit prior to registration."""
+async def get_validators_deposit_root(block_number: BlockNumber) -> HexStr:
+    """Fetches validators deposit root for protecting against operator submitting deposit prior to registration."""
     result: Dict = await execute_ethereum_gql_query(
         query=VALIDATOR_REGISTRATIONS_LATEST_INDEX_QUERY,
         variables=dict(block_number=block_number),
     )
-    registrations = result["validatorRegistrations"]
-    if not registrations:
-        validators_count = int.to_bytes(1, 8, byteorder="little")
-    else:
-        index = int.from_bytes(
-            Web3.toBytes(hexstr=registrations[0]["index"]), byteorder="little"
-        )
-        validators_count = int.to_bytes(index + 1, 8, byteorder="little")
-
-    return Web3.toHex(Web3.keccak(validators_count))
+    return result["validatorRegistrations"][0]["validatorsDepositRoot"]

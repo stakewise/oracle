@@ -400,7 +400,7 @@ VALIDATOR_REGISTRATIONS_LATEST_INDEX_QUERY = gql(
         orderBy: createdAtBlock
         orderDirection: desc
       ) {
-        index
+        validatorsDepositRoot
       }
     }
 """
