@@ -175,7 +175,7 @@ def get_oracles_contract() -> Contract:
                     },
                     {
                         "internalType": "bytes32",
-                        "name": "validatorsDepositCount",
+                        "name": "validatorsDepositRoot",
                         "type": "bytes32",
                     },
                     {
