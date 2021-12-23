@@ -5,6 +5,7 @@ LOG_LEVEL = config("LOG_LEVEL", default="INFO")
 REWARD_VOTE_FILENAME = "reward-vote.json"
 DISTRIBUTOR_VOTE_FILENAME = "distributor-vote.json"
 VALIDATOR_VOTE_FILENAME = "validator-vote.json"
+TEST_VOTE_FILENAME = "test-vote.json"
 
 # supported networks
 MAINNET = "mainnet"
