@@ -5,27 +5,22 @@ import threading
 from typing import Any
 
 import aiohttp
-from decouple import UndefinedValueError
 from eth_account import Account
 from eth_account.signers.local import LocalAccount
 
 from oracle.common.health_server import create_health_server_runner, start_health_server
-from oracle.common.settings import ENABLE_HEALTH_SERVER, LOG_LEVEL
+from oracle.common.settings import ENABLE_HEALTH_SERVER, LOG_LEVEL, TEST_VOTE_FILENAME
 from oracle.oracle.distributor.controller import DistributorController
 from oracle.oracle.eth1 import (
     check_oracle_account,
     get_finalized_block,
     get_voting_parameters,
+    submit_vote,
 )
 from oracle.oracle.health_server import oracle_routes
 from oracle.oracle.rewards.controller import RewardsController
 from oracle.oracle.rewards.eth2 import get_finality_checkpoints, get_genesis
-from oracle.oracle.settings import (
-    AWS_ACCESS_KEY_ID,
-    AWS_SECRET_ACCESS_KEY,
-    ORACLE_PRIVATE_KEY,
-    ORACLE_PROCESS_INTERVAL,
-)
+from oracle.oracle.settings import ORACLE_PRIVATE_KEY, ORACLE_PROCESS_INTERVAL
 from oracle.oracle.validators.controller import ValidatorsController
 
 logging.basicConfig(
@@ -60,10 +55,14 @@ class InterruptHandler:
 async def main() -> None:
     oracle: LocalAccount = Account.from_key(ORACLE_PRIVATE_KEY)
 
-    if not (AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY):
-        raise UndefinedValueError(
-            "AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY env variables must be specified"
-        )
+    # try submitting test vote
+    # noinspection PyTypeChecker
+    submit_vote(
+        oracle=oracle,
+        encoded_data=b"test data",
+        vote={"name": "test vote"},
+        name=TEST_VOTE_FILENAME,
+    )
 
     # check stakewise graphql connection
     await get_finalized_block()
