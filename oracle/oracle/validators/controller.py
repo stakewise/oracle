@@ -10,7 +10,7 @@ from oracle.common.settings import VALIDATOR_VOTE_FILENAME
 
 from ..eth1 import submit_vote
 from .eth1 import (
-    get_validators_count,
+    get_validators_deposit_root,
     get_voting_parameters,
     has_synced_block,
     select_validator,
@@ -27,7 +27,7 @@ class ValidatorsController(object):
     def __init__(self, oracle: LocalAccount) -> None:
         self.validator_deposit: Wei = Web3.toWei(32, "ether")
         self.last_vote_public_key = None
-        self.last_vote_validators_count = None
+        self.last_vote_validators_deposit_root = None
         self.oracle = oracle
 
     async def process(self) -> None:
@@ -49,10 +49,10 @@ class ValidatorsController(object):
             logger.warning("Failed to find the next validator to register")
             return
 
-        validators_count = await get_validators_count(latest_block_number)
+        validators_deposit_root = await get_validators_deposit_root(latest_block_number)
         public_key = validator_deposit_data["public_key"]
         if (
-            self.last_vote_validators_count == validators_count
+            self.last_vote_validators_deposit_root == validators_deposit_root
             and self.last_vote_public_key == public_key
         ):
             # already voted for the validator
@@ -63,12 +63,12 @@ class ValidatorsController(object):
         operator = validator_deposit_data["operator"]
         encoded_data: bytes = w3.codec.encode_abi(
             ["uint256", "bytes", "address", "bytes32"],
-            [current_nonce, public_key, operator, validators_count],
+            [current_nonce, public_key, operator, validators_deposit_root],
         )
         vote = ValidatorVote(
             signature=HexStr(""),
             nonce=current_nonce,
-            validators_count=validators_count,
+            validators_deposit_root=validators_deposit_root,
             **validator_deposit_data,
         )
         logger.info(
@@ -83,6 +83,6 @@ class ValidatorsController(object):
         )
         logger.info("Submitted validator registration vote")
 
-        # skip voting for the same validator and validators count in the next check
+        # skip voting for the same validator and validators deposit root in the next check
         self.last_vote_public_key = public_key
-        self.last_vote_validators_count = validators_count
+        self.last_vote_validators_deposit_root = validators_deposit_root

@@ -4,6 +4,8 @@ import threading
 import time
 from typing import Any
 
+import backoff
+
 from oracle.common.health_server import create_health_server_runner, start_health_server
 from oracle.common.settings import ENABLE_HEALTH_SERVER, LOG_LEVEL
 from oracle.keeper.health_server import keeper_routes
@@ -38,6 +40,7 @@ class InterruptHandler:
         self.exit = True
 
 
+@backoff.on_exception(backoff.expo, Exception, max_time=900)
 def main() -> None:
     # wait for interrupt
     interrupt_handler = InterruptHandler()

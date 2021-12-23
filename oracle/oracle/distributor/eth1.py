@@ -318,12 +318,14 @@ async def get_operators_rewards(
     if total_validators <= 0:
         return {}, total_reward
 
-    operators_reward = (total_reward * total_points) // (
-        total_validators * 10000 * (to_block - from_block)
+    operators_reward = Wei(
+        (total_reward * total_points)
+        // (total_validators * 10000 * (to_block - from_block))
     )
     if operators_reward <= 0:
         return {}, total_reward
 
+    operators_reward = min(total_reward, operators_reward)
     rewards = calculate_points_based_rewards(
         total_reward=operators_reward,
         points=points,
@@ -378,12 +380,14 @@ async def get_partners_rewards(
     if total_contributed <= 0:
         return {}, total_reward
 
-    partners_reward = (total_reward * total_points) // (
-        total_contributed * 10000 * (to_block - from_block)
+    partners_reward = Wei(
+        (total_reward * total_points)
+        // (total_contributed * 10000 * (to_block - from_block))
     )
     if partners_reward <= 0:
         return {}, total_reward
 
+    partners_reward = min(total_reward, partners_reward)
     rewards = calculate_points_based_rewards(
         total_reward=partners_reward,
         points=points,

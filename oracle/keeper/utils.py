@@ -145,7 +145,7 @@ def check_validator_vote(vote: ValidatorVote, oracle: ChecksumAddress) -> bool:
                 int(vote["nonce"]),
                 vote["public_key"],
                 vote["operator"],
-                vote["validators_count"],
+                vote["validators_deposit_root"],
             ],
         )
         return validate_vote_signature(encoded_data, oracle, vote["signature"])
@@ -239,7 +239,6 @@ def get_transaction_params() -> TxParams:
     )
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=900)
 def submit_update(function_call: ContractFunction) -> None:
     tx_params = get_transaction_params()
     estimated_gas = function_call.estimateGas(tx_params)
@@ -317,21 +316,21 @@ def submit_votes(votes: OraclesVotes, total_oracles: int) -> None:
 
     counter = Counter(
         [
-            (vote["public_key"], vote["operator"], vote["validators_count"])
+            (vote["public_key"], vote["operator"], vote["validators_deposit_root"])
             for vote in votes.validator
         ]
     )
     most_voted = counter.most_common(1)
     if most_voted and can_submit(most_voted[0][1], total_oracles):
-        public_key, operator, validators_count = most_voted[0][0]
+        public_key, operator, validators_deposit_root = most_voted[0][0]
         signatures = []
         i = 0
         while not can_submit(len(signatures), total_oracles):
             vote = votes.validator[i]
-            if (public_key, operator, validators_count) == (
+            if (public_key, operator, validators_deposit_root) == (
                 vote["public_key"],
                 vote["operator"],
-                vote["validators_count"],
+                vote["validators_deposit_root"],
             ):
                 signatures.append(vote["signature"])
             i += 1
@@ -339,18 +338,18 @@ def submit_votes(votes: OraclesVotes, total_oracles: int) -> None:
         validator_vote: ValidatorVote = next(
             vote
             for vote in votes.validator
-            if (public_key, operator, validators_count)
+            if (public_key, operator, validators_deposit_root)
             == (
                 vote["public_key"],
                 vote["operator"],
-                vote["validators_count"],
+                vote["validators_deposit_root"],
             )
         )
         logger.info(
             f"Submitting validator registration: "
             f"operator={operator}, "
             f"public key={public_key}, "
-            f"validator count={validators_count}"
+            f"validator deposit root={validators_deposit_root}"
         )
         submit_update(
             oracles_contract.functions.registerValidator(
@@ -362,7 +361,7 @@ def submit_votes(votes: OraclesVotes, total_oracles: int) -> None:
                     signature=validator_vote["deposit_data_signature"],
                 ),
                 validator_vote["proof"],
-                validators_count,
+                validators_deposit_root,
                 signatures,
             ),
         )
