@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Union
 import backoff
 import boto3
 import ipfshttpclient
-from aiohttp import ClientSession
+from aiohttp import ClientSession, ClientTimeout
 from gql import Client
 from gql.transport.aiohttp import AIOHTTPTransport
 from graphql import DocumentNode
@@ -26,12 +26,17 @@ s3_client = boto3.client(
 
 # set default GQL query execution timeout to 30 seconds
 EXECUTE_TIMEOUT = 30
+AIOHTTP_SESSION_ARGS = {
+    "timeout": ClientTimeout(total=None, sock_connect=5, sock_read=5)
+}
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=300)
 async def execute_sw_gql_query(query: DocumentNode, variables: Dict) -> Dict:
     """Executes GraphQL query."""
-    transport = AIOHTTPTransport(url=STAKEWISE_SUBGRAPH_URL)
+    transport = AIOHTTPTransport(
+        url=STAKEWISE_SUBGRAPH_URL, client_session_args=AIOHTTP_SESSION_ARGS
+    )
     async with Client(transport=transport, execute_timeout=EXECUTE_TIMEOUT) as session:
         return await session.execute(query, variable_values=variables)
 
@@ -39,7 +44,9 @@ async def execute_sw_gql_query(query: DocumentNode, variables: Dict) -> Dict:
 @backoff.on_exception(backoff.expo, Exception, max_time=300)
 async def execute_uniswap_v3_gql_query(query: DocumentNode, variables: Dict) -> Dict:
     """Executes GraphQL query."""
-    transport = AIOHTTPTransport(url=UNISWAP_V3_SUBGRAPH_URL)
+    transport = AIOHTTPTransport(
+        url=UNISWAP_V3_SUBGRAPH_URL, client_session_args=AIOHTTP_SESSION_ARGS
+    )
     async with Client(transport=transport, execute_timeout=EXECUTE_TIMEOUT) as session:
         return await session.execute(query, variable_values=variables)
 
@@ -47,7 +54,9 @@ async def execute_uniswap_v3_gql_query(query: DocumentNode, variables: Dict) -> 
 @backoff.on_exception(backoff.expo, Exception, max_time=300)
 async def execute_ethereum_gql_query(query: DocumentNode, variables: Dict) -> Dict:
     """Executes GraphQL query."""
-    transport = AIOHTTPTransport(url=ETHEREUM_SUBGRAPH_URL)
+    transport = AIOHTTPTransport(
+        url=ETHEREUM_SUBGRAPH_URL, client_session_args=AIOHTTP_SESSION_ARGS
+    )
     async with Client(transport=transport, execute_timeout=EXECUTE_TIMEOUT) as session:
         return await session.execute(query, variable_values=variables)
 
