@@ -65,12 +65,14 @@ async def main() -> None:
     )
 
     # check stakewise graphql connection
+    logger.info("Checking connection to graph node...")
     await get_finalized_block()
 
     # aiohttp session
     session = aiohttp.ClientSession()
 
     # check ETH2 API connection
+    logger.info("Checking connection to ETH2 node...")
     await get_finality_checkpoints(session)
 
     # check whether oracle is part of the oracles set

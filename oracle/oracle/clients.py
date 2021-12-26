@@ -24,31 +24,31 @@ s3_client = boto3.client(
     aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
 )
 
-# set default timeout to 5 minutes
-DEFAULT_TIMEOUT = 5 * 60
+# set default GQL query execution timeout to 30 seconds
+EXECUTE_TIMEOUT = 30
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=300)
 async def execute_sw_gql_query(query: DocumentNode, variables: Dict) -> Dict:
     """Executes GraphQL query."""
-    transport = AIOHTTPTransport(url=STAKEWISE_SUBGRAPH_URL, timeout=DEFAULT_TIMEOUT)
-    async with Client(transport=transport) as session:
+    transport = AIOHTTPTransport(url=STAKEWISE_SUBGRAPH_URL)
+    async with Client(transport=transport, execute_timeout=EXECUTE_TIMEOUT) as session:
         return await session.execute(query, variable_values=variables)
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=300)
 async def execute_uniswap_v3_gql_query(query: DocumentNode, variables: Dict) -> Dict:
     """Executes GraphQL query."""
-    transport = AIOHTTPTransport(url=UNISWAP_V3_SUBGRAPH_URL, timeout=DEFAULT_TIMEOUT)
-    async with Client(transport=transport) as session:
+    transport = AIOHTTPTransport(url=UNISWAP_V3_SUBGRAPH_URL)
+    async with Client(transport=transport, execute_timeout=EXECUTE_TIMEOUT) as session:
         return await session.execute(query, variable_values=variables)
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=300)
 async def execute_ethereum_gql_query(query: DocumentNode, variables: Dict) -> Dict:
     """Executes GraphQL query."""
-    transport = AIOHTTPTransport(url=ETHEREUM_SUBGRAPH_URL, timeout=DEFAULT_TIMEOUT)
-    async with Client(transport=transport) as session:
+    transport = AIOHTTPTransport(url=ETHEREUM_SUBGRAPH_URL)
+    async with Client(transport=transport, execute_timeout=EXECUTE_TIMEOUT) as session:
         return await session.execute(query, variable_values=variables)
 
 
