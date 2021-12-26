@@ -7,6 +7,7 @@ import ipfshttpclient
 from aiohttp import ClientSession, client_exceptions
 from gql import Client
 from gql.transport.aiohttp import AIOHTTPTransport
+from gql.transport.exceptions import TransportServerError
 from graphql import DocumentNode
 
 from oracle.oracle.settings import (
@@ -59,7 +60,11 @@ async def _execute_gql_query(
                 transport=transport, execute_timeout=EXECUTE_TIMEOUT
             ) as session:
                 return await session.execute(query, variable_values=variables)
-        except (asyncio.exceptions.TimeoutError, client_exceptions.ServerTimeoutError):
+        except (
+            asyncio.exceptions.TimeoutError,
+            client_exceptions.ServerTimeoutError,
+            TransportServerError,
+        ):
             await asyncio.sleep(3)
 
     async with Client(transport=transport, execute_timeout=EXECUTE_TIMEOUT) as session:
