@@ -26,9 +26,7 @@ s3_client = boto3.client(
 
 # set default GQL query execution timeout to 30 seconds
 EXECUTE_TIMEOUT = 30
-AIOHTTP_SESSION_ARGS = {
-    "timeout": ClientTimeout(total=None, sock_connect=5, sock_read=5)
-}
+AIOHTTP_SESSION_ARGS = {"timeout": ClientTimeout(total=None)}
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=300)
