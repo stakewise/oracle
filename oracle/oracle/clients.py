@@ -1,13 +1,12 @@
-import asyncio
+import logging
 from typing import Any, Dict, List, Union
 
 import backoff
 import boto3
 import ipfshttpclient
-from aiohttp import ClientSession, client_exceptions
+from aiohttp import ClientSession
 from gql import Client
 from gql.transport.aiohttp import AIOHTTPTransport
-from gql.transport.exceptions import TransportServerError
 from graphql import DocumentNode
 
 from oracle.oracle.settings import (
@@ -26,47 +25,35 @@ s3_client = boto3.client(
     aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
 )
 
+gql_logger = logging.getLogger("gql_logger")
+gql_handler = logging.StreamHandler()
+gql_logger.addHandler(gql_handler)
+gql_logger.setLevel(logging.ERROR)
+
 # set default GQL query execution timeout to 30 seconds
 EXECUTE_TIMEOUT = 30
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=300)
+@backoff.on_exception(backoff.expo, Exception, max_time=300, logger=gql_logger)
 async def execute_sw_gql_query(query: DocumentNode, variables: Dict) -> Dict:
     """Executes GraphQL query."""
     transport = AIOHTTPTransport(url=STAKEWISE_SUBGRAPH_URL)
-    return await _execute_gql_query(transport, query, variables)
+    async with Client(transport=transport, execute_timeout=EXECUTE_TIMEOUT) as session:
+        return await session.execute(query, variable_values=variables)
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=300)
+@backoff.on_exception(backoff.expo, Exception, max_time=300, logger=gql_logger)
 async def execute_uniswap_v3_gql_query(query: DocumentNode, variables: Dict) -> Dict:
     """Executes GraphQL query."""
     transport = AIOHTTPTransport(url=UNISWAP_V3_SUBGRAPH_URL)
-    return await _execute_gql_query(transport, query, variables)
+    async with Client(transport=transport, execute_timeout=EXECUTE_TIMEOUT) as session:
+        return await session.execute(query, variable_values=variables)
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=300)
+@backoff.on_exception(backoff.expo, Exception, max_time=300, logger=gql_logger)
 async def execute_ethereum_gql_query(query: DocumentNode, variables: Dict) -> Dict:
     """Executes GraphQL query."""
     transport = AIOHTTPTransport(url=ETHEREUM_SUBGRAPH_URL)
-    return await _execute_gql_query(transport, query, variables)
-
-
-async def _execute_gql_query(
-    transport: AIOHTTPTransport, query: DocumentNode, variables: Dict
-):
-    for _ in range(2):
-        try:
-            async with Client(
-                transport=transport, execute_timeout=EXECUTE_TIMEOUT
-            ) as session:
-                return await session.execute(query, variable_values=variables)
-        except (
-            asyncio.exceptions.TimeoutError,
-            client_exceptions.ServerTimeoutError,
-            TransportServerError,
-        ):
-            await asyncio.sleep(3)
-
     async with Client(transport=transport, execute_timeout=EXECUTE_TIMEOUT) as session:
         return await session.execute(query, variable_values=variables)
 
