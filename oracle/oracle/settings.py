@@ -63,6 +63,10 @@ if NETWORK == MAINNET:
     DISTRIBUTOR_FALLBACK_ADDRESS = Web3.toChecksumAddress(
         "0x144a98cb1CdBb23610501fE6108858D9B7D24934"
     )
+    RARI_FUSE_POOL_ADDRESSES = [
+        Web3.toChecksumAddress("0x18F49849D20Bc04059FE9d775df9a38Cd1f5eC9F"),
+        Web3.toChecksumAddress("0x83d534Ab1d4002249B0E6d22410b62CF31978Ca2"),
+    ]
     WITHDRAWAL_CREDENTIALS: HexStr = HexStr(
         "0x0100000000000000000000002296e122c1a20fca3cac3371357bdad3be0df079"
     )
@@ -78,6 +82,10 @@ if NETWORK == MAINNET:
         "ETHEREUM_SUBGRAPH_URL",
         default="https://api.thegraph.com/subgraphs/name/stakewise/ethereum-mainnet",
     )
+    RARI_FUSE_SUBGRAPH_URL = config(
+        "RARI_FUSE_SUBGRAPH_URL",
+        default="https://api.thegraph.com/subgraphs/name/stakewise/rari-fuse-mainnet",
+    )
 elif NETWORK == GOERLI:
     SYNC_PERIOD = timedelta(hours=1)
     SWISE_TOKEN_CONTRACT_ADDRESS = Web3.toChecksumAddress(
@@ -92,6 +100,7 @@ elif NETWORK == GOERLI:
     DISTRIBUTOR_FALLBACK_ADDRESS = Web3.toChecksumAddress(
         "0x1867c96601bc5fE24F685d112314B8F3Fe228D5A"
     )
+    RARI_FUSE_POOL_ADDRESSES = []
     WITHDRAWAL_CREDENTIALS: HexStr = HexStr(
         "0x010000000000000000000000040f15c6b5bfc5f324ecab5864c38d4e1eef4218"
     )
@@ -107,3 +116,4 @@ elif NETWORK == GOERLI:
         "ETHEREUM_SUBGRAPH_URL",
         default="https://api.thegraph.com/subgraphs/name/stakewise/ethereum-goerli",
     )
+    RARI_FUSE_SUBGRAPH_URL = ""

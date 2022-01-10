@@ -87,7 +87,7 @@ async def get_periodic_allocations(
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def get_disabled_stakers_reward_eth_distributions(
-    distributor_reward: Wei, to_block: BlockNumber
+    distributor_reward: Wei, from_block: BlockNumber, to_block: BlockNumber
 ) -> Distributions:
     """Fetches disabled stakers reward ETH distributions based on their staked ETH balances."""
     if distributor_reward <= 0:
@@ -149,7 +149,8 @@ async def get_disabled_stakers_reward_eth_distributions(
 
         distribution = Distribution(
             contract=staker_address,
-            block_number=to_block,
+            from_block=from_block,
+            to_block=to_block,
             uni_v3_token=STAKED_ETH_TOKEN_CONTRACT_ADDRESS,
             reward_token=REWARD_ETH_TOKEN_CONTRACT_ADDRESS,
             reward=reward,

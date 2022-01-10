@@ -125,7 +125,8 @@ async def get_uniswap_v3_distributions(
                     if reward > 0:
                         distribution = Distribution(
                             contract=pool_address,
-                            block_number=BlockNumber(start + interval),
+                            from_block=start,
+                            to_block=BlockNumber(start + interval),
                             reward_token=allocation["reward_token"],
                             reward=reward,
                             uni_v3_token=EMPTY_ADDR_HEX,
@@ -133,16 +134,17 @@ async def get_uniswap_v3_distributions(
                         distributions.append(distribution)
                     break
 
-                start += BLOCKS_INTERVAL
                 if interval_reward > 0:
                     distribution = Distribution(
                         contract=pool_address,
-                        block_number=start,
+                        from_block=start,
+                        to_block=BlockNumber(start + BLOCKS_INTERVAL),
                         reward_token=allocation["reward_token"],
                         reward=interval_reward,
                         uni_v3_token=EMPTY_ADDR_HEX,
                     )
                     distributions.append(distribution)
+                start += BLOCKS_INTERVAL
 
     return distributions
 

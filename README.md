@@ -72,6 +72,7 @@ docker-compose -f docker-compose.yml up -d
 | AWS_SECRET_ACCESS_KEY    | The AWS secret access key used to make the oracle vote public                      | Yes      | -                                                                       |
 | STAKEWISE_SUBGRAPH_URL   | The StakeWise subgraph URL                                                         | No       | https://api.thegraph.com/subgraphs/name/stakewise/stakewise-mainnet     |
 | UNISWAP_V3_SUBGRAPH_URL  | The Uniswap V3 subgraph URL                                                        | No       | https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-mainnet    |
+| RARI_FUSE_SUBGRAPH_URL   | Rari Capital Fuse subgraph URL                                                     | No       | https://api.thegraph.com/subgraphs/name/stakewise/rari-fuse-mainnet     |
 | ETHEREUM_SUBGRAPH_URL    | The Ethereum subgraph URL                                                          | No       | https://api.thegraph.com/subgraphs/name/stakewise/ethereum-mainnet      |
 | ORACLE_PROCESS_INTERVAL  | How long to wait before processing again (in seconds)                              | No       | 180                                                                     |
 | ETH1_CONFIRMATION_BLOCKS | The required number of ETH1 confirmation blocks used to fetch the data             | No       | 15                                                                      |
