@@ -15,7 +15,7 @@ from .types import Balances
 async def get_rari_fuse_liquidity_points(
     ctoken_address: ChecksumAddress, from_block: BlockNumber, to_block: BlockNumber
 ) -> Balances:
-    """Fetches Rari Fuse pools."""
+    """Fetches Rari Fuse pool accounts balances."""
     lowered_ctoken_address = ctoken_address.lower()
     last_id = ""
     result: Dict = await execute_rari_fuse_pools_gql_query(
