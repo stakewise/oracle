@@ -15,6 +15,7 @@ from oracle.oracle.settings import (
     ETHEREUM_SUBGRAPH_URL,
     IPFS_FETCH_ENDPOINTS,
     IPFS_PIN_ENDPOINTS,
+    RARI_FUSE_SUBGRAPH_URL,
     STAKEWISE_SUBGRAPH_URL,
     UNISWAP_V3_SUBGRAPH_URL,
 )
@@ -54,6 +55,16 @@ async def execute_uniswap_v3_gql_query(query: DocumentNode, variables: Dict) -> 
 async def execute_ethereum_gql_query(query: DocumentNode, variables: Dict) -> Dict:
     """Executes GraphQL query."""
     transport = AIOHTTPTransport(url=ETHEREUM_SUBGRAPH_URL)
+    async with Client(transport=transport, execute_timeout=EXECUTE_TIMEOUT) as session:
+        return await session.execute(query, variable_values=variables)
+
+
+@backoff.on_exception(backoff.expo, Exception, max_time=300, logger=gql_logger)
+async def execute_rari_fuse_pools_gql_query(
+    query: DocumentNode, variables: Dict
+) -> Dict:
+    """Executes GraphQL query."""
+    transport = AIOHTTPTransport(url=RARI_FUSE_SUBGRAPH_URL)
     async with Client(transport=transport, execute_timeout=EXECUTE_TIMEOUT) as session:
         return await session.execute(query, variable_values=variables)
 

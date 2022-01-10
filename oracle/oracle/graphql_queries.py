@@ -297,6 +297,30 @@ UNISWAP_V3_POSITIONS_QUERY = gql(
 """
 )
 
+RARI_FUSE_POOLS_CTOKENS_QUERY = gql(
+    """
+    query getCTokens(
+      $block_number: Int
+      $ctoken_address: Bytes
+      $last_id: ID
+    ) {
+      accountCTokens(
+        block: { number: $block_number }
+        where: { ctoken: $ctoken_address, id_gt: $last_id }
+        first: 1000
+        orderBy: id
+        orderDirection: asc
+      ) {
+        id
+        account
+        cTokenBalance
+        distributorPoints
+        updatedAtBlock
+      }
+    }
+"""
+)
+
 DISTRIBUTOR_CLAIMED_ACCOUNTS_QUERY = gql(
     """
     query getDistributorClaims($merkle_root: Bytes, $last_id: ID) {

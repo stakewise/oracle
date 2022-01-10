@@ -7,11 +7,13 @@ from eth_typing import BlockNumber, ChecksumAddress
 
 from oracle.oracle.settings import (
     DISTRIBUTOR_FALLBACK_ADDRESS,
+    RARI_FUSE_POOL_ADDRESSES,
     REWARD_ETH_TOKEN_CONTRACT_ADDRESS,
     STAKED_ETH_TOKEN_CONTRACT_ADDRESS,
     SWISE_TOKEN_CONTRACT_ADDRESS,
 )
 
+from .rari import get_rari_fuse_liquidity_points
 from .types import Balances, Rewards, UniswapV3Pools
 from .uniswap_v3 import (
     get_uniswap_v3_liquidity_points,
@@ -26,7 +28,8 @@ class DistributorRewards(object):
     def __init__(
         self,
         uniswap_v3_pools: UniswapV3Pools,
-        block_number: BlockNumber,
+        from_block: BlockNumber,
+        to_block: BlockNumber,
         reward_token: ChecksumAddress,
         uni_v3_token: ChecksumAddress,
         swise_holders: Balances,
@@ -37,7 +40,8 @@ class DistributorRewards(object):
         self.uni_v3_pools = self.uni_v3_swise_pools.union(
             self.uni_v3_staked_eth_pools
         ).union(self.uni_v3_reward_eth_pools)
-        self.block_number = block_number
+        self.from_block = from_block
+        self.to_block = to_block
         self.uni_v3_token = uni_v3_token
         self.reward_token = reward_token
         self.swise_holders = swise_holders
@@ -47,6 +51,7 @@ class DistributorRewards(object):
         return (
             contract_address in self.uni_v3_pools
             or contract_address == SWISE_TOKEN_CONTRACT_ADDRESS
+            or contract_address in RARI_FUSE_POOL_ADDRESSES
         )
 
     @staticmethod
@@ -110,7 +115,7 @@ class DistributorRewards(object):
             return await get_uniswap_v3_single_token_balances(
                 pool_address=contract_address,
                 token=STAKED_ETH_TOKEN_CONTRACT_ADDRESS,
-                block_number=self.block_number,
+                block_number=self.to_block,
             )
         elif (
             self.uni_v3_token == REWARD_ETH_TOKEN_CONTRACT_ADDRESS
@@ -120,7 +125,7 @@ class DistributorRewards(object):
             return await get_uniswap_v3_single_token_balances(
                 pool_address=contract_address,
                 token=REWARD_ETH_TOKEN_CONTRACT_ADDRESS,
-                block_number=self.block_number,
+                block_number=self.to_block,
             )
         elif (
             self.uni_v3_token == SWISE_TOKEN_CONTRACT_ADDRESS
@@ -130,7 +135,7 @@ class DistributorRewards(object):
             return await get_uniswap_v3_single_token_balances(
                 pool_address=contract_address,
                 token=SWISE_TOKEN_CONTRACT_ADDRESS,
-                block_number=self.block_number,
+                block_number=self.to_block,
             )
         elif (
             self.uni_v3_token == EMPTY_ADDR_HEX
@@ -143,7 +148,7 @@ class DistributorRewards(object):
                 tick_lower=-887220,
                 tick_upper=887220,
                 pool_address=contract_address,
-                block_number=self.block_number,
+                block_number=self.to_block,
             )
         elif contract_address in self.uni_v3_pools:
             logger.info(
@@ -151,7 +156,16 @@ class DistributorRewards(object):
             )
             return await get_uniswap_v3_liquidity_points(
                 pool_address=contract_address,
-                block_number=self.block_number,
+                block_number=self.to_block,
+            )
+        elif contract_address in RARI_FUSE_POOL_ADDRESSES:
+            logger.info(
+                f"Fetching Rari Fuse Pool liquidity points: pool={contract_address}"
+            )
+            return await get_rari_fuse_liquidity_points(
+                ctoken_address=contract_address,
+                from_block=self.from_block,
+                to_block=self.to_block,
             )
         elif contract_address == SWISE_TOKEN_CONTRACT_ADDRESS:
             logger.info("Distributing rewards to SWISE holders")

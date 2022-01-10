@@ -17,7 +17,8 @@ class DistributorVotingParameters(TypedDict):
 
 class Distribution(TypedDict):
     contract: ChecksumAddress
-    block_number: BlockNumber
+    from_block: BlockNumber
+    to_block: BlockNumber
     uni_v3_token: ChecksumAddress
     reward_token: ChecksumAddress
     reward: int

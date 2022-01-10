@@ -46,7 +46,11 @@ class DistributorController(object):
         current_nonce = voting_params["rewards_nonce"]
 
         # skip submitting vote if too early or vote has been already submitted
-        if to_block <= last_updated_at_block or self.last_to_block == to_block:
+        if (
+            to_block <= last_updated_at_block
+            or self.last_to_block == to_block
+            or from_block >= to_block
+        ):
             return
 
         logger.info(
@@ -71,6 +75,7 @@ class DistributorController(object):
         disabled_stakers_distributions = (
             await get_disabled_stakers_reward_eth_distributions(
                 distributor_reward=voting_params["distributor_reward"],
+                from_block=from_block,
                 to_block=to_block,
             )
         )
@@ -102,7 +107,8 @@ class DistributorController(object):
         for dist in all_distributions:
             distributor_rewards = DistributorRewards(
                 uniswap_v3_pools=uniswap_v3_pools,
-                block_number=dist["block_number"],
+                from_block=dist["from_block"],
+                to_block=dist["to_block"],
                 reward_token=dist["reward_token"],
                 uni_v3_token=dist["uni_v3_token"],
                 swise_holders=swise_holders,
@@ -131,7 +137,8 @@ class DistributorController(object):
         swise_holders_rewards = await DistributorRewards(
             uniswap_v3_pools=uniswap_v3_pools,
             swise_holders=swise_holders,
-            block_number=to_block,
+            from_block=from_block,
+            to_block=to_block,
             uni_v3_token=SWISE_TOKEN_CONTRACT_ADDRESS,
             reward_token=REWARD_ETH_TOKEN_CONTRACT_ADDRESS,
         ).get_rewards(SWISE_TOKEN_CONTRACT_ADDRESS, left_reward)
