@@ -21,7 +21,7 @@ volumes:
 services:
   oracle:
     container_name: oracle
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.0.3
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.0.4
     restart: always
     entrypoint: ["python"]
     command: ["oracle/oracle/main.py"]
@@ -30,7 +30,7 @@ services:
 
   keeper:
     container_name: keeper
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.0.3
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.0.4
     restart: always
     entrypoint: ["python"]
     command: ["oracle/keeper/main.py"]
@@ -77,12 +77,10 @@ services:
 
   subgraphs:
     container_name: subgraphs
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/subgraphs:v1.0.4
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/subgraphs:v1.0.6
     command: >
       /bin/sh -c "until nc -vz graph-node 8020; do echo 'Waiting graph-node'; sleep 2; done
-      && yarn prepare:${NETWORK}
-      && yarn codegen
-      && yarn build
+      && yarn build:${NETWORK}
       && yarn create:local
       && yarn deploy:local"
     env_file: [".env"]
