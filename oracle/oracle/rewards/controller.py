@@ -12,7 +12,7 @@ from web3.types import Timestamp, Wei
 from oracle.common.settings import REWARD_VOTE_FILENAME
 from oracle.oracle.eth1 import submit_vote
 
-from ..settings import SYNC_PERIOD
+from ..settings import NATIVE_CURRENCY, SYNC_PERIOD
 from .eth1 import get_registered_validators_public_keys
 from .eth2 import (
     PENDING_STATUSES,
@@ -28,8 +28,8 @@ logger = logging.getLogger(__name__)
 w3 = Web3()
 
 
-def format_ether(value: Union[str, int, Wei], sign="ETH") -> str:
-    """Converts Wei value to ETH."""
+def format_ether(value: Union[str, int, Wei], sign=NATIVE_CURRENCY) -> str:
+    """Converts Wei value."""
     _value = int(value)
     if _value < 0:
         formatted_value = f'-{Web3.fromWei(abs(_value), "ether")}'
@@ -52,9 +52,7 @@ class RewardsController(object):
         self.aiohttp_session = aiohttp_session
         self.genesis_timestamp = genesis_timestamp
         self.oracle = oracle
-
         self.last_vote_total_rewards = None
-        self.last_vote_update_time = None
 
     async def process(
         self,
@@ -73,10 +71,7 @@ class RewardsController(object):
             next_update_time += SYNC_PERIOD
 
         # skip submitting vote if too early or vote has been already submitted
-        if (
-            next_update_time > current_time
-            or next_update_time == self.last_vote_update_time
-        ):
+        if next_update_time > current_time:
             return
 
         # fetch pool validator BLS public keys
@@ -124,15 +119,8 @@ class RewardsController(object):
         pretty_total_rewards = format_ether(total_rewards)
         log_msg = f"Retrieved pool validator rewards: total={pretty_total_rewards}"
 
-        if (
-            self.last_vote_total_rewards is not None
-            and self.last_vote_update_time is not None
-        ):
-            log_msg += (
-                f", since last vote={format_ether((total_rewards - self.last_vote_total_rewards))},"
-                f" time elapsed="
-                f"{(next_update_time - self.last_vote_update_time).total_seconds()}"
-            )
+        if self.last_vote_total_rewards is not None:
+            log_msg += f", since last vote={format_ether((total_rewards - self.last_vote_total_rewards))}"
         logger.info(log_msg)
 
         if total_rewards < voting_params["total_rewards"]:
@@ -173,4 +161,3 @@ class RewardsController(object):
         logger.info("Rewards vote has been successfully submitted")
 
         self.last_vote_total_rewards = total_rewards
-        self.last_vote_update_time = next_update_time

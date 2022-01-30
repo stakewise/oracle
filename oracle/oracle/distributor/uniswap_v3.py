@@ -15,8 +15,8 @@ from oracle.oracle.graphql_queries import (
     UNISWAP_V3_RANGE_POSITIONS_QUERY,
 )
 from oracle.oracle.settings import (
-    REWARD_ETH_TOKEN_CONTRACT_ADDRESS,
-    STAKED_ETH_TOKEN_CONTRACT_ADDRESS,
+    REWARD_TOKEN_CONTRACT_ADDRESS,
+    STAKED_TOKEN_CONTRACT_ADDRESS,
     SWISE_TOKEN_CONTRACT_ADDRESS,
 )
 
@@ -33,8 +33,8 @@ BLOCKS_INTERVAL: BlockNumber = BlockNumber(277)
 MIN_TICK: int = -887272
 MAX_TICK: int = -MIN_TICK
 MAX_UINT_256 = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-Q32 = 2 ** 32
-Q96 = 2 ** 96
+Q32 = 2**32
+Q96 = 2**96
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
@@ -59,8 +59,8 @@ async def get_uniswap_v3_pools(block_number: BlockNumber) -> UniswapV3Pools:
         pools.extend(pools_chunk)
 
     uni_v3_pools = UniswapV3Pools(
-        staked_eth_pools=set(),
-        reward_eth_pools=set(),
+        staked_token_pools=set(),
+        reward_token_pools=set(),
         swise_pools=set(),
     )
     for pool in pools:
@@ -68,10 +68,10 @@ async def get_uniswap_v3_pools(block_number: BlockNumber) -> UniswapV3Pools:
         pool_token0 = Web3.toChecksumAddress(pool["token0"])
         pool_token1 = Web3.toChecksumAddress(pool["token1"])
         for pool_token in [pool_token0, pool_token1]:
-            if pool_token == STAKED_ETH_TOKEN_CONTRACT_ADDRESS:
-                uni_v3_pools["staked_eth_pools"].add(pool_address)
-            elif pool_token == REWARD_ETH_TOKEN_CONTRACT_ADDRESS:
-                uni_v3_pools["reward_eth_pools"].add(pool_address)
+            if pool_token == STAKED_TOKEN_CONTRACT_ADDRESS:
+                uni_v3_pools["staked_token_pools"].add(pool_address)
+            elif pool_token == REWARD_TOKEN_CONTRACT_ADDRESS:
+                uni_v3_pools["reward_token_pools"].add(pool_address)
             elif pool_token == SWISE_TOKEN_CONTRACT_ADDRESS:
                 uni_v3_pools["swise_pools"].add(pool_address)
 
@@ -87,8 +87,8 @@ async def get_uniswap_v3_distributions(
 ) -> Distributions:
     """Fetches Uniswap V3 pools and token distributions for them."""
     all_pools = (
-        pools["staked_eth_pools"]
-        .union(pools["reward_eth_pools"])
+        pools["staked_token_pools"]
+        .union(pools["reward_token_pools"])
         .union(pools["swise_pools"])
     )
     if not active_allocations or not all_pools:

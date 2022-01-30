@@ -8,7 +8,7 @@ from eth_account.signers.local import LocalAccount
 from web3 import Web3
 from web3.types import BlockNumber, Timestamp, Wei
 
-from oracle.common.settings import AWS_S3_BUCKET_NAME, ETH1_CONFIRMATION_BLOCKS
+from oracle.common.settings import AWS_S3_BUCKET_NAME, CONFIRMATION_BLOCKS
 
 from .clients import execute_ethereum_gql_query, execute_sw_gql_query, s3_client
 from .distributor.types import DistributorVote, DistributorVotingParameters
@@ -34,13 +34,12 @@ class VotingParameters(TypedDict):
     distributor: DistributorVotingParameters
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def get_finalized_block() -> Block:
     """Gets the finalized block number and its timestamp."""
     result: Dict = await execute_ethereum_gql_query(
         query=FINALIZED_BLOCK_QUERY,
         variables=dict(
-            confirmation_blocks=ETH1_CONFIRMATION_BLOCKS,
+            confirmation_blocks=CONFIRMATION_BLOCKS,
         ),
     )
     return Block(
@@ -49,13 +48,12 @@ async def get_finalized_block() -> Block:
     )
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def get_latest_block() -> Block:
     """Gets the latest block number and its timestamp."""
     result: Dict = await execute_ethereum_gql_query(
         query=LATEST_BLOCK_QUERY,
         variables=dict(
-            confirmation_blocks=ETH1_CONFIRMATION_BLOCKS,
+            confirmation_blocks=CONFIRMATION_BLOCKS,
         ),
     )
     return Block(
@@ -64,7 +62,6 @@ async def get_latest_block() -> Block:
     )
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def get_voting_parameters(block_number: BlockNumber) -> VotingParameters:
     """Fetches rewards voting parameters."""
     result: Dict = await execute_sw_gql_query(
@@ -75,29 +72,26 @@ async def get_voting_parameters(block_number: BlockNumber) -> VotingParameters:
     )
     network = result["networks"][0]
     distributor = result["merkleDistributors"][0]
-    reward_eth_token = result["rewardEthTokens"][0]
+    reward_token = result["rewardEthTokens"][0]
 
     rewards = RewardsVotingParameters(
         rewards_nonce=int(network["oraclesRewardsNonce"]),
-        total_rewards=Wei(int(reward_eth_token["totalRewards"])),
-        rewards_updated_at_timestamp=Timestamp(
-            int(reward_eth_token["updatedAtTimestamp"])
-        ),
+        total_rewards=Wei(int(reward_token["totalRewards"])),
+        rewards_updated_at_timestamp=Timestamp(int(reward_token["updatedAtTimestamp"])),
     )
     distributor = DistributorVotingParameters(
         rewards_nonce=int(network["oraclesRewardsNonce"]),
         from_block=BlockNumber(int(distributor["rewardsUpdatedAtBlock"])),
-        to_block=BlockNumber(int(reward_eth_token["updatedAtBlock"])),
+        to_block=BlockNumber(int(reward_token["updatedAtBlock"])),
         last_updated_at_block=BlockNumber(int(distributor["updatedAtBlock"])),
         last_merkle_root=distributor["merkleRoot"],
         last_merkle_proofs=distributor["merkleProofs"],
-        protocol_reward=Wei(int(reward_eth_token["protocolPeriodReward"])),
-        distributor_reward=Wei(int(reward_eth_token["distributorPeriodReward"])),
+        protocol_reward=Wei(int(reward_token["protocolPeriodReward"])),
+        distributor_reward=Wei(int(reward_token["distributorPeriodReward"])),
     )
     return VotingParameters(rewards=rewards, distributor=distributor)
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def check_oracle_account(oracle: LocalAccount) -> None:
     """Checks whether oracle is part of the oracles set."""
     oracle_lowered_address = oracle.address.lower()
@@ -125,7 +119,7 @@ def submit_vote(
     vote: Union[RewardVote, DistributorVote, ValidatorVote],
     name: str,
 ) -> None:
-    """Submits vote to the votes aggregator."""
+    """Submits vote to the votes' aggregator."""
     # generate candidate ID
     candidate_id: bytes = Web3.keccak(primitive=encoded_data)
     message = encode_defunct(primitive=candidate_id)

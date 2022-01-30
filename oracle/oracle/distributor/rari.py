@@ -1,6 +1,5 @@
 from typing import Dict
 
-import backoff
 from ens.constants import EMPTY_ADDR_HEX
 from eth_typing import BlockNumber, ChecksumAddress
 from web3 import Web3
@@ -11,7 +10,6 @@ from ..graphql_queries import RARI_FUSE_POOLS_CTOKENS_QUERY
 from .types import Balances
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def get_rari_fuse_liquidity_points(
     ctoken_address: ChecksumAddress, from_block: BlockNumber, to_block: BlockNumber
 ) -> Balances:

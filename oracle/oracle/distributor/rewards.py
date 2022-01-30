@@ -8,8 +8,8 @@ from eth_typing import BlockNumber, ChecksumAddress
 from oracle.oracle.settings import (
     DISTRIBUTOR_FALLBACK_ADDRESS,
     RARI_FUSE_POOL_ADDRESSES,
-    REWARD_ETH_TOKEN_CONTRACT_ADDRESS,
-    STAKED_ETH_TOKEN_CONTRACT_ADDRESS,
+    REWARD_TOKEN_CONTRACT_ADDRESS,
+    STAKED_TOKEN_CONTRACT_ADDRESS,
     SWISE_TOKEN_CONTRACT_ADDRESS,
 )
 
@@ -32,19 +32,17 @@ class DistributorRewards(object):
         to_block: BlockNumber,
         reward_token: ChecksumAddress,
         uni_v3_token: ChecksumAddress,
-        swise_holders: Balances,
     ) -> None:
-        self.uni_v3_staked_eth_pools = uniswap_v3_pools["staked_eth_pools"]
-        self.uni_v3_reward_eth_pools = uniswap_v3_pools["reward_eth_pools"]
+        self.uni_v3_staked_token_pools = uniswap_v3_pools["staked_token_pools"]
+        self.uni_v3_reward_token_pools = uniswap_v3_pools["reward_token_pools"]
         self.uni_v3_swise_pools = uniswap_v3_pools["swise_pools"]
         self.uni_v3_pools = self.uni_v3_swise_pools.union(
-            self.uni_v3_staked_eth_pools
-        ).union(self.uni_v3_reward_eth_pools)
+            self.uni_v3_staked_token_pools
+        ).union(self.uni_v3_reward_token_pools)
         self.from_block = from_block
         self.to_block = to_block
         self.uni_v3_token = uni_v3_token
         self.reward_token = reward_token
-        self.swise_holders = swise_holders
 
     def is_supported_contract(self, contract_address: ChecksumAddress) -> bool:
         """Checks whether the provided contract address is supported."""
@@ -108,23 +106,27 @@ class DistributorRewards(object):
     async def get_balances(self, contract_address: ChecksumAddress) -> Balances:
         """Fetches balances and total supply of the contract."""
         if (
-            self.uni_v3_token == STAKED_ETH_TOKEN_CONTRACT_ADDRESS
-            and contract_address in self.uni_v3_staked_eth_pools
+            self.uni_v3_token == STAKED_TOKEN_CONTRACT_ADDRESS
+            and contract_address in self.uni_v3_staked_token_pools
         ):
-            logger.info(f"Fetching Uniswap V3 sETH2 balances: pool={contract_address}")
+            logger.info(
+                f"Fetching Uniswap V3 staked token balances: pool={contract_address}"
+            )
             return await get_uniswap_v3_single_token_balances(
                 pool_address=contract_address,
-                token=STAKED_ETH_TOKEN_CONTRACT_ADDRESS,
+                token=STAKED_TOKEN_CONTRACT_ADDRESS,
                 block_number=self.to_block,
             )
         elif (
-            self.uni_v3_token == REWARD_ETH_TOKEN_CONTRACT_ADDRESS
-            and contract_address in self.uni_v3_reward_eth_pools
+            self.uni_v3_token == REWARD_TOKEN_CONTRACT_ADDRESS
+            and contract_address in self.uni_v3_reward_token_pools
         ):
-            logger.info(f"Fetching Uniswap V3 rETH2 balances: pool={contract_address}")
+            logger.info(
+                f"Fetching Uniswap V3 reward token balances: pool={contract_address}"
+            )
             return await get_uniswap_v3_single_token_balances(
                 pool_address=contract_address,
-                token=REWARD_ETH_TOKEN_CONTRACT_ADDRESS,
+                token=REWARD_TOKEN_CONTRACT_ADDRESS,
                 block_number=self.to_block,
             )
         elif (
@@ -167,9 +169,6 @@ class DistributorRewards(object):
                 from_block=self.from_block,
                 to_block=self.to_block,
             )
-        elif contract_address == SWISE_TOKEN_CONTRACT_ADDRESS:
-            logger.info("Distributing rewards to SWISE holders")
-            return self.swise_holders
 
         raise ValueError(
             f"Cannot get balances for unsupported contract address {contract_address}"

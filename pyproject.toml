@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "oracle"
-version = "2.0.0"
+version = "2.1.0"
 description = "StakeWise Oracles are responsible for submitting off-chain data."
 authors = ["Dmitri Tsumak <tsumak.dmitri@gmail.com>"]
 license = "AGPL-3.0-only"
@@ -9,21 +9,21 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "==3.8.12"
 python-decouple = "==3.5"
-web3 = "==5.25.0"
+web3 = "==5.26.0"
 py-ecc = "==5.2.0"
-gql = {version = "3.0.0rc0", allow-prereleases = true, extras = ["aiohttp"]}
+gql = {version = "3.0.0", extras = ["aiohttp"]}
 backoff = "==1.11.1"
 aiohttp = {version = "==3.8.1", extras = ["speedups"]}
-boto3 = {version = "==1.20.24", extras = ["awscrt"]}
+boto3 = {version = "==1.20.46", extras = ["awscrt"]}
 
 [tool.poetry.dev-dependencies]
-mypy = "==0.910"
-black = "==21.12b0"
+mypy = "==0.931"
+black = "==22.1.0"
 flake8 = "==4.0.1"
 isort = "==5.10.1"
-flake8-black = "==0.2.3"
-flake8-bugbear = "==21.11.29"
-pre-commit = "==2.16.0"
+flake8-black = "==0.2.4"
+flake8-bugbear = "==22.1.11"
+pre-commit = "==2.17.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

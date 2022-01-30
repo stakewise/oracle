@@ -16,8 +16,8 @@ from web3.types import TxParams
 from oracle.common.settings import (
     AWS_S3_BUCKET_NAME,
     AWS_S3_REGION,
+    CONFIRMATION_BLOCKS,
     DISTRIBUTOR_VOTE_FILENAME,
-    ETH1_CONFIRMATION_BLOCKS,
     REWARD_VOTE_FILENAME,
     VALIDATOR_VOTE_FILENAME,
 )
@@ -209,7 +209,7 @@ def wait_for_transaction(tx_hash: HexBytes) -> None:
     receipt = web3_client.eth.wait_for_transaction_receipt(
         transaction_hash=tx_hash, timeout=TRANSACTION_TIMEOUT, poll_latency=5
     )
-    confirmation_block: BlockNumber = receipt["blockNumber"] + ETH1_CONFIRMATION_BLOCKS
+    confirmation_block: BlockNumber = receipt["blockNumber"] + CONFIRMATION_BLOCKS
     current_block: BlockNumber = web3_client.eth.block_number
     while confirmation_block > current_block:
         logger.info(
@@ -218,7 +218,7 @@ def wait_for_transaction(tx_hash: HexBytes) -> None:
         time.sleep(15)
 
         receipt = web3_client.eth.get_transaction_receipt(tx_hash)
-        confirmation_block = receipt["blockNumber"] + ETH1_CONFIRMATION_BLOCKS
+        confirmation_block = receipt["blockNumber"] + CONFIRMATION_BLOCKS
         current_block = web3_client.eth.block_number
 
 

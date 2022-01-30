@@ -21,7 +21,7 @@ volumes:
 services:
   oracle:
     container_name: oracle
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.0.5
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.0.6
     restart: always
     entrypoint: ["python"]
     command: ["oracle/oracle/main.py"]
@@ -30,7 +30,7 @@ services:
 
   keeper:
     container_name: keeper
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.0.5
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.0.6
     restart: always
     entrypoint: ["python"]
     command: ["oracle/keeper/main.py"]
@@ -60,7 +60,7 @@ services:
 
   graph-node:
     container_name: graph-node
-    image: graphprotocol/graph-node:v0.24.2
+    image: graphprotocol/graph-node:v0.25.0
     restart: always
     env_file: [".env"]
     depends_on: ["postgres","ipfs"]
@@ -77,7 +77,7 @@ services:
 
   subgraphs:
     container_name: subgraphs
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/subgraphs:v1.0.7
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/subgraphs:v1.0.8
     command: >
       /bin/sh -c "until nc -vz graph-node 8020; do echo 'Waiting graph-node'; sleep 2; done
       && yarn build:${NETWORK}
@@ -102,7 +102,7 @@ services:
 
   geth:
     container_name: geth
-    image: ethereum/client-go:v1.10.13
+    image: ethereum/client-go:v1.10.15
     restart: always
     command:
       - --syncmode=full
@@ -118,7 +118,7 @@ services:
 
   erigon:
     container_name: erigon
-    image: thorax/erigon:v2021.12.02
+    image: thorax/erigon:v2022.01.03
     restart: always
     command:
       - erigon
@@ -133,7 +133,7 @@ services:
 
   erigon-rpcdaemon:
     container_name: erigon-rpcdaemon
-    image: thorax/erigon:v2021.12.02
+    image: thorax/erigon:v2022.01.03
     restart: always
     command:
       - rpcdaemon
@@ -162,7 +162,7 @@ services:
 
   lighthouse:
     container_name: lighthouse
-    image: sigp/lighthouse:v2.0.1
+    image: sigp/lighthouse:v2.1.1
     restart: always
     command:
       - lighthouse

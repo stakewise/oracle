@@ -1,6 +1,5 @@
 from typing import Dict, Union
 
-import backoff
 from eth_typing import HexStr
 from web3 import Web3
 from web3.types import BlockNumber, Wei
@@ -21,7 +20,6 @@ from oracle.oracle.graphql_queries import (
 from .types import ValidatorDepositData, ValidatorVotingParameters
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def get_voting_parameters() -> ValidatorVotingParameters:
     """Fetches validator voting parameters."""
     result: Dict = await execute_sw_gql_query(
@@ -38,7 +36,6 @@ async def get_voting_parameters() -> ValidatorVotingParameters:
     )
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def select_validator(
     block_number: BlockNumber,
 ) -> Union[None, ValidatorDepositData]:
@@ -85,7 +82,6 @@ async def select_validator(
             )
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def can_register_validator(block_number: BlockNumber, public_key: HexStr) -> bool:
     """Checks whether it's safe to register the validator."""
     result: Dict = await execute_ethereum_gql_query(
@@ -107,7 +103,6 @@ async def has_synced_block(block_number: BlockNumber) -> bool:
     return block_number <= BlockNumber(int(meta["block"]["number"]))
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def get_validators_deposit_root(block_number: BlockNumber) -> HexStr:
     """Fetches validators deposit root for protecting against operator submitting deposit prior to registration."""
     result: Dict = await execute_ethereum_gql_query(

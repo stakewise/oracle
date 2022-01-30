@@ -4,7 +4,7 @@ from decouple import Choices, Csv, config
 from eth_typing import HexStr
 from web3 import Web3
 
-from oracle.common.settings import GOERLI, MAINNET, NETWORK
+from oracle.common.settings import GNOSIS, GOERLI, MAINNET, NETWORK
 
 IPFS_PIN_ENDPOINTS = config(
     "IPFS_PIN_ENDPOINTS",
@@ -30,7 +30,7 @@ IPFS_PINATA_SECRET_KEY = config(
 # ETH2 settings
 ETH2_ENDPOINT = config("ETH2_ENDPOINT", default="http://localhost:3501")
 
-# TODO: Check whether can be removed after https://github.com/sigp/lighthouse/issues/2739 is resolved
+# TODO: remove once https://github.com/gnosischain/gbc-lighthouse updated to 2.1.1
 LIGHTHOUSE = "lighthouse"
 PRYSM = "prysm"
 TEKU = "teku"
@@ -54,10 +54,10 @@ if NETWORK == MAINNET:
     SWISE_TOKEN_CONTRACT_ADDRESS = Web3.toChecksumAddress(
         "0x48C3399719B582dD63eB5AADf12A40B4C3f52FA2"
     )
-    REWARD_ETH_TOKEN_CONTRACT_ADDRESS = Web3.toChecksumAddress(
+    REWARD_TOKEN_CONTRACT_ADDRESS = Web3.toChecksumAddress(
         "0x20BC832ca081b91433ff6c17f85701B6e92486c5"
     )
-    STAKED_ETH_TOKEN_CONTRACT_ADDRESS = Web3.toChecksumAddress(
+    STAKED_TOKEN_CONTRACT_ADDRESS = Web3.toChecksumAddress(
         "0xFe2e637202056d30016725477c5da089Ab0A043A"
     )
     DISTRIBUTOR_FALLBACK_ADDRESS = Web3.toChecksumAddress(
@@ -86,15 +86,38 @@ if NETWORK == MAINNET:
         "RARI_FUSE_SUBGRAPH_URL",
         default="https://api.thegraph.com/subgraphs/name/stakewise/rari-fuse-mainnet",
     )
+    NATIVE_CURRENCY = "ETH"
+# TODO: fix addresses once gnosis deployed
+elif NETWORK == GNOSIS:
+    SYNC_PERIOD = timedelta(days=1)
+    SWISE_TOKEN_CONTRACT_ADDRESS = ""
+    REWARD_TOKEN_CONTRACT_ADDRESS = ""
+    STAKED_TOKEN_CONTRACT_ADDRESS = ""
+    DISTRIBUTOR_FALLBACK_ADDRESS = ""
+    RARI_FUSE_POOL_ADDRESSES = []
+    WITHDRAWAL_CREDENTIALS: HexStr = HexStr("")
+    STAKEWISE_SUBGRAPH_URL = config(
+        "STAKEWISE_SUBGRAPH_URL",
+        default="https://api.thegraph.com/subgraphs/name/stakewise/stakewise-gnosis",
+    )
+    # TODO: update once uniswap v3 is deployed to gnosis chain
+    UNISWAP_V3_SUBGRAPH_URL = config("UNISWAP_V3_SUBGRAPH_URL", default="")
+    ETHEREUM_SUBGRAPH_URL = config(
+        "ETHEREUM_SUBGRAPH_URL",
+        default="https://api.thegraph.com/subgraphs/name/stakewise/ethereum-gnosis",
+    )
+    # TODO: update once rari fuse pools is deployed to gnosis chain
+    RARI_FUSE_SUBGRAPH_URL = config("RARI_FUSE_SUBGRAPH_URL", default="")
+    NATIVE_CURRENCY = "mGNO"
 elif NETWORK == GOERLI:
     SYNC_PERIOD = timedelta(hours=1)
     SWISE_TOKEN_CONTRACT_ADDRESS = Web3.toChecksumAddress(
         "0x0e2497aACec2755d831E4AFDEA25B4ef1B823855"
     )
-    REWARD_ETH_TOKEN_CONTRACT_ADDRESS = Web3.toChecksumAddress(
+    REWARD_TOKEN_CONTRACT_ADDRESS = Web3.toChecksumAddress(
         "0x826f88d423440c305D9096cC1581Ae751eFCAfB0"
     )
-    STAKED_ETH_TOKEN_CONTRACT_ADDRESS = Web3.toChecksumAddress(
+    STAKED_TOKEN_CONTRACT_ADDRESS = Web3.toChecksumAddress(
         "0x221D9812823DBAb0F1fB40b0D294D9875980Ac19"
     )
     DISTRIBUTOR_FALLBACK_ADDRESS = Web3.toChecksumAddress(
@@ -116,4 +139,6 @@ elif NETWORK == GOERLI:
         "ETHEREUM_SUBGRAPH_URL",
         default="https://api.thegraph.com/subgraphs/name/stakewise/ethereum-goerli",
     )
-    RARI_FUSE_SUBGRAPH_URL = ""
+    # TODO: update once rari fuse pools is deployed to goerli chain
+    RARI_FUSE_SUBGRAPH_URL = config("RARI_FUSE_SUBGRAPH_URL", default="")
+    NATIVE_CURRENCY = "ETH"

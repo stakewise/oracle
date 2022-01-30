@@ -3,6 +3,7 @@ import logging
 import signal
 import threading
 from typing import Any
+from urllib.parse import urlparse
 
 import aiohttp
 from eth_account import Account
@@ -20,7 +21,13 @@ from oracle.oracle.eth1 import (
 from oracle.oracle.health_server import oracle_routes
 from oracle.oracle.rewards.controller import RewardsController
 from oracle.oracle.rewards.eth2 import get_finality_checkpoints, get_genesis
-from oracle.oracle.settings import ORACLE_PRIVATE_KEY, ORACLE_PROCESS_INTERVAL
+from oracle.oracle.settings import (
+    ETH2_CLIENT,
+    ETH2_ENDPOINT,
+    ETHEREUM_SUBGRAPH_URL,
+    ORACLE_PRIVATE_KEY,
+    ORACLE_PROCESS_INTERVAL,
+)
 from oracle.oracle.validators.controller import ValidatorsController
 
 logging.basicConfig(
@@ -67,6 +74,10 @@ async def main() -> None:
     # check stakewise graphql connection
     logger.info("Checking connection to graph node...")
     await get_finalized_block()
+    parsed_uri = "{uri.scheme}://{uri.netloc}".format(
+        uri=urlparse(ETHEREUM_SUBGRAPH_URL)
+    )
+    logger.info(f"Connected to graph node at {parsed_uri}")
 
     # aiohttp session
     session = aiohttp.ClientSession()
@@ -74,6 +85,8 @@ async def main() -> None:
     # check ETH2 API connection
     logger.info("Checking connection to ETH2 node...")
     await get_finality_checkpoints(session)
+    parsed_uri = "{uri.scheme}://{uri.netloc}".format(uri=urlparse(ETH2_ENDPOINT))
+    logger.info(f"Connected to {ETH2_CLIENT} node at {parsed_uri}")
 
     # check whether oracle is part of the oracles set
     await check_oracle_account(oracle)

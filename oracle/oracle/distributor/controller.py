@@ -6,20 +6,16 @@ from eth_typing import HexStr
 from web3 import Web3
 
 from oracle.common.settings import DISTRIBUTOR_VOTE_FILENAME
-from oracle.oracle.settings import (
-    REWARD_ETH_TOKEN_CONTRACT_ADDRESS,
-    SWISE_TOKEN_CONTRACT_ADDRESS,
-)
 
 from ..eth1 import submit_vote
+from ..settings import DISTRIBUTOR_FALLBACK_ADDRESS, REWARD_TOKEN_CONTRACT_ADDRESS
 from .eth1 import (
-    get_disabled_stakers_reward_eth_distributions,
+    get_disabled_stakers_reward_token_distributions,
     get_distributor_claimed_accounts,
     get_one_time_rewards,
     get_operators_rewards,
     get_partners_rewards,
     get_periodic_allocations,
-    get_swise_holders,
 )
 from .ipfs import get_unclaimed_balances, upload_claims
 from .merkle_tree import calculate_merkle_root
@@ -73,7 +69,7 @@ class DistributorController(object):
 
         # fetch disabled stakers distributions
         disabled_stakers_distributions = (
-            await get_disabled_stakers_reward_eth_distributions(
+            await get_disabled_stakers_reward_token_distributions(
                 distributor_reward=voting_params["distributor_reward"],
                 from_block=from_block,
                 to_block=to_block,
@@ -95,13 +91,6 @@ class DistributorController(object):
         else:
             unclaimed_rewards = {}
 
-        swise_holders = await get_swise_holders(
-            from_block=from_block,
-            to_block=to_block,
-            unclaimed_rewards=unclaimed_rewards,
-            uniswap_v3_pools=uniswap_v3_pools,
-        )
-
         # calculate reward distributions with coroutines
         tasks = []
         for dist in all_distributions:
@@ -111,7 +100,6 @@ class DistributorController(object):
                 to_block=dist["to_block"],
                 reward_token=dist["reward_token"],
                 uni_v3_token=dist["uni_v3_token"],
-                swise_holders=swise_holders,
             )
             task = distributor_rewards.get_rewards(
                 contract_address=dist["contract"], reward=dist["reward"]
@@ -134,16 +122,19 @@ class DistributorController(object):
         partners_rewards, left_reward = await get_partners_rewards(
             from_block=from_block, to_block=to_block, total_reward=left_reward
         )
-        swise_holders_rewards = await DistributorRewards(
-            uniswap_v3_pools=uniswap_v3_pools,
-            swise_holders=swise_holders,
-            from_block=from_block,
-            to_block=to_block,
-            uni_v3_token=SWISE_TOKEN_CONTRACT_ADDRESS,
-            reward_token=REWARD_ETH_TOKEN_CONTRACT_ADDRESS,
-        ).get_rewards(SWISE_TOKEN_CONTRACT_ADDRESS, left_reward)
+        if left_reward > 0:
+            final_rewards = DistributorRewards.merge_rewards(
+                rewards1=final_rewards,
+                rewards2=Rewards(
+                    {
+                        DISTRIBUTOR_FALLBACK_ADDRESS: {
+                            REWARD_TOKEN_CONTRACT_ADDRESS: left_reward
+                        }
+                    }
+                ),
+            )
 
-        for rewards in [operators_rewards, partners_rewards, swise_holders_rewards]:
+        for rewards in [operators_rewards, partners_rewards]:
             final_rewards = DistributorRewards.merge_rewards(final_rewards, rewards)
 
         # merge final rewards with unclaimed rewards
