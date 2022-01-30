@@ -153,7 +153,6 @@ def check_validator_vote(vote: ValidatorVote, oracle: ChecksumAddress) -> bool:
         return False
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=900)
 def get_oracles_votes(
     rewards_nonce: int, validators_nonce: int, oracles: List[ChecksumAddress]
 ) -> OraclesVotes:
@@ -252,8 +251,17 @@ def submit_update(function_call: ContractFunction) -> None:
     wait_for_transaction(tx_hash)
 
 
-def submit_votes(votes: OraclesVotes, total_oracles: int) -> None:
+@backoff.on_exception(backoff.expo, Exception, max_time=900)
+def submit_votes(params: Parameters) -> None:
     """Submits aggregated votes in case they have majority."""
+    # resolve and fetch the latest votes of the oracles for validators and rewards
+    votes = get_oracles_votes(
+        rewards_nonce=params.rewards_nonce,
+        validators_nonce=params.validators_nonce,
+        oracles=params.oracles,
+    )
+    total_oracles = len(params.oracles)
+
     counter = Counter(
         [
             (vote["total_rewards"], vote["activated_validators"])
