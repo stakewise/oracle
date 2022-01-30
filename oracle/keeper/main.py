@@ -4,13 +4,11 @@ import threading
 import time
 from typing import Any
 
-import backoff
-
 from oracle.common.health_server import create_health_server_runner, start_health_server
 from oracle.common.settings import ENABLE_HEALTH_SERVER, LOG_LEVEL
 from oracle.keeper.health_server import keeper_routes
 from oracle.keeper.settings import KEEPER_PROCESS_INTERVAL
-from oracle.keeper.utils import get_keeper_params, get_oracles_votes, submit_votes
+from oracle.keeper.utils import get_keeper_params, submit_votes
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(message)s",
@@ -40,30 +38,19 @@ class InterruptHandler:
         self.exit = True
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=900)
 def main() -> None:
     # wait for interrupt
     interrupt_handler = InterruptHandler()
 
     while not interrupt_handler.exit:
-        # 1. Fetch current nonces of the validators, rewards and the total number of oracles
+        # Fetch current nonces of the validators, rewards and the total number of oracles
         params = get_keeper_params()
         if params.paused:
             time.sleep(KEEPER_PROCESS_INTERVAL)
             continue
 
-        # 2. Resolve and fetch latest votes of the oracles for validators and rewards
-        latest_votes = get_oracles_votes(
-            rewards_nonce=params.rewards_nonce,
-            validators_nonce=params.validators_nonce,
-            oracles=params.oracles,
-        )
-
-        # 3. If nonces match the current for the majority, submit the transactions
-        submit_votes(
-            votes=latest_votes,
-            total_oracles=len(params.oracles),
-        )
+        # If nonces match the current for the majority, submit the transactions
+        submit_votes(params)
 
         time.sleep(KEEPER_PROCESS_INTERVAL)
 

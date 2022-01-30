@@ -20,7 +20,6 @@ from .types import ClaimedAccounts, Claims, Rewards
 logger = logging.getLogger(__name__)
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def get_unclaimed_balances(
     merkle_proofs: str, claimed_accounts: ClaimedAccounts
 ) -> Rewards:
@@ -54,7 +53,6 @@ async def get_unclaimed_balances(
     return unclaimed_rewards
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def get_one_time_rewards_allocations(rewards: str) -> Dict[ChecksumAddress, str]:
     """Fetches one time rewards from IPFS."""
     return await ipfs_fetch(rewards)

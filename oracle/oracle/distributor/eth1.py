@@ -1,7 +1,6 @@
 import logging
-from typing import Dict, Set, Tuple
+from typing import Dict, Tuple
 
-import backoff
 from ens.constants import EMPTY_ADDR_HEX
 from eth_typing import ChecksumAddress, HexStr
 from web3 import Web3
@@ -15,32 +14,27 @@ from oracle.oracle.graphql_queries import (
     OPERATORS_REWARDS_QUERY,
     PARTNERS_QUERY,
     PERIODIC_DISTRIBUTIONS_QUERY,
-    SWISE_HOLDERS_QUERY,
 )
 from oracle.oracle.settings import (
     DISTRIBUTOR_FALLBACK_ADDRESS,
-    REWARD_ETH_TOKEN_CONTRACT_ADDRESS,
-    STAKED_ETH_TOKEN_CONTRACT_ADDRESS,
-    SWISE_TOKEN_CONTRACT_ADDRESS,
+    REWARD_TOKEN_CONTRACT_ADDRESS,
+    STAKED_TOKEN_CONTRACT_ADDRESS,
 )
 
 from .ipfs import get_one_time_rewards_allocations
 from .rewards import DistributorRewards
 from .types import (
-    Balances,
     ClaimedAccounts,
     Distribution,
     Distributions,
     Rewards,
     TokenAllocation,
     TokenAllocations,
-    UniswapV3Pools,
 )
 
 logger = logging.getLogger(__name__)
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def get_periodic_allocations(
     from_block: BlockNumber, to_block: BlockNumber
 ) -> TokenAllocations:
@@ -85,11 +79,10 @@ async def get_periodic_allocations(
     return allocations
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=900)
-async def get_disabled_stakers_reward_eth_distributions(
+async def get_disabled_stakers_reward_token_distributions(
     distributor_reward: Wei, from_block: BlockNumber, to_block: BlockNumber
 ) -> Distributions:
-    """Fetches disabled stakers reward ETH distributions based on their staked ETH balances."""
+    """Fetches disabled stakers reward token distributions based on their staked token balances."""
     if distributor_reward <= 0:
         return []
 
@@ -151,8 +144,8 @@ async def get_disabled_stakers_reward_eth_distributions(
             contract=staker_address,
             from_block=from_block,
             to_block=to_block,
-            uni_v3_token=STAKED_ETH_TOKEN_CONTRACT_ADDRESS,
-            reward_token=REWARD_ETH_TOKEN_CONTRACT_ADDRESS,
+            uni_v3_token=STAKED_TOKEN_CONTRACT_ADDRESS,
+            reward_token=REWARD_TOKEN_CONTRACT_ADDRESS,
             reward=reward,
         )
         distributions.append(distribution)
@@ -161,7 +154,6 @@ async def get_disabled_stakers_reward_eth_distributions(
     return distributions
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def get_distributor_claimed_accounts(merkle_root: HexStr) -> ClaimedAccounts:
     """Fetches addresses that have claimed their tokens from the `MerkleDistributor` contract."""
     last_id = ""
@@ -185,95 +177,6 @@ async def get_distributor_claimed_accounts(merkle_root: HexStr) -> ClaimedAccoun
     return set(Web3.toChecksumAddress(claim["account"]) for claim in claims)
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=900)
-async def get_swise_holders(
-    from_block: BlockNumber,
-    to_block: BlockNumber,
-    unclaimed_rewards: Rewards,
-    uniswap_v3_pools: UniswapV3Pools,
-) -> Balances:
-    """Fetches SWISE holding points."""
-    last_id = ""
-    result: Dict = await execute_sw_gql_query(
-        query=SWISE_HOLDERS_QUERY,
-        variables=dict(block_number=to_block, last_id=last_id),
-    )
-    swise_holders_chunk = result.get("stakeWiseTokenHolders", [])
-    swise_holders = swise_holders_chunk
-
-    # accumulate chunks
-    while len(swise_holders_chunk) >= 1000:
-        last_id = swise_holders_chunk[-1]["id"]
-        result: Dict = await execute_sw_gql_query(
-            query=SWISE_HOLDERS_QUERY,
-            variables=dict(block_number=to_block, last_id=last_id),
-        )
-        swise_holders_chunk = result.get("stakeWiseTokenHolders", [])
-        swise_holders.extend(swise_holders_chunk)
-
-    # process swise holders
-    all_uni_pools = (
-        uniswap_v3_pools["swise_pools"]
-        .union(uniswap_v3_pools["staked_eth_pools"])
-        .union(uniswap_v3_pools["reward_eth_pools"])
-    )
-    points: Dict[ChecksumAddress, int] = {}
-    total_points = 0
-    contracts: Set[ChecksumAddress] = set()
-    for swise_holder in swise_holders:
-        account = Web3.toChecksumAddress(swise_holder["id"])
-        if account == EMPTY_ADDR_HEX:
-            continue
-
-        is_contract = swise_holder.get("isContract", False)
-        if is_contract:
-            contracts.add(account)
-            if account not in all_uni_pools:
-                continue
-
-        balance = int(swise_holder["balance"])
-        prev_account_points = int(swise_holder["distributorPoints"])
-        updated_at_block = BlockNumber(int(swise_holder["updatedAtBlock"]))
-        if from_block > updated_at_block:
-            updated_at_block = from_block
-            prev_account_points = 0
-
-        account_points = prev_account_points + (balance * (to_block - updated_at_block))
-        if account_points <= 0:
-            continue
-
-        points[account] = account_points
-        total_points += account_points
-
-    # process unclaimed SWISE
-    for account in unclaimed_rewards:
-        if account in contracts:
-            continue
-
-        balance = int(
-            unclaimed_rewards.get(account, {}).get(SWISE_TOKEN_CONTRACT_ADDRESS, "0")
-        )
-        if balance <= 0:
-            continue
-
-        account_points = balance * (to_block - from_block)
-        if account_points <= 0:
-            continue
-
-        points[account] = points.setdefault(account, 0) + account_points
-        total_points += account_points
-
-    # require holding at least 1000 SWISE for the max duration
-    min_swise_holding_points = Web3.toWei(1000, "ether") * (to_block - from_block)
-    for account, account_points in list(points.items()):
-        if account_points < min_swise_holding_points:
-            del points[account]
-            total_points -= account_points
-
-    return Balances(total_supply=total_points, balances=points)
-
-
-@backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def get_operators_rewards(
     from_block: BlockNumber,
     to_block: BlockNumber,
@@ -331,13 +234,12 @@ async def get_operators_rewards(
         total_reward=operators_reward,
         points=points,
         total_points=total_points,
-        reward_token=REWARD_ETH_TOKEN_CONTRACT_ADDRESS,
+        reward_token=REWARD_TOKEN_CONTRACT_ADDRESS,
     )
 
     return rewards, Wei(total_reward - operators_reward)
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def get_partners_rewards(
     from_block: BlockNumber, to_block: BlockNumber, total_reward: Wei
 ) -> Tuple[Rewards, Wei]:
@@ -393,7 +295,7 @@ async def get_partners_rewards(
         total_reward=partners_reward,
         points=points,
         total_points=total_points,
-        reward_token=REWARD_ETH_TOKEN_CONTRACT_ADDRESS,
+        reward_token=REWARD_TOKEN_CONTRACT_ADDRESS,
     )
 
     return rewards, Wei(total_reward - partners_reward)
@@ -432,7 +334,6 @@ def calculate_points_based_rewards(
     return rewards
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def get_one_time_rewards(
     from_block: BlockNumber, to_block: BlockNumber
 ) -> Rewards:

@@ -337,26 +337,6 @@ DISTRIBUTOR_CLAIMED_ACCOUNTS_QUERY = gql(
 """
 )
 
-SWISE_HOLDERS_QUERY = gql(
-    """
-    query getSwiseHolders($block_number: Int, $last_id: ID) {
-      stakeWiseTokenHolders(
-        block: { number: $block_number }
-        where: { id_gt: $last_id }
-        first: 1000
-        orderBy: id
-        orderDirection: asc
-      ) {
-        id
-        balance
-        isContract
-        distributorPoints
-        updatedAtBlock
-      }
-    }
-"""
-)
-
 OPERATORS_REWARDS_QUERY = gql(
     """
     query getOperatorsRewards($block_number: Int) {

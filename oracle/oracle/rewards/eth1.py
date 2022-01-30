@@ -1,6 +1,5 @@
 from typing import Dict
 
-import backoff
 from web3.types import BlockNumber
 
 from oracle.oracle.clients import execute_sw_gql_query
@@ -9,7 +8,6 @@ from oracle.oracle.graphql_queries import REGISTERED_VALIDATORS_QUERY
 from .types import RegisteredValidatorsPublicKeys
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def get_registered_validators_public_keys(
     block_number: BlockNumber,
 ) -> RegisteredValidatorsPublicKeys:

@@ -47,6 +47,7 @@ async def get_validators(
     if not public_keys:
         return []
 
+    # TODO: remove once https://github.com/gnosischain/gbc-lighthouse updated to 2.1.1
     if ETH2_CLIENT == LIGHTHOUSE:
         endpoint = f"{ETH2_ENDPOINT}/eth/v1/beacon/states/{state_id}/validators?id={','.join(public_keys)}"
     else:

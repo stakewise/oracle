@@ -44,8 +44,8 @@ class Claim(TypedDict):
 
 
 class UniswapV3Pools(TypedDict):
-    staked_eth_pools: Set[ChecksumAddress]
-    reward_eth_pools: Set[ChecksumAddress]
+    staked_token_pools: Set[ChecksumAddress]
+    reward_token_pools: Set[ChecksumAddress]
     swise_pools: Set[ChecksumAddress]
 
 

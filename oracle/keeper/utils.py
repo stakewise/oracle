@@ -16,8 +16,8 @@ from web3.types import TxParams
 from oracle.common.settings import (
     AWS_S3_BUCKET_NAME,
     AWS_S3_REGION,
+    CONFIRMATION_BLOCKS,
     DISTRIBUTOR_VOTE_FILENAME,
-    ETH1_CONFIRMATION_BLOCKS,
     REWARD_VOTE_FILENAME,
     VALIDATOR_VOTE_FILENAME,
 )
@@ -153,7 +153,6 @@ def check_validator_vote(vote: ValidatorVote, oracle: ChecksumAddress) -> bool:
         return False
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=900)
 def get_oracles_votes(
     rewards_nonce: int, validators_nonce: int, oracles: List[ChecksumAddress]
 ) -> OraclesVotes:
@@ -209,7 +208,7 @@ def wait_for_transaction(tx_hash: HexBytes) -> None:
     receipt = web3_client.eth.wait_for_transaction_receipt(
         transaction_hash=tx_hash, timeout=TRANSACTION_TIMEOUT, poll_latency=5
     )
-    confirmation_block: BlockNumber = receipt["blockNumber"] + ETH1_CONFIRMATION_BLOCKS
+    confirmation_block: BlockNumber = receipt["blockNumber"] + CONFIRMATION_BLOCKS
     current_block: BlockNumber = web3_client.eth.block_number
     while confirmation_block > current_block:
         logger.info(
@@ -218,7 +217,7 @@ def wait_for_transaction(tx_hash: HexBytes) -> None:
         time.sleep(15)
 
         receipt = web3_client.eth.get_transaction_receipt(tx_hash)
-        confirmation_block = receipt["blockNumber"] + ETH1_CONFIRMATION_BLOCKS
+        confirmation_block = receipt["blockNumber"] + CONFIRMATION_BLOCKS
         current_block = web3_client.eth.block_number
 
 
@@ -252,8 +251,17 @@ def submit_update(function_call: ContractFunction) -> None:
     wait_for_transaction(tx_hash)
 
 
-def submit_votes(votes: OraclesVotes, total_oracles: int) -> None:
+@backoff.on_exception(backoff.expo, Exception, max_time=900)
+def submit_votes(params: Parameters) -> None:
     """Submits aggregated votes in case they have majority."""
+    # resolve and fetch the latest votes of the oracles for validators and rewards
+    votes = get_oracles_votes(
+        rewards_nonce=params.rewards_nonce,
+        validators_nonce=params.validators_nonce,
+        oracles=params.oracles,
+    )
+    total_oracles = len(params.oracles)
+
     counter = Counter(
         [
             (vote["total_rewards"], vote["activated_validators"])
