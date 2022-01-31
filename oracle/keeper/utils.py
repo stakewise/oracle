@@ -221,7 +221,6 @@ def wait_for_transaction(tx_hash: HexBytes) -> None:
         current_block = web3_client.eth.block_number
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=900)
 def get_transaction_params() -> TxParams:
     account_nonce = web3_client.eth.getTransactionCount(web3_client.eth.default_account)
     latest_block = web3_client.eth.get_block("latest")
