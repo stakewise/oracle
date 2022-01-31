@@ -3,12 +3,12 @@ name: CI
 on:
   pull_request:
     paths:
-      - 'oracle/*'
+      - 'oracle/**/*'
       - 'pyporject.toml'
       - 'Dockerfile'
   push:
     paths:
-      - 'oracle/*'
+      - 'oracle/**/*'
       - 'pyporject.toml'
       - 'Dockerfile'
 
