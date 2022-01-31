@@ -86,7 +86,7 @@ if NETWORK == MAINNET:
         "RARI_FUSE_SUBGRAPH_URL",
         default="https://api.thegraph.com/subgraphs/name/stakewise/rari-fuse-mainnet",
     )
-    NATIVE_CURRENCY = "ETH"
+    STAKED_TOKEN_SYMBOL = "ETH"
 # TODO: fix addresses once gnosis deployed
 elif NETWORK == GNOSIS:
     SYNC_PERIOD = timedelta(days=1)
@@ -108,7 +108,7 @@ elif NETWORK == GNOSIS:
     )
     # TODO: update once rari fuse pools is deployed to gnosis chain
     RARI_FUSE_SUBGRAPH_URL = config("RARI_FUSE_SUBGRAPH_URL", default="")
-    NATIVE_CURRENCY = "mGNO"
+    STAKED_TOKEN_SYMBOL = "mGNO"
 elif NETWORK == GOERLI:
     SYNC_PERIOD = timedelta(hours=1)
     SWISE_TOKEN_CONTRACT_ADDRESS = Web3.toChecksumAddress(
@@ -141,4 +141,4 @@ elif NETWORK == GOERLI:
     )
     # TODO: update once rari fuse pools is deployed to goerli chain
     RARI_FUSE_SUBGRAPH_URL = config("RARI_FUSE_SUBGRAPH_URL", default="")
-    NATIVE_CURRENCY = "ETH"
+    STAKED_TOKEN_SYMBOL = "ETH"

@@ -5,7 +5,13 @@ import backoff
 from aiohttp import ClientSession
 from eth_typing import HexStr
 
-from oracle.oracle.settings import ETH2_CLIENT, ETH2_ENDPOINT, LIGHTHOUSE
+from oracle.oracle.settings import (
+    ETH2_CLIENT,
+    ETH2_ENDPOINT,
+    GNOSIS,
+    LIGHTHOUSE,
+    NETWORK,
+)
 
 
 class ValidatorStatus(Enum):
@@ -23,8 +29,14 @@ class ValidatorStatus(Enum):
 
 
 PENDING_STATUSES = [ValidatorStatus.PENDING_INITIALIZED, ValidatorStatus.PENDING_QUEUED]
-SLOTS_PER_EPOCH = 32
-SECONDS_PER_SLOT = 12
+
+if NETWORK == GNOSIS:
+    SLOTS_PER_EPOCH = 16
+    SECONDS_PER_SLOT = 5
+else:
+    SLOTS_PER_EPOCH = 32
+    SECONDS_PER_SLOT = 12
+
 SECONDS_PER_EPOCH = SECONDS_PER_SLOT * SLOTS_PER_EPOCH
 
 
