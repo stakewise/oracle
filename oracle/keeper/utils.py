@@ -223,12 +223,17 @@ def wait_for_transaction(tx_hash: HexBytes) -> None:
 
 def get_transaction_params() -> TxParams:
     account_nonce = web3_client.eth.getTransactionCount(web3_client.eth.default_account)
+    latest_block = web3_client.eth.get_block("latest")
     max_priority_fee = min(web3_client.eth.max_priority_fee, MAX_FEE_PER_GAS)
+
+    base_fee = latest_block["baseFeePerGas"]
+    priority_fee = int(str(max_priority_fee), 16)
+    max_fee_per_gas = priority_fee + 2 * base_fee
 
     return TxParams(
         nonce=account_nonce,
         maxPriorityFeePerGas=max_priority_fee,
-        maxFeePerGas=hex(MAX_FEE_PER_GAS),
+        maxFeePerGas=hex(min(max_fee_per_gas, MAX_FEE_PER_GAS)),
     )
 
 
