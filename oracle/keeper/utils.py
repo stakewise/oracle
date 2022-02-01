@@ -23,7 +23,7 @@ from oracle.common.settings import (
 )
 from oracle.keeper.clients import web3_client
 from oracle.keeper.contracts import multicall_contract, oracles_contract
-from oracle.keeper.settings import TRANSACTION_TIMEOUT
+from oracle.keeper.settings import MAX_FEE_PER_GAS, TRANSACTION_TIMEOUT
 from oracle.keeper.typings import OraclesVotes, Parameters
 from oracle.oracle.distributor.types import DistributorVote
 from oracle.oracle.rewards.types import RewardVote
@@ -223,17 +223,12 @@ def wait_for_transaction(tx_hash: HexBytes) -> None:
 
 def get_transaction_params() -> TxParams:
     account_nonce = web3_client.eth.getTransactionCount(web3_client.eth.default_account)
-    latest_block = web3_client.eth.get_block("latest")
-    max_priority_fee = web3_client.eth.max_priority_fee
-
-    base_fee = latest_block["baseFeePerGas"]
-    priority_fee = int(str(max_priority_fee), 16)
-    max_fee_per_gas = priority_fee + 2 * base_fee
+    max_priority_fee = min(web3_client.eth.max_priority_fee, MAX_FEE_PER_GAS)
 
     return TxParams(
         nonce=account_nonce,
-        maxPriorityFeePerGas=web3_client.eth.max_priority_fee,
-        maxFeePerGas=hex(max_fee_per_gas),
+        maxPriorityFeePerGas=max_priority_fee,
+        maxFeePerGas=hex(MAX_FEE_PER_GAS),
     )
 
 
