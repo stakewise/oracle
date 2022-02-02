@@ -12,7 +12,7 @@ from web3.types import Timestamp, Wei
 from oracle.common.settings import REWARD_VOTE_FILENAME
 from oracle.oracle.eth1 import submit_vote
 
-from ..settings import NATIVE_CURRENCY, SYNC_PERIOD
+from ..settings import STAKED_TOKEN_SYMBOL, SYNC_PERIOD
 from .eth1 import get_registered_validators_public_keys
 from .eth2 import (
     PENDING_STATUSES,
@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 w3 = Web3()
 
 
-def format_ether(value: Union[str, int, Wei], sign=NATIVE_CURRENCY) -> str:
+def format_ether(value: Union[str, int, Wei], sign=STAKED_TOKEN_SYMBOL) -> str:
     """Converts Wei value."""
     _value = int(value)
     if _value < 0:

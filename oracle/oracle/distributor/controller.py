@@ -123,15 +123,14 @@ class DistributorController(object):
             from_block=from_block, to_block=to_block, total_reward=left_reward
         )
         if left_reward > 0:
+            fallback_rewards: Rewards = {
+                DISTRIBUTOR_FALLBACK_ADDRESS: {
+                    REWARD_TOKEN_CONTRACT_ADDRESS: str(left_reward)
+                }
+            }
             final_rewards = DistributorRewards.merge_rewards(
                 rewards1=final_rewards,
-                rewards2=Rewards(
-                    {
-                        DISTRIBUTOR_FALLBACK_ADDRESS: {
-                            REWARD_TOKEN_CONTRACT_ADDRESS: left_reward
-                        }
-                    }
-                ),
+                rewards2=fallback_rewards,
             )
 
         for rewards in [operators_rewards, partners_rewards]:

@@ -15,6 +15,10 @@ KEEPER_MIN_BALANCE_WEI = config(
 
 TRANSACTION_TIMEOUT = config("TRANSACTION_TIMEOUT", default=900, cast=int)
 
+MAX_FEE_PER_GAS = config(
+    "MAX_FEE_PER_GAS_GWEI", default=150, cast=lambda x: Web3.toWei(x, "gwei")
+)
+
 if NETWORK == MAINNET:
     ORACLES_CONTRACT_ADDRESS = Web3.toChecksumAddress(
         "0x8a887282E67ff41d36C0b7537eAB035291461AcD"

@@ -21,7 +21,7 @@ volumes:
 services:
   oracle:
     container_name: oracle
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.1.1
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.1.2
     restart: always
     entrypoint: ["python"]
     command: ["oracle/oracle/main.py"]
@@ -30,7 +30,7 @@ services:
 
   keeper:
     container_name: keeper
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.1.1
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.1.2
     restart: always
     entrypoint: ["python"]
     command: ["oracle/keeper/main.py"]
