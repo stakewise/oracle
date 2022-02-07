@@ -21,7 +21,7 @@ volumes:
 services:
   oracle:
     container_name: oracle
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.1.2
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.2.0
     restart: always
     entrypoint: ["python"]
     command: ["oracle/oracle/main.py"]
@@ -30,7 +30,7 @@ services:
 
   keeper:
     container_name: keeper
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.1.2
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.2.0
     restart: always
     entrypoint: ["python"]
     command: ["oracle/keeper/main.py"]
@@ -148,7 +148,7 @@ services:
 
   prysm:
     container_name: prysm
-    image: gcr.io/prysmaticlabs/prysm/beacon-chain:v2.0.5
+    image: gcr.io/prysmaticlabs/prysm/beacon-chain:v2.0.6
     restart: always
     command:
       - --datadir=/data
@@ -162,7 +162,7 @@ services:
 
   lighthouse:
     container_name: lighthouse
-    image: sigp/lighthouse:v2.1.1
+    image: sigp/lighthouse:v2.1.2
     restart: always
     command:
       - lighthouse

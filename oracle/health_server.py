@@ -2,7 +2,7 @@ import asyncio
 
 from aiohttp import web
 
-from oracle.common.settings import HEALTH_SERVER_HOST, HEALTH_SERVER_PORT
+from oracle.settings import HEALTH_SERVER_HOST, HEALTH_SERVER_PORT
 
 
 def start_health_server(runner):

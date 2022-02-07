@@ -1,13 +1,16 @@
+from typing import Dict
+
+from web3 import Web3
 from web3.contract import Contract
 
-from oracle.keeper.clients import web3_client
-from oracle.keeper.settings import MULTICALL_CONTRACT_ADDRESS, ORACLES_CONTRACT_ADDRESS
+from oracle.networks import NETWORKS
+from oracle.settings import ENABLED_NETWORKS
 
 
-def get_multicall_contract() -> Contract:
+def get_multicall_contract(w3_client: Web3, network: str) -> Contract:
     """:returns instance of `Multicall` contract."""
-    return web3_client.eth.contract(
-        address=MULTICALL_CONTRACT_ADDRESS,
+    return w3_client.eth.contract(
+        address=NETWORKS[network]["MULTICALL_CONTRACT_ADDRESS"],
         abi=[
             {
                 "constant": False,
@@ -34,10 +37,10 @@ def get_multicall_contract() -> Contract:
     )
 
 
-def get_oracles_contract() -> Contract:
+def get_oracles_contract(web3_client: Web3, network: str) -> Contract:
     """:returns instance of `Oracles` contract."""
     return web3_client.eth.contract(
-        address=ORACLES_CONTRACT_ADDRESS,
+        address=NETWORKS[network]["ORACLES_CONTRACT_ADDRESS"],
         abi=[
             {
                 "inputs": [],
@@ -193,5 +196,19 @@ def get_oracles_contract() -> Contract:
     )
 
 
-multicall_contract = get_multicall_contract()
-oracles_contract = get_oracles_contract()
+def get_multicall_contracts(web3_clients: Dict[str, Web3]) -> Dict[str, Contract]:
+    multicall_contracts = {}
+    for network in ENABLED_NETWORKS:
+        web3_client = web3_clients[network]
+        multicall_contracts[network] = get_multicall_contract(web3_client, network)
+
+    return multicall_contracts
+
+
+def get_oracles_contracts(web3_clients: Dict[str, Web3]) -> Dict[str, Contract]:
+    oracles_contracts = {}
+    for network in ENABLED_NETWORKS:
+        web3_client = web3_clients[network]
+        oracles_contracts[network] = get_oracles_contract(web3_client, network)
+
+    return oracles_contracts
