@@ -20,7 +20,7 @@ volumes:
 
 services:
   oracle:
-    container_name: oracle
+    container_name: oracle_goerli
     image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.2.0
     restart: always
     entrypoint: ["python"]
@@ -29,7 +29,7 @@ services:
     profiles: ["oracle"]
 
   keeper:
-    container_name: keeper
+    container_name: keeper_goerli
     image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.2.0
     restart: always
     entrypoint: ["python"]
@@ -38,28 +38,27 @@ services:
     profiles: ["keeper"]
 
   prometheus:
-    container_name: prometheus
+    container_name: prometheus_goerli
     image: bitnami/prometheus:2
     restart: always
     env_file: [".env"]
     volumes:
       - prometheus:/opt/bitnami/prometheus/data
-      - ./configs/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml
-      - ./configs/rules.yml:/opt/bitnami/prometheus/conf/rules.yml
+      - ../configs/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml
+      - ../configs/rules.yml:/opt/bitnami/prometheus/conf/rules.yml
 
   alertmanager:
-    container_name: alertmanager
+    container_name: alertmanager_goerli
     image: bitnami/alertmanager:0
     restart: always
-    ports: ["127.0.0.1:9093:9093"]
     env_file: [".env"]
     volumes:
       - alertmanager:/opt/bitnami/alertmanager/data
-      - ./configs/alertmanager.yml:/opt/bitnami/alertmanager/conf/config.yml
+      - ../configs/alertmanager.yml:/opt/bitnami/alertmanager/conf/config.yml
     depends_on: ["prometheus"]
 
   graph-node:
-    container_name: graph-node
+    container_name: graph_node_goerli
     image: graphprotocol/graph-node:v0.25.0
     restart: always
     env_file: [".env"]
@@ -67,7 +66,7 @@ services:
     profiles: ["graph"]
 
   postgres:
-    container_name: postgres
+    container_name: postgres_goerli
     image: postgres:14-alpine
     restart: always
     command: ["postgres", "-cshared_preload_libraries=pg_stat_statements"]
@@ -76,7 +75,7 @@ services:
     profiles: ["graph"]
 
   subgraphs:
-    container_name: subgraphs
+    container_name: subgraphs_goerli
     image: europe-west4-docker.pkg.dev/stakewiselabs/public/subgraphs:v1.0.8
     command: >
       /bin/sh -c "until nc -vz graph-node 8020; do echo 'Waiting graph-node'; sleep 2; done
@@ -89,7 +88,7 @@ services:
     profiles: ["graph"]
 
   ipfs:
-    container_name: ipfs
+    container_name: ipfs_goerli
     image: ipfs/go-ipfs:v0.10.0
     restart: always
     env_file: [".env"]
@@ -101,10 +100,11 @@ services:
     profiles: ["oracle"]
 
   geth:
-    container_name: geth
+    container_name: geth_goerli
     image: ethereum/client-go:v1.10.15
     restart: always
     command:
+      - --goerli
       - --syncmode=full
       - --http
       - --http.addr=0.0.0.0
@@ -117,11 +117,12 @@ services:
     profiles: ["geth"]
 
   erigon:
-    container_name: erigon
+    container_name: erigon_goerli
     image: thorax/erigon:v2022.01.03
     restart: always
     command:
       - erigon
+      - --chain=goerli
       - --private.api.addr=0.0.0.0:9090
       - --maxpeers=100
       - --datadir=/home/erigon/.local/share/erigon
@@ -132,7 +133,7 @@ services:
     profiles: ["erigon"]
 
   erigon-rpcdaemon:
-    container_name: erigon-rpcdaemon
+    container_name: erigon-rpcdaemon_goerli
     image: thorax/erigon:v2022.01.03
     restart: always
     command:
@@ -147,27 +148,29 @@ services:
     profiles: ["erigon"]
 
   prysm:
-    container_name: prysm
+    container_name: prysm_prater
     image: gcr.io/prysmaticlabs/prysm/beacon-chain:v2.0.6
     restart: always
     command:
+      - --prater
+      - --genesis-state=/data/genesis.ssz
       - --datadir=/data
       - --rpc-host=0.0.0.0
       - --monitoring-host=0.0.0.0
       - --http-web3provider=http://geth:8545
       - --slots-per-archive-point=64
       - --accept-terms-of-use
-    volumes: ["prysm:/data"]
+    volumes: ["prysm:/data","../configs/genesis.ssz:/data/gensis.ssz"]
     profiles: ["prysm"]
 
   lighthouse:
-    container_name: lighthouse
+    container_name: lighthouse_prater
     image: sigp/lighthouse:v2.1.2
     restart: always
     command:
       - lighthouse
       - --network
-      - mainnet
+      - prater
       - beacon
       - --http
       - --http-address

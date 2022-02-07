@@ -9,18 +9,16 @@ volumes:
     driver: local
   ipfs:
     driver: local
-  geth:
+  openethereum:
     driver: local
-  erigon:
-    driver: local
-  prysm:
+  nethermind:
     driver: local
   lighthouse:
     driver: local
 
 services:
   oracle:
-    container_name: oracle
+    container_name: oracle_gnosis
     image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.2.0
     restart: always
     entrypoint: ["python"]
@@ -29,7 +27,7 @@ services:
     profiles: ["oracle"]
 
   keeper:
-    container_name: keeper
+    container_name: keeper_gnosis
     image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.2.0
     restart: always
     entrypoint: ["python"]
@@ -38,28 +36,27 @@ services:
     profiles: ["keeper"]
 
   prometheus:
-    container_name: prometheus
+    container_name: prometheus_gnosis
     image: bitnami/prometheus:2
     restart: always
     env_file: [".env"]
     volumes:
       - prometheus:/opt/bitnami/prometheus/data
-      - ./configs/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml
-      - ./configs/rules.yml:/opt/bitnami/prometheus/conf/rules.yml
+      - ../configs/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml
+      - ../configs/rules.yml:/opt/bitnami/prometheus/conf/rules.yml
 
   alertmanager:
-    container_name: alertmanager
+    container_name: alertmanager_gnosis
     image: bitnami/alertmanager:0
     restart: always
-    ports: ["127.0.0.1:9093:9093"]
     env_file: [".env"]
     volumes:
       - alertmanager:/opt/bitnami/alertmanager/data
-      - ./configs/alertmanager.yml:/opt/bitnami/alertmanager/conf/config.yml
+      - ../configs/alertmanager.yml:/opt/bitnami/alertmanager/conf/config.yml
     depends_on: ["prometheus"]
 
   graph-node:
-    container_name: graph-node
+    container_name: graph_node_gnosis
     image: graphprotocol/graph-node:v0.25.0
     restart: always
     env_file: [".env"]
@@ -67,7 +64,7 @@ services:
     profiles: ["graph"]
 
   postgres:
-    container_name: postgres
+    container_name: postgres_gnosis
     image: postgres:14-alpine
     restart: always
     command: ["postgres", "-cshared_preload_libraries=pg_stat_statements"]
@@ -76,7 +73,7 @@ services:
     profiles: ["graph"]
 
   subgraphs:
-    container_name: subgraphs
+    container_name: subgraphs_gnosis
     image: europe-west4-docker.pkg.dev/stakewiselabs/public/subgraphs:v1.0.8
     command: >
       /bin/sh -c "until nc -vz graph-node 8020; do echo 'Waiting graph-node'; sleep 2; done
@@ -89,7 +86,7 @@ services:
     profiles: ["graph"]
 
   ipfs:
-    container_name: ipfs
+    container_name: ipfs_gnosis
     image: ipfs/go-ipfs:v0.10.0
     restart: always
     env_file: [".env"]
@@ -97,82 +94,50 @@ services:
       nofile:
         soft: 8192
         hard: 8192
-    volumes: ["ipfs:/data/ipfs","./configs/ipfs-entrypoint.sh:/usr/local/bin/start_ipfs"]
-    profiles: ["oracle"]
+    volumes: ["ipfs:/data/ipfs","../configs/ipfs-entrypoint.sh:/usr/local/bin/start_ipfs"]
+    profiles: ["ipfs"]
 
-  geth:
-    container_name: geth
-    image: ethereum/client-go:v1.10.15
+  openethereum:
+    container_name: openethereum_gnosis
+    image: openethereum/openethereum:v3.3.3
     restart: always
     command:
-      - --syncmode=full
-      - --http
-      - --http.addr=0.0.0.0
-      - --http.vhosts=*
-      - --http.api=web3,eth,net
-      - --datadir=/data/ethereum
-      - --ethash.dagdir=/data/ethereum/.ethash
-      - --ipcdisable
-    volumes: ["geth:/data"]
-    profiles: ["geth"]
+      - --chain=xdai
+      - --jsonrpc-interface=all
+      - --jsonrpc-hosts=all
+      - --jsonrpc-port=8545
+      - --min-peers=50
+      - --max-peers=100
+    volumes: ["openethereum:/home/openethereum"]
+    profiles: ["openethereum"]
 
-  erigon:
-    container_name: erigon
-    image: thorax/erigon:v2022.01.03
+  nethermind:
+    container_name: nethermind_gnosis
+    image: nethermind/nethermind:1.12.4
     restart: always
     command:
-      - erigon
-      - --private.api.addr=0.0.0.0:9090
-      - --maxpeers=100
-      - --datadir=/home/erigon/.local/share/erigon
-      - --batchSize=512M
-      - --prune.r.before=11184524
-      - --prune=htc
-    volumes: ["erigon:/home/erigon/.local/share/erigon"]
-    profiles: ["erigon"]
-
-  erigon-rpcdaemon:
-    container_name: erigon-rpcdaemon
-    image: thorax/erigon:v2022.01.03
-    restart: always
-    command:
-      - rpcdaemon
-      - --private.api.addr=erigon:9090
-      - --http.addr=0.0.0.0
-      - --http.vhosts=*
-      - --http.corsdomain=*
-      - --http.api=eth,erigon,web3,net,txpool
-      - --ws
-    depends_on: ["erigon"]
-    profiles: ["erigon"]
-
-  prysm:
-    container_name: prysm
-    image: gcr.io/prysmaticlabs/prysm/beacon-chain:v2.0.6
-    restart: always
-    command:
-      - --datadir=/data
-      - --rpc-host=0.0.0.0
-      - --monitoring-host=0.0.0.0
-      - --http-web3provider=http://geth:8545
-      - --slots-per-archive-point=64
-      - --accept-terms-of-use
-    volumes: ["prysm:/data"]
-    profiles: ["prysm"]
+      - --config=xdai
+      - --datadir=/data/nethermind
+      - --JsonRpc.Enabled=true
+      - --JsonRpc.EnabledModules=Eth,Subscribe,Trace,TxPool,Web3,Personal,Proof,Net,Parity,Health
+      - --JsonRpc.Host=0.0.0.0
+      - --JsonRpc.Port=8545
+    volumes: ["nethermind:/data"]
+    profiles: ["nethermind"]
 
   lighthouse:
-    container_name: lighthouse
+    container_name: lighthouse_gnosis
     image: sigp/lighthouse:v2.1.2
     restart: always
     command:
       - lighthouse
       - --network
-      - mainnet
+      - gnosis
       - beacon
       - --http
       - --http-address
       - 0.0.0.0
       - --eth1-endpoints
-      - http://geth:8545
+      - http://openethereum:8545
     volumes: ["lighthouse:/root/.lighthouse"]
     profiles: ["lighthouse"]
