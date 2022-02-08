@@ -165,11 +165,13 @@ services:
       - gnosis
       - beacon
       - --http
-      - --http-address
-      - 0.0.0.0
+      - --http-address=0.0.0.0
+      - --http-port=5052
       - --eth1-endpoints
       - $ETH1_ENDPOINT
     volumes: ["lighthouse:/root/.lighthouse"]
     profiles: ["lighthouse"]
     networks:
-      - gnosis
+      gnosis:
+        aliases:
+          - eth2-node
