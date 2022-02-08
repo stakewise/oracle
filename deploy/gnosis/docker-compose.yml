@@ -16,6 +16,11 @@ volumes:
   lighthouse:
     driver: local
 
+networks:
+  gnosis:
+    name: gnosis
+    driver: bridge
+
 services:
   oracle:
     container_name: oracle_gnosis
@@ -25,6 +30,8 @@ services:
     command: ["oracle/oracle/main.py"]
     env_file: [".env"]
     profiles: ["oracle"]
+    networks:
+      - gnosis
 
   keeper:
     container_name: keeper_gnosis
@@ -34,6 +41,8 @@ services:
     command: ["oracle/keeper/main.py"]
     env_file: [".env"]
     profiles: ["keeper"]
+    networks:
+      - gnosis
 
   prometheus:
     container_name: prometheus_gnosis
@@ -44,6 +53,8 @@ services:
       - prometheus:/opt/bitnami/prometheus/data
       - ../configs/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml
       - ../configs/rules.yml:/opt/bitnami/prometheus/conf/rules.yml
+    networks:
+      - gnosis
 
   alertmanager:
     container_name: alertmanager_gnosis
@@ -54,6 +65,8 @@ services:
       - alertmanager:/opt/bitnami/alertmanager/data
       - ../configs/alertmanager.yml:/opt/bitnami/alertmanager/conf/config.yml
     depends_on: ["prometheus"]
+    networks:
+      - gnosis
 
   graph-node:
     container_name: graph_node_gnosis
@@ -62,6 +75,8 @@ services:
     env_file: [".env"]
     depends_on: ["postgres","ipfs"]
     profiles: ["graph"]
+    networks:
+      - gnosis
 
   postgres:
     container_name: postgres_gnosis
@@ -71,6 +86,8 @@ services:
     env_file: [".env"]
     volumes: ["postgres:/var/lib/postgresql/data"]
     profiles: ["graph"]
+    networks:
+      - gnosis
 
   subgraphs:
     container_name: subgraphs_gnosis
@@ -84,6 +101,8 @@ services:
     restart: "no"
     depends_on: ["graph-node","ipfs"]
     profiles: ["graph"]
+    networks:
+      - gnosis
 
   ipfs:
     container_name: ipfs_gnosis
@@ -96,6 +115,8 @@ services:
         hard: 8192
     volumes: ["ipfs:/data/ipfs","../configs/ipfs-entrypoint.sh:/usr/local/bin/start_ipfs"]
     profiles: ["ipfs"]
+    networks:
+      - gnosis
 
   openethereum:
     container_name: openethereum_gnosis
@@ -110,6 +131,11 @@ services:
       - --max-peers=100
     volumes: ["openethereum:/home/openethereum"]
     profiles: ["openethereum"]
+    networks:
+      gnosis:
+        aliases:
+          - eth1-node
+
 
   nethermind:
     container_name: nethermind_gnosis
@@ -124,6 +150,10 @@ services:
       - --JsonRpc.Port=8545
     volumes: ["nethermind:/data"]
     profiles: ["nethermind"]
+    networks:
+      gnosis:
+        aliases:
+          - eth1-node
 
   lighthouse:
     container_name: lighthouse_gnosis
@@ -138,6 +168,8 @@ services:
       - --http-address
       - 0.0.0.0
       - --eth1-endpoints
-      - http://openethereum:8545
+      - $ETH1_ENDPOINT
     volumes: ["lighthouse:/root/.lighthouse"]
     profiles: ["lighthouse"]
+    networks:
+      - gnosis
