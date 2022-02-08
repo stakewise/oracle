@@ -18,65 +18,81 @@ volumes:
   lighthouse:
     driver: local
 
+networks:
+  mainnet:
+    name: mainnet
+    driver: bridge
+
 services:
   oracle:
-    container_name: oracle
+    container_name: oracle_mainnet
     image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.2.0
     restart: always
     entrypoint: ["python"]
     command: ["oracle/oracle/main.py"]
     env_file: [".env"]
     profiles: ["oracle"]
+    networks:
+      - mainnet
 
   keeper:
-    container_name: keeper
+    container_name: keeper_mainnet
     image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.2.0
     restart: always
     entrypoint: ["python"]
     command: ["oracle/keeper/main.py"]
     env_file: [".env"]
     profiles: ["keeper"]
+    networks:
+      - mainnet
 
   prometheus:
-    container_name: prometheus
+    container_name: prometheus_mainnet
     image: bitnami/prometheus:2
     restart: always
     env_file: [".env"]
     volumes:
       - prometheus:/opt/bitnami/prometheus/data
-      - ./configs/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml
-      - ./configs/rules.yml:/opt/bitnami/prometheus/conf/rules.yml
+      - ../configs/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml
+      - ../configs/rules.yml:/opt/bitnami/prometheus/conf/rules.yml
+    networks:
+      - mainnet
 
   alertmanager:
-    container_name: alertmanager
+    container_name: alertmanager_mainnet
     image: bitnami/alertmanager:0
     restart: always
-    ports: ["127.0.0.1:9093:9093"]
     env_file: [".env"]
     volumes:
       - alertmanager:/opt/bitnami/alertmanager/data
-      - ./configs/alertmanager.yml:/opt/bitnami/alertmanager/conf/config.yml
+      - ../configs/alertmanager.yml:/opt/bitnami/alertmanager/conf/config.yml
     depends_on: ["prometheus"]
+    networks:
+      - mainnet
 
   graph-node:
-    container_name: graph-node
+    container_name: graph-node_mainnet
     image: graphprotocol/graph-node:v0.25.0
     restart: always
     env_file: [".env"]
     depends_on: ["postgres","ipfs"]
     profiles: ["graph"]
+    networks:
+      - mainnet
 
   postgres:
-    container_name: postgres
+    container_name: postgres_mainnet
     image: postgres:14-alpine
     restart: always
     command: ["postgres", "-cshared_preload_libraries=pg_stat_statements"]
     env_file: [".env"]
     volumes: ["postgres:/var/lib/postgresql/data"]
     profiles: ["graph"]
+    networks:
+      - mainnet
 
   subgraphs:
-    container_name: subgraphs
+    container_name: subgraphs_mainnet
     image: europe-west4-docker.pkg.dev/stakewiselabs/public/subgraphs:v1.0.8
     command: >
       /bin/sh -c "until nc -vz graph-node 8020; do echo 'Waiting graph-node'; sleep 2; done
@@ -87,9 +103,11 @@ services:
     restart: "no"
     depends_on: ["graph-node","ipfs"]
     profiles: ["graph"]
+    networks:
+      - mainnet
 
   ipfs:
-    container_name: ipfs
+    container_name: ipfs_mainnet
     image: ipfs/go-ipfs:v0.10.0
     restart: always
     env_file: [".env"]
@@ -98,10 +116,12 @@ services:
         soft: 8192
         hard: 8192
     volumes: ["ipfs:/data/ipfs","./configs/ipfs-entrypoint.sh:/usr/local/bin/start_ipfs"]
-    profiles: ["oracle"]
+    profiles: ["ipfs"]
+    networks:
+      - mainnet
 
   geth:
-    container_name: geth
+    container_name: geth_mainnet
     image: ethereum/client-go:v1.10.15
     restart: always
     command:
@@ -115,9 +135,11 @@ services:
       - --ipcdisable
     volumes: ["geth:/data"]
     profiles: ["geth"]
+    networks:
+      - mainnet
 
   erigon:
-    container_name: erigon
+    container_name: erigon_mainnet
     image: thorax/erigon:v2022.01.03
     restart: always
     command:
@@ -130,9 +152,13 @@ services:
       - --prune=htc
     volumes: ["erigon:/home/erigon/.local/share/erigon"]
     profiles: ["erigon"]
+    networks:
+      mainnet:
+        aliases:
+          - eth1-node
 
   erigon-rpcdaemon:
-    container_name: erigon-rpcdaemon
+    container_name: erigon-rpcdaemon_mainnet
     image: thorax/erigon:v2022.01.03
     restart: always
     command:
@@ -145,23 +171,29 @@ services:
       - --ws
     depends_on: ["erigon"]
     profiles: ["erigon"]
+    networks:
+      mainnet:
+        aliases:
+          - eth1-node
 
   prysm:
-    container_name: prysm
+    container_name: prysm_mainnet
     image: gcr.io/prysmaticlabs/prysm/beacon-chain:v2.0.6
     restart: always
     command:
       - --datadir=/data
       - --rpc-host=0.0.0.0
       - --monitoring-host=0.0.0.0
-      - --http-web3provider=http://geth:8545
+      - --http-web3provider=$ETH1_ENDPOINT
       - --slots-per-archive-point=64
       - --accept-terms-of-use
     volumes: ["prysm:/data"]
     profiles: ["prysm"]
+    networks:
+      - mainnet
 
   lighthouse:
-    container_name: lighthouse
+    container_name: lighthouse_mainnet
     image: sigp/lighthouse:v2.1.2
     restart: always
     command:
@@ -173,6 +205,8 @@ services:
       - --http-address
       - 0.0.0.0
       - --eth1-endpoints
-      - http://geth:8545
+      - $ETH1_ENDPOINT
     volumes: ["lighthouse:/root/.lighthouse"]
     profiles: ["lighthouse"]
+    networks:
+      - mainnet
