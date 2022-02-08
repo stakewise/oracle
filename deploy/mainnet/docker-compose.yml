@@ -183,6 +183,7 @@ services:
     command:
       - --datadir=/data
       - --rpc-host=0.0.0.0
+      - --rpc-port=5052
       - --monitoring-host=0.0.0.0
       - --http-web3provider=$ETH1_ENDPOINT
       - --slots-per-archive-point=64
@@ -190,7 +191,9 @@ services:
     volumes: ["prysm:/data"]
     profiles: ["prysm"]
     networks:
-      - mainnet
+      mainnet:
+        aliases:
+          - eth2-node
 
   lighthouse:
     container_name: lighthouse_mainnet
@@ -202,11 +205,13 @@ services:
       - mainnet
       - beacon
       - --http
-      - --http-address
-      - 0.0.0.0
+      - --http-address=0.0.0.0
+      - --http-port=5052
       - --eth1-endpoints
       - $ETH1_ENDPOINT
     volumes: ["lighthouse:/root/.lighthouse"]
     profiles: ["lighthouse"]
     networks:
-      - mainnet
+      mainnet:
+        aliases:
+          - eth2-node
