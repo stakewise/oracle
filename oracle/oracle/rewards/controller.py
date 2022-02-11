@@ -153,6 +153,7 @@ class RewardsController(object):
             total_rewards=str(total_rewards),
         )
         submit_vote(
+            network=self.network,
             oracle=self.oracle,
             encoded_data=encoded_data,
             vote=vote,

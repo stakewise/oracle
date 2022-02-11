@@ -18,6 +18,7 @@ from oracle.oracle.validators.controller import ValidatorsController
 from oracle.settings import (
     ENABLE_HEALTH_SERVER,
     ENABLED_NETWORKS,
+    HEALTH_SERVER_PORT,
     LOG_LEVEL,
     ORACLE_PROCESS_INTERVAL,
     TEST_VOTE_FILENAME,
@@ -43,6 +44,7 @@ async def main() -> None:
         logger.info(f"[{network}] Submitting test vote for account {oracle.address}...")
         # noinspection PyTypeChecker
         submit_vote(
+            network=network,
             oracle=oracle,
             encoded_data=b"test data",
             vote={"name": "test vote"},
@@ -126,6 +128,9 @@ if __name__ == "__main__":
             target=start_health_server,
             args=(create_health_server_runner(oracle_routes),),
             daemon=True,
+        )
+        logger.info(
+            f"Starting monitoring server at http://{ENABLE_HEALTH_SERVER}:{HEALTH_SERVER_PORT}"
         )
         t.start()
     asyncio.run(main())
