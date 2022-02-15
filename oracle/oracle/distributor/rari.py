@@ -5,18 +5,22 @@ from eth_typing import BlockNumber, ChecksumAddress
 from web3 import Web3
 
 from oracle.oracle.clients import execute_rari_fuse_pools_gql_query
+from oracle.oracle.graphql_queries import RARI_FUSE_POOLS_CTOKENS_QUERY
 
-from ..graphql_queries import RARI_FUSE_POOLS_CTOKENS_QUERY
 from .types import Balances
 
 
 async def get_rari_fuse_liquidity_points(
-    ctoken_address: ChecksumAddress, from_block: BlockNumber, to_block: BlockNumber
+    network: str,
+    ctoken_address: ChecksumAddress,
+    from_block: BlockNumber,
+    to_block: BlockNumber,
 ) -> Balances:
     """Fetches Rari Fuse pool accounts balances."""
     lowered_ctoken_address = ctoken_address.lower()
     last_id = ""
     result: Dict = await execute_rari_fuse_pools_gql_query(
+        network=network,
         query=RARI_FUSE_POOLS_CTOKENS_QUERY,
         variables=dict(
             ctoken_address=lowered_ctoken_address,
@@ -31,6 +35,7 @@ async def get_rari_fuse_liquidity_points(
     while len(positions_chunk) >= 1000:
         last_id = positions_chunk[-1]["id"]
         result: Dict = await execute_rari_fuse_pools_gql_query(
+            network=network,
             query=RARI_FUSE_POOLS_CTOKENS_QUERY,
             variables=dict(
                 ctoken_address=lowered_ctoken_address,

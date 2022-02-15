@@ -1,14 +1,20 @@
 import logging
-import signal
 import threading
 import time
-from typing import Any
 
-from oracle.common.health_server import create_health_server_runner, start_health_server
-from oracle.common.settings import ENABLE_HEALTH_SERVER, LOG_LEVEL
+from oracle.health_server import create_health_server_runner, start_health_server
+from oracle.keeper.clients import get_web3_clients
+from oracle.keeper.contracts import get_multicall_contracts, get_oracles_contracts
 from oracle.keeper.health_server import keeper_routes
-from oracle.keeper.settings import KEEPER_PROCESS_INTERVAL
 from oracle.keeper.utils import get_keeper_params, submit_votes
+from oracle.settings import (
+    ENABLE_HEALTH_SERVER,
+    ENABLED_NETWORKS,
+    HEALTH_SERVER_PORT,
+    KEEPER_PROCESS_INTERVAL,
+    LOG_LEVEL,
+)
+from oracle.utils import InterruptHandler
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(message)s",
@@ -20,39 +26,29 @@ logging.getLogger("backoff").addHandler(logging.StreamHandler())
 logger = logging.getLogger(__name__)
 
 
-class InterruptHandler:
-    """
-    Tracks SIGINT and SIGTERM signals.
-    https://stackoverflow.com/a/31464349
-    """
-
-    exit = False
-
-    def __init__(self) -> None:
-        signal.signal(signal.SIGINT, self.exit_gracefully)
-        signal.signal(signal.SIGTERM, self.exit_gracefully)
-
-    # noinspection PyUnusedLocal
-    def exit_gracefully(self, signum: int, frame: Any) -> None:
-        logger.info(f"Received interrupt signal {signum}, exiting...")
-        self.exit = True
-
-
 def main() -> None:
     # wait for interrupt
     interrupt_handler = InterruptHandler()
+    web3_clients = get_web3_clients()
+    multicall_contracts = get_multicall_contracts(web3_clients)
+    oracles_contracts = get_oracles_contracts(web3_clients)
 
     while not interrupt_handler.exit:
         # Fetch current nonces of the validators, rewards and the total number of oracles
-        params = get_keeper_params()
-        if params.paused:
+        for network in ENABLED_NETWORKS:
+            web3_client = web3_clients[network]
+            multicall_contract = multicall_contracts[network]
+            oracles_contract = oracles_contracts[network]
+
+            params = get_keeper_params(oracles_contract, multicall_contract)
+            if params.paused:
+                time.sleep(KEEPER_PROCESS_INTERVAL)
+                continue
+
+            # If nonces match the current for the majority, submit the transactions
+            submit_votes(network, web3_client, oracles_contract, params)
+
             time.sleep(KEEPER_PROCESS_INTERVAL)
-            continue
-
-        # If nonces match the current for the majority, submit the transactions
-        submit_votes(params)
-
-        time.sleep(KEEPER_PROCESS_INTERVAL)
 
 
 if __name__ == "__main__":
@@ -61,6 +57,9 @@ if __name__ == "__main__":
             target=start_health_server,
             args=(create_health_server_runner(keeper_routes),),
             daemon=True,
+        )
+        logger.info(
+            f"Starting monitoring server at http://{ENABLE_HEALTH_SERVER}:{HEALTH_SERVER_PORT}"
         )
         t.start()
     main()

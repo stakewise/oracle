@@ -1,0 +1,221 @@
+version: "3.9"
+
+volumes:
+  prometheus:
+    driver: local
+  alertmanager:
+    driver: local
+  postgres:
+    driver: local
+  ipfs:
+    driver: local
+  geth:
+    driver: local
+  erigon:
+    driver: local
+  prysm:
+    driver: local
+  lighthouse:
+    driver: local
+
+networks:
+  goerli:
+    name: goerli
+    driver: bridge
+
+services:
+  oracle:
+    container_name: oracle_goerli
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.2.0
+    restart: always
+    entrypoint: ["python"]
+    command: ["oracle/oracle/main.py"]
+    env_file: [".env"]
+    profiles: ["oracle"]
+    networks:
+      - goerli
+
+  keeper:
+    container_name: keeper_goerli
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.2.0
+    restart: always
+    entrypoint: ["python"]
+    command: ["oracle/keeper/main.py"]
+    env_file: [".env"]
+    profiles: ["keeper"]
+    networks:
+      - goerli
+
+  prometheus:
+    container_name: prometheus_goerli
+    image: bitnami/prometheus:2
+    restart: always
+    env_file: [".env"]
+    volumes:
+      - prometheus:/opt/bitnami/prometheus/data
+      - ../configs/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml
+      - ../configs/rules.yml:/opt/bitnami/prometheus/conf/rules.yml
+    networks:
+      - goerli
+
+  alertmanager:
+    container_name: alertmanager_goerli
+    image: bitnami/alertmanager:0
+    restart: always
+    env_file: [".env"]
+    volumes:
+      - alertmanager:/opt/bitnami/alertmanager/data
+      - ../configs/alertmanager.yml:/opt/bitnami/alertmanager/conf/config.yml
+    depends_on: ["prometheus"]
+    networks:
+      - goerli
+
+  graph-node:
+    container_name: graph_node_goerli
+    image: graphprotocol/graph-node:v0.25.0
+    restart: always
+    env_file: [".env"]
+    depends_on: ["postgres","ipfs"]
+    profiles: ["graph"]
+    networks:
+      - goerli
+
+  postgres:
+    container_name: postgres_goerli
+    image: postgres:14-alpine
+    restart: always
+    command: ["postgres", "-cshared_preload_libraries=pg_stat_statements"]
+    env_file: [".env"]
+    volumes: ["postgres:/var/lib/postgresql/data"]
+    profiles: ["graph"]
+    networks:
+      - goerli
+
+  subgraphs:
+    container_name: subgraphs_goerli
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/subgraphs:v1.0.8
+    command: >
+      /bin/sh -c "until nc -vz graph-node 8020; do echo 'Waiting graph-node'; sleep 2; done
+      && yarn build:${NETWORK}
+      && yarn create:local
+      && yarn deploy:local"
+    env_file: [".env"]
+    restart: "no"
+    depends_on: ["graph-node","ipfs"]
+    profiles: ["graph"]
+    networks:
+      - goerli
+
+  ipfs:
+    container_name: ipfs_goerli
+    image: ipfs/go-ipfs:v0.10.0
+    restart: always
+    env_file: [".env"]
+    ulimits:
+      nofile:
+        soft: 8192
+        hard: 8192
+    volumes: ["ipfs:/data/ipfs","./configs/ipfs-entrypoint.sh:/usr/local/bin/start_ipfs"]
+    profiles: ["ipfs"]
+    networks:
+      - goerli
+
+  geth:
+    container_name: geth_goerli
+    image: ethereum/client-go:v1.10.15
+    restart: always
+    command:
+      - --goerli
+      - --syncmode=full
+      - --http
+      - --http.addr=0.0.0.0
+      - --http.vhosts=*
+      - --http.api=web3,eth,net
+      - --datadir=/data/ethereum
+      - --ethash.dagdir=/data/ethereum/.ethash
+      - --ipcdisable
+    volumes: ["geth:/data"]
+    profiles: ["geth"]
+    networks:
+      goerli:
+        aliases:
+          - eth1-node
+
+  erigon:
+    container_name: erigon_goerli
+    image: thorax/erigon:v2022.01.03
+    restart: always
+    command:
+      - erigon
+      - --chain=goerli
+      - --private.api.addr=0.0.0.0:9090
+      - --maxpeers=100
+      - --datadir=/home/erigon/.local/share/erigon
+      - --batchSize=512M
+      - --prune.r.before=11184524
+      - --prune=htc
+    volumes: ["erigon:/home/erigon/.local/share/erigon"]
+    profiles: ["erigon"]
+    networks:
+      - goerli
+
+  erigon-rpcdaemon:
+    container_name: erigon-rpcdaemon_goerli
+    image: thorax/erigon:v2022.01.03
+    restart: always
+    command:
+      - rpcdaemon
+      - --private.api.addr=erigon:9090
+      - --http.addr=0.0.0.0
+      - --http.vhosts=*
+      - --http.corsdomain=*
+      - --http.api=eth,erigon,web3,net,txpool
+      - --ws
+    depends_on: ["erigon"]
+    profiles: ["erigon"]
+    networks:
+      goerli:
+        aliases:
+          - eth1-node
+
+  prysm:
+    container_name: prysm_prater
+    image: gcr.io/prysmaticlabs/prysm/beacon-chain:v2.0.6
+    restart: always
+    command:
+      - --prater
+      - --genesis-state=/data/genesis.ssz
+      - --datadir=/data
+      - --rpc-host=0.0.0.0
+      - --rpc-port=5052
+      - --monitoring-host=0.0.0.0
+      - --http-web3provider=$ETH1_ENDPOINT
+      - --slots-per-archive-point=64
+      - --accept-terms-of-use
+    volumes: ["prysm:/data","../configs/genesis.ssz:/data/gensis.ssz"]
+    profiles: ["prysm"]
+    networks:
+      goerli:
+        aliases:
+          - eth2-node
+
+  lighthouse:
+    container_name: lighthouse_prater
+    image: sigp/lighthouse:v2.1.2
+    restart: always
+    command:
+      - lighthouse
+      - --network
+      - prater
+      - beacon
+      - --http
+      - --http-address=0.0.0.0
+      - --http-port=5052
+      - --eth1-endpoints
+      - $ETH1_ENDPOINT
+    volumes: ["lighthouse:/root/.lighthouse"]
+    profiles: ["lighthouse"]
+    networks:
+      goerli:
+        aliases:
+          - eth2-node

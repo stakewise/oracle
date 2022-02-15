@@ -5,13 +5,7 @@ from typing import List, Set
 from ens.constants import EMPTY_ADDR_HEX
 from eth_typing import BlockNumber, ChecksumAddress
 
-from oracle.oracle.settings import (
-    DISTRIBUTOR_FALLBACK_ADDRESS,
-    RARI_FUSE_POOL_ADDRESSES,
-    REWARD_TOKEN_CONTRACT_ADDRESS,
-    STAKED_TOKEN_CONTRACT_ADDRESS,
-    SWISE_TOKEN_CONTRACT_ADDRESS,
-)
+from oracle.networks import NETWORKS
 
 from .rari import get_rari_fuse_liquidity_points
 from .types import Balances, Rewards, UniswapV3Pools
@@ -27,12 +21,27 @@ logger = logging.getLogger(__name__)
 class DistributorRewards(object):
     def __init__(
         self,
+        network: str,
         uniswap_v3_pools: UniswapV3Pools,
         from_block: BlockNumber,
         to_block: BlockNumber,
         reward_token: ChecksumAddress,
         uni_v3_token: ChecksumAddress,
     ) -> None:
+        self.network = network
+        self.rari_fuse_pool_addresses = NETWORKS[network]["RARI_FUSE_POOL_ADDRESSES"]
+        self.distributor_fallback_address = NETWORKS[network][
+            "DISTRIBUTOR_FALLBACK_ADDRESS"
+        ]
+        self.staked_token_contract_address = NETWORKS[network][
+            "STAKED_TOKEN_CONTRACT_ADDRESS"
+        ]
+        self.reward_token_contract_address = NETWORKS[network][
+            "REWARD_TOKEN_CONTRACT_ADDRESS"
+        ]
+        self.swise_token_contract_address = NETWORKS[network][
+            "SWISE_TOKEN_CONTRACT_ADDRESS"
+        ]
         self.uni_v3_staked_token_pools = uniswap_v3_pools["staked_token_pools"]
         self.uni_v3_reward_token_pools = uniswap_v3_pools["reward_token_pools"]
         self.uni_v3_swise_pools = uniswap_v3_pools["swise_pools"]
@@ -48,8 +57,8 @@ class DistributorRewards(object):
         """Checks whether the provided contract address is supported."""
         return (
             contract_address in self.uni_v3_pools
-            or contract_address == SWISE_TOKEN_CONTRACT_ADDRESS
-            or contract_address in RARI_FUSE_POOL_ADDRESSES
+            or contract_address == self.swise_token_contract_address
+            or contract_address in self.rari_fuse_pool_addresses
         )
 
     @staticmethod
@@ -96,7 +105,7 @@ class DistributorRewards(object):
         rewards: Rewards = {}
         self.add_value(
             rewards=rewards,
-            to=DISTRIBUTOR_FALLBACK_ADDRESS,
+            to=self.distributor_fallback_address,
             reward_token=self.reward_token,
             amount=reward,
         )
@@ -106,37 +115,42 @@ class DistributorRewards(object):
     async def get_balances(self, contract_address: ChecksumAddress) -> Balances:
         """Fetches balances and total supply of the contract."""
         if (
-            self.uni_v3_token == STAKED_TOKEN_CONTRACT_ADDRESS
+            self.uni_v3_token == self.staked_token_contract_address
             and contract_address in self.uni_v3_staked_token_pools
         ):
             logger.info(
-                f"Fetching Uniswap V3 staked token balances: pool={contract_address}"
+                f"[{self.network}] Fetching Uniswap V3 staked token balances: pool={contract_address}"
             )
             return await get_uniswap_v3_single_token_balances(
+                network=self.network,
                 pool_address=contract_address,
-                token=STAKED_TOKEN_CONTRACT_ADDRESS,
+                token=self.staked_token_contract_address,
                 block_number=self.to_block,
             )
         elif (
-            self.uni_v3_token == REWARD_TOKEN_CONTRACT_ADDRESS
+            self.uni_v3_token == self.reward_token_contract_address
             and contract_address in self.uni_v3_reward_token_pools
         ):
             logger.info(
-                f"Fetching Uniswap V3 reward token balances: pool={contract_address}"
+                f"[{self.network}] Fetching Uniswap V3 reward token balances: pool={contract_address}"
             )
             return await get_uniswap_v3_single_token_balances(
+                network=self.network,
                 pool_address=contract_address,
-                token=REWARD_TOKEN_CONTRACT_ADDRESS,
+                token=self.reward_token_contract_address,
                 block_number=self.to_block,
             )
         elif (
-            self.uni_v3_token == SWISE_TOKEN_CONTRACT_ADDRESS
+            self.uni_v3_token == self.swise_token_contract_address
             and contract_address in self.uni_v3_swise_pools
         ):
-            logger.info(f"Fetching Uniswap V3 SWISE balances: pool={contract_address}")
+            logger.info(
+                f"[{self.network}] Fetching Uniswap V3 SWISE balances: pool={contract_address}"
+            )
             return await get_uniswap_v3_single_token_balances(
+                network=self.network,
                 pool_address=contract_address,
-                token=SWISE_TOKEN_CONTRACT_ADDRESS,
+                token=self.swise_token_contract_address,
                 block_number=self.to_block,
             )
         elif (
@@ -144,9 +158,10 @@ class DistributorRewards(object):
             and contract_address in self.uni_v3_swise_pools
         ):
             logger.info(
-                f"Fetching Uniswap V3 full range liquidity points: pool={contract_address}"
+                f"[{self.network}] Fetching Uniswap V3 full range liquidity points: pool={contract_address}"
             )
             return await get_uniswap_v3_range_liquidity_points(
+                network=self.network,
                 tick_lower=-887220,
                 tick_upper=887220,
                 pool_address=contract_address,
@@ -154,24 +169,26 @@ class DistributorRewards(object):
             )
         elif contract_address in self.uni_v3_pools:
             logger.info(
-                f"Fetching Uniswap V3 liquidity points: pool={contract_address}"
+                f"[{self.network}] Fetching Uniswap V3 liquidity points: pool={contract_address}"
             )
             return await get_uniswap_v3_liquidity_points(
+                network=self.network,
                 pool_address=contract_address,
                 block_number=self.to_block,
             )
-        elif contract_address in RARI_FUSE_POOL_ADDRESSES:
+        elif contract_address in self.rari_fuse_pool_addresses:
             logger.info(
-                f"Fetching Rari Fuse Pool liquidity points: pool={contract_address}"
+                f"[{self.network}] Fetching Rari Fuse Pool liquidity points: pool={contract_address}"
             )
             return await get_rari_fuse_liquidity_points(
+                network=self.network,
                 ctoken_address=contract_address,
                 from_block=self.from_block,
                 to_block=self.to_block,
             )
 
         raise ValueError(
-            f"Cannot get balances for unsupported contract address {contract_address}"
+            f"[{self.network}] Cannot get balances for unsupported contract address {contract_address}"
         )
 
     async def _get_rewards(
@@ -189,7 +206,7 @@ class DistributorRewards(object):
             # no recipients for the rewards -> assign reward to the rescue address
             self.add_value(
                 rewards=rewards,
-                to=DISTRIBUTOR_FALLBACK_ADDRESS,
+                to=self.distributor_fallback_address,
                 reward_token=self.reward_token,
                 amount=total_reward,
             )
@@ -215,7 +232,7 @@ class DistributorRewards(object):
                 # failed to assign reward -> return it to rescue address
                 self.add_value(
                     rewards=rewards,
-                    to=DISTRIBUTOR_FALLBACK_ADDRESS,
+                    to=self.distributor_fallback_address,
                     reward_token=self.reward_token,
                     amount=account_reward,
                 )

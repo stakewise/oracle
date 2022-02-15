@@ -2,7 +2,7 @@
 
 ## Oracle
 
-Oracles are responsible for voting on the new ETH2 rewards for the StakeWise sETH2 tokens holders and calculating Merkle
+Oracles are responsible for voting on the new rewards for the StakeWise staked tokens holders and calculating Merkle
 root and proofs for the additional token distributions through the
 [Merkle Distributor](https://github.com/stakewise/contracts/blob/master/contracts/merkles/MerkleDistributor.sol)
 contract.
@@ -31,57 +31,37 @@ supports [ETH2 Beacon Node API specification](https://ethereum.github.io/beacon-
 - [Teku](https://launchpad.ethereum.org/en/teku)
 - [Infura](https://infura.io/docs/eth2) (hosted)
 
-### Usage
+### Oracle Usage
 
-1. Move to `deploy` directory
+1. Move to `deploy/<network>` directory
 
 ```shell script
-cd deploy
+cd deploy/mainnet
 ```
 
-2. Create an edit environment file (see `Oracle Settings` below)
+2. Create an edit environment file
 
 ```shell script
 cp .env.example .env
 ```
 
-3. Enable `pushover` alerts in `configs/alertmanager.yml`
+3. Enable `pushover` alerts in `deploy/configs/alertmanager.yml`
 
-4. Run with [docker-compose](https://docs.docker.com/compose/)
+   1. Register an account on [pushover](https://pushover.net/).
+   2. Create an [Application/API Token](https://pushover.net/apps/build).
+   3. Add `User Key` and `API Token` to `deploy/configs/alertmanager.yml` file.
+
+4. Run with [docker-compose](https://docs.docker.com/compose/). The docker-compose version must be **v1.27.0+**.
 
 ```shell script
-docker-compose -f docker-compose.yml up -d
+COMPOSE_PROFILES=lighthouse docker-compose up -d
 ```
-
-### Oracle Settings
-
-| Variable                | Description                                                                        | Required | Default                                                                 |
-|-------------------------|------------------------------------------------------------------------------------|----------|-------------------------------------------------------------------------|
-| NETWORK                 | The network that the oracle is currently operating on. Choices are goerli, mainnet | No       | mainnet                                                                 |
-| ENABLE_HEALTH_SERVER    | Defines whether to enable health server                                            | No       | True                                                                    |
-| HEALTH_SERVER_PORT      | The port where the health server will run                                          | No       | 8080                                                                    |
-| HEALTH_SERVER_HOST      | The host where the health server will run                                          | No       | 127.0.0.1                                                               |
-| IPFS_PIN_ENDPOINTS      | The IPFS endpoint where the rewards will be uploaded                               | No       | /dns/ipfs.infura.io/tcp/5001/https                                      |
-| IPFS_FETCH_ENDPOINTS    | The IPFS endpoints from where the rewards will be fetched                          | No       | https://gateway.pinata.cloud,http://cloudflare-ipfs.com,https://ipfs.io |
-| IPFS_PINATA_API_KEY     | The Pinata API key for uploading reward proofs for the redundancy                  | No       | -                                                                       |
-| IPFS_PINATA_SECRET_KEY  | The Pinata Secret key for uploading reward proofs for the redundancy               | No       | -                                                                       |
-| ETH2_ENDPOINT           | The ETH2 node endpoint                                                             | No       | http://localhost:3501                                                   |
-| ETH2_CLIENT             | The ETH2 client used. Choices are prysm, lighthouse, teku.                         | No       | prysm                                                                   |
-| ORACLE_PRIVATE_KEY      | The ETH1 private key of the oracle                                                 | Yes      | -                                                                       |
-| AWS_ACCESS_KEY_ID       | The AWS access key used to make the oracle vote public                             | Yes      | -                                                                       |
-| AWS_SECRET_ACCESS_KEY   | The AWS secret access key used to make the oracle vote public                      | Yes      | -                                                                       |
-| STAKEWISE_SUBGRAPH_URL  | The StakeWise subgraph URL                                                         | No       | https://api.thegraph.com/subgraphs/name/stakewise/stakewise-mainnet     |
-| UNISWAP_V3_SUBGRAPH_URL | The Uniswap V3 subgraph URL                                                        | No       | https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-mainnet    |
-| RARI_FUSE_SUBGRAPH_URL  | Rari Capital Fuse subgraph URL                                                     | No       | https://api.thegraph.com/subgraphs/name/stakewise/rari-fuse-mainnet     |
-| ETHEREUM_SUBGRAPH_URL   | The Ethereum subgraph URL                                                          | No       | https://api.thegraph.com/subgraphs/name/stakewise/ethereum-mainnet      |
-| ORACLE_PROCESS_INTERVAL | How long to wait before processing again (in seconds)                              | No       | 180                                                                     |
-| CONFIRMATION_BLOCKS     | The required number of confirmation blocks used to fetch the data                  | No       | 15                                                                      |
-| LOG_LEVEL               | The log level of the oracle                                                        | No       | INFO                                                                    |
 
 ## Keeper
 
 Keeper is an oracle that aggregates votes that were submitted by all the oracles and submits the update transaction.
 The keeper does not require any additional role, and can be executed by any of the oracles.
+It helps save the gas cost and stability as there is no need for every oracle to submit vote.
 
 ### Dependencies
 
@@ -91,49 +71,24 @@ The ETH1 node is used to submit the transactions on chain. Any of the ETH1 clien
 
 - [Go-ethereum](https://github.com/ethereum/go-ethereum)
 - [OpenEthereum](https://github.com/openethereum/openethereum)
+- [Nethermind](https://github.com/NethermindEth/nethermind)
 - [Infura](https://infura.io/docs/eth2) (hosted)
 - [Alchemy](https://www.alchemy.com/) (hosted)
 
-### Usage
+### Keeper Usage
 
-1. Move to `deploy` directory
+1. Make sure keeper has enough balance to submit the transactions
 
-```shell script
-cd deploy
-```
+2. Go through the [oracle usage](#oracle-usage) steps above
 
-2. Create an edit environment file (see `Keeper Settings` below)
-
-```shell script
-cp .env.example .env
-```
-
-3. Enable `pushover` alerts in `configs/alertmanager.yml`
+3. Configure keeper section in the `deploy/<network>/.env` file
 
 4. Uncomment `keeper` sections in the following files:
-   * configs/rules.yml
-   * configs/prometheus.yml
-   * configs/rules.yml
-   * docker-compose.yml
+   * `deploy/configs/prometheus.yml`
+   * `deploy/configs/rules.yml`
 
-5. Run with [docker-compose](https://docs.docker.com/compose/)
+5. Run with [docker-compose](https://docs.docker.com/compose/). The docker-compose version must be **v1.27.0+**.
 
 ```shell script
-docker-compose -f docker-compose.yml up -d
+COMPOSE_PROFILES=lighthouse,keeper docker-compose up -d
 ```
-
-### Keeper Settings
-
-| Variable                | Description                                                                        | Required | Default   |
-|-------------------------|------------------------------------------------------------------------------------|----------|-----------|
-| NETWORK                 | The network that the keeper is currently operating on. Choices are goerli, mainnet | No       | mainnet   |
-| WEB3_ENDPOINT           | The endpoint of the ETH1 node.                                                     | Yes      | -         |
-| MAX_FEE_PER_GAS_GWEI    | The max fee per gas keeper is willing to pay. Specified in GWEI.                   |  No      | 150       |
-| ENABLE_HEALTH_SERVER    | Defines whether to enable health server                                            | No       | True      |
-| HEALTH_SERVER_PORT      | The port where the health server will run                                          | No       | 8080      |
-| HEALTH_SERVER_HOST      | The host where the health server will run                                          | No       | 127.0.0.1 |
-| ORACLE_PRIVATE_KEY      | The ETH1 private key of the oracle                                                 | Yes      | -         |
-| KEEPER_PROCESS_INTERVAL | How long to wait before processing again (in seconds)                              | No       | 180       |
-| CONFIRMATION_BLOCKS     | The required number of confirmation blocks used to fetch the data                  | No       | 15        |
-| KEEPER_MIN_BALANCE_WEI  | The minimum balance keeper must have for votes submission                          | No       | 0.1 ETH   |
-| LOG_LEVEL               | The log level of the keeper                                                        | No       | INFO      |

@@ -7,14 +7,14 @@ import ipfshttpclient
 from aiohttp import ClientSession
 from eth_typing import ChecksumAddress
 
-from oracle.oracle.settings import (
+from oracle.oracle.clients import ipfs_fetch
+from oracle.settings import (
     IPFS_PIN_ENDPOINTS,
     IPFS_PINATA_API_KEY,
     IPFS_PINATA_PIN_ENDPOINT,
     IPFS_PINATA_SECRET_KEY,
 )
 
-from ..clients import ipfs_fetch
 from .types import ClaimedAccounts, Claims, Rewards
 
 logger = logging.getLogger(__name__)

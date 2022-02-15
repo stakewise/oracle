@@ -2,29 +2,14 @@ import logging
 from typing import Any, Dict, List, Union
 
 import backoff
-import boto3
 import ipfshttpclient
 from aiohttp import ClientSession
 from gql import Client
 from gql.transport.aiohttp import AIOHTTPTransport
 from graphql import DocumentNode
 
-from oracle.oracle.settings import (
-    AWS_ACCESS_KEY_ID,
-    AWS_SECRET_ACCESS_KEY,
-    ETHEREUM_SUBGRAPH_URL,
-    IPFS_FETCH_ENDPOINTS,
-    IPFS_PIN_ENDPOINTS,
-    RARI_FUSE_SUBGRAPH_URL,
-    STAKEWISE_SUBGRAPH_URL,
-    UNISWAP_V3_SUBGRAPH_URL,
-)
-
-s3_client = boto3.client(
-    "s3",
-    aws_access_key_id=AWS_ACCESS_KEY_ID,
-    aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-)
+from oracle.networks import NETWORKS
+from oracle.settings import IPFS_FETCH_ENDPOINTS, IPFS_PIN_ENDPOINTS
 
 gql_logger = logging.getLogger("gql_logger")
 gql_handler = logging.StreamHandler()
@@ -36,35 +21,45 @@ EXECUTE_TIMEOUT = 30
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=300, logger=gql_logger)
-async def execute_sw_gql_query(query: DocumentNode, variables: Dict) -> Dict:
+async def execute_sw_gql_query(
+    network: str, query: DocumentNode, variables: Dict
+) -> Dict:
     """Executes GraphQL query."""
-    transport = AIOHTTPTransport(url=STAKEWISE_SUBGRAPH_URL)
+    subgraph_url = NETWORKS[network]["STAKEWISE_SUBGRAPH_URL"]
+    transport = AIOHTTPTransport(url=subgraph_url)
     async with Client(transport=transport, execute_timeout=EXECUTE_TIMEOUT) as session:
         return await session.execute(query, variable_values=variables)
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=300, logger=gql_logger)
-async def execute_uniswap_v3_gql_query(query: DocumentNode, variables: Dict) -> Dict:
+async def execute_uniswap_v3_gql_query(
+    network: str, query: DocumentNode, variables: Dict
+) -> Dict:
     """Executes GraphQL query."""
-    transport = AIOHTTPTransport(url=UNISWAP_V3_SUBGRAPH_URL)
+    subgraph_url = NETWORKS[network]["UNISWAP_V3_SUBGRAPH_URL"]
+    transport = AIOHTTPTransport(url=subgraph_url)
     async with Client(transport=transport, execute_timeout=EXECUTE_TIMEOUT) as session:
         return await session.execute(query, variable_values=variables)
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=300, logger=gql_logger)
-async def execute_ethereum_gql_query(query: DocumentNode, variables: Dict) -> Dict:
+async def execute_ethereum_gql_query(
+    network: str, query: DocumentNode, variables: Dict
+) -> Dict:
     """Executes GraphQL query."""
-    transport = AIOHTTPTransport(url=ETHEREUM_SUBGRAPH_URL)
+    subgraph_url = NETWORKS[network]["ETHEREUM_SUBGRAPH_URL"]
+    transport = AIOHTTPTransport(url=subgraph_url)
     async with Client(transport=transport, execute_timeout=EXECUTE_TIMEOUT) as session:
         return await session.execute(query, variable_values=variables)
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=300, logger=gql_logger)
 async def execute_rari_fuse_pools_gql_query(
-    query: DocumentNode, variables: Dict
+    network: str, query: DocumentNode, variables: Dict
 ) -> Dict:
     """Executes GraphQL query."""
-    transport = AIOHTTPTransport(url=RARI_FUSE_SUBGRAPH_URL)
+    subgraph_url = NETWORKS[network]["RARI_FUSE_SUBGRAPH_URL"]
+    transport = AIOHTTPTransport(url=subgraph_url)
     async with Client(transport=transport, execute_timeout=EXECUTE_TIMEOUT) as session:
         return await session.execute(query, variable_values=variables)
 

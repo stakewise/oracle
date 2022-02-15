@@ -1,0 +1,177 @@
+version: "3.9"
+
+volumes:
+  prometheus:
+    driver: local
+  alertmanager:
+    driver: local
+  postgres:
+    driver: local
+  ipfs:
+    driver: local
+  openethereum:
+    driver: local
+  nethermind:
+    driver: local
+  lighthouse:
+    driver: local
+
+networks:
+  gnosis:
+    name: gnosis
+    driver: bridge
+
+services:
+  oracle:
+    container_name: oracle_gnosis
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.2.0
+    restart: always
+    entrypoint: ["python"]
+    command: ["oracle/oracle/main.py"]
+    env_file: [".env"]
+    profiles: ["oracle"]
+    networks:
+      - gnosis
+
+  keeper:
+    container_name: keeper_gnosis
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.2.0
+    restart: always
+    entrypoint: ["python"]
+    command: ["oracle/keeper/main.py"]
+    env_file: [".env"]
+    profiles: ["keeper"]
+    networks:
+      - gnosis
+
+  prometheus:
+    container_name: prometheus_gnosis
+    image: bitnami/prometheus:2
+    restart: always
+    env_file: [".env"]
+    volumes:
+      - prometheus:/opt/bitnami/prometheus/data
+      - ../configs/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml
+      - ../configs/rules.yml:/opt/bitnami/prometheus/conf/rules.yml
+    networks:
+      - gnosis
+
+  alertmanager:
+    container_name: alertmanager_gnosis
+    image: bitnami/alertmanager:0
+    restart: always
+    env_file: [".env"]
+    volumes:
+      - alertmanager:/opt/bitnami/alertmanager/data
+      - ../configs/alertmanager.yml:/opt/bitnami/alertmanager/conf/config.yml
+    depends_on: ["prometheus"]
+    networks:
+      - gnosis
+
+  graph-node:
+    container_name: graph_node_gnosis
+    image: graphprotocol/graph-node:v0.25.0
+    restart: always
+    env_file: [".env"]
+    depends_on: ["postgres","ipfs"]
+    profiles: ["graph"]
+    networks:
+      - gnosis
+
+  postgres:
+    container_name: postgres_gnosis
+    image: postgres:14-alpine
+    restart: always
+    command: ["postgres", "-cshared_preload_libraries=pg_stat_statements"]
+    env_file: [".env"]
+    volumes: ["postgres:/var/lib/postgresql/data"]
+    profiles: ["graph"]
+    networks:
+      - gnosis
+
+  subgraphs:
+    container_name: subgraphs_gnosis
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/subgraphs:v1.0.8
+    command: >
+      /bin/sh -c "until nc -vz graph-node 8020; do echo 'Waiting graph-node'; sleep 2; done
+      && yarn build:${NETWORK}
+      && yarn create:local
+      && yarn deploy:local"
+    env_file: [".env"]
+    restart: "no"
+    depends_on: ["graph-node","ipfs"]
+    profiles: ["graph"]
+    networks:
+      - gnosis
+
+  ipfs:
+    container_name: ipfs_gnosis
+    image: ipfs/go-ipfs:v0.10.0
+    restart: always
+    env_file: [".env"]
+    ulimits:
+      nofile:
+        soft: 8192
+        hard: 8192
+    volumes: ["ipfs:/data/ipfs","../configs/ipfs-entrypoint.sh:/usr/local/bin/start_ipfs"]
+    profiles: ["ipfs"]
+    networks:
+      - gnosis
+
+  openethereum:
+    container_name: openethereum_gnosis
+    image: openethereum/openethereum:v3.3.3
+    restart: always
+    command:
+      - --chain=xdai
+      - --jsonrpc-interface=all
+      - --jsonrpc-hosts=all
+      - --jsonrpc-port=8545
+      - --min-peers=50
+      - --max-peers=100
+    volumes: ["openethereum:/home/openethereum"]
+    profiles: ["openethereum"]
+    networks:
+      gnosis:
+        aliases:
+          - eth1-node
+
+
+  nethermind:
+    container_name: nethermind_gnosis
+    image: nethermind/nethermind:1.12.4
+    restart: always
+    command:
+      - --config=xdai
+      - --datadir=/data/nethermind
+      - --JsonRpc.Enabled=true
+      - --JsonRpc.EnabledModules=Eth,Subscribe,Trace,TxPool,Web3,Personal,Proof,Net,Parity,Health
+      - --JsonRpc.Host=0.0.0.0
+      - --JsonRpc.Port=8545
+    volumes: ["nethermind:/data"]
+    profiles: ["nethermind"]
+    networks:
+      gnosis:
+        aliases:
+          - eth1-node
+
+  lighthouse:
+    container_name: lighthouse_gnosis
+    image: sigp/lighthouse:v2.1.2
+    restart: always
+    command:
+      - lighthouse
+      - --network
+      - gnosis
+      - beacon
+      - --http
+      - --http-address=0.0.0.0
+      - --http-port=5052
+      - --eth1-endpoints
+      - $ETH1_ENDPOINT
+    volumes: ["lighthouse:/root/.lighthouse"]
+    profiles: ["lighthouse"]
+    networks:
+      gnosis:
+        aliases:
+          - eth2-node

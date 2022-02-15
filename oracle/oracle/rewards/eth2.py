@@ -5,13 +5,7 @@ import backoff
 from aiohttp import ClientSession
 from eth_typing import HexStr
 
-from oracle.oracle.settings import (
-    ETH2_CLIENT,
-    ETH2_ENDPOINT,
-    GNOSIS,
-    LIGHTHOUSE,
-    NETWORK,
-)
+from oracle.networks import NETWORKS
 
 
 class ValidatorStatus(Enum):
@@ -30,22 +24,14 @@ class ValidatorStatus(Enum):
 
 PENDING_STATUSES = [ValidatorStatus.PENDING_INITIALIZED, ValidatorStatus.PENDING_QUEUED]
 
-if NETWORK == GNOSIS:
-    SLOTS_PER_EPOCH = 16
-    SECONDS_PER_SLOT = 5
-else:
-    SLOTS_PER_EPOCH = 32
-    SECONDS_PER_SLOT = 12
-
-SECONDS_PER_EPOCH = SECONDS_PER_SLOT * SLOTS_PER_EPOCH
-
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def get_finality_checkpoints(
-    session: ClientSession, state_id: str = "head"
+    network: str, session: ClientSession, state_id: str = "head"
 ) -> Dict:
     """Fetches finality checkpoints."""
-    endpoint = f"{ETH2_ENDPOINT}/eth/v1/beacon/states/{state_id}/finality_checkpoints"
+    network_config = NETWORKS[network]
+    endpoint = f"{network_config['ETH2_ENDPOINT']}/eth/v1/beacon/states/{state_id}/finality_checkpoints"
     async with session.get(endpoint) as response:
         response.raise_for_status()
         return (await response.json())["data"]
@@ -53,17 +39,17 @@ async def get_finality_checkpoints(
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def get_validators(
-    session: ClientSession, public_keys: List[HexStr], state_id: str = "head"
+    network: str,
+    session: ClientSession,
+    public_keys: List[HexStr],
+    state_id: str = "head",
 ) -> List[Dict]:
     """Fetches validators."""
     if not public_keys:
         return []
 
-    # TODO: remove once https://github.com/gnosischain/gbc-lighthouse updated to 2.1.1
-    if ETH2_CLIENT == LIGHTHOUSE:
-        endpoint = f"{ETH2_ENDPOINT}/eth/v1/beacon/states/{state_id}/validators?id={','.join(public_keys)}"
-    else:
-        endpoint = f"{ETH2_ENDPOINT}/eth/v1/beacon/states/{state_id}/validators?id={'&id='.join(public_keys)}"
+    _endpoint = NETWORKS[network]["ETH2_ENDPOINT"]
+    endpoint = f"{_endpoint}/eth/v1/beacon/states/{state_id}/validators?id={'&id='.join(public_keys)}"
 
     async with session.get(endpoint) as response:
         response.raise_for_status()
@@ -71,9 +57,10 @@ async def get_validators(
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
-async def get_genesis(session: ClientSession) -> Dict:
+async def get_genesis(network: str, session: ClientSession) -> Dict:
     """Fetches beacon chain genesis."""
-    endpoint = f"{ETH2_ENDPOINT}/eth/v1/beacon/genesis"
+    network_config = NETWORKS[network]
+    endpoint = f"{network_config['ETH2_ENDPOINT']}/eth/v1/beacon/genesis"
     async with session.get(endpoint) as response:
         response.raise_for_status()
         return (await response.json())["data"]
