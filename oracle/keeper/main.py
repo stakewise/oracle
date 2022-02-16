@@ -10,6 +10,7 @@ from oracle.keeper.utils import get_keeper_params, submit_votes
 from oracle.settings import (
     ENABLE_HEALTH_SERVER,
     ENABLED_NETWORKS,
+    HEALTH_SERVER_HOST,
     HEALTH_SERVER_PORT,
     KEEPER_PROCESS_INTERVAL,
     LOG_LEVEL,
@@ -59,7 +60,7 @@ if __name__ == "__main__":
             daemon=True,
         )
         logger.info(
-            f"Starting monitoring server at http://{ENABLE_HEALTH_SERVER}:{HEALTH_SERVER_PORT}"
+            f"Starting monitoring server at http://{HEALTH_SERVER_HOST}:{HEALTH_SERVER_PORT}"
         )
         t.start()
     main()
