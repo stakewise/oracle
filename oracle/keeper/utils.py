@@ -162,6 +162,7 @@ def check_validator_vote(
 
 def get_oracles_votes(
     network: str,
+    web3_client: Web3,
     rewards_nonce: int,
     validators_nonce: int,
     oracles: List[ChecksumAddress],
@@ -198,7 +199,7 @@ def get_oracles_votes(
                 vote = response.json()
                 if "nonce" not in vote or vote["nonce"] != correct_nonce:
                     continue
-                if not vote_checker(vote, oracle):
+                if not vote_checker(web3_client, vote, oracle):
                     logger.warning(
                         f"[{network}] Oracle {oracle} has submitted incorrect vote at {bucket_key}"
                     )
@@ -275,6 +276,7 @@ def submit_votes(
     # resolve and fetch the latest votes of the oracles for validators and rewards
     votes = get_oracles_votes(
         network=network,
+        web3_client=web3_client,
         rewards_nonce=params.rewards_nonce,
         validators_nonce=params.validators_nonce,
         oracles=params.oracles,

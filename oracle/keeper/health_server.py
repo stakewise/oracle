@@ -34,6 +34,7 @@ async def health(request):
             # Can resolve and fetch recent votes of the oracles
             get_oracles_votes(
                 network=network,
+                web3_client=web3_client,
                 rewards_nonce=params.rewards_nonce,
                 validators_nonce=params.validators_nonce,
                 oracles=params.oracles,
