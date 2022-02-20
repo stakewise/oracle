@@ -1,13 +1,13 @@
 from decouple import Csv, config
 
-from oracle.networks import ETHEREUM_MAINNET
+from oracle.networks import MAINNET
 
 # common
 LOG_LEVEL = config("LOG_LEVEL", default="INFO")
 
 ENABLED_NETWORKS = config(
     "ENABLED_NETWORKS",
-    default=ETHEREUM_MAINNET,
+    default=MAINNET,
     cast=Csv(),
 )
 
