@@ -4,33 +4,35 @@ from decouple import config
 from eth_typing import HexStr
 from web3 import Web3
 
-ETHEREUM_MAINNET = "eth_mainnet"
-ETHEREUM_GOERLI = "eth_goerli"
+MAINNET = "mainnet"
+GOERLI = "goerli"
+PERM_GOERLI = "perm_goerli"
 GNOSIS_CHAIN = "gnosis"
 
-ETHEREUM_MAINNET_UPPER = ETHEREUM_MAINNET.upper()
-ETHEREUM_GOERLI_UPPER = ETHEREUM_GOERLI.upper()
+MAINNET_UPPER = MAINNET.upper()
+GOERLI_UPPER = GOERLI.upper()
+PERM_GOERLI_UPPER = PERM_GOERLI.upper()
 GNOSIS_CHAIN_UPPER = GNOSIS_CHAIN.upper()
 
 NETWORKS = {
-    ETHEREUM_MAINNET: dict(
+    MAINNET: dict(
         STAKEWISE_SUBGRAPH_URL=config(
-            f"{ETHEREUM_MAINNET_UPPER}_STAKEWISE_SUBGRAPH_URL",
+            f"{MAINNET_UPPER}_STAKEWISE_SUBGRAPH_URL",
             default="https://api.thegraph.com/subgraphs/name/stakewise/stakewise-mainnet",
         ),
         ETHEREUM_SUBGRAPH_URL=config(
-            f"{ETHEREUM_MAINNET_UPPER}_ETHEREUM_SUBGRAPH_URL",
+            f"{MAINNET_UPPER}_ETHEREUM_SUBGRAPH_URL",
             default="https://api.thegraph.com/subgraphs/name/stakewise/ethereum-mainnet",
         ),
         UNISWAP_V3_SUBGRAPH_URL=config(
-            f"{ETHEREUM_MAINNET_UPPER}_UNISWAP_V3_SUBGRAPH_URL",
+            f"{MAINNET_UPPER}_UNISWAP_V3_SUBGRAPH_URL",
             default="https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-mainnet",
         ),
         RARI_FUSE_SUBGRAPH_URL=config(
-            f"{ETHEREUM_MAINNET_UPPER}_RARI_FUSE_SUBGRAPH_URL",
+            f"{MAINNET_UPPER}_RARI_FUSE_SUBGRAPH_URL",
             default="https://api.thegraph.com/subgraphs/name/stakewise/rari-fuse-mainnet",
         ),
-        ETH2_ENDPOINT=config(f"{ETHEREUM_MAINNET_UPPER}_ETH2_ENDPOINT", default=""),
+        ETH2_ENDPOINT=config(f"{MAINNET_UPPER}_ETH2_ENDPOINT", default=""),
         SLOTS_PER_EPOCH=32,
         SECONDS_PER_SLOT=12,
         ORACLES_CONTRACT_ADDRESS=Web3.toChecksumAddress(
@@ -58,31 +60,25 @@ NETWORKS = {
         WITHDRAWAL_CREDENTIALS=HexStr(
             "0x0100000000000000000000002296e122c1a20fca3cac3371357bdad3be0df079"
         ),
-        ORACLE_PRIVATE_KEY=config(
-            f"{ETHEREUM_MAINNET_UPPER}_ORACLE_PRIVATE_KEY", default=""
-        ),
+        ORACLE_PRIVATE_KEY=config(f"{MAINNET_UPPER}_ORACLE_PRIVATE_KEY", default=""),
         AWS_BUCKET_NAME=config(
-            f"{ETHEREUM_MAINNET_UPPER}_AWS_BUCKET_NAME", default="oracle-votes-mainnet"
+            f"{MAINNET_UPPER}_AWS_BUCKET_NAME", default="oracle-votes-mainnet"
         ),
-        AWS_REGION=config(
-            f"{ETHEREUM_MAINNET_UPPER}_AWS_REGION", default="eu-central-1"
-        ),
-        AWS_ACCESS_KEY_ID=config(
-            f"{ETHEREUM_MAINNET_UPPER}_AWS_ACCESS_KEY_ID", default=""
-        ),
+        AWS_REGION=config(f"{MAINNET_UPPER}_AWS_REGION", default="eu-central-1"),
+        AWS_ACCESS_KEY_ID=config(f"{MAINNET_UPPER}_AWS_ACCESS_KEY_ID", default=""),
         AWS_SECRET_ACCESS_KEY=config(
-            f"{ETHEREUM_MAINNET_UPPER}_AWS_SECRET_ACCESS_KEY", default=""
+            f"{MAINNET_UPPER}_AWS_SECRET_ACCESS_KEY", default=""
         ),
         KEEPER_ETH1_ENDPOINT=config(
-            f"{ETHEREUM_MAINNET_UPPER}_KEEPER_ETH1_ENDPOINT", default=""
+            f"{MAINNET_UPPER}_KEEPER_ETH1_ENDPOINT", default=""
         ),
         KEEPER_MIN_BALANCE=config(
-            f"{ETHEREUM_MAINNET_UPPER}_KEEPER_MIN_BALANCE_WEI",
+            f"{MAINNET_UPPER}_KEEPER_MIN_BALANCE_WEI",
             default=Web3.toWei(0.1, "ether"),
             cast=int,
         ),
         KEEPER_MAX_FEE_PER_GAS=config(
-            f"{ETHEREUM_MAINNET_UPPER}_KEEPER_MAX_FEE_PER_GAS_GWEI",
+            f"{MAINNET_UPPER}_KEEPER_MAX_FEE_PER_GAS_GWEI",
             default=150,
             cast=lambda x: Web3.toWei(x, "gwei"),
         ),
@@ -90,24 +86,24 @@ NETWORKS = {
         IS_POA=False,
         DEPOSIT_TOKEN_SYMBOL="ETH",
     ),
-    ETHEREUM_GOERLI: dict(
+    GOERLI: dict(
         STAKEWISE_SUBGRAPH_URL=config(
-            f"{ETHEREUM_GOERLI_UPPER}_STAKEWISE_SUBGRAPH_URL",
+            f"{GOERLI_UPPER}_STAKEWISE_SUBGRAPH_URL",
             default="https://api.thegraph.com/subgraphs/name/stakewise/stakewise-goerli",
         ),
         ETHEREUM_SUBGRAPH_URL=config(
-            f"{ETHEREUM_GOERLI_UPPER}_ETHEREUM_SUBGRAPH_URL",
+            f"{GOERLI_UPPER}_ETHEREUM_SUBGRAPH_URL",
             default="https://api.thegraph.com/subgraphs/name/stakewise/ethereum-goerli",
         ),
         UNISWAP_V3_SUBGRAPH_URL=config(
-            f"{ETHEREUM_GOERLI_UPPER}_UNISWAP_V3_SUBGRAPH_URL",
+            f"{GOERLI_UPPER}_UNISWAP_V3_SUBGRAPH_URL",
             default="https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-goerli",
         ),
         # TODO: update once rari fuse pools is deployed to goerli chain
         RARI_FUSE_SUBGRAPH_URL=config(
-            f"{ETHEREUM_GOERLI_UPPER}_RARI_FUSE_SUBGRAPH_URL", default=""
+            f"{GOERLI_UPPER}_RARI_FUSE_SUBGRAPH_URL", default=""
         ),
-        ETH2_ENDPOINT=config(f"{ETHEREUM_GOERLI_UPPER}_ETH2_ENDPOINT", default=""),
+        ETH2_ENDPOINT=config(f"{GOERLI_UPPER}_ETH2_ENDPOINT", default=""),
         SLOTS_PER_EPOCH=32,
         SECONDS_PER_SLOT=12,
         ORACLES_CONTRACT_ADDRESS=Web3.toChecksumAddress(
@@ -132,31 +128,89 @@ NETWORKS = {
         WITHDRAWAL_CREDENTIALS=HexStr(
             "0x010000000000000000000000040f15c6b5bfc5f324ecab5864c38d4e1eef4218"
         ),
-        ORACLE_PRIVATE_KEY=config(
-            f"{ETHEREUM_GOERLI_UPPER}_ORACLE_PRIVATE_KEY", default=""
-        ),
+        ORACLE_PRIVATE_KEY=config(f"{GOERLI_UPPER}_ORACLE_PRIVATE_KEY", default=""),
         AWS_BUCKET_NAME=config(
-            f"{ETHEREUM_GOERLI_UPPER}_AWS_BUCKET_NAME", default="oracle-votes-goerli"
+            f"{GOERLI_UPPER}_AWS_BUCKET_NAME", default="oracle-votes-goerli"
         ),
-        AWS_REGION=config(
-            f"{ETHEREUM_GOERLI_UPPER}_AWS_REGION", default="eu-central-1"
-        ),
-        AWS_ACCESS_KEY_ID=config(
-            f"{ETHEREUM_GOERLI_UPPER}_AWS_ACCESS_KEY_ID", default=""
-        ),
+        AWS_REGION=config(f"{GOERLI_UPPER}_AWS_REGION", default="eu-central-1"),
+        AWS_ACCESS_KEY_ID=config(f"{GOERLI_UPPER}_AWS_ACCESS_KEY_ID", default=""),
         AWS_SECRET_ACCESS_KEY=config(
-            f"{ETHEREUM_GOERLI_UPPER}_AWS_SECRET_ACCESS_KEY", default=""
+            f"{GOERLI_UPPER}_AWS_SECRET_ACCESS_KEY", default=""
         ),
-        KEEPER_ETH1_ENDPOINT=config(
-            f"{ETHEREUM_GOERLI_UPPER}_KEEPER_ETH1_ENDPOINT", default=""
-        ),
+        KEEPER_ETH1_ENDPOINT=config(f"{GOERLI_UPPER}_KEEPER_ETH1_ENDPOINT", default=""),
         KEEPER_MIN_BALANCE=config(
-            f"{ETHEREUM_GOERLI_UPPER}_KEEPER_MIN_BALANCE_WEI",
+            f"{GOERLI_UPPER}_KEEPER_MIN_BALANCE_WEI",
             default=Web3.toWei(0.1, "ether"),
             cast=int,
         ),
         KEEPER_MAX_FEE_PER_GAS=config(
-            f"{ETHEREUM_GOERLI_UPPER}_KEEPER_MAX_FEE_PER_GAS_GWEI",
+            f"{GOERLI_UPPER}_KEEPER_MAX_FEE_PER_GAS_GWEI",
+            default=150,
+            cast=lambda x: Web3.toWei(x, "gwei"),
+        ),
+        SYNC_PERIOD=timedelta(hours=1),
+        IS_POA=True,
+        DEPOSIT_TOKEN_SYMBOL="ETH",
+    ),
+    PERM_GOERLI: dict(
+        STAKEWISE_SUBGRAPH_URL=config(
+            f"{PERM_GOERLI_UPPER}_STAKEWISE_SUBGRAPH_URL",
+            default="https://api.thegraph.com/subgraphs/name/stakewise/stakewise-perm-goerli",
+        ),
+        ETHEREUM_SUBGRAPH_URL=config(
+            f"{PERM_GOERLI_UPPER}_ETHEREUM_SUBGRAPH_URL",
+            default="https://api.thegraph.com/subgraphs/name/stakewise/ethereum-perm-goerli",
+        ),
+        UNISWAP_V3_SUBGRAPH_URL=config(
+            f"{PERM_GOERLI_UPPER}_UNISWAP_V3_SUBGRAPH_URL",
+            default="https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-perm-goerli",
+        ),
+        # TODO: update once rari fuse pools is deployed to goerli chain
+        RARI_FUSE_SUBGRAPH_URL=config(
+            f"{GOERLI_UPPER}_RARI_FUSE_SUBGRAPH_URL", default=""
+        ),
+        ETH2_ENDPOINT=config(f"{GOERLI_UPPER}_ETH2_ENDPOINT", default=""),
+        SLOTS_PER_EPOCH=32,
+        SECONDS_PER_SLOT=12,
+        ORACLES_CONTRACT_ADDRESS=Web3.toChecksumAddress(
+            "0x4E9CA30186E829D7712ADFEEE491c0c6C46E1AED"
+        ),
+        MULTICALL_CONTRACT_ADDRESS=Web3.toChecksumAddress(
+            "0x77dCa2C955b15e9dE4dbBCf1246B4B85b651e50e"
+        ),
+        SWISE_TOKEN_CONTRACT_ADDRESS=Web3.toChecksumAddress(
+            "0x0e2497aACec2755d831E4AFDEA25B4ef1B823855"
+        ),
+        REWARD_TOKEN_CONTRACT_ADDRESS=Web3.toChecksumAddress(
+            "0xbA9aD2A3Ef7A372900644aBe9D82eCD3Fa8CF8dD"
+        ),
+        STAKED_TOKEN_CONTRACT_ADDRESS=Web3.toChecksumAddress(
+            "0xa5c65F2D71f9c82e31a380e1dadb680976492fc5"
+        ),
+        DISTRIBUTOR_FALLBACK_ADDRESS=Web3.toChecksumAddress(
+            "0x66D6c253084d8d51c7CFfDb3C188A0b53D998a3d"
+        ),
+        RARI_FUSE_POOL_ADDRESSES=[],
+        WITHDRAWAL_CREDENTIALS=HexStr(
+            "0x0100000000000000000000006dfc9682e3c3263758ad96e2b2ba9822167f81ee"
+        ),
+        ORACLE_PRIVATE_KEY=config(f"{GOERLI_UPPER}_ORACLE_PRIVATE_KEY", default=""),
+        AWS_BUCKET_NAME=config(
+            f"{GOERLI_UPPER}_AWS_BUCKET_NAME", default="oracle-votes-perm-goerli"
+        ),
+        AWS_REGION=config(f"{GOERLI_UPPER}_AWS_REGION", default="eu-central-1"),
+        AWS_ACCESS_KEY_ID=config(f"{GOERLI_UPPER}_AWS_ACCESS_KEY_ID", default=""),
+        AWS_SECRET_ACCESS_KEY=config(
+            f"{GOERLI_UPPER}_AWS_SECRET_ACCESS_KEY", default=""
+        ),
+        KEEPER_ETH1_ENDPOINT=config(f"{GOERLI_UPPER}_KEEPER_ETH1_ENDPOINT", default=""),
+        KEEPER_MIN_BALANCE=config(
+            f"{GOERLI_UPPER}_KEEPER_MIN_BALANCE_WEI",
+            default=Web3.toWei(0.1, "ether"),
+            cast=int,
+        ),
+        KEEPER_MAX_FEE_PER_GAS=config(
+            f"{GOERLI_UPPER}_KEEPER_MAX_FEE_PER_GAS_GWEI",
             default=150,
             cast=lambda x: Web3.toWei(x, "gwei"),
         ),

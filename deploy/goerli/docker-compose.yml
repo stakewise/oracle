@@ -26,18 +26,17 @@ networks:
 services:
   oracle:
     container_name: oracle_goerli
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.2.1
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.2.2
     restart: always
     entrypoint: ["python"]
     command: ["oracle/oracle/main.py"]
     env_file: [".env"]
-    profiles: ["oracle"]
     networks:
       - goerli
 
   keeper:
     container_name: keeper_goerli
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.2.1
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.2.2
     restart: always
     entrypoint: ["python"]
     command: ["oracle/keeper/main.py"]
@@ -93,10 +92,10 @@ services:
 
   subgraphs:
     container_name: subgraphs_goerli
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/subgraphs:v1.0.8
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/subgraphs:v1.0.9
     command: >
       /bin/sh -c "until nc -vz graph-node 8020; do echo 'Waiting graph-node'; sleep 2; done
-      && yarn build:${NETWORK}
+      && yarn build:goerli
       && yarn create:local
       && yarn deploy:local"
     env_file: [".env"]
@@ -115,7 +114,7 @@ services:
       nofile:
         soft: 8192
         hard: 8192
-    volumes: ["ipfs:/data/ipfs","./configs/ipfs-entrypoint.sh:/usr/local/bin/start_ipfs"]
+    volumes: ["ipfs:/data/ipfs","../configs/ipfs-entrypoint.sh:/usr/local/bin/start_ipfs"]
     profiles: ["ipfs"]
     networks:
       - goerli
@@ -160,7 +159,7 @@ services:
       - goerli
 
   erigon-rpcdaemon:
-    container_name: erigon-rpcdaemon_goerli
+    container_name: erigon_rpcdaemon_goerli
     image: thorax/erigon:v2022.01.03
     restart: always
     command:
@@ -179,7 +178,7 @@ services:
           - eth1-node
 
   prysm:
-    container_name: prysm_prater
+    container_name: prysm_goerli
     image: gcr.io/prysmaticlabs/prysm/beacon-chain:v2.0.6
     restart: always
     command:
@@ -200,7 +199,7 @@ services:
           - eth2-node
 
   lighthouse:
-    container_name: lighthouse_prater
+    container_name: lighthouse_goerli
     image: sigp/lighthouse:v2.1.2
     restart: always
     command:
