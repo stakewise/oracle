@@ -114,7 +114,7 @@ services:
       nofile:
         soft: 8192
         hard: 8192
-    volumes: ["ipfs:/data/ipfs","./configs/ipfs-entrypoint.sh:/usr/local/bin/start_ipfs"]
+    volumes: ["ipfs:/data/ipfs","../configs/ipfs-entrypoint.sh:/usr/local/bin/start_ipfs"]
     profiles: ["ipfs"]
     networks:
       - perm_goerli
