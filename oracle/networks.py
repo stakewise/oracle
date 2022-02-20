@@ -159,11 +159,11 @@ NETWORKS = {
         ),
         ETHEREUM_SUBGRAPH_URL=config(
             f"{PERM_GOERLI_UPPER}_ETHEREUM_SUBGRAPH_URL",
-            default="https://api.thegraph.com/subgraphs/name/stakewise/ethereum-perm-goerli",
+            default="https://api.thegraph.com/subgraphs/name/stakewise/ethereum-goerli",
         ),
         UNISWAP_V3_SUBGRAPH_URL=config(
             f"{PERM_GOERLI_UPPER}_UNISWAP_V3_SUBGRAPH_URL",
-            default="https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-perm-goerli",
+            default="",
         ),
         # TODO: update once rari fuse pools is deployed to goerli chain
         RARI_FUSE_SUBGRAPH_URL=config(

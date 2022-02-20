@@ -26,7 +26,7 @@ networks:
 services:
   oracle:
     container_name: oracle_mainnet
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.2.2
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.2.3
     restart: always
     entrypoint: ["python"]
     command: ["oracle/oracle/main.py"]
@@ -36,7 +36,7 @@ services:
 
   keeper:
     container_name: keeper_mainnet
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.2.2
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.2.3
     restart: always
     entrypoint: ["python"]
     command: ["oracle/keeper/main.py"]
