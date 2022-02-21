@@ -214,7 +214,7 @@ NETWORKS = {
             default=150,
             cast=lambda x: Web3.toWei(x, "gwei"),
         ),
-        SYNC_PERIOD=timedelta(hours=1),
+        SYNC_PERIOD=timedelta(days=1),
         IS_POA=True,
         DEPOSIT_TOKEN_SYMBOL="ETH",
     ),
