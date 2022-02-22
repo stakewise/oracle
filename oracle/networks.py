@@ -228,31 +228,44 @@ NETWORKS = {
             default="https://api.thegraph.com/subgraphs/name/stakewise/ethereum-gnosis",
         ),
         UNISWAP_V3_SUBGRAPH_URL=config(
-            f"{GNOSIS_CHAIN_UPPER}_UNISWAP_V3_SUBGRAPH_URL",
-            default="https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-gnosis",
+            f"{GNOSIS_CHAIN_UPPER}_UNISWAP_V3_SUBGRAPH_URL", default=""
         ),
-        # TODO: update once rari fuse pools is deployed to gnosis chain
         RARI_FUSE_SUBGRAPH_URL=config(
-            f"{GNOSIS_CHAIN_UPPER}_RARI_FUSE_SUBGRAPH_URL", default=""
+            f"{GNOSIS_CHAIN_UPPER}_RARI_FUSE_SUBGRAPH_URL",
+            default="",
         ),
         ETH2_ENDPOINT=config(f"{GNOSIS_CHAIN_UPPER}_ETH2_ENDPOINT", default=""),
         SLOTS_PER_EPOCH=16,
         SECONDS_PER_SLOT=5,
-        ORACLES_CONTRACT_ADDRESS="",
-        MULTICALL_CONTRACT_ADDRESS="",
-        SWISE_TOKEN_CONTRACT_ADDRESS="",
-        REWARD_TOKEN_CONTRACT_ADDRESS="",
-        STAKED_TOKEN_CONTRACT_ADDRESS="",
-        DISTRIBUTOR_FALLBACK_ADDRESS="",
+        ORACLES_CONTRACT_ADDRESS=Web3.toChecksumAddress(
+            "0xd0f5ddaed2D8BaE1F451D2A11FFAe1806f2Ee1a5"
+        ),
+        MULTICALL_CONTRACT_ADDRESS=Web3.toChecksumAddress(
+            "0xb5b692a88BDFc81ca69dcB1d924f59f0413A602a"
+        ),
+        SWISE_TOKEN_CONTRACT_ADDRESS=Web3.toChecksumAddress(
+            "0xfdA94F056346d2320d4B5E468D6Ad099b2277746"
+        ),
+        REWARD_TOKEN_CONTRACT_ADDRESS=Web3.toChecksumAddress(
+            "0x6FFa613eD41585B1c1e517A78d140cFBD68be639"
+        ),
+        STAKED_TOKEN_CONTRACT_ADDRESS=Web3.toChecksumAddress(
+            "0x9AEBd2322D3D5fB69324a3cFE380DD11Bc3694D2"
+        ),
+        DISTRIBUTOR_FALLBACK_ADDRESS=Web3.toChecksumAddress(
+            "0x8737f638E9af54e89ed9E1234dbC68B115CD169e"
+        ),
         RARI_FUSE_POOL_ADDRESSES=[],
-        WITHDRAWAL_CREDENTIALS="",
+        WITHDRAWAL_CREDENTIALS=HexStr(
+            "0x010000000000000000000000fc9b67b6034f6b306ea9bd8ec1baf3efa2490394"
+        ),
         ORACLE_PRIVATE_KEY=config(
             f"{GNOSIS_CHAIN_UPPER}_ORACLE_PRIVATE_KEY", default=""
         ),
         AWS_BUCKET_NAME=config(
             f"{GNOSIS_CHAIN_UPPER}_AWS_BUCKET_NAME", default="oracle-votes-gnosis"
         ),
-        AWS_REGION=config(f"{GNOSIS_CHAIN_UPPER}_AWS_REGION", default=""),
+        AWS_REGION=config(f"{GNOSIS_CHAIN_UPPER}_AWS_REGION", default="eu-north-1"),
         AWS_ACCESS_KEY_ID=config(f"{GNOSIS_CHAIN_UPPER}_AWS_ACCESS_KEY_ID", default=""),
         AWS_SECRET_ACCESS_KEY=config(
             f"{GNOSIS_CHAIN_UPPER}_AWS_SECRET_ACCESS_KEY", default=""
