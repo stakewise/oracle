@@ -167,9 +167,9 @@ NETWORKS = {
         ),
         # TODO: update once rari fuse pools is deployed to goerli chain
         RARI_FUSE_SUBGRAPH_URL=config(
-            f"{GOERLI_UPPER}_RARI_FUSE_SUBGRAPH_URL", default=""
+            f"{PERM_GOERLI_UPPER}_RARI_FUSE_SUBGRAPH_URL", default=""
         ),
-        ETH2_ENDPOINT=config(f"{GOERLI_UPPER}_ETH2_ENDPOINT", default=""),
+        ETH2_ENDPOINT=config(f"{PERM_GOERLI_UPPER}_ETH2_ENDPOINT", default=""),
         SLOTS_PER_EPOCH=32,
         SECONDS_PER_SLOT=12,
         ORACLES_CONTRACT_ADDRESS=Web3.toChecksumAddress(
@@ -194,23 +194,27 @@ NETWORKS = {
         WITHDRAWAL_CREDENTIALS=HexStr(
             "0x0100000000000000000000006dfc9682e3c3263758ad96e2b2ba9822167f81ee"
         ),
-        ORACLE_PRIVATE_KEY=config(f"{GOERLI_UPPER}_ORACLE_PRIVATE_KEY", default=""),
+        ORACLE_PRIVATE_KEY=config(
+            f"{PERM_GOERLI_UPPER}_ORACLE_PRIVATE_KEY", default=""
+        ),
         AWS_BUCKET_NAME=config(
-            f"{GOERLI_UPPER}_AWS_BUCKET_NAME", default="oracle-votes-perm-goerli"
+            f"{PERM_GOERLI_UPPER}_AWS_BUCKET_NAME", default="oracle-votes-perm-goerli"
         ),
-        AWS_REGION=config(f"{GOERLI_UPPER}_AWS_REGION", default="eu-central-1"),
-        AWS_ACCESS_KEY_ID=config(f"{GOERLI_UPPER}_AWS_ACCESS_KEY_ID", default=""),
+        AWS_REGION=config(f"{PERM_GOERLI_UPPER}_AWS_REGION", default="eu-central-1"),
+        AWS_ACCESS_KEY_ID=config(f"{PERM_GOERLI_UPPER}_AWS_ACCESS_KEY_ID", default=""),
         AWS_SECRET_ACCESS_KEY=config(
-            f"{GOERLI_UPPER}_AWS_SECRET_ACCESS_KEY", default=""
+            f"{PERM_GOERLI_UPPER}_AWS_SECRET_ACCESS_KEY", default=""
         ),
-        KEEPER_ETH1_ENDPOINT=config(f"{GOERLI_UPPER}_KEEPER_ETH1_ENDPOINT", default=""),
+        KEEPER_ETH1_ENDPOINT=config(
+            f"{PERM_GOERLI_UPPER}_KEEPER_ETH1_ENDPOINT", default=""
+        ),
         KEEPER_MIN_BALANCE=config(
-            f"{GOERLI_UPPER}_KEEPER_MIN_BALANCE_WEI",
+            f"{PERM_GOERLI_UPPER}_KEEPER_MIN_BALANCE_WEI",
             default=Web3.toWei(0.1, "ether"),
             cast=int,
         ),
         KEEPER_MAX_FEE_PER_GAS=config(
-            f"{GOERLI_UPPER}_KEEPER_MAX_FEE_PER_GAS_GWEI",
+            f"{PERM_GOERLI_UPPER}_KEEPER_MAX_FEE_PER_GAS_GWEI",
             default=150,
             cast=lambda x: Web3.toWei(x, "gwei"),
         ),
