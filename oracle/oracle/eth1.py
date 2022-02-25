@@ -77,8 +77,17 @@ async def get_voting_parameters(
         ),
     )
     network = result["networks"][0]
-    distributor = result["merkleDistributors"][0]
     reward_token = result["rewardEthTokens"][0]
+
+    try:
+        distributor = result["merkleDistributors"][0]
+    except IndexError:
+        distributor = {
+            "rewardsUpdatedAtBlock": 0,
+            "updatedAtBlock": 0,
+            "merkleRoot": None,
+            "merkleProofs": None,
+        }
 
     rewards = RewardsVotingParameters(
         rewards_nonce=int(network["oraclesRewardsNonce"]),

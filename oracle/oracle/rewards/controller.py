@@ -122,6 +122,11 @@ class RewardsController(object):
         logger.info(
             f"[{self.network}] Retrieved pool validator rewards: total={pretty_total_rewards}"
         )
+        if not total_rewards:
+            logger.info(
+                f"[{self.network}] No staking rewards, waiting for validators to be activated..."
+            )
+            return
 
         if total_rewards < voting_params["total_rewards"]:
             # rewards were reduced -> don't mint new ones
