@@ -89,7 +89,11 @@ class DistributorController(object):
 
         last_merkle_root = voting_params["last_merkle_root"]
         last_merkle_proofs = voting_params["last_merkle_proofs"]
-        if w3.toInt(hexstr=last_merkle_root) and last_merkle_proofs:
+        if (
+            last_merkle_root is not None
+            and w3.toInt(hexstr=last_merkle_root)
+            and last_merkle_proofs
+        ):
             # fetch accounts that have claimed since last merkle root update
             claimed_accounts = await get_distributor_claimed_accounts(
                 network=self.network, merkle_root=last_merkle_root
@@ -164,6 +168,10 @@ class DistributorController(object):
             final_rewards = DistributorRewards.merge_rewards(
                 final_rewards, unclaimed_rewards
             )
+
+        if not final_rewards:
+            logger.info(f"[{self.network}] No rewards to distribute")
+            return
 
         # calculate merkle root
         merkle_root, claims = calculate_merkle_root(final_rewards)

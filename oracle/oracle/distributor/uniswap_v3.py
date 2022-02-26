@@ -6,7 +6,7 @@ from ens.constants import EMPTY_ADDR_HEX
 from eth_typing import BlockNumber, ChecksumAddress
 from web3 import Web3
 
-from oracle.networks import GNOSIS_CHAIN, NETWORKS
+from oracle.networks import GNOSIS_CHAIN, NETWORKS, PERM_GOERLI
 from oracle.oracle.clients import execute_uniswap_v3_gql_query
 from oracle.oracle.graphql_queries import (
     UNISWAP_V3_CURRENT_TICK_POSITIONS_QUERY,
@@ -38,7 +38,7 @@ async def get_uniswap_v3_pools(
     network: str, block_number: BlockNumber
 ) -> UniswapV3Pools:
     """Fetches Uniswap V3 pools."""
-    if network == GNOSIS_CHAIN:
+    if network in (GNOSIS_CHAIN, PERM_GOERLI):
         return UniswapV3Pools(
             staked_token_pools=set(),
             reward_token_pools=set(),
