@@ -92,7 +92,7 @@ services:
 
   subgraphs:
     container_name: subgraphs_mainnet
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/subgraphs:v1.1.0
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/subgraphs:v1.1.1
     command: >
       /bin/sh -c "until nc -vz graph-node 8020; do echo 'Waiting graph-node'; sleep 2; done
       && yarn build:mainnet
