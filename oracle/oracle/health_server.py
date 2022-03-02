@@ -19,9 +19,9 @@ async def health(request):
             current_block_number = finalized_block["block_number"]
             voting_params = await get_voting_parameters(network, current_block_number)
             last_merkle_proofs = voting_params["distributor"]["last_merkle_proofs"]
-
-            # check IPFS connection
-            await ipfs_fetch(last_merkle_proofs)
+            if last_merkle_proofs:
+                # check IPFS connection
+                await ipfs_fetch(last_merkle_proofs)
 
         return web.Response(text="oracle 1")
     except Exception as e:  # noqa: E722
