@@ -48,14 +48,6 @@ services:
     profiles: ["keeper"]
     networks:
       - perm_goerli
-  
-  scoring:
-    container_name: scoring_perm_goerli
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/operator-effectiveness:v0.0.6
-    restart: always
-    env_file: [".env"]
-    networks:
-      - perm_goerli
 
   prometheus:
     container_name: prometheus_perm_goerli
