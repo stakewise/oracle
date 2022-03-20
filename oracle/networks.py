@@ -28,10 +28,6 @@ NETWORKS = {
             f"{MAINNET_UPPER}_UNISWAP_V3_SUBGRAPH_URL",
             default="https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-mainnet",
         ),
-        RARI_FUSE_SUBGRAPH_URL=config(
-            f"{MAINNET_UPPER}_RARI_FUSE_SUBGRAPH_URL",
-            default="https://api.thegraph.com/subgraphs/name/stakewise/rari-fuse-mainnet",
-        ),
         ETH2_ENDPOINT=config(f"{MAINNET_UPPER}_ETH2_ENDPOINT", default=""),
         SLOTS_PER_EPOCH=32,
         SECONDS_PER_SLOT=12,
@@ -53,10 +49,6 @@ NETWORKS = {
         DISTRIBUTOR_FALLBACK_ADDRESS=Web3.toChecksumAddress(
             "0x144a98cb1CdBb23610501fE6108858D9B7D24934"
         ),
-        RARI_FUSE_POOL_ADDRESSES=[
-            Web3.toChecksumAddress("0x18F49849D20Bc04059FE9d775df9a38Cd1f5eC9F"),
-            Web3.toChecksumAddress("0x83d534Ab1d4002249B0E6d22410b62CF31978Ca2"),
-        ],
         WITHDRAWAL_CREDENTIALS=HexStr(
             "0x0100000000000000000000002296e122c1a20fca3cac3371357bdad3be0df079"
         ),
@@ -99,10 +91,6 @@ NETWORKS = {
             f"{GOERLI_UPPER}_UNISWAP_V3_SUBGRAPH_URL",
             default="https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-goerli",
         ),
-        # TODO: update once rari fuse pools is deployed to goerli chain
-        RARI_FUSE_SUBGRAPH_URL=config(
-            f"{GOERLI_UPPER}_RARI_FUSE_SUBGRAPH_URL", default=""
-        ),
         ETH2_ENDPOINT=config(f"{GOERLI_UPPER}_ETH2_ENDPOINT", default=""),
         SLOTS_PER_EPOCH=32,
         SECONDS_PER_SLOT=12,
@@ -124,7 +112,6 @@ NETWORKS = {
         DISTRIBUTOR_FALLBACK_ADDRESS=Web3.toChecksumAddress(
             "0x1867c96601bc5fE24F685d112314B8F3Fe228D5A"
         ),
-        RARI_FUSE_POOL_ADDRESSES=[],
         WITHDRAWAL_CREDENTIALS=HexStr(
             "0x010000000000000000000000040f15c6b5bfc5f324ecab5864c38d4e1eef4218"
         ),
@@ -165,10 +152,6 @@ NETWORKS = {
             f"{PERM_GOERLI_UPPER}_UNISWAP_V3_SUBGRAPH_URL",
             default="",
         ),
-        # TODO: update once rari fuse pools is deployed to goerli chain
-        RARI_FUSE_SUBGRAPH_URL=config(
-            f"{PERM_GOERLI_UPPER}_RARI_FUSE_SUBGRAPH_URL", default=""
-        ),
         ETH2_ENDPOINT=config(f"{PERM_GOERLI_UPPER}_ETH2_ENDPOINT", default=""),
         SLOTS_PER_EPOCH=32,
         SECONDS_PER_SLOT=12,
@@ -190,7 +173,6 @@ NETWORKS = {
         DISTRIBUTOR_FALLBACK_ADDRESS=Web3.toChecksumAddress(
             "0x66D6c253084d8d51c7CFfDb3C188A0b53D998a3d"
         ),
-        RARI_FUSE_POOL_ADDRESSES=[],
         WITHDRAWAL_CREDENTIALS=HexStr(
             "0x0100000000000000000000006dfc9682e3c3263758ad96e2b2ba9822167f81ee"
         ),
@@ -234,10 +216,6 @@ NETWORKS = {
         UNISWAP_V3_SUBGRAPH_URL=config(
             f"{GNOSIS_CHAIN_UPPER}_UNISWAP_V3_SUBGRAPH_URL", default=""
         ),
-        RARI_FUSE_SUBGRAPH_URL=config(
-            f"{GNOSIS_CHAIN_UPPER}_RARI_FUSE_SUBGRAPH_URL",
-            default="",
-        ),
         ETH2_ENDPOINT=config(f"{GNOSIS_CHAIN_UPPER}_ETH2_ENDPOINT", default=""),
         SLOTS_PER_EPOCH=16,
         SECONDS_PER_SLOT=5,
@@ -259,7 +237,6 @@ NETWORKS = {
         DISTRIBUTOR_FALLBACK_ADDRESS=Web3.toChecksumAddress(
             "0x8737f638E9af54e89ed9E1234dbC68B115CD169e"
         ),
-        RARI_FUSE_POOL_ADDRESSES=[],
         WITHDRAWAL_CREDENTIALS=HexStr(
             "0x010000000000000000000000fc9b67b6034f6b306ea9bd8ec1baf3efa2490394"
         ),

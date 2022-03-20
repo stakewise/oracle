@@ -7,7 +7,7 @@ from eth_typing import BlockNumber, ChecksumAddress
 
 from oracle.networks import NETWORKS
 
-from .rari import get_rari_fuse_liquidity_points
+from .distributor_tokens import get_distributor_tokens, get_token_liquidity_points
 from .types import Balances, Rewards, UniswapV3Pools
 from .uniswap_v3 import (
     get_uniswap_v3_liquidity_points,
@@ -29,7 +29,7 @@ class DistributorRewards(object):
         uni_v3_token: ChecksumAddress,
     ) -> None:
         self.network = network
-        self.rari_fuse_pool_addresses = NETWORKS[network]["RARI_FUSE_POOL_ADDRESSES"]
+        self.distributor_tokens = await get_distributor_tokens(network, from_block)
         self.distributor_fallback_address = NETWORKS[network][
             "DISTRIBUTOR_FALLBACK_ADDRESS"
         ]
@@ -57,8 +57,7 @@ class DistributorRewards(object):
         """Checks whether the provided contract address is supported."""
         return (
             contract_address in self.uni_v3_pools
-            or contract_address == self.swise_token_contract_address
-            or contract_address in self.rari_fuse_pool_addresses
+            or contract_address in self.distributor_tokens
         )
 
     @staticmethod
@@ -176,13 +175,14 @@ class DistributorRewards(object):
                 pool_address=contract_address,
                 block_number=self.to_block,
             )
-        elif contract_address in self.rari_fuse_pool_addresses:
+        elif contract_address in self.distributor_tokens:
+            token_address = self.distributor_tokens[contract_address]
             logger.info(
-                f"[{self.network}] Fetching Rari Fuse Pool liquidity points: pool={contract_address}"
+                f"[{self.network}] Fetching {token_address} token holders liquidity points"
             )
-            return await get_rari_fuse_liquidity_points(
+            return await get_token_liquidity_points(
                 network=self.network,
-                ctoken_address=contract_address,
+                token_address=token_address,
                 from_block=self.from_block,
                 to_block=self.to_block,
             )
