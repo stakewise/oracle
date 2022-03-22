@@ -59,13 +59,15 @@ class ScoringDatabase(object):
         start_epoch = collections.defaultdict(dict)
         end_epoch = collections.defaultdict(dict)
         for balance in self.cur.execute(
-            "SELECT * FROM wallet_balance WHERE epoch='%d' ORDER BY wallet_id DESC" % start
+            "SELECT * FROM wallet_balance WHERE epoch='%d' ORDER BY wallet_id DESC"
+            % start
         ):
             wallet = str(balance["wallet_id"])
             index = str(balance["validator_index"])
             start_epoch[wallet][index] = balance = balance["balance"]
         for balance in self.cur.execute(
-            "SELECT * FROM wallet_balance WHERE epoch='%d' ORDER BY wallet_id DESC" % end
+            "SELECT * FROM wallet_balance WHERE epoch='%d' ORDER BY wallet_id DESC"
+            % end
         ):
             wallet = str(balance["wallet_id"])
             index = str(balance["validator_index"])

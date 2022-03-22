@@ -6,9 +6,9 @@ from web3.types import ChecksumAddress
 
 from oracle.oracle.clients import execute_sw_gql_query
 from oracle.oracle.graphql_queries import (
+    OPERATOR_PUBLIC_KEYS_QUERY,
     OPERATORS_IDS_QUERY,
     STAKING_REWARDS_SNAPSHOTS_QUERY,
-    OPERATOR_PUBLIC_KEYS_QUERY,
 )
 
 
