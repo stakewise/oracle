@@ -23,7 +23,9 @@ class ScoringDatabase(object):
         )
 
     def get_latest_epoch(self) -> int:
-        self.cur.execute("SELECT epoch FROM wallet_balance ORDER BY epoch DESC LIMIT 1")
+        self.cur.execute(
+            "SELECT epoch FROM wallet_balance ORDER BY epoch DESC LIMIT 1"
+        )
         result = self.cur.fetchone()
         if result is not None:
             return result[0]
@@ -31,7 +33,10 @@ class ScoringDatabase(object):
             return 0
 
     def check_epoch_exists(self, epoch: int) -> bool:
-        self.cur.execute("SELECT COUNT(epoch) FROM wallet_balance WHERE epoch='%d'" % epoch)
+        self.cur.execute(
+            "SELECT COUNT(epoch) FROM wallet_balance WHERE epoch='%d'"
+            % epoch
+        )
         result = self.cur.fetchone()
         if result[0] > 0:
             return True
