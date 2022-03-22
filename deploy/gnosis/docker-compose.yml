@@ -1,6 +1,8 @@
 version: "3.9"
 
 volumes:
+  oracle:
+    driver: local
   prometheus:
     driver: local
   alertmanager:
@@ -14,8 +16,6 @@ volumes:
   nethermind:
     driver: local
   lighthouse:
-    driver: local
-  scoring:
     driver: local
 
 networks:
@@ -31,6 +31,8 @@ services:
     entrypoint: ["python"]
     command: ["oracle/oracle/main.py"]
     env_file: [".env"]
+    volumes:
+      - oracle:/data
     networks:
       - gnosis
 
@@ -42,16 +44,6 @@ services:
     command: ["oracle/keeper/main.py"]
     env_file: [".env"]
     profiles: ["keeper"]
-    networks:
-      - gnosis
-  
-  scoring:
-    container_name: scoring_gnosis
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/operator-effectiveness:v0.0.6
-    restart: always
-    env_file: [".env"]
-    volumes:
-      - scoring:/data
     networks:
       - gnosis
 

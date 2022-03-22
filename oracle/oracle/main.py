@@ -14,6 +14,7 @@ from oracle.oracle.eth1 import get_finalized_block, get_voting_parameters, submi
 from oracle.oracle.health_server import oracle_routes
 from oracle.oracle.rewards.controller import RewardsController
 from oracle.oracle.rewards.eth2 import get_finality_checkpoints, get_genesis
+from oracle.oracle.scoring.controller import ScoringController
 from oracle.oracle.validators.controller import ValidatorsController
 from oracle.settings import (
     ENABLE_HEALTH_SERVER,
@@ -89,14 +90,20 @@ async def main() -> None:
             genesis_timestamp=int(genesis["genesis_time"]),
             oracle=oracle,
         )
+        scoring_controller = ScoringController(
+            network,
+            genesis_timestamp=int(genesis["genesis_time"]),
+            aiohttp_session=session,
+            oracle=oracle,
+        )
         distributor_controller = DistributorController(network, oracle)
         validators_controller = ValidatorsController(network, oracle)
         controllers.append(
-            (network, rewards_controller, distributor_controller, validators_controller)
+            (network, rewards_controller, distributor_controller, validators_controller, scoring_controller)
         )
 
     while not interrupt_handler.exit:
-        for (network, rewards_ctrl, distributor_ctrl, validators_ctrl) in controllers:
+        for (network, rewards_ctrl, distributor_ctrl, validators_ctrl, scoring_ctrl) in controllers:
             # fetch current finalized ETH1 block data
             finalized_block = await get_finalized_block(network)
             current_block_number = finalized_block["block_number"]
@@ -115,6 +122,7 @@ async def main() -> None:
                 distributor_ctrl.process(voting_parameters["distributor"]),
                 # process validators registration
                 validators_ctrl.process(),
+                scoring_ctrl.process(),
             )
 
         # wait until next processing time

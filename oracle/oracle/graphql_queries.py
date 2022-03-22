@@ -409,3 +409,44 @@ VALIDATOR_REGISTRATIONS_LATEST_INDEX_QUERY = gql(
     }
 """
 )
+
+STAKING_REWARDS_SNAPSHOTS = gql(
+    """
+    query getStakingRewardsSnapshots {
+      stakingRewardsSnapshots(
+        first: 14
+        orderBy: createdAtTimestamp
+        orderDirection: desc
+      ) {
+        createdAtTimestamp
+      }
+    }
+"""
+)
+
+OPERATORS_IDS = gql(
+    """
+    query getOperators {
+      operators(
+        where: { committed: true }
+      ) {
+        id
+      }
+    }
+"""
+)
+
+VALIDATORS_PER_OPERATOR = gql(
+    """
+    query getValidators($operator: ID!, $last_id: ID) {
+      validators(
+        first: 1000
+        where: { operator: $operator, id_gt: $last_id }
+        orderBy: id
+        orderDirection: asc
+      ) {
+        id
+      }
+    }
+"""
+)

@@ -5,3 +5,4 @@ dist
 .idea
 local.env
 *.env
+operator.db

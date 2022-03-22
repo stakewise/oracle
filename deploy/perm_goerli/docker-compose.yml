@@ -17,8 +17,6 @@ volumes:
     driver: local
   lighthouse:
     driver: local
-  scoring:
-    driver: local
 
 networks:
   perm_goerli:
@@ -33,8 +31,6 @@ services:
     entrypoint: ["python"]
     command: ["oracle/oracle/main.py"]
     env_file: [".env"]
-    volumes:
-      - scoring:/data
     networks:
       - perm_goerli
 
