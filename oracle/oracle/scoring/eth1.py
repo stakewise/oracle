@@ -4,12 +4,10 @@ from eth_typing import HexStr
 from web3 import Web3
 from web3.types import ChecksumAddress
 
-from oracle.oracle.clients import (
-    execute_sw_gql_query,
-)
+from oracle.oracle.clients import execute_sw_gql_query
 from oracle.oracle.graphql_queries import (
-    STAKING_REWARDS_SNAPSHOTS,
     OPERATORS_IDS,
+    STAKING_REWARDS_SNAPSHOTS,
     VALIDATORS_PER_OPERATOR,
 )
 

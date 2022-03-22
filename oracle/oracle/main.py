@@ -99,11 +99,23 @@ async def main() -> None:
         distributor_controller = DistributorController(network, oracle)
         validators_controller = ValidatorsController(network, oracle)
         controllers.append(
-            (network, rewards_controller, distributor_controller, validators_controller, scoring_controller)
+            (
+                network,
+                rewards_controller,
+                distributor_controller,
+                validators_controller,
+                scoring_controller,
+            )
         )
 
     while not interrupt_handler.exit:
-        for (network, rewards_ctrl, distributor_ctrl, validators_ctrl, scoring_ctrl) in controllers:
+        for (
+            network,
+            rewards_ctrl,
+            distributor_ctrl,
+            validators_ctrl,
+            scoring_ctrl
+        ) in controllers:
             # fetch current finalized ETH1 block data
             finalized_block = await get_finalized_block(network)
             current_block_number = finalized_block["block_number"]

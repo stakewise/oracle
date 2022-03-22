@@ -1,8 +1,10 @@
+import collections
 import logging
 import sqlite3
-import collections
-from .utils import calculate_average, percent_diff
+
 from oracle.settings import SCORING_DATABASE_PATH
+
+from .utils import calculate_average, percent_diff
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +44,8 @@ def write_validator_balance(
     try:
         with sql:
             cur.execute(
-                "INSERT INTO wallet_balance(epoch, wallet_id, validator_index, pubkey, balance) values (?, ?, ?, ?, ?)", (epoch, str(wallet_id), validator_index, str(pubkey), balance)
+                "INSERT INTO wallet_balance(epoch, wallet_id, validator_index, pubkey, balance) values (?, ?, ?, ?, ?)",
+                (epoch, str(wallet_id), validator_index, str(pubkey), balance),
             )
     except sqlite3.IntegrityError as e:
         logger.error(e)
@@ -51,11 +54,15 @@ def write_validator_balance(
 def get_effectiveness(start: int, end: int) -> dict:
     start_epoch = collections.defaultdict(dict)
     end_epoch = collections.defaultdict(dict)
-    for balance in cur.execute("SELECT * FROM wallet_balance WHERE epoch='%d' ORDER BY wallet_id DESC" % start):
+    for balance in cur.execute(
+        "SELECT * FROM wallet_balance WHERE epoch='%d' ORDER BY wallet_id DESC" % start
+    ):
         wallet = str(balance['wallet_id'])
         index = str(balance['validator_index'])
         start_epoch[wallet][index] = balance = balance['balance']
-    for balance in cur.execute("SELECT * FROM wallet_balance WHERE epoch='%d' ORDER BY wallet_id DESC" % end):
+    for balance in cur.execute(
+        "SELECT * FROM wallet_balance WHERE epoch='%d' ORDER BY wallet_id DESC" % end
+    ):
         wallet = str(balance['wallet_id'])
         index = str(balance['validator_index'])
         end_epoch[wallet][index] = balance = balance['balance']

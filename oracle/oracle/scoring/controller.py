@@ -1,29 +1,16 @@
 import logging
-
 from time import sleep
+
 from aiohttp import ClientSession
 from eth_account.signers.local import LocalAccount
 from web3 import Web3
 from web3.types import Wei
 
 from oracle.networks import NETWORKS
-from oracle.oracle.rewards.eth2 import (
-    PENDING_STATUSES,
-    ValidatorStatus,
-    get_validators,
-)
+from oracle.oracle.rewards.eth2 import PENDING_STATUSES, ValidatorStatus, get_validators
 
-from .eth1 import (
-    get_operators,
-    get_operators_rewards_timestamps,
-    get_public_keys,
-)
-
-from .db import (
-    get_latest_epoch,
-    check_epoch_exists,
-    write_validator_balance,
-)
+from .db import check_epoch_exists, get_latest_epoch, write_validator_balance
+from .eth1 import get_operators, get_operators_rewards_timestamps, get_public_keys
 
 logger = logging.getLogger(__name__)
 w3 = Web3()
@@ -74,10 +61,20 @@ class ScoringController(object):
                     i += 1
                     continue
                 else:
-                    state_id.append(str(self.get_epoch_from_timestamp(rewards_timestamps[i]) * self.slots_per_epoch))
+                    state_id.append(
+                        str(
+                            self.get_epoch_from_timestamp(rewards_timestamps[i])
+                            * self.slots_per_epoch
+                        )
+                    )
                     i += 1
         else:
-            state_id.append(str(self.get_epoch_from_timestamp(rewards_timestamps[0]) * self.slots_per_epoch))
+            state_id.append(
+                str(
+                    self.get_epoch_from_timestamp(rewards_timestamps[0])
+                    * self.slots_per_epoch
+                )
+            )
 
         logger.info(
             f"[{self.network}] Syncing validator balances. Current epoch: {latest_epoch}. DB Epoch: {latest_db_epoch}"
@@ -104,7 +101,7 @@ class ScoringController(object):
                             operator,
                             validator["index"],
                             validator["validator"]["pubkey"],
-                            validator["balance"]
+                            validator["balance"],
                         )
 
     def get_epoch_from_timestamp(self, timestamp) -> int:
