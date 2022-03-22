@@ -38,12 +38,6 @@ IPFS_FETCH_ENDPOINTS = config(
     default="https://gateway.pinata.cloud,http://cloudflare-ipfs.com,https://ipfs.io",
 )
 
-SCORING_DATABASE_PATH = config(
-    "SCORING_DATABASE_PATH",
-    cast=str,
-    default="operator.db",
-)
-
 # extra pins to pinata for redundancy
 IPFS_PINATA_PIN_ENDPOINT = config(
     "IPFS_PINATA_ENDPOINT", default="https://api.pinata.cloud/pinning/pinJSONToIPFS"

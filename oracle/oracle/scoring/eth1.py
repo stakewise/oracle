@@ -6,9 +6,9 @@ from web3.types import ChecksumAddress
 
 from oracle.oracle.clients import execute_sw_gql_query
 from oracle.oracle.graphql_queries import (
-    OPERATORS_IDS,
-    STAKING_REWARDS_SNAPSHOTS,
-    VALIDATORS_PER_OPERATOR,
+    OPERATORS_IDS_QUERY,
+    STAKING_REWARDS_SNAPSHOTS_QUERY,
+    OPERATOR_PUBLIC_KEYS_QUERY,
 )
 
 
@@ -18,7 +18,7 @@ async def get_operators(
     """Get operators checksum addresses"""
     result: Dict = await execute_sw_gql_query(
         network=network,
-        query=OPERATORS_IDS,
+        query=OPERATORS_IDS_QUERY,
         variables={},
     )
     items = result["operators"]
@@ -37,7 +37,7 @@ async def get_public_keys(
     last_id = ""
     result: Dict = await execute_sw_gql_query(
         network=network,
-        query=VALIDATORS_PER_OPERATOR,
+        query=OPERATOR_PUBLIC_KEYS_QUERY,
         variables=dict(operator=operator, last_id=last_id),
     )
     validators_chunk = result.get("validators", [])
@@ -48,7 +48,7 @@ async def get_public_keys(
         last_id = validators_chunk[-1]["id"]
         result: Dict = await execute_sw_gql_query(
             network=network,
-            query=VALIDATORS_PER_OPERATOR,
+            query=OPERATOR_PUBLIC_KEYS_QUERY,
             variables=dict(operator=operator, last_id=last_id),
         )
         validators_chunk = result.get("validators", [])
@@ -63,7 +63,7 @@ async def get_operators_rewards_timestamps(
     """Fetches operators rewards."""
     result: Dict = await execute_sw_gql_query(
         network=network,
-        query=STAKING_REWARDS_SNAPSHOTS,
+        query=STAKING_REWARDS_SNAPSHOTS_QUERY,
         variables={},
     )
     items = result["stakingRewardsSnapshots"]

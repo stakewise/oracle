@@ -85,6 +85,11 @@ NETWORKS = {
         SYNC_PERIOD=timedelta(days=1),
         IS_POA=False,
         DEPOSIT_TOKEN_SYMBOL="ETH",
+        SCORING_DATABASE_PATH=config(
+            f"{MAINNET_UPPER}_SCORING_DATABASE_PATH",
+            default=f"/data/{MAINNET}_operator.db",
+            cast=str,
+        ),
     ),
     GOERLI: dict(
         STAKEWISE_SUBGRAPH_URL=config(
@@ -151,6 +156,11 @@ NETWORKS = {
         SYNC_PERIOD=timedelta(hours=1),
         IS_POA=True,
         DEPOSIT_TOKEN_SYMBOL="ETH",
+        SCORING_DATABASE_PATH=config(
+            f"{GOERLI_UPPER}_SCORING_DATABASE_PATH",
+            default=f"/data/{GOERLI}_operator.db",
+            cast=str,
+        ),
     ),
     PERM_GOERLI: dict(
         STAKEWISE_SUBGRAPH_URL=config(
@@ -290,5 +300,10 @@ NETWORKS = {
         SYNC_PERIOD=timedelta(days=1),
         IS_POA=True,
         DEPOSIT_TOKEN_SYMBOL="mGNO",
+        SCORING_DATABASE_PATH=config(
+            f"{GNOSIS_CHAIN_UPPER}_SCORING_DATABASE_PATH",
+            default=f"/data/{GNOSIS_CHAIN}_operator.db",
+            cast=str,
+        ),
     ),
 }

@@ -1,5 +1,4 @@
 import logging
-from time import sleep
 
 from aiohttp import ClientSession
 from eth_account.signers.local import LocalAccount
@@ -9,7 +8,7 @@ from web3.types import Wei
 from oracle.networks import NETWORKS
 from oracle.oracle.rewards.eth2 import PENDING_STATUSES, ValidatorStatus, get_validators
 
-from .db import check_epoch_exists, get_latest_epoch, write_validator_balance
+from .db import ScoringDatabase
 from .eth1 import get_operators, get_operators_rewards_timestamps, get_public_keys
 
 logger = logging.getLogger(__name__)
@@ -36,12 +35,16 @@ class ScoringController(object):
         self.seconds_per_epoch = (
             self.slots_per_epoch * NETWORKS[network]["SECONDS_PER_SLOT"]
         )
+        self.db = ScoringDatabase(network)
 
     async def process(self) -> None:
-        """Process validators registration."""
+        """Process validators scoring."""
         rewards_timestamps = await get_operators_rewards_timestamps(self.network)
         latest_epoch = self.get_epoch_from_timestamp(rewards_timestamps[0])
-        latest_db_epoch = get_latest_epoch()
+        if not latest_epoch:
+            logger.error("Rewards snapshot is empty")
+            return
+        latest_db_epoch = self.db.get_latest_epoch()
 
         operators = await get_operators(self.network)
 
@@ -50,12 +53,11 @@ class ScoringController(object):
             logger.info(
                 f"[{self.network}] Nothing to sync. Current epoch: {latest_epoch}. DB Epoch: {latest_db_epoch}"
             )
-            sleep(3600)
             return
         elif (latest_epoch - latest_db_epoch) <= 432:
             i = 0
             while i <= 2:
-                if check_epoch_exists(
+                if self.db.check_epoch_exists(
                     self.get_epoch_from_timestamp(rewards_timestamps[i])
                 ):
                     i += 1
@@ -96,7 +98,7 @@ class ScoringController(object):
                     for validator in validators:
                         if ValidatorStatus(validator["status"]) in PENDING_STATUSES:
                             continue
-                        write_validator_balance(
+                        self.db.write_validator_balance(
                             epoch,
                             operator,
                             validator["index"],

@@ -410,7 +410,7 @@ VALIDATOR_REGISTRATIONS_LATEST_INDEX_QUERY = gql(
 """
 )
 
-STAKING_REWARDS_SNAPSHOTS = gql(
+STAKING_REWARDS_SNAPSHOTS_QUERY = gql(
     """
     query getStakingRewardsSnapshots {
       stakingRewardsSnapshots(
@@ -424,7 +424,7 @@ STAKING_REWARDS_SNAPSHOTS = gql(
 """
 )
 
-OPERATORS_IDS = gql(
+OPERATORS_IDS_QUERY = gql(
     """
     query getOperators {
       operators(
@@ -436,7 +436,7 @@ OPERATORS_IDS = gql(
 """
 )
 
-VALIDATORS_PER_OPERATOR = gql(
+OPERATOR_PUBLIC_KEYS_QUERY = gql(
     """
     query getValidators($operator: ID!, $last_id: ID) {
       validators(
