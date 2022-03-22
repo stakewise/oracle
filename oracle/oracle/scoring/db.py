@@ -57,15 +57,15 @@ def get_effectiveness(start: int, end: int) -> dict:
     for balance in cur.execute(
         "SELECT * FROM wallet_balance WHERE epoch='%d' ORDER BY wallet_id DESC" % start
     ):
-        wallet = str(balance['wallet_id'])
-        index = str(balance['validator_index'])
-        start_epoch[wallet][index] = balance = balance['balance']
+        wallet = str(balance["wallet_id"])
+        index = str(balance["validator_index"])
+        start_epoch[wallet][index] = balance = balance["balance"]
     for balance in cur.execute(
         "SELECT * FROM wallet_balance WHERE epoch='%d' ORDER BY wallet_id DESC" % end
     ):
-        wallet = str(balance['wallet_id'])
-        index = str(balance['validator_index'])
-        end_epoch[wallet][index] = balance = balance['balance']
+        wallet = str(balance["wallet_id"])
+        index = str(balance["validator_index"])
+        end_epoch[wallet][index] = balance = balance["balance"]
 
     effectiveness = {}
     for operator in start_epoch.keys():

@@ -114,7 +114,7 @@ async def main() -> None:
             rewards_ctrl,
             distributor_ctrl,
             validators_ctrl,
-            scoring_ctrl
+            scoring_ctrl,
         ) in controllers:
             # fetch current finalized ETH1 block data
             finalized_block = await get_finalized_block(network)
