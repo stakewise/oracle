@@ -28,6 +28,7 @@ NETWORKS = {
             f"{MAINNET_UPPER}_UNISWAP_V3_SUBGRAPH_URL",
             default="https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-mainnet",
         ),
+        DISTRIBUTOR_REDIRECTS={},
         ETH2_ENDPOINT=config(f"{MAINNET_UPPER}_ETH2_ENDPOINT", default=""),
         SLOTS_PER_EPOCH=32,
         SECONDS_PER_SLOT=12,
@@ -91,6 +92,7 @@ NETWORKS = {
             f"{GOERLI_UPPER}_UNISWAP_V3_SUBGRAPH_URL",
             default="https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-goerli",
         ),
+        DISTRIBUTOR_REDIRECTS={},
         ETH2_ENDPOINT=config(f"{GOERLI_UPPER}_ETH2_ENDPOINT", default=""),
         SLOTS_PER_EPOCH=32,
         SECONDS_PER_SLOT=12,
@@ -152,6 +154,7 @@ NETWORKS = {
             f"{PERM_GOERLI_UPPER}_UNISWAP_V3_SUBGRAPH_URL",
             default="",
         ),
+        DISTRIBUTOR_REDIRECTS={},
         ETH2_ENDPOINT=config(f"{PERM_GOERLI_UPPER}_ETH2_ENDPOINT", default=""),
         SLOTS_PER_EPOCH=32,
         SECONDS_PER_SLOT=12,
@@ -216,6 +219,7 @@ NETWORKS = {
         UNISWAP_V3_SUBGRAPH_URL=config(
             f"{GNOSIS_CHAIN_UPPER}_UNISWAP_V3_SUBGRAPH_URL", default=""
         ),
+        DISTRIBUTOR_REDIRECTS={},
         ETH2_ENDPOINT=config(f"{GNOSIS_CHAIN_UPPER}_ETH2_ENDPOINT", default=""),
         SLOTS_PER_EPOCH=16,
         SECONDS_PER_SLOT=5,

@@ -9,6 +9,7 @@ from oracle.networks import NETWORKS
 from oracle.settings import DISTRIBUTOR_VOTE_FILENAME
 
 from ..eth1 import submit_vote
+from .distributor_tokens import get_distributor_tokens
 from .eth1 import (
     get_disabled_stakers_reward_token_distributions,
     get_distributor_claimed_accounts,
@@ -109,12 +110,14 @@ class DistributorController(object):
 
         # calculate reward distributions with coroutines
         tasks = []
+        distributor_tokens = await get_distributor_tokens(self.network, from_block)
         for dist in all_distributions:
             distributor_rewards = DistributorRewards(
                 network=self.network,
                 uniswap_v3_pools=uniswap_v3_pools,
                 from_block=dist["from_block"],
                 to_block=dist["to_block"],
+                distributor_tokens=distributor_tokens,
                 reward_token=dist["reward_token"],
                 uni_v3_token=dist["uni_v3_token"],
             )

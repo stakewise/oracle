@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Set
 
 from ens.constants import EMPTY_ADDR_HEX
 from eth_typing import BlockNumber, ChecksumAddress
@@ -15,7 +15,7 @@ from .types import Balances
 
 async def get_distributor_tokens(
     network: str, block_number: BlockNumber
-) -> Dict[ChecksumAddress, ChecksumAddress]:
+) -> Set[ChecksumAddress]:
     """Fetches distributor tokens."""
     last_id = ""
     result: Dict = await execute_sw_gql_query(
@@ -43,14 +43,7 @@ async def get_distributor_tokens(
         distributor_tokens_chunk = result.get("distributorTokens", [])
         distributor_tokens.extend(distributor_tokens_chunk)
 
-    # process distributor tokens
-    tokens: Dict[ChecksumAddress, ChecksumAddress] = {}
-    for dist_token in distributor_tokens:
-        tokens[Web3.toChecksumAddress(dist_token["holder"])] = Web3.toChecksumAddress(
-            dist_token["token"]
-        )
-
-    return tokens
+    return set(Web3.toChecksumAddress(t["id"]) for t in distributor_tokens)
 
 
 async def get_token_liquidity_points(
@@ -97,7 +90,7 @@ async def get_token_liquidity_points(
         if account == EMPTY_ADDR_HEX:
             continue
 
-        principal = int(position["balance"])
+        principal = int(position["amount"])
         prev_account_points = int(position["distributorPoints"])
         updated_at_block = BlockNumber(int(position["updatedAtBlock"]))
         if from_block > updated_at_block:

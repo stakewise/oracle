@@ -311,8 +311,6 @@ DISTRIBUTOR_TOKENS_QUERY = gql(
         orderDirection: asc
       ) {
         id
-        holder
-        token
       }
     }
 """
@@ -325,7 +323,7 @@ DISTRIBUTOR_TOKEN_HOLDERS_QUERY = gql(
       $token_address: Bytes
       $last_id: ID
     ) {
-      accountCTokens(
+      distributorTokenHolders(
         block: { number: $block_number }
         where: { token: $token_address, id_gt: $last_id }
         first: 1000
@@ -334,7 +332,7 @@ DISTRIBUTOR_TOKEN_HOLDERS_QUERY = gql(
       ) {
         id
         account
-        balance
+        amount
         distributorPoints
         updatedAtBlock
       }
