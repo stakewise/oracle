@@ -35,10 +35,7 @@ class ScoringDatabase(object):
             "SELECT COUNT(epoch) FROM wallet_balance WHERE epoch='%d'" % epoch
         )
         result = self.cur.fetchone()
-        if result[0] > 0:
-            return True
-        else:
-            return False
+        return result[0] > 0
 
     def write_validator_balance(
         self,
