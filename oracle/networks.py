@@ -28,7 +28,6 @@ NETWORKS = {
             f"{MAINNET_UPPER}_UNISWAP_V3_SUBGRAPH_URL",
             default="https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-mainnet",
         ),
-        DISTRIBUTOR_REDIRECTS={},
         ETH2_ENDPOINT=config(f"{MAINNET_UPPER}_ETH2_ENDPOINT", default=""),
         SLOTS_PER_EPOCH=32,
         SECONDS_PER_SLOT=12,
@@ -92,7 +91,6 @@ NETWORKS = {
             f"{GOERLI_UPPER}_UNISWAP_V3_SUBGRAPH_URL",
             default="https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-goerli",
         ),
-        DISTRIBUTOR_REDIRECTS={},
         ETH2_ENDPOINT=config(f"{GOERLI_UPPER}_ETH2_ENDPOINT", default=""),
         SLOTS_PER_EPOCH=32,
         SECONDS_PER_SLOT=12,
@@ -154,7 +152,6 @@ NETWORKS = {
             f"{PERM_GOERLI_UPPER}_UNISWAP_V3_SUBGRAPH_URL",
             default="",
         ),
-        DISTRIBUTOR_REDIRECTS={},
         ETH2_ENDPOINT=config(f"{PERM_GOERLI_UPPER}_ETH2_ENDPOINT", default=""),
         SLOTS_PER_EPOCH=32,
         SECONDS_PER_SLOT=12,
@@ -219,12 +216,11 @@ NETWORKS = {
         UNISWAP_V3_SUBGRAPH_URL=config(
             f"{GNOSIS_CHAIN_UPPER}_UNISWAP_V3_SUBGRAPH_URL", default=""
         ),
-        DISTRIBUTOR_REDIRECTS={},
         ETH2_ENDPOINT=config(f"{GNOSIS_CHAIN_UPPER}_ETH2_ENDPOINT", default=""),
         SLOTS_PER_EPOCH=16,
         SECONDS_PER_SLOT=5,
         ORACLES_CONTRACT_ADDRESS=Web3.toChecksumAddress(
-            "0xd0f5ddaed2D8BaE1F451D2A11FFAe1806f2Ee1a5"
+            "0xa6D123620Ea004cc5158b0ec260E934bd45C78c1"
         ),
         MULTICALL_CONTRACT_ADDRESS=Web3.toChecksumAddress(
             "0xb5b692a88BDFc81ca69dcB1d924f59f0413A602a"
@@ -233,10 +229,10 @@ NETWORKS = {
             "0xfdA94F056346d2320d4B5E468D6Ad099b2277746"
         ),
         REWARD_TOKEN_CONTRACT_ADDRESS=Web3.toChecksumAddress(
-            "0x6FFa613eD41585B1c1e517A78d140cFBD68be639"
+            "0x6aC78efae880282396a335CA2F79863A1e6831D4"
         ),
         STAKED_TOKEN_CONTRACT_ADDRESS=Web3.toChecksumAddress(
-            "0x9AEBd2322D3D5fB69324a3cFE380DD11Bc3694D2"
+            "0xA4eF9Da5BA71Cc0D2e5E877a910A37eC43420445"
         ),
         DISTRIBUTOR_FALLBACK_ADDRESS=Web3.toChecksumAddress(
             "0x8737f638E9af54e89ed9E1234dbC68B115CD169e"
@@ -270,6 +266,6 @@ NETWORKS = {
         ),
         SYNC_PERIOD=timedelta(days=1),
         IS_POA=True,
-        DEPOSIT_TOKEN_SYMBOL="mGNO",
+        DEPOSIT_TOKEN_SYMBOL="GNO",
     ),
 }

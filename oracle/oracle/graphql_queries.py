@@ -297,6 +297,28 @@ UNISWAP_V3_POSITIONS_QUERY = gql(
 """
 )
 
+DISTRIBUTOR_REDIRECTS_QUERY = gql(
+    """
+    query getDistributorRedirects(
+      $block_number: Int
+      $last_id: ID
+    ) {
+      distributorRedirects(
+        block: { number: $block_number }
+        where: { id_gt: $last_id }
+        first: 1000
+        orderBy: id
+        orderDirection: asc
+      ) {
+        id
+        token: {
+          id
+        }
+      }
+    }
+"""
+)
+
 DISTRIBUTOR_TOKENS_QUERY = gql(
     """
     query getDistributorTokens(

@@ -1,6 +1,6 @@
 import copy
 import logging
-from typing import List, Set
+from typing import Dict, List, Set
 
 from ens.constants import EMPTY_ADDR_HEX
 from eth_typing import BlockNumber, ChecksumAddress
@@ -26,6 +26,7 @@ class DistributorRewards(object):
         from_block: BlockNumber,
         to_block: BlockNumber,
         distributor_tokens: Set[ChecksumAddress],
+        distributor_redirects: Dict[ChecksumAddress, ChecksumAddress],
         reward_token: ChecksumAddress,
         uni_v3_token: ChecksumAddress,
     ) -> None:
@@ -43,7 +44,7 @@ class DistributorRewards(object):
         self.swise_token_contract_address = NETWORKS[network][
             "SWISE_TOKEN_CONTRACT_ADDRESS"
         ]
-        self.distributor_redirects = NETWORKS[network]["DISTRIBUTOR_REDIRECTS"]
+        self.distributor_redirects = distributor_redirects
         self.uni_v3_staked_token_pools = uniswap_v3_pools["staked_token_pools"]
         self.uni_v3_reward_token_pools = uniswap_v3_pools["reward_token_pools"]
         self.uni_v3_swise_pools = uniswap_v3_pools["swise_pools"]

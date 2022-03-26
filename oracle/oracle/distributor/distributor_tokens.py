@@ -6,11 +6,51 @@ from web3 import Web3
 
 from oracle.oracle.clients import execute_sw_gql_query
 from oracle.oracle.graphql_queries import (
+    DISTRIBUTOR_REDIRECTS_QUERY,
     DISTRIBUTOR_TOKEN_HOLDERS_QUERY,
     DISTRIBUTOR_TOKENS_QUERY,
 )
 
 from .types import Balances
+
+
+async def get_distributor_redirects(
+    network: str, block_number: BlockNumber
+) -> Dict[ChecksumAddress, ChecksumAddress]:
+    """Fetches distributor redirects."""
+    last_id = ""
+    result: Dict = await execute_sw_gql_query(
+        network=network,
+        query=DISTRIBUTOR_REDIRECTS_QUERY,
+        variables=dict(
+            block_number=block_number,
+            last_id=last_id,
+        ),
+    )
+    distributor_redirects_chunk = result.get("distributorRedirects", [])
+    distributor_redirects = distributor_redirects_chunk
+
+    # accumulate chunks
+    while len(distributor_redirects_chunk) >= 1000:
+        last_id = distributor_redirects_chunk[-1]["id"]
+        result: Dict = await execute_sw_gql_query(
+            network=network,
+            query=DISTRIBUTOR_REDIRECTS_QUERY,
+            variables=dict(
+                block_number=block_number,
+                last_id=last_id,
+            ),
+        )
+        distributor_redirects_chunk = result.get("distributorRedirects", [])
+        distributor_redirects.extend(distributor_redirects_chunk)
+
+    redirects: Dict[ChecksumAddress, ChecksumAddress] = {}
+    for redirect in distributor_redirects:
+        redirected_from = Web3.toChecksumAddress(redirect["id"])
+        redirected_to = Web3.toChecksumAddress(redirect["token"]["id"])
+        redirects[redirected_from] = redirected_to
+
+    return redirects
 
 
 async def get_distributor_tokens(
