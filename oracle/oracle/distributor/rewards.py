@@ -1,13 +1,13 @@
 import copy
 import logging
-from typing import List, Set
+from typing import Dict, List, Set
 
 from ens.constants import EMPTY_ADDR_HEX
 from eth_typing import BlockNumber, ChecksumAddress
 
 from oracle.networks import NETWORKS
 
-from .rari import get_rari_fuse_liquidity_points
+from .distributor_tokens import get_token_liquidity_points
 from .types import Balances, Rewards, UniswapV3Pools
 from .uniswap_v3 import (
     get_uniswap_v3_liquidity_points,
@@ -25,11 +25,13 @@ class DistributorRewards(object):
         uniswap_v3_pools: UniswapV3Pools,
         from_block: BlockNumber,
         to_block: BlockNumber,
+        distributor_tokens: Set[ChecksumAddress],
+        distributor_redirects: Dict[ChecksumAddress, ChecksumAddress],
         reward_token: ChecksumAddress,
         uni_v3_token: ChecksumAddress,
     ) -> None:
         self.network = network
-        self.rari_fuse_pool_addresses = NETWORKS[network]["RARI_FUSE_POOL_ADDRESSES"]
+        self.distributor_tokens = distributor_tokens
         self.distributor_fallback_address = NETWORKS[network][
             "DISTRIBUTOR_FALLBACK_ADDRESS"
         ]
@@ -42,6 +44,7 @@ class DistributorRewards(object):
         self.swise_token_contract_address = NETWORKS[network][
             "SWISE_TOKEN_CONTRACT_ADDRESS"
         ]
+        self.distributor_redirects = distributor_redirects
         self.uni_v3_staked_token_pools = uniswap_v3_pools["staked_token_pools"]
         self.uni_v3_reward_token_pools = uniswap_v3_pools["reward_token_pools"]
         self.uni_v3_swise_pools = uniswap_v3_pools["swise_pools"]
@@ -57,8 +60,7 @@ class DistributorRewards(object):
         """Checks whether the provided contract address is supported."""
         return (
             contract_address in self.uni_v3_pools
-            or contract_address == self.swise_token_contract_address
-            or contract_address in self.rari_fuse_pool_addresses
+            or contract_address in self.distributor_tokens
         )
 
     @staticmethod
@@ -94,14 +96,21 @@ class DistributorRewards(object):
         if reward <= 0:
             return {}
 
+        # apply redirect of rewards
+        visited = set()
+        if contract_address in self.distributor_redirects:
+            visited.add(contract_address)
+            contract_address = self.distributor_redirects[contract_address]
+
         if self.is_supported_contract(contract_address):
+            visited.add(contract_address)
             return await self._get_rewards(
                 contract_address=contract_address,
                 total_reward=reward,
-                visited={contract_address},
+                visited=visited,
             )
 
-        # unknown allocation -> assign to the rescue address
+        # unknown allocation -> assign to the fallback address
         rewards: Rewards = {}
         self.add_value(
             rewards=rewards,
@@ -176,13 +185,13 @@ class DistributorRewards(object):
                 pool_address=contract_address,
                 block_number=self.to_block,
             )
-        elif contract_address in self.rari_fuse_pool_addresses:
+        elif contract_address in self.distributor_tokens:
             logger.info(
-                f"[{self.network}] Fetching Rari Fuse Pool liquidity points: pool={contract_address}"
+                f"[{self.network}] Fetching token holders liquidity points: token={contract_address}"
             )
-            return await get_rari_fuse_liquidity_points(
+            return await get_token_liquidity_points(
                 network=self.network,
-                ctoken_address=contract_address,
+                token_address=contract_address,
                 from_block=self.from_block,
                 to_block=self.to_block,
             )
@@ -203,7 +212,7 @@ class DistributorRewards(object):
         result = await self.get_balances(contract_address)
         total_supply = result["total_supply"]
         if total_supply <= 0:
-            # no recipients for the rewards -> assign reward to the rescue address
+            # no recipients for the rewards -> assign reward to the fallback address
             self.add_value(
                 rewards=rewards,
                 to=self.distributor_fallback_address,
@@ -228,8 +237,13 @@ class DistributorRewards(object):
             if account_reward <= 0:
                 continue
 
+            # apply redirect of rewards
+            if account in self.distributor_redirects:
+                visited = visited.union({account})
+                account = self.distributor_redirects[account]
+
             if account == contract_address or account in visited:
-                # failed to assign reward -> return it to rescue address
+                # failed to assign reward -> return it to fallback address
                 self.add_value(
                     rewards=rewards,
                     to=self.distributor_fallback_address,

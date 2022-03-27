@@ -17,8 +17,6 @@ volumes:
     driver: local
   lighthouse:
     driver: local
-  scoring:
-    driver: local
 
 networks:
   mainnet:
@@ -28,7 +26,7 @@ networks:
 services:
   oracle:
     container_name: oracle_mainnet
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.2.9
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.3.0
     restart: always
     entrypoint: ["python"]
     command: ["oracle/oracle/main.py"]
@@ -38,22 +36,12 @@ services:
 
   keeper:
     container_name: keeper_mainnet
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.2.9
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.3.0
     restart: always
     entrypoint: ["python"]
     command: ["oracle/keeper/main.py"]
     env_file: [".env"]
     profiles: ["keeper"]
-    networks:
-      - mainnet
-  
-  scoring:
-    container_name: scoring_mainnet
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/operator-effectiveness:v0.0.6
-    restart: always
-    env_file: [".env"]
-    volumes:
-      - scoring:/data
     networks:
       - mainnet
 
@@ -104,7 +92,7 @@ services:
 
   subgraphs:
     container_name: subgraphs_mainnet
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/subgraphs:v1.1.1
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/subgraphs:v1.2.0
     command: >
       /bin/sh -c "until nc -vz graph-node 8020; do echo 'Waiting graph-node'; sleep 2; done
       && yarn build:mainnet
@@ -151,7 +139,7 @@ services:
 
   erigon:
     container_name: erigon_mainnet
-    image: thorax/erigon:v2022.01.03
+    image: thorax/erigon:v2022.03.02
     restart: always
     command:
       - erigon
@@ -170,7 +158,7 @@ services:
 
   erigon-rpcdaemon:
     container_name: erigon_rpcdaemon_mainnet
-    image: thorax/erigon:v2022.01.03
+    image: thorax/erigon:v2022.03.02
     restart: always
     command:
       - rpcdaemon
@@ -208,7 +196,7 @@ services:
 
   lighthouse:
     container_name: lighthouse_mainnet
-    image: sigp/lighthouse:v2.1.2
+    image: sigp/lighthouse:v2.1.5
     restart: always
     command:
       - lighthouse

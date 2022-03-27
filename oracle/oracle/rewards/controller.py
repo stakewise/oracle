@@ -9,7 +9,7 @@ from eth_typing import BlockNumber, HexStr
 from web3 import Web3
 from web3.types import Timestamp, Wei
 
-from oracle.networks import NETWORKS
+from oracle.networks import GNOSIS_CHAIN, NETWORKS
 from oracle.oracle.eth1 import submit_vote
 from oracle.settings import REWARD_VOTE_FILENAME
 
@@ -24,6 +24,9 @@ from .types import RewardsVotingParameters, RewardVote
 
 logger = logging.getLogger(__name__)
 w3 = Web3()
+
+WAD = Web3.toWei(1, "ether")
+MGNO_RATE = Web3.toWei(32, "ether")
 
 
 class RewardsController(object):
@@ -117,6 +120,10 @@ class RewardsController(object):
                 total_rewards += Wei(
                     Web3.toWei(validator["balance"], "gwei") - self.deposit_amount
                 )
+
+        if self.network == GNOSIS_CHAIN:
+            # apply GNO <-> mGNO exchange rate
+            total_rewards = Wei(int(total_rewards * WAD // MGNO_RATE))
 
         pretty_total_rewards = self.format_ether(total_rewards)
         logger.info(

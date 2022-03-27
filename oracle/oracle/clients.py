@@ -53,17 +53,6 @@ async def execute_ethereum_gql_query(
         return await session.execute(query, variable_values=variables)
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=300, logger=gql_logger)
-async def execute_rari_fuse_pools_gql_query(
-    network: str, query: DocumentNode, variables: Dict
-) -> Dict:
-    """Executes GraphQL query."""
-    subgraph_url = NETWORKS[network]["RARI_FUSE_SUBGRAPH_URL"]
-    transport = AIOHTTPTransport(url=subgraph_url)
-    async with Client(transport=transport, execute_timeout=EXECUTE_TIMEOUT) as session:
-        return await session.execute(query, variable_values=variables)
-
-
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def ipfs_fetch(ipfs_hash: str) -> Union[Dict[Any, Any], List[Dict[Any, Any]]]:
     """Tries to fetch IPFS hash from different sources."""

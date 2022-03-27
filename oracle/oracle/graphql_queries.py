@@ -297,23 +297,64 @@ UNISWAP_V3_POSITIONS_QUERY = gql(
 """
 )
 
-RARI_FUSE_POOLS_CTOKENS_QUERY = gql(
+DISTRIBUTOR_REDIRECTS_QUERY = gql(
     """
-    query getCTokens(
+    query getDistributorRedirects(
       $block_number: Int
-      $ctoken_address: Bytes
       $last_id: ID
     ) {
-      accountCTokens(
+      distributorRedirects(
         block: { number: $block_number }
-        where: { ctoken: $ctoken_address, id_gt: $last_id }
+        where: { id_gt: $last_id }
+        first: 1000
+        orderBy: id
+        orderDirection: asc
+      ) {
+        id
+        token {
+          id
+        }
+      }
+    }
+"""
+)
+
+DISTRIBUTOR_TOKENS_QUERY = gql(
+    """
+    query getDistributorTokens(
+      $block_number: Int
+      $last_id: ID
+    ) {
+      distributorTokens(
+        block: { number: $block_number }
+        where: { id_gt: $last_id }
+        first: 1000
+        orderBy: id
+        orderDirection: asc
+      ) {
+        id
+      }
+    }
+"""
+)
+
+DISTRIBUTOR_TOKEN_HOLDERS_QUERY = gql(
+    """
+    query getDistributorTokenHolders(
+      $block_number: Int
+      $token_address: Bytes
+      $last_id: ID
+    ) {
+      distributorTokenHolders(
+        block: { number: $block_number }
+        where: { token: $token_address, id_gt: $last_id }
         first: 1000
         orderBy: id
         orderDirection: asc
       ) {
         id
         account
-        cTokenBalance
+        amount
         distributorPoints
         updatedAtBlock
       }
