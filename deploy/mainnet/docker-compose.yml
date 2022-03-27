@@ -92,7 +92,7 @@ services:
 
   subgraphs:
     container_name: subgraphs_mainnet
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/subgraphs:v1.1.1
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/subgraphs:v1.2.0
     command: >
       /bin/sh -c "until nc -vz graph-node 8020; do echo 'Waiting graph-node'; sleep 2; done
       && yarn build:mainnet
@@ -139,7 +139,7 @@ services:
 
   erigon:
     container_name: erigon_mainnet
-    image: thorax/erigon:v2022.01.03
+    image: thorax/erigon:v2022.03.02
     restart: always
     command:
       - erigon
@@ -158,7 +158,7 @@ services:
 
   erigon-rpcdaemon:
     container_name: erigon_rpcdaemon_mainnet
-    image: thorax/erigon:v2022.01.03
+    image: thorax/erigon:v2022.03.02
     restart: always
     command:
       - rpcdaemon
@@ -196,7 +196,7 @@ services:
 
   lighthouse:
     container_name: lighthouse_mainnet
-    image: sigp/lighthouse:v2.1.2
+    image: sigp/lighthouse:v2.1.5
     restart: always
     command:
       - lighthouse

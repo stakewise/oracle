@@ -71,7 +71,7 @@ services:
 
   graph-node:
     container_name: graph_node_perm_goerli
-    image: graphprotocol/graph-node:v0.25.0
+    image: graphprotocol/graph-node:v0.25.2
     restart: always
     env_file: [".env"]
     depends_on: ["postgres","ipfs"]
@@ -92,7 +92,7 @@ services:
 
   subgraphs:
     container_name: subgraphs_perm_goerli
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/subgraphs:v1.1.1
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/subgraphs:v1.2.0
     command: >
       /bin/sh -c "until nc -vz graph-node 8020; do echo 'Waiting graph-node'; sleep 2; done
       && yarn build:perm_goerli
@@ -107,7 +107,7 @@ services:
 
   ipfs:
     container_name: ipfs_perm_goerli
-    image: ipfs/go-ipfs:v0.10.0
+    image: ipfs/go-ipfs:v0.12.1
     restart: always
     env_file: [".env"]
     ulimits:
@@ -121,7 +121,7 @@ services:
 
   geth:
     container_name: geth_perm_goerli
-    image: ethereum/client-go:v1.10.15
+    image: ethereum/client-go:v1.10.16
     restart: always
     command:
       - --goerli
@@ -142,7 +142,7 @@ services:
 
   erigon:
     container_name: erigon_perm_goerli
-    image: thorax/erigon:v2022.01.03
+    image: thorax/erigon:v2022.03.02
     restart: always
     command:
       - erigon
@@ -160,7 +160,7 @@ services:
 
   erigon-rpcdaemon:
     container_name: erigon_rpcdaemon_perm_goerli
-    image: thorax/erigon:v2022.01.03
+    image: thorax/erigon:v2022.03.02
     restart: always
     command:
       - rpcdaemon
@@ -200,7 +200,7 @@ services:
 
   lighthouse:
     container_name: lighthouse_perm_goerli
-    image: sigp/lighthouse:v2.1.2
+    image: sigp/lighthouse:v2.1.5
     restart: always
     command:
       - lighthouse

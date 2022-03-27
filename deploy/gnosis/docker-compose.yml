@@ -69,7 +69,7 @@ services:
 
   graph-node:
     container_name: graph_node_gnosis
-    image: graphprotocol/graph-node:v0.25.0
+    image: graphprotocol/graph-node:v0.25.2
     restart: always
     env_file: [".env"]
     depends_on: ["postgres","ipfs"]
@@ -90,7 +90,7 @@ services:
 
   subgraphs:
     container_name: subgraphs_gnosis
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/subgraphs:v1.1.1
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/subgraphs:v1.2.0
     command: >
       /bin/sh -c "until nc -vz graph-node 8020; do echo 'Waiting graph-node'; sleep 2; done
       && yarn build:gnosis
@@ -105,7 +105,7 @@ services:
 
   ipfs:
     container_name: ipfs_gnosis
-    image: ipfs/go-ipfs:v0.10.0
+    image: ipfs/go-ipfs:v0.12.1
     restart: always
     env_file: [".env"]
     ulimits:
@@ -119,7 +119,7 @@ services:
 
   openethereum:
     container_name: openethereum_gnosis
-    image: openethereum/openethereum:v3.3.3
+    image: openethereum/openethereum:v3.3.4
     restart: always
     command:
       - --chain=xdai
@@ -135,10 +135,9 @@ services:
         aliases:
           - eth1-node
 
-
   nethermind:
     container_name: nethermind_gnosis
-    image: nethermind/nethermind:1.12.4
+    image: nethermind/nethermind:1.12.6
     restart: always
     command:
       - --config=xdai
@@ -156,7 +155,7 @@ services:
 
   lighthouse:
     container_name: lighthouse_gnosis
-    image: sigp/lighthouse:v2.1.2
+    image: sigp/lighthouse:v2.1.5
     restart: always
     command:
       - lighthouse
