@@ -311,7 +311,7 @@ DISTRIBUTOR_REDIRECTS_QUERY = gql(
         orderDirection: asc
       ) {
         id
-        token: {
+        token {
           id
         }
       }
