@@ -24,7 +24,7 @@ networks:
 services:
   oracle:
     container_name: oracle_gnosis
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.3.0
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.3.1
     restart: always
     entrypoint: ["python"]
     command: ["oracle/oracle/main.py"]
@@ -34,7 +34,7 @@ services:
 
   keeper:
     container_name: keeper_gnosis
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.3.0
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.3.1
     restart: always
     entrypoint: ["python"]
     command: ["oracle/keeper/main.py"]
@@ -90,7 +90,7 @@ services:
 
   subgraphs:
     container_name: subgraphs_gnosis
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/subgraphs:v1.2.0
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/subgraphs:v1.2.1
     command: >
       /bin/sh -c "until nc -vz graph-node 8020; do echo 'Waiting graph-node'; sleep 2; done
       && yarn build:gnosis
