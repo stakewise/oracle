@@ -6,8 +6,9 @@ from eth_typing import HexStr
 from web3 import Web3
 from web3.types import Wei
 
+from oracle.networks import GNOSIS_CHAIN
 from oracle.oracle.eth1 import submit_vote
-from oracle.settings import VALIDATOR_VOTE_FILENAME
+from oracle.settings import MGNO_RATE, VALIDATOR_VOTE_FILENAME, WAD
 
 from .eth1 import (
     get_validators_deposit_root,
@@ -36,6 +37,11 @@ class ValidatorsController(object):
         voting_params = await get_voting_parameters(self.network)
         latest_block_number = voting_params["latest_block_number"]
         pool_balance = voting_params["pool_balance"]
+
+        if self.network == GNOSIS_CHAIN:
+            # apply GNO <-> mGNO exchange rate
+            pool_balance = Wei(int(pool_balance * MGNO_RATE // WAD))
+
         if pool_balance < self.validator_deposit:
             # not enough balance to register next validator
             return

@@ -1,4 +1,5 @@
 from decouple import Csv, config
+from web3 import Web3
 
 from oracle.networks import MAINNET
 
@@ -52,3 +53,6 @@ IPFS_PINATA_SECRET_KEY = config(
 KEEPER_PROCESS_INTERVAL = config("KEEPER_PROCESS_INTERVAL", default=10, cast=int)
 
 TRANSACTION_TIMEOUT = config("TRANSACTION_TIMEOUT", default=900, cast=int)
+
+WAD = Web3.toWei(1, "ether")
+MGNO_RATE = Web3.toWei(32, "ether")
