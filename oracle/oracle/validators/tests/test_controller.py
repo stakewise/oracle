@@ -1,6 +1,7 @@
 from unittest.mock import patch
 
-from ...test import TEST_NETWORK, get_test_oracle
+from oracle.oracle.tests.common import TEST_NETWORK, get_test_oracle
+
 from ..controller import ValidatorsController
 
 

@@ -1,6 +1,6 @@
 from eth_account import Account
 
-from ..networks import GOERLI
+from oracle.networks import GOERLI
 
 
 def get_test_oracle():
