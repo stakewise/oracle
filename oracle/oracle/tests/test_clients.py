@@ -99,9 +99,9 @@ class TestClients:
         ]:
             await self._test_basic(query_func)
 
-            for query_func in [
-                execute_ethereum_paginated_gql_query,
-                execute_sw_gql_paginated_query,
-                execute_uniswap_v3_paginated_gql_query,
-            ]:
-                await self._test_paginated(query_func)
+        for query_func in [
+            execute_ethereum_paginated_gql_query,
+            execute_sw_gql_paginated_query,
+            execute_uniswap_v3_paginated_gql_query,
+        ]:
+            await self._test_paginated(query_func)
