@@ -1,12 +1,12 @@
 import logging
-from typing import Dict, Tuple
+from typing import Dict, List, Tuple
 
 from ens.constants import EMPTY_ADDR_HEX
 from eth_typing import ChecksumAddress, HexStr
 from web3 import Web3
 from web3.types import BlockNumber, Wei
 
-from oracle.oracle.clients import execute_sw_gql_query
+from oracle.oracle.clients import execute_sw_gql_paginated_query, execute_sw_gql_query
 from oracle.oracle.graphql_queries import (
     DISABLED_STAKER_ACCOUNTS_QUERY,
     DISTRIBUTOR_CLAIMED_ACCOUNTS_QUERY,
@@ -35,25 +35,12 @@ async def get_periodic_allocations(
     network: str, from_block: BlockNumber, to_block: BlockNumber
 ) -> TokenAllocations:
     """Fetches periodic allocations."""
-    last_id = ""
-    result: Dict = await execute_sw_gql_query(
+    distributions: List = await execute_sw_gql_paginated_query(
         network=network,
         query=PERIODIC_DISTRIBUTIONS_QUERY,
-        variables=dict(from_block=from_block, to_block=to_block, last_id=last_id),
+        variables=dict(from_block=from_block, to_block=to_block),
+        paginated_field="periodicDistributions",
     )
-    distributions_chunk = result.get("periodicDistributions", [])
-    distributions = distributions_chunk
-
-    # accumulate chunks of distributions
-    while len(distributions_chunk) >= 1000:
-        last_id = distributions_chunk[-1]["id"]
-        result: Dict = await execute_sw_gql_query(
-            network=network,
-            query=PERIODIC_DISTRIBUTIONS_QUERY,
-            variables=dict(from_block=from_block, to_block=to_block, last_id=last_id),
-        )
-        distributions_chunk = result.get("periodicDistributions", [])
-        distributions.extend(distributions_chunk)
 
     allocations: TokenAllocations = {}
     for dist in distributions:
@@ -164,26 +151,12 @@ async def get_distributor_claimed_accounts(
     network: str, merkle_root: HexStr
 ) -> ClaimedAccounts:
     """Fetches addresses that have claimed their tokens from the `MerkleDistributor` contract."""
-    last_id = ""
-    result: Dict = await execute_sw_gql_query(
+    claims: List = await execute_sw_gql_paginated_query(
         network=network,
         query=DISTRIBUTOR_CLAIMED_ACCOUNTS_QUERY,
-        variables=dict(merkle_root=merkle_root, last_id=last_id),
+        variables=dict(merkle_root=merkle_root),
+        paginated_field="merkleDistributorClaims",
     )
-    claims_chunk = result.get("merkleDistributorClaims", [])
-    claims = claims_chunk
-
-    # accumulate chunks of claims
-    while len(claims_chunk) >= 1000:
-        last_id = claims_chunk[-1]["id"]
-        result: Dict = await execute_sw_gql_query(
-            network=network,
-            query=DISTRIBUTOR_CLAIMED_ACCOUNTS_QUERY,
-            variables=dict(merkle_root=merkle_root, last_id=last_id),
-        )
-        claims_chunk = result.get("merkleDistributorClaims", [])
-        claims.extend(claims_chunk)
-
     return set(Web3.toChecksumAddress(claim["account"]) for claim in claims)
 
 
@@ -355,25 +328,12 @@ async def get_one_time_rewards(
     """Fetches one time rewards."""
     distributor_fallback_address = NETWORKS[network]["DISTRIBUTOR_FALLBACK_ADDRESS"]
 
-    last_id = ""
-    result: Dict = await execute_sw_gql_query(
+    distributions: List = await execute_sw_gql_paginated_query(
         network=network,
         query=ONE_TIME_DISTRIBUTIONS_QUERY,
-        variables=dict(from_block=from_block, to_block=to_block, last_id=last_id),
+        variables=dict(from_block=from_block, to_block=to_block),
+        paginated_field="oneTimeDistributions",
     )
-    distributions_chunk = result.get("oneTimeDistributions", [])
-    distributions = distributions_chunk
-
-    # accumulate chunks of distributions
-    while len(distributions_chunk) >= 1000:
-        last_id = distributions_chunk[-1]["id"]
-        result: Dict = await execute_sw_gql_query(
-            network=network,
-            query=ONE_TIME_DISTRIBUTIONS_QUERY,
-            variables=dict(from_block=from_block, to_block=to_block, last_id=last_id),
-        )
-        distributions_chunk = result.get("oneTimeDistributions", [])
-        distributions.extend(distributions_chunk)
 
     # process one time distributions
     final_rewards: Rewards = {}

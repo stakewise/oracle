@@ -3,7 +3,8 @@ from unittest.mock import patch
 import aiohttp
 from web3.types import BlockNumber, Timestamp, Wei
 
-from ...test import TEST_NETWORK, get_test_oracle
+from oracle.oracle.tests.common import TEST_NETWORK, get_test_oracle
+
 from ..controller import RewardsController
 from ..types import RewardsVotingParameters
 
@@ -26,19 +27,17 @@ def get_finality_checkpoints(*args, **kwargs):
 
 
 def get_registered_validators_public_keys(*args, **kwargs):
-    return {
-        "validators": [
-            {
-                "id": "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001"
-            },
-            {
-                "id": "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002"
-            },
-            {
-                "id": "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003"
-            },
-        ]
-    }
+    return [
+        {
+            "id": "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+            "id": "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+            "id": "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003"
+        },
+    ]
 
 
 def get_validators(*args, **kwargs):
@@ -97,7 +96,7 @@ sw_gql_query = [get_registered_validators_public_keys()]
 class TestRewardController:
     async def test_process_success(self):
         with patch(
-            "oracle.oracle.rewards.eth1.execute_sw_gql_query",
+            "oracle.oracle.rewards.eth1.execute_sw_gql_paginated_query",
             side_effect=sw_gql_query,
         ), patch(
             "oracle.oracle.rewards.controller.get_finality_checkpoints",
@@ -142,3 +141,4 @@ class TestRewardController:
                 name="reward-vote.json",
             )
             vote_mock.assert_called_once_with(**vote)
+            await session.close()
