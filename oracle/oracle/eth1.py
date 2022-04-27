@@ -20,7 +20,7 @@ from oracle.settings import CONFIRMATION_BLOCKS
 
 from .distributor.types import DistributorVote, DistributorVotingParameters
 from .rewards.types import RewardsVotingParameters, RewardVote
-from .validators.types import ValidatorVote
+from .validators.types import ValidatorsVote
 
 logger = logging.getLogger(__name__)
 
@@ -112,7 +112,7 @@ def submit_vote(
     network: str,
     oracle: LocalAccount,
     encoded_data: bytes,
-    vote: Union[RewardVote, DistributorVote, ValidatorVote],
+    vote: Union[RewardVote, DistributorVote, ValidatorsVote],
     name: str,
 ) -> None:
     """Submits vote to the votes' aggregator."""
