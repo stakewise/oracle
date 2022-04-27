@@ -1,10 +1,9 @@
 import asyncio
 import logging
-from collections import defaultdict
-from typing import Dict, List
+from typing import List, Set
 
 from eth_account.signers.local import LocalAccount
-from eth_typing import ChecksumAddress, HexStr
+from eth_typing import HexStr
 from web3 import Web3
 from web3.types import Wei
 
@@ -58,19 +57,19 @@ class ValidatorsController(object):
             await asyncio.sleep(5)
 
         validators_deposit_data: List[ValidatorDepositData] = []
-        indexes_counts: Dict[ChecksumAddress, int] = defaultdict(int)
+        used_pubkeys: Set[HexStr] = set()
         for _ in range(validators_count):
             # select next validator
             # TODO: implement scoring system based on the operators performance
             deposit_data = await select_validator(
                 network=self.network,
                 block_number=latest_block_number,
-                indexes_counts=indexes_counts,
+                used_pubkeys=used_pubkeys,
             )
             if deposit_data is None:
                 break
 
-            indexes_counts[deposit_data["operator"]] += 1
+            used_pubkeys.add(deposit_data["public_key"])
             validators_deposit_data.append(deposit_data)
 
         if not validators_deposit_data:

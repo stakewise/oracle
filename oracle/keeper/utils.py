@@ -145,9 +145,24 @@ def check_validator_vote(
 ) -> bool:
     """Checks whether oracle's validator vote is correct."""
     try:
+        deposit_data_payloads = []
+        for deposit_data in vote["deposit_data"]:
+            deposit_data_payloads.append(
+                (
+                    deposit_data["operator"],
+                    deposit_data["withdrawal_credentials"],
+                    deposit_data["deposit_data_root"],
+                    deposit_data["public_key"],
+                    deposit_data["deposit_data_signature"],
+                )
+            )
         encoded_data: bytes = web3_client.codec.encode_abi(
             ["uint256", "(address,bytes32,bytes32,bytes,bytes)[]", "bytes32"],
-            [int(vote["nonce"]), vote["deposit_data"], vote["validators_deposit_root"]],
+            [
+                int(vote["nonce"]),
+                deposit_data_payloads,
+                vote["validators_deposit_root"],
+            ],
         )
         return validate_vote_signature(
             web3_client, encoded_data, oracle, vote["signature"]
@@ -379,8 +394,8 @@ def submit_votes(
         )
         logger.info(
             f"[{network}] Submitting validator(s) registration: "
-            f"validators count={len(validators_vote['deposit_data'])}, "
-            f"validators deposit root={validators_deposit_root}"
+            f"count={len(validators_vote['deposit_data'])}, "
+            f"deposit root={validators_deposit_root}"
         )
         submit_deposit_data = []
         submit_merkle_proofs = []
