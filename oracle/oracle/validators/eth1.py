@@ -1,6 +1,6 @@
 from typing import Dict, Union
 
-from eth_typing import HexStr
+from eth_typing import ChecksumAddress, HexStr
 from web3 import Web3
 from web3.types import BlockNumber, Wei
 
@@ -38,8 +38,7 @@ async def get_voting_parameters(network: str) -> ValidatorVotingParameters:
 
 
 async def select_validator(
-    network: str,
-    block_number: BlockNumber,
+    network: str, block_number: BlockNumber, indexes_counts: Dict[ChecksumAddress, int]
 ) -> Union[None, ValidatorDepositData]:
     """Selects the next validator to register."""
     result: Dict = await execute_sw_gql_query(
@@ -54,7 +53,9 @@ async def select_validator(
             continue
 
         operator_address = Web3.toChecksumAddress(operator["id"])
-        deposit_data_index = int(operator["depositDataIndex"])
+        deposit_data_index = int(operator["depositDataIndex"]) + indexes_counts.get(
+            operator_address, 0
+        )
         deposit_datum = await ipfs_fetch(merkle_proofs)
 
         max_deposit_data_index = len(deposit_datum) - 1
