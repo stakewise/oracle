@@ -4,7 +4,7 @@ from eth_typing import ChecksumAddress
 
 from oracle.oracle.distributor.types import DistributorVote
 from oracle.oracle.rewards.types import RewardVote
-from oracle.oracle.validators.types import ValidatorVote
+from oracle.oracle.validators.types import ValidatorsVote
 
 
 class Parameters(NamedTuple):
@@ -17,4 +17,4 @@ class Parameters(NamedTuple):
 class OraclesVotes(NamedTuple):
     rewards: List[RewardVote]
     distributor: List[DistributorVote]
-    validator: List[ValidatorVote]
+    validators: List[ValidatorsVote]

@@ -1,4 +1,4 @@
-from typing import Dict, Union
+from typing import Dict, Set, Union
 
 from eth_typing import HexStr
 from web3 import Web3
@@ -38,8 +38,7 @@ async def get_voting_parameters(network: str) -> ValidatorVotingParameters:
 
 
 async def select_validator(
-    network: str,
-    block_number: BlockNumber,
+    network: str, block_number: BlockNumber, used_pubkeys: Set[HexStr]
 ) -> Union[None, ValidatorDepositData]:
     """Selects the next validator to register."""
     result: Dict = await execute_sw_gql_query(
@@ -62,16 +61,19 @@ async def select_validator(
             continue
 
         selected_deposit_data = deposit_datum[deposit_data_index]
-        can_register = await can_register_validator(
-            network, block_number, selected_deposit_data["public_key"]
+        public_key = selected_deposit_data["public_key"]
+        can_register = public_key not in used_pubkeys and await can_register_validator(
+            network, block_number, public_key
         )
         while deposit_data_index < max_deposit_data_index and not can_register:
             # the edge case when the validator was registered in previous merkle root
             # and the deposit data is presented in the same.
             deposit_data_index += 1
             selected_deposit_data = deposit_datum[deposit_data_index]
-            can_register = await can_register_validator(
-                network, block_number, selected_deposit_data["public_key"]
+            public_key = selected_deposit_data["public_key"]
+            can_register = (
+                public_key not in used_pubkeys
+                and await can_register_validator(network, block_number, public_key)
             )
 
         if can_register:

@@ -29,6 +29,16 @@ NETWORKS = {
             default="https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-mainnet",
         ),
         ETH2_ENDPOINT=config(f"{MAINNET_UPPER}_ETH2_ENDPOINT", default=""),
+        VALIDATORS_FETCH_CHUNK_SIZE=config(
+            f"{MAINNET_UPPER}_VALIDATORS_FETCH_CHUNK_SIZE",
+            default=100,
+            cast=int,
+        ),
+        VALIDATORS_BATCH_SIZE=config(
+            f"{MAINNET_UPPER}_VALIDATORS_BATCH_SIZE",
+            default=5,
+            cast=int,
+        ),
         SLOTS_PER_EPOCH=32,
         SECONDS_PER_SLOT=12,
         ORACLES_CONTRACT_ADDRESS=Web3.toChecksumAddress(
@@ -92,6 +102,16 @@ NETWORKS = {
             default="https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-goerli",
         ),
         ETH2_ENDPOINT=config(f"{GOERLI_UPPER}_ETH2_ENDPOINT", default=""),
+        VALIDATORS_FETCH_CHUNK_SIZE=config(
+            f"{GOERLI_UPPER}_VALIDATORS_FETCH_CHUNK_SIZE",
+            default=100,
+            cast=int,
+        ),
+        VALIDATORS_BATCH_SIZE=config(
+            f"{GOERLI_UPPER}_VALIDATORS_BATCH_SIZE",
+            default=5,
+            cast=int,
+        ),
         SLOTS_PER_EPOCH=32,
         SECONDS_PER_SLOT=12,
         ORACLES_CONTRACT_ADDRESS=Web3.toChecksumAddress(
@@ -153,6 +173,16 @@ NETWORKS = {
             default="",
         ),
         ETH2_ENDPOINT=config(f"{PERM_GOERLI_UPPER}_ETH2_ENDPOINT", default=""),
+        VALIDATORS_FETCH_CHUNK_SIZE=config(
+            f"{PERM_GOERLI_UPPER}_VALIDATORS_FETCH_CHUNK_SIZE",
+            default=100,
+            cast=int,
+        ),
+        VALIDATORS_BATCH_SIZE=config(
+            f"{PERM_GOERLI_UPPER}_VALIDATORS_BATCH_SIZE",
+            default=10,
+            cast=int,
+        ),
         SLOTS_PER_EPOCH=32,
         SECONDS_PER_SLOT=12,
         ORACLES_CONTRACT_ADDRESS=Web3.toChecksumAddress(
@@ -217,6 +247,16 @@ NETWORKS = {
             f"{GNOSIS_CHAIN_UPPER}_UNISWAP_V3_SUBGRAPH_URL", default=""
         ),
         ETH2_ENDPOINT=config(f"{GNOSIS_CHAIN_UPPER}_ETH2_ENDPOINT", default=""),
+        VALIDATORS_FETCH_CHUNK_SIZE=config(
+            f"{GNOSIS_CHAIN_UPPER}_VALIDATORS_FETCH_CHUNK_SIZE",
+            default=100,
+            cast=int,
+        ),
+        VALIDATORS_BATCH_SIZE=config(
+            f"{GNOSIS_CHAIN_UPPER}_VALIDATORS_BATCH_SIZE",
+            default=10,
+            cast=int,
+        ),
         SLOTS_PER_EPOCH=16,
         SECONDS_PER_SLOT=5,
         ORACLES_CONTRACT_ADDRESS=Web3.toChecksumAddress(
