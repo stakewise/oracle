@@ -1,92 +1,64 @@
 from unittest.mock import patch
 
 import aiohttp
-from web3.types import BlockNumber, Timestamp, Wei
+from web3 import Web3
+from web3.types import BlockNumber, Timestamp
 
 from oracle.oracle.tests.common import TEST_NETWORK, get_test_oracle
+from oracle.oracle.tests.factories import faker
 
 from ..controller import RewardsController
 from ..types import RewardsVotingParameters
+
+epoch = faker.random_int(150000, 250000)
+
+w3 = Web3()
 
 
 def get_finality_checkpoints(*args, **kwargs):
     return {
         "previous_justified": {
-            "epoch": "642974",
-            "root": "0x0000000000000000000000000000000000000000000000000000000000000001",
+            "epoch": str(epoch - 1),
+            "root": faker.eth_address(),
         },
         "current_justified": {
-            "epoch": "642975",
-            "root": "0x0000000000000000000000000000000000000000000000000000000000000012",
+            "epoch": str(epoch),
+            "root": faker.eth_address(),
         },
         "finalized": {
-            "epoch": "642975",
-            "root": "0x0000000000000000000000000000000000000000000000000000000000000123",
+            "epoch": str(epoch),
+            "root": faker.eth_address(),
         },
     }
 
 
 def get_registered_validators_public_keys(*args, **kwargs):
-    return [
-        {
-            "id": "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001"
+    return [{"id": faker.public_key()} for x in range(3)]
+
+
+def get_validator(status="active_ongoing"):
+    return {
+        "index": str(faker.random_int()),
+        "balance": str(faker.random_int(32 * 10**9, 40 * 10**9)),
+        "status": status,
+        "validator": {
+            "pubkey": faker.public_key(),
+            "withdrawal_credentials": faker.eth_address(),
+            "effective_balance": str(32 * 10**9),
+            "slashed": False,
+            "activation_eligibility_epoch": faker.random_int(100, epoch),
+            "activation_epoch": faker.random_int(100, epoch),
+            "exit_epoch": faker.random_int(epoch, epoch**2),
+            "withdrawable_epoch": faker.random_int(epoch, epoch**2),
         },
-        {
-            "id": "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002"
-        },
-        {
-            "id": "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003"
-        },
-    ]
+    }
 
 
 def get_validators(*args, **kwargs):
     return [
-        {
-            "index": "111798",
-            "balance": "34035649369",
-            "status": "active_ongoing",
-            "validator": {
-                "pubkey": "0x100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001",
-                "withdrawal_credentials": "0x0100000000000000000000000000000000000000000000000000000000000001",
-                "effective_balance": "32000000000",
-                "slashed": False,
-                "activation_eligibility_epoch": "25890",
-                "activation_epoch": "25909",
-                "exit_epoch": "18446744073709551615",
-                "withdrawable_epoch": "18446744073709551615",
-            },
-        },
-        {
-            "index": "352132",
-            "balance": "32000000000",
-            "status": "pending_queued",
-            "validator": {
-                "pubkey": "0x100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001",
-                "withdrawal_credentials": "0x0100000000000000000000000000000000000000000000000000000000000002",
-                "effective_balance": "32000000000",
-                "slashed": False,
-                "activation_eligibility_epoch": "111076",
-                "activation_epoch": "18446744073709551615",
-                "exit_epoch": "18446744073709551615",
-                "withdrawable_epoch": "18446744073709551615",
-            },
-        },
-        {
-            "index": "282945",
-            "balance": "32448295062",
-            "status": "active_ongoing",
-            "validator": {
-                "pubkey": "0x100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001",
-                "withdrawal_credentials": "0x0100000000000000000000000000000000000000000000000000000000000003",
-                "effective_balance": "32000000000",
-                "slashed": False,
-                "activation_eligibility_epoch": "92962",
-                "activation_epoch": "92989",
-                "exit_epoch": "18446744073709551615",
-                "withdrawable_epoch": "18446744073709551615",
-            },
-        },
+        get_validator(),
+        get_validator(),
+        get_validator(status="pending_queued"),
     ]
 
 
@@ -108,6 +80,9 @@ class TestRewardController:
             "oracle.oracle.rewards.controller.submit_vote", return_value=None
         ) as vote_mock:
             session = aiohttp.ClientSession()
+            rewards_nonce = faker.random_int(1000, 2000)
+            total_rewards = faker.wei_amount()
+
             controller = RewardsController(
                 network=TEST_NETWORK,
                 aiohttp_session=session,
@@ -116,28 +91,30 @@ class TestRewardController:
             )
             await controller.process(
                 voting_params=RewardsVotingParameters(
-                    rewards_nonce=1651,
-                    total_rewards=Wei(1856120527076000000000),
+                    rewards_nonce=rewards_nonce,
+                    total_rewards=total_rewards,
                     rewards_updated_at_timestamp=Timestamp(1649854536),
                 ),
                 current_block_number=BlockNumber(14583706),
                 current_timestamp=Timestamp(1649941516),
             )
+            vote = {
+                "signature": "",
+                "nonce": rewards_nonce,
+                "activated_validators": 2,
+                "total_rewards": total_rewards,
+            }
+            encoded_data: bytes = w3.codec.encode_abi(
+                ["uint256", "uint256", "uint256"],
+                [vote["nonce"], vote["activated_validators"], vote["total_rewards"]],
+            )
+            vote["total_rewards"] = str(vote["total_rewards"])
             vote_mock.assert_called()
             vote = dict(
                 network=TEST_NETWORK,
                 oracle=get_test_oracle(),
-                encoded_data=b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
-                b"\x00\x00\x00\x00\x00\x00\x00\x00\x06s\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
-                b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00"
-                b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
-                b"d\x9e\xd8\xc9:C\xcb\xe8\x00",
-                vote={
-                    "signature": "",
-                    "nonce": 1651,
-                    "activated_validators": 2,
-                    "total_rewards": "1856120527076000000000",
-                },
+                encoded_data=encoded_data,
+                vote=vote,
                 name="reward-vote.json",
             )
             vote_mock.assert_called_once_with(**vote)
