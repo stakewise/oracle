@@ -36,7 +36,7 @@ NETWORKS = {
         ),
         VALIDATORS_BATCH_SIZE=config(
             f"{MAINNET_UPPER}_VALIDATORS_BATCH_SIZE",
-            default=5,
+            default=10,
             cast=int,
         ),
         SLOTS_PER_EPOCH=32,
@@ -109,7 +109,7 @@ NETWORKS = {
         ),
         VALIDATORS_BATCH_SIZE=config(
             f"{GOERLI_UPPER}_VALIDATORS_BATCH_SIZE",
-            default=5,
+            default=10,
             cast=int,
         ),
         SLOTS_PER_EPOCH=32,
