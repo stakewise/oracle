@@ -1,5 +1,5 @@
 from math import ceil, sqrt
-from typing import Dict
+from typing import Dict, List
 
 import backoff
 from ens.constants import EMPTY_ADDR_HEX
@@ -7,7 +7,10 @@ from eth_typing import BlockNumber, ChecksumAddress
 from web3 import Web3
 
 from oracle.networks import GNOSIS_CHAIN, NETWORKS, PERM_GOERLI
-from oracle.oracle.clients import execute_uniswap_v3_gql_query
+from oracle.oracle.clients import (
+    execute_uniswap_v3_gql_query,
+    execute_uniswap_v3_paginated_gql_query,
+)
 from oracle.oracle.graphql_queries import (
     UNISWAP_V3_CURRENT_TICK_POSITIONS_QUERY,
     UNISWAP_V3_POOL_QUERY,
@@ -46,25 +49,12 @@ async def get_uniswap_v3_pools(
         )
 
     network_config = NETWORKS[network]
-    last_id = ""
-    result: Dict = await execute_uniswap_v3_gql_query(
+    pools: List = await execute_uniswap_v3_paginated_gql_query(
         network=network,
         query=UNISWAP_V3_POOLS_QUERY,
-        variables=dict(block_number=block_number, last_id=last_id),
+        variables=dict(block_number=block_number),
+        paginated_field="pools",
     )
-    pools_chunk = result.get("pools", [])
-    pools = pools_chunk
-
-    # accumulate chunks of pools
-    while len(pools_chunk) >= 1000:
-        last_id = pools_chunk[-1]["id"]
-        result: Dict = await execute_uniswap_v3_gql_query(
-            network=network,
-            query=UNISWAP_V3_POOLS_QUERY,
-            variables=dict(block_number=block_number, last_id=last_id),
-        )
-        pools_chunk = result.get("pools", [])
-        pools.extend(pools_chunk)
 
     uni_v3_pools = UniswapV3Pools(
         staked_token_pools=set(),
@@ -178,35 +168,16 @@ async def get_uniswap_v3_liquidity_points(
     except TypeError:
         return Balances(total_supply=0, balances={})
 
-    last_id = ""
-    result: Dict = await execute_uniswap_v3_gql_query(
+    positions: List = await execute_uniswap_v3_paginated_gql_query(
         network=network,
         query=UNISWAP_V3_CURRENT_TICK_POSITIONS_QUERY,
         variables=dict(
             block_number=block_number,
             tick_current=tick_current,
             pool_address=lowered_pool_address,
-            last_id=last_id,
         ),
+        paginated_field="positions",
     )
-    positions_chunk = result.get("positions", [])
-    positions = positions_chunk
-
-    # accumulate chunks of positions
-    while len(positions_chunk) >= 1000:
-        last_id = positions_chunk[-1]["id"]
-        result: Dict = await execute_uniswap_v3_gql_query(
-            network=network,
-            query=UNISWAP_V3_CURRENT_TICK_POSITIONS_QUERY,
-            variables=dict(
-                block_number=block_number,
-                tick_current=tick_current,
-                pool_address=lowered_pool_address,
-                last_id=last_id,
-            ),
-        )
-        positions_chunk = result.get("positions", [])
-        positions.extend(positions_chunk)
 
     # process positions
     balances: Dict[ChecksumAddress, int] = {}
@@ -238,8 +209,7 @@ async def get_uniswap_v3_range_liquidity_points(
     """Fetches users' liquidity points of the Uniswap V3 pool in the specific range."""
     lowered_pool_address = pool_address.lower()
 
-    last_id = ""
-    result: Dict = await execute_uniswap_v3_gql_query(
+    positions: List = await execute_uniswap_v3_paginated_gql_query(
         network=network,
         query=UNISWAP_V3_RANGE_POSITIONS_QUERY,
         variables=dict(
@@ -247,28 +217,9 @@ async def get_uniswap_v3_range_liquidity_points(
             tick_lower=tick_lower,
             tick_upper=tick_upper,
             pool_address=lowered_pool_address,
-            last_id=last_id,
         ),
+        paginated_field="positions",
     )
-    positions_chunk = result.get("positions", [])
-    positions = positions_chunk
-
-    # accumulate chunks of positions
-    while len(positions_chunk) >= 1000:
-        last_id = positions_chunk[-1]["id"]
-        result: Dict = await execute_uniswap_v3_gql_query(
-            network=network,
-            query=UNISWAP_V3_RANGE_POSITIONS_QUERY,
-            variables=dict(
-                block_number=block_number,
-                tick_lower=tick_lower,
-                tick_upper=tick_upper,
-                pool_address=lowered_pool_address,
-                last_id=last_id,
-            ),
-        )
-        positions_chunk = result.get("positions", [])
-        positions.extend(positions_chunk)
 
     # process positions
     balances: Dict[ChecksumAddress, int] = {}
@@ -321,36 +272,17 @@ async def get_uniswap_v3_single_token_balances(
     token0_address: ChecksumAddress = Web3.toChecksumAddress(pool["token0"])
     token1_address: ChecksumAddress = Web3.toChecksumAddress(pool["token1"])
 
-    last_id = ""
-    result: Dict = await execute_uniswap_v3_gql_query(
+    positions: List = await execute_uniswap_v3_paginated_gql_query(
         network=network,
         query=UNISWAP_V3_POSITIONS_QUERY,
         variables=dict(
             block_number=block_number,
             pool_address=lowered_pool_address,
-            last_id=last_id,
         ),
+        paginated_field="positions",
     )
-    positions_chunk = result.get("positions", [])
-    positions = positions_chunk
 
     # TODO: calculated earned fees
-
-    # accumulate chunks of positions
-    while len(positions_chunk) >= 1000:
-        last_id = positions_chunk[-1]["id"]
-        result: Dict = await execute_uniswap_v3_gql_query(
-            network=network,
-            query=UNISWAP_V3_POSITIONS_QUERY,
-            variables=dict(
-                block_number=block_number,
-                pool_address=lowered_pool_address,
-                last_id=last_id,
-            ),
-        )
-        positions_chunk = result.get("positions", [])
-        positions.extend(positions_chunk)
-
     # process positions
     balances: Dict[ChecksumAddress, int] = {}
     total_supply = 0

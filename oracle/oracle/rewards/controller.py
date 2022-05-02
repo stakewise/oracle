@@ -11,6 +11,7 @@ from web3.types import Timestamp, Wei
 
 from oracle.networks import GNOSIS_CHAIN, NETWORKS
 from oracle.oracle.eth1 import submit_vote
+from oracle.oracle.rewards.types import RewardsVotingParameters, RewardVote
 from oracle.settings import MGNO_RATE, REWARD_VOTE_FILENAME, WAD
 
 from .eth1 import get_registered_validators_public_keys
@@ -20,7 +21,6 @@ from .eth2 import (
     get_finality_checkpoints,
     get_validators,
 )
-from .types import RewardsVotingParameters, RewardVote
 
 logger = logging.getLogger(__name__)
 w3 = Web3()
@@ -101,12 +101,14 @@ class RewardsController(object):
         state_id = str(update_epoch * self.slots_per_epoch)
         total_rewards: Wei = Wei(0)
         activated_validators = 0
-        # fetch balances in chunks of 100 keys
-        for i in range(0, len(public_keys), 100):
+        chunk_size = NETWORKS[self.network]["VALIDATORS_FETCH_CHUNK_SIZE"]
+
+        # fetch balances in chunks
+        for i in range(0, len(public_keys), chunk_size):
             validators = await get_validators(
                 network=self.network,
                 session=self.aiohttp_session,
-                public_keys=public_keys[i : i + 100],
+                public_keys=public_keys[i : i + chunk_size],
                 state_id=state_id,
             )
             for validator in validators:

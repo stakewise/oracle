@@ -19,35 +19,105 @@ gql_logger.setLevel(logging.ERROR)
 # set default GQL query execution timeout to 30 seconds
 EXECUTE_TIMEOUT = 30
 
+# set default GQL pagination
+PAGINATION_WINDOWS = 1000
 
-@backoff.on_exception(backoff.expo, Exception, max_time=300, logger=gql_logger)
+
 async def execute_sw_gql_query(
     network: str, query: DocumentNode, variables: Dict
 ) -> Dict:
-    """Executes GraphQL query."""
-    subgraph_url = NETWORKS[network]["STAKEWISE_SUBGRAPH_URL"]
-    transport = AIOHTTPTransport(url=subgraph_url)
-    async with Client(transport=transport, execute_timeout=EXECUTE_TIMEOUT) as session:
-        return await session.execute(query, variable_values=variables)
+    return await execute_gql_query(
+        subgraph_url=NETWORKS[network]["STAKEWISE_SUBGRAPH_URL"],
+        query=query,
+        variables=variables,
+    )
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=300, logger=gql_logger)
 async def execute_uniswap_v3_gql_query(
-    network: str, query: DocumentNode, variables: Dict
+    network: str,
+    query: DocumentNode,
+    variables: Dict,
 ) -> Dict:
     """Executes GraphQL query."""
-    subgraph_url = NETWORKS[network]["UNISWAP_V3_SUBGRAPH_URL"]
-    transport = AIOHTTPTransport(url=subgraph_url)
-    async with Client(transport=transport, execute_timeout=EXECUTE_TIMEOUT) as session:
-        return await session.execute(query, variable_values=variables)
+    return await execute_gql_query(
+        subgraph_url=NETWORKS[network]["UNISWAP_V3_SUBGRAPH_URL"],
+        query=query,
+        variables=variables,
+    )
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=300, logger=gql_logger)
 async def execute_ethereum_gql_query(
     network: str, query: DocumentNode, variables: Dict
 ) -> Dict:
     """Executes GraphQL query."""
-    subgraph_url = NETWORKS[network]["ETHEREUM_SUBGRAPH_URL"]
+    return await execute_gql_query(
+        subgraph_url=NETWORKS[network]["ETHEREUM_SUBGRAPH_URL"],
+        query=query,
+        variables=variables,
+    )
+
+
+async def execute_base_gql_paginated_query(
+    subgraph_url: str, query: DocumentNode, variables: Dict, paginated_field: str
+) -> List:
+    """Executes GraphQL query."""
+    chunks, result = [], []
+    variables["last_id"] = ""
+
+    while True:
+        query_result: Dict = await execute_gql_query(
+            subgraph_url=subgraph_url,
+            query=query,
+            variables=variables,
+        )
+        chunks = query_result.get(paginated_field, [])
+        result.extend(chunks)
+        if len(chunks) < PAGINATION_WINDOWS:
+            return result
+
+        variables["last_id"] = chunks[-1]["id"]
+
+
+async def execute_sw_gql_paginated_query(
+    network: str, query: DocumentNode, variables: Dict, paginated_field: str
+) -> List:
+    return await execute_base_gql_paginated_query(
+        subgraph_url=NETWORKS[network]["STAKEWISE_SUBGRAPH_URL"],
+        query=query,
+        variables=variables,
+        paginated_field=paginated_field,
+    )
+
+
+async def execute_uniswap_v3_paginated_gql_query(
+    network: str, query: DocumentNode, variables: Dict, paginated_field: str
+) -> List:
+    """Executes GraphQL query."""
+    return await execute_base_gql_paginated_query(
+        subgraph_url=NETWORKS[network]["UNISWAP_V3_SUBGRAPH_URL"],
+        query=query,
+        variables=variables,
+        paginated_field=paginated_field,
+    )
+
+
+async def execute_ethereum_paginated_gql_query(
+    network: str, query: DocumentNode, variables: Dict, paginated_field: str
+) -> List:
+    """Executes ETH query."""
+    return await execute_base_gql_paginated_query(
+        subgraph_url=NETWORKS[network]["ETHEREUM_SUBGRAPH_URL"],
+        query=query,
+        variables=variables,
+        paginated_field=paginated_field,
+    )
+
+
+@backoff.on_exception(backoff.expo, Exception, max_time=300, logger=gql_logger)
+async def execute_gql_query(
+    subgraph_url: str, query: DocumentNode, variables: Dict
+) -> Dict:
+    """Executes gql query."""
     transport = AIOHTTPTransport(url=subgraph_url)
     async with Client(transport=transport, execute_timeout=EXECUTE_TIMEOUT) as session:
         return await session.execute(query, variable_values=variables)

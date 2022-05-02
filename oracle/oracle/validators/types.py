@@ -28,7 +28,8 @@ class ValidatorDepositData(TypedDict):
     proof: List[HexStr]
 
 
-class ValidatorVote(ValidatorDepositData):
+class ValidatorsVote(TypedDict):
     nonce: int
     validators_deposit_root: HexStr
     signature: HexStr
+    deposit_data: List[ValidatorDepositData]
