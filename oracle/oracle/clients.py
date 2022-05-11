@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from typing import Any, Dict, List, Union
 
@@ -15,6 +16,8 @@ gql_logger = logging.getLogger("gql_logger")
 gql_handler = logging.StreamHandler()
 gql_logger.addHandler(gql_handler)
 gql_logger.setLevel(logging.ERROR)
+logger = logging.getLogger(__name__)
+
 
 # set default GQL query execution timeout to 30 seconds
 EXECUTE_TIMEOUT = 30
@@ -23,11 +26,34 @@ EXECUTE_TIMEOUT = 30
 PAGINATION_WINDOWS = 1000
 
 
+class GraphqlConsensusError(ConnectionError):
+    pass
+
+
+def with_consensus(f):
+    def wrapper(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except GraphqlConsensusError as e:
+            logger.error(f"There is no consensus in GraphQL query: {e}")
+            return None
+
+    return wrapper
+
+
+async def execute_single_gql_query(
+    subgraph_url: str, query: DocumentNode, variables: Dict
+):
+    transport = AIOHTTPTransport(url=subgraph_url)
+    async with Client(transport=transport, execute_timeout=EXECUTE_TIMEOUT) as session:
+        return await session.execute(query, variable_values=variables)
+
+
 async def execute_sw_gql_query(
     network: str, query: DocumentNode, variables: Dict
 ) -> Dict:
     return await execute_gql_query(
-        subgraph_url=NETWORKS[network]["STAKEWISE_SUBGRAPH_URL"],
+        subgraph_urls=NETWORKS[network]["STAKEWISE_SUBGRAPH_URLS"],
         query=query,
         variables=variables,
     )
@@ -40,7 +66,7 @@ async def execute_uniswap_v3_gql_query(
 ) -> Dict:
     """Executes GraphQL query."""
     return await execute_gql_query(
-        subgraph_url=NETWORKS[network]["UNISWAP_V3_SUBGRAPH_URL"],
+        subgraph_urls=NETWORKS[network]["UNISWAP_V3_SUBGRAPH_URLS"],
         query=query,
         variables=variables,
     )
@@ -51,14 +77,14 @@ async def execute_ethereum_gql_query(
 ) -> Dict:
     """Executes GraphQL query."""
     return await execute_gql_query(
-        subgraph_url=NETWORKS[network]["ETHEREUM_SUBGRAPH_URL"],
+        subgraph_urls=NETWORKS[network]["ETHEREUM_SUBGRAPH_URLS"],
         query=query,
         variables=variables,
     )
 
 
 async def execute_base_gql_paginated_query(
-    subgraph_url: str, query: DocumentNode, variables: Dict, paginated_field: str
+    subgraph_urls: str, query: DocumentNode, variables: Dict, paginated_field: str
 ) -> List:
     """Executes GraphQL query."""
     chunks, result = [], []
@@ -66,7 +92,7 @@ async def execute_base_gql_paginated_query(
 
     while True:
         query_result: Dict = await execute_gql_query(
-            subgraph_url=subgraph_url,
+            subgraph_urls=subgraph_urls,
             query=query,
             variables=variables,
         )
@@ -82,7 +108,7 @@ async def execute_sw_gql_paginated_query(
     network: str, query: DocumentNode, variables: Dict, paginated_field: str
 ) -> List:
     return await execute_base_gql_paginated_query(
-        subgraph_url=NETWORKS[network]["STAKEWISE_SUBGRAPH_URL"],
+        subgraph_urls=NETWORKS[network]["STAKEWISE_SUBGRAPH_URLS"],
         query=query,
         variables=variables,
         paginated_field=paginated_field,
@@ -94,7 +120,7 @@ async def execute_uniswap_v3_paginated_gql_query(
 ) -> List:
     """Executes GraphQL query."""
     return await execute_base_gql_paginated_query(
-        subgraph_url=NETWORKS[network]["UNISWAP_V3_SUBGRAPH_URL"],
+        subgraph_urls=NETWORKS[network]["UNISWAP_V3_SUBGRAPH_URLS"],
         query=query,
         variables=variables,
         paginated_field=paginated_field,
@@ -106,21 +132,38 @@ async def execute_ethereum_paginated_gql_query(
 ) -> List:
     """Executes ETH query."""
     return await execute_base_gql_paginated_query(
-        subgraph_url=NETWORKS[network]["ETHEREUM_SUBGRAPH_URL"],
+        subgraph_urls=NETWORKS[network]["ETHEREUM_SUBGRAPH_URLS"],
         query=query,
         variables=variables,
         paginated_field=paginated_field,
     )
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=300, logger=gql_logger)
+@backoff.on_exception(backoff.expo, Exception, max_time=3, logger=gql_logger)
 async def execute_gql_query(
-    subgraph_url: str, query: DocumentNode, variables: Dict
+    subgraph_urls: str, query: DocumentNode, variables: Dict
 ) -> Dict:
     """Executes gql query."""
-    transport = AIOHTTPTransport(url=subgraph_url)
-    async with Client(transport=transport, execute_timeout=EXECUTE_TIMEOUT) as session:
-        return await session.execute(query, variable_values=variables)
+    results = await asyncio.gather(
+        *[
+            execute_single_gql_query(subgraph_url, query, variables)
+            for subgraph_url in subgraph_urls
+        ]
+    )
+    if len(subgraph_urls) == 1:
+        return results[0]
+
+    # Otherwise, check the majority consensus
+    result = []
+    majority = 0
+    for item in results:
+        if results.count(item) > majority:
+            result = item
+            majority = results.count(item)
+
+    if majority >= len(subgraph_urls) // 2 + 1:
+        return result
+    raise GraphqlConsensusError
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)

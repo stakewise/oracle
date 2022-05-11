@@ -20,20 +20,20 @@ from oracle.oracle.graphql_queries import (
 from .types import ValidatorDepositData, ValidatorVotingParameters
 
 
-async def get_voting_parameters(network: str) -> ValidatorVotingParameters:
+async def get_voting_parameters(
+    network: str, block_number: BlockNumber
+) -> ValidatorVotingParameters:
     """Fetches validator voting parameters."""
     result: Dict = await execute_sw_gql_query(
         network=network,
         query=VALIDATOR_VOTING_PARAMETERS_QUERY,
-        variables={},
+        variables=dict(block_number=block_number),
     )
     network = result["networks"][0]
     pool = result["pools"][0]
-    meta = result["_meta"]
     return ValidatorVotingParameters(
         validators_nonce=int(network["oraclesValidatorsNonce"]),
         pool_balance=Wei(int(pool["balance"])),
-        latest_block_number=BlockNumber(int(meta["block"]["number"])),
     )
 
 

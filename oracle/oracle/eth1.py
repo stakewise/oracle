@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 from typing import Dict, TypedDict, Union
@@ -10,7 +11,11 @@ from web3 import Web3
 from web3.types import BlockNumber, Timestamp, Wei
 
 from oracle.networks import NETWORKS
-from oracle.oracle.clients import execute_ethereum_gql_query, execute_sw_gql_query
+from oracle.oracle.clients import (
+    execute_ethereum_gql_query,
+    execute_single_gql_query,
+    execute_sw_gql_query,
+)
 from oracle.oracle.graphql_queries import (
     FINALIZED_BLOCK_QUERY,
     LATEST_BLOCK_QUERY,
@@ -37,13 +42,19 @@ class VotingParameters(TypedDict):
 
 async def get_finalized_block(network: str) -> Block:
     """Gets the finalized block number and its timestamp."""
-    result: Dict = await execute_ethereum_gql_query(
-        network=network,
-        query=FINALIZED_BLOCK_QUERY,
-        variables=dict(
-            confirmation_blocks=CONFIRMATION_BLOCKS,
-        ),
+    results = await asyncio.gather(
+        *[
+            execute_single_gql_query(
+                subgraph_url,
+                query=FINALIZED_BLOCK_QUERY,
+                variables=dict(
+                    confirmation_blocks=CONFIRMATION_BLOCKS,
+                ),
+            )
+            for subgraph_url in NETWORKS[network]["ETHEREUM_SUBGRAPH_URLS"]
+        ]
     )
+    result = min(results, key=lambda result: int(result["blocks"][0]["id"]))
     return Block(
         block_number=BlockNumber(int(result["blocks"][0]["id"])),
         timestamp=Timestamp(int(result["blocks"][0]["timestamp"])),
@@ -115,6 +126,10 @@ def submit_vote(
     vote: Union[RewardVote, DistributorVote, ValidatorsVote],
     name: str,
 ) -> None:
+    logger.info(
+        f"submit vote: network {network}; oracle {oracle}; encoded data:{encoded_data}; vote:{vote}; name:{name}"
+    )
+    return
     """Submits vote to the votes' aggregator."""
     network_config = NETWORKS[network]
     aws_bucket_name = network_config["AWS_BUCKET_NAME"]
@@ -130,11 +145,11 @@ def submit_vote(
     vote["signature"] = signed_message.signature.hex()
 
     # TODO: support more aggregators (GCP, Azure, etc.)
-    bucket_key = f"{oracle.address}/{name}"
+    object_key = f"{oracle.address}/{name}"
     s3_client.put_object(
         Bucket=aws_bucket_name,
-        Key=bucket_key,
+        Key=object_key,
         Body=json.dumps(vote),
         ACL="public-read",
     )
-    s3_client.get_waiter("object_exists").wait(Bucket=aws_bucket_name, Key=bucket_key)
+    s3_client.get_waiter("object_exists").wait(Bucket=aws_bucket_name, Key=object_key)

@@ -15,7 +15,6 @@ def get_voting_parameters(nonce, balance, *args, **kwargs):
     return {
         "networks": [{"oraclesValidatorsNonce": nonce}],
         "pools": [{"balance": str(balance)}],
-        "_meta": {"block": {"number": block_number}},
     }
 
 
@@ -106,7 +105,7 @@ class TestValidatorController:
                 network=TEST_NETWORK,
                 oracle=get_test_oracle(),
             )
-            await controller.process()
+            await controller.process(block_number)
             assert vote_mock.mock_calls == []
 
     async def test_process_success(self):
@@ -153,7 +152,7 @@ class TestValidatorController:
                 network=TEST_NETWORK,
                 oracle=get_test_oracle(),
             )
-            await controller.process()
+            await controller.process(block_number)
 
             encoded_data: bytes = w3.codec.encode_abi(
                 ["uint256", "(address,bytes32,bytes32,bytes,bytes)[]", "bytes32"],

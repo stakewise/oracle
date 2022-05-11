@@ -8,6 +8,7 @@ from web3 import Web3
 from web3.types import Wei
 
 from oracle.networks import GNOSIS_CHAIN, NETWORKS
+from oracle.oracle.clients import with_consensus
 from oracle.oracle.eth1 import submit_vote
 from oracle.settings import MGNO_RATE, VALIDATOR_VOTE_FILENAME, WAD
 
@@ -35,12 +36,11 @@ class ValidatorsController(object):
         self.validators_batch_size = NETWORKS[self.network]["VALIDATORS_BATCH_SIZE"]
         self.last_validators_deposit_data = []
 
-    async def process(self) -> None:
+    @with_consensus
+    async def process(self, current_block_number) -> None:
         """Process validators registration."""
-        voting_params = await get_voting_parameters(self.network)
-        latest_block_number = voting_params["latest_block_number"]
+        voting_params = await get_voting_parameters(self.network, current_block_number)
         pool_balance = voting_params["pool_balance"]
-
         if self.network == GNOSIS_CHAIN:
             # apply GNO <-> mGNO exchange rate
             pool_balance = Wei(int(pool_balance * MGNO_RATE // WAD))
@@ -53,7 +53,7 @@ class ValidatorsController(object):
             # not enough balance to register next validator
             return
 
-        while not (await has_synced_block(self.network, latest_block_number)):
+        while not (await has_synced_block(self.network, current_block_number)):
             await asyncio.sleep(5)
 
         validators_deposit_data: List[ValidatorDepositData] = []
@@ -63,7 +63,7 @@ class ValidatorsController(object):
             # TODO: implement scoring system based on the operators performance
             deposit_data = await select_validator(
                 network=self.network,
-                block_number=latest_block_number,
+                block_number=current_block_number,
                 used_pubkeys=used_pubkeys,
             )
             if deposit_data is None:
@@ -77,7 +77,7 @@ class ValidatorsController(object):
             return
 
         validators_deposit_root = await get_validators_deposit_root(
-            self.network, latest_block_number
+            self.network, current_block_number
         )
         if (
             self.last_vote_validators_deposit_root == validators_deposit_root

@@ -6,6 +6,7 @@ from eth_typing import HexStr
 from web3 import Web3
 
 from oracle.networks import NETWORKS
+from oracle.oracle.clients import with_consensus
 from oracle.settings import DISTRIBUTOR_VOTE_FILENAME
 
 from ..eth1 import submit_vote
@@ -42,6 +43,7 @@ class DistributorController(object):
             "REWARD_TOKEN_CONTRACT_ADDRESS"
         ]
 
+    @with_consensus
     async def process(self, voting_params: DistributorVotingParameters) -> None:
         """Submits vote for the new merkle root and merkle proofs to the IPFS."""
         from_block = voting_params["from_block"]

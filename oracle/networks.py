@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from decouple import config
+from decouple import Csv, config
 from eth_typing import HexStr
 from web3 import Web3
 
@@ -16,17 +16,20 @@ GNOSIS_CHAIN_UPPER = GNOSIS_CHAIN.upper()
 
 NETWORKS = {
     MAINNET: dict(
-        STAKEWISE_SUBGRAPH_URL=config(
-            f"{MAINNET_UPPER}_STAKEWISE_SUBGRAPH_URL",
-            default="https://api.thegraph.com/subgraphs/name/stakewise/stakewise-mainnet",
+        STAKEWISE_SUBGRAPH_URLS=config(
+            f"{MAINNET_UPPER}_STAKEWISE_SUBGRAPH_URLs",
+            default="https://graph.stakewise.io/subgraphs/name/stakewise/stakewise,https://api.thegraph.com/subgraphs/name/stakewise/stakewise-mainnet",
+            cast=Csv(),
         ),
-        ETHEREUM_SUBGRAPH_URL=config(
-            f"{MAINNET_UPPER}_ETHEREUM_SUBGRAPH_URL",
-            default="https://api.thegraph.com/subgraphs/name/stakewise/ethereum-mainnet",
+        ETHEREUM_SUBGRAPH_URLS=config(
+            f"{MAINNET_UPPER}_ETHEREUM_SUBGRAPH_URLs",
+            default="https://graph.stakewise.io/subgraphs/name/stakewise/ethereum,https://api.thegraph.com/subgraphs/name/stakewise/ethereum-mainnet",
+            cast=Csv(),
         ),
-        UNISWAP_V3_SUBGRAPH_URL=config(
-            f"{MAINNET_UPPER}_UNISWAP_V3_SUBGRAPH_URL",
-            default="https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-mainnet",
+        UNISWAP_V3_SUBGRAPH_URLS=config(
+            f"{MAINNET_UPPER}_UNISWAP_V3_SUBGRAPH_URLs",
+            default="https://graph.stakewise.io/subgraphs/name/stakewise/uniswap-v3,https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-mainnet",
+            cast=Csv(),
         ),
         ETH2_ENDPOINT=config(f"{MAINNET_UPPER}_ETH2_ENDPOINT", default=""),
         VALIDATORS_FETCH_CHUNK_SIZE=config(
@@ -89,17 +92,20 @@ NETWORKS = {
         DEPOSIT_TOKEN_SYMBOL="ETH",
     ),
     GOERLI: dict(
-        STAKEWISE_SUBGRAPH_URL=config(
+        STAKEWISE_SUBGRAPH_URLS=config(
             f"{GOERLI_UPPER}_STAKEWISE_SUBGRAPH_URL",
             default="https://api.thegraph.com/subgraphs/name/stakewise/stakewise-goerli",
+            cast=Csv(),
         ),
-        ETHEREUM_SUBGRAPH_URL=config(
+        ETHEREUM_SUBGRAPH_URLS=config(
             f"{GOERLI_UPPER}_ETHEREUM_SUBGRAPH_URL",
             default="https://api.thegraph.com/subgraphs/name/stakewise/ethereum-goerli",
+            cast=Csv(),
         ),
-        UNISWAP_V3_SUBGRAPH_URL=config(
+        UNISWAP_V3_SUBGRAPH_URLS=config(
             f"{GOERLI_UPPER}_UNISWAP_V3_SUBGRAPH_URL",
             default="https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-goerli",
+            cast=Csv(),
         ),
         ETH2_ENDPOINT=config(f"{GOERLI_UPPER}_ETH2_ENDPOINT", default=""),
         VALIDATORS_FETCH_CHUNK_SIZE=config(
@@ -160,17 +166,20 @@ NETWORKS = {
         DEPOSIT_TOKEN_SYMBOL="ETH",
     ),
     PERM_GOERLI: dict(
-        STAKEWISE_SUBGRAPH_URL=config(
+        STAKEWISE_SUBGRAPH_URLS=config(
             f"{PERM_GOERLI_UPPER}_STAKEWISE_SUBGRAPH_URL",
             default="https://api.thegraph.com/subgraphs/name/stakewise/stakewise-perm-goerli",
+            cast=Csv(),
         ),
-        ETHEREUM_SUBGRAPH_URL=config(
+        ETHEREUM_SUBGRAPH_URLS=config(
             f"{PERM_GOERLI_UPPER}_ETHEREUM_SUBGRAPH_URL",
             default="https://api.thegraph.com/subgraphs/name/stakewise/ethereum-goerli",
+            cast=Csv(),
         ),
-        UNISWAP_V3_SUBGRAPH_URL=config(
+        UNISWAP_V3_SUBGRAPH_URLS=config(
             f"{PERM_GOERLI_UPPER}_UNISWAP_V3_SUBGRAPH_URL",
             default="",
+            cast=Csv(),
         ),
         ETH2_ENDPOINT=config(f"{PERM_GOERLI_UPPER}_ETH2_ENDPOINT", default=""),
         VALIDATORS_FETCH_CHUNK_SIZE=config(
@@ -235,16 +244,20 @@ NETWORKS = {
         DEPOSIT_TOKEN_SYMBOL="ETH",
     ),
     GNOSIS_CHAIN: dict(
-        STAKEWISE_SUBGRAPH_URL=config(
+        STAKEWISE_SUBGRAPH_URLS=config(
             f"{GNOSIS_CHAIN_UPPER}_STAKEWISE_SUBGRAPH_URL",
-            default="https://api.thegraph.com/subgraphs/name/stakewise/stakewise-gnosis",
+            default="https://api.thegraph.com/subgraphs/name/stakewise/stakewise-gnosis,https://graph-gno.stakewise.io/subgraphs/name/stakewise/stakewise",
+            cast=Csv(),
         ),
-        ETHEREUM_SUBGRAPH_URL=config(
+        ETHEREUM_SUBGRAPH_URLS=config(
             f"{GNOSIS_CHAIN_UPPER}_ETHEREUM_SUBGRAPH_URL",
-            default="https://api.thegraph.com/subgraphs/name/stakewise/ethereum-gnosis",
+            default="https://api.thegraph.com/subgraphs/name/stakewise/ethereum-gnosis,https://graph-gno.stakewise.io/subgraphs/name/stakewise/ethereum",
+            cast=Csv(),
         ),
-        UNISWAP_V3_SUBGRAPH_URL=config(
-            f"{GNOSIS_CHAIN_UPPER}_UNISWAP_V3_SUBGRAPH_URL", default=""
+        UNISWAP_V3_SUBGRAPH_URLS=config(
+            f"{GNOSIS_CHAIN_UPPER}_UNISWAP_V3_SUBGRAPH_URL",
+            default="",
+            cast=Csv(),
         ),
         ETH2_ENDPOINT=config(f"{GNOSIS_CHAIN_UPPER}_ETH2_ENDPOINT", default=""),
         VALIDATORS_FETCH_CHUNK_SIZE=config(

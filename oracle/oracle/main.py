@@ -57,10 +57,11 @@ async def main() -> None:
         network_config = NETWORKS[network]
         logger.info(f"[{network}] Checking connection to graph node...")
         await get_finalized_block(network)
-        parsed_uri = "{uri.scheme}://{uri.netloc}".format(
-            uri=urlparse(network_config["ETHEREUM_SUBGRAPH_URL"])
-        )
-        logger.info(f"[{network}] Connected to graph node at {parsed_uri}")
+        parsed_uris = [
+            "{uri.scheme}://{uri.netloc}".format(uri=urlparse(url))
+            for url in network_config["ETHEREUM_SUBGRAPH_URLS"]
+        ]
+        logger.info(f"[{network}] Connected to graph nodes at {parsed_uris}")
 
     # aiohttp session
     session = aiohttp.ClientSession()
@@ -114,7 +115,7 @@ async def main() -> None:
                 # check and update merkle distributor
                 distributor_ctrl.process(voting_parameters["distributor"]),
                 # process validators registration
-                validators_ctrl.process(),
+                validators_ctrl.process(current_block_number=current_block_number),
             )
 
         # wait until next processing time

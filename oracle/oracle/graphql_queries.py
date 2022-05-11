@@ -56,17 +56,12 @@ VOTING_PARAMETERS_QUERY = gql(
 
 VALIDATOR_VOTING_PARAMETERS_QUERY = gql(
     """
-    query getVotingParameters {
-      networks {
+    query getVotingParameters($block_number: Int) {
+      networks(block: { number: $block_number }) {
         oraclesValidatorsNonce
       }
-      pools {
+      pools(block: { number: $block_number }) {
         balance
-      }
-      _meta {
-        block {
-          number
-        }
       }
     }
 """
