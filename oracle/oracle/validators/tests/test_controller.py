@@ -1,25 +1,16 @@
 from unittest.mock import patch
 
 from web3 import Web3
+from web3.types import BlockNumber
 
 from oracle.oracle.tests.common import TEST_NETWORK, get_test_oracle
 from oracle.oracle.tests.factories import faker
 
 from ..controller import ValidatorsController
+from ..types import ValidatorVotingParameters
 
 w3 = Web3()
 block_number = faker.random_int(150000, 250000)
-
-
-def get_voting_parameters(nonce, balance, *args, **kwargs):
-    return {
-        "networks": [{"oraclesValidatorsNonce": nonce}],
-        "pools": [{"balance": str(balance)}],
-    }
-
-
-def has_synced_block(*args, **kwargs):
-    return {"_meta": {"block": {"number": block_number + 10}}}
 
 
 def select_validator(operator, *args, **kwargs):
@@ -78,16 +69,14 @@ def get_validators_deposit_root(validatorsDepositRoot, *args, **kwargs):
     }
 
 
-def sw_gql_query(nonce, operator):
+def sw_gql_query(operator):
     return [
-        get_voting_parameters(nonce, w3.toWei(33, "ether")),
         select_validator(operator),
     ]
 
 
 def ethereum_gql_query(validatorsDepositRoot, *args, **kwargs):
     return [
-        has_synced_block(*args, **kwargs),
         can_registor_validator(),
         get_validators_deposit_root(validatorsDepositRoot),
     ]
@@ -95,23 +84,26 @@ def ethereum_gql_query(validatorsDepositRoot, *args, **kwargs):
 
 class TestValidatorController:
     async def test_process_low_balance(self):
-        with patch(
-            "oracle.oracle.validators.eth1.execute_sw_gql_query",
-            return_value=get_voting_parameters(
-                faker.random_int(100, 200), 31 * 10**9
-            ),
-        ), patch("oracle.oracle.eth1.submit_vote", return_value=None) as vote_mock:
+        with patch("oracle.oracle.eth1.submit_vote", return_value=None) as vote_mock:
             controller = ValidatorsController(
                 network=TEST_NETWORK,
                 oracle=get_test_oracle(),
             )
-            await controller.process(block_number)
+            await controller.process(
+                voting_params=ValidatorVotingParameters(
+                    validators_nonce=faker.random_int(1000, 2000),
+                    pool_balance=w3.toWei(31, "ether"),
+                ),
+                current_block_number=BlockNumber(14583706),
+            )
             assert vote_mock.mock_calls == []
 
     async def test_process_success(self):
+        validators_nonce = faker.random_int(1000, 2000)
+
         vote = {
             "signature": "",
-            "nonce": faker.random_int(100, 200),
+            "nonce": validators_nonce,
             "validators_deposit_root": faker.eth_proof(),
             "deposit_data": [
                 {
@@ -126,9 +118,7 @@ class TestValidatorController:
         }
         with patch(
             "oracle.oracle.validators.eth1.execute_sw_gql_query",
-            side_effect=sw_gql_query(
-                nonce=vote["nonce"], operator=vote["deposit_data"][0]["operator"]
-            ),
+            side_effect=sw_gql_query(operator=vote["deposit_data"][0]["operator"]),
         ), patch(
             "oracle.oracle.validators.eth1.execute_ethereum_gql_query",
             side_effect=ethereum_gql_query(
@@ -152,7 +142,13 @@ class TestValidatorController:
                 network=TEST_NETWORK,
                 oracle=get_test_oracle(),
             )
-            await controller.process(block_number)
+            await controller.process(
+                voting_params=ValidatorVotingParameters(
+                    validators_nonce=validators_nonce,
+                    pool_balance=w3.toWei(33, "ether"),
+                ),
+                current_block_number=BlockNumber(14583706),
+            )
 
             encoded_data: bytes = w3.codec.encode_abi(
                 ["uint256", "(address,bytes32,bytes32,bytes,bytes)[]", "bytes32"],

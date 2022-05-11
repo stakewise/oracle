@@ -10,7 +10,12 @@ from eth_account.signers.local import LocalAccount
 from oracle.health_server import create_health_server_runner, start_health_server
 from oracle.networks import NETWORKS
 from oracle.oracle.distributor.controller import DistributorController
-from oracle.oracle.eth1 import get_finalized_block, get_voting_parameters, submit_vote
+from oracle.oracle.eth1 import (
+    get_finalized_block,
+    get_voting_parameters,
+    has_synced_block,
+    submit_vote,
+)
 from oracle.oracle.health_server import oracle_routes
 from oracle.oracle.rewards.controller import RewardsController
 from oracle.oracle.rewards.eth2 import get_finality_checkpoints, get_genesis
@@ -99,12 +104,17 @@ async def main() -> None:
     while not interrupt_handler.exit:
         for (network, rewards_ctrl, distributor_ctrl, validators_ctrl) in controllers:
             # fetch current finalized ETH1 block data
-            finalized_block = await get_finalized_block(network)
+            finalized_block = await get_finalized_block(network)  # eth
             current_block_number = finalized_block["block_number"]
             current_timestamp = finalized_block["timestamp"]
+
+            while not (await has_synced_block(network, current_block_number)):
+                await asyncio.sleep(5)
+
             voting_parameters = await get_voting_parameters(
                 network, current_block_number
             )
+
             await asyncio.gather(
                 # check and update staking rewards
                 rewards_ctrl.process(
@@ -115,7 +125,10 @@ async def main() -> None:
                 # check and update merkle distributor
                 distributor_ctrl.process(voting_parameters["distributor"]),
                 # process validators registration
-                validators_ctrl.process(current_block_number=current_block_number),
+                validators_ctrl.process(
+                    voting_parameters=voting_parameters["validator"],
+                    current_block_number=current_block_number,
+                ),
             )
 
         # wait until next processing time

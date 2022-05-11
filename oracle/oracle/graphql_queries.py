@@ -50,6 +50,12 @@ VOTING_PARAMETERS_QUERY = gql(
         updatedAtBlock
         updatedAtTimestamp
       }
+      networks(block: { number: $block_number }) {
+        oraclesValidatorsNonce
+      }
+      pools(block: { number: $block_number }) {
+        balance
+      }
     }
 """
 )
@@ -67,7 +73,7 @@ VALIDATOR_VOTING_PARAMETERS_QUERY = gql(
 """
 )
 
-VALIDATOR_REGISTRATIONS_SYNC_BLOCK_QUERY = gql(
+SYNC_BLOCK_QUERY = gql(
     """
     query getMeta {
       _meta {

@@ -2,7 +2,7 @@ from typing import Dict, Set, Union
 
 from eth_typing import HexStr
 from web3 import Web3
-from web3.types import BlockNumber, Wei
+from web3.types import BlockNumber
 
 from oracle.oracle.clients import (
     execute_ethereum_gql_query,
@@ -13,28 +13,9 @@ from oracle.oracle.graphql_queries import (
     OPERATORS_QUERY,
     VALIDATOR_REGISTRATIONS_LATEST_INDEX_QUERY,
     VALIDATOR_REGISTRATIONS_QUERY,
-    VALIDATOR_REGISTRATIONS_SYNC_BLOCK_QUERY,
-    VALIDATOR_VOTING_PARAMETERS_QUERY,
 )
 
-from .types import ValidatorDepositData, ValidatorVotingParameters
-
-
-async def get_voting_parameters(
-    network: str, block_number: BlockNumber
-) -> ValidatorVotingParameters:
-    """Fetches validator voting parameters."""
-    result: Dict = await execute_sw_gql_query(
-        network=network,
-        query=VALIDATOR_VOTING_PARAMETERS_QUERY,
-        variables=dict(block_number=block_number),
-    )
-    network = result["networks"][0]
-    pool = result["pools"][0]
-    return ValidatorVotingParameters(
-        validators_nonce=int(network["oraclesValidatorsNonce"]),
-        pool_balance=Wei(int(pool["balance"])),
-    )
+from .types import ValidatorDepositData
 
 
 async def select_validator(
@@ -99,17 +80,6 @@ async def can_register_validator(
     registrations = result["validatorRegistrations"]
 
     return len(registrations) == 0
-
-
-async def has_synced_block(network: str, block_number: BlockNumber) -> bool:
-    result: Dict = await execute_ethereum_gql_query(
-        network=network,
-        query=VALIDATOR_REGISTRATIONS_SYNC_BLOCK_QUERY,
-        variables={},
-    )
-    meta = result["_meta"]
-
-    return block_number <= BlockNumber(int(meta["block"]["number"]))
 
 
 async def get_validators_deposit_root(

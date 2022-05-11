@@ -1,9 +1,8 @@
-import asyncio
 import logging
 from typing import List, Set
 
 from eth_account.signers.local import LocalAccount
-from eth_typing import HexStr
+from eth_typing import BlockNumber, HexStr
 from web3 import Web3
 from web3.types import Wei
 
@@ -12,13 +11,8 @@ from oracle.oracle.clients import with_consensus
 from oracle.oracle.eth1 import submit_vote
 from oracle.settings import MGNO_RATE, VALIDATOR_VOTE_FILENAME, WAD
 
-from .eth1 import (
-    get_validators_deposit_root,
-    get_voting_parameters,
-    has_synced_block,
-    select_validator,
-)
-from .types import ValidatorDepositData, ValidatorsVote
+from .eth1 import get_validators_deposit_root, select_validator
+from .types import ValidatorDepositData, ValidatorsVote, ValidatorVotingParameters
 
 logger = logging.getLogger(__name__)
 w3 = Web3()
@@ -37,9 +31,12 @@ class ValidatorsController(object):
         self.last_validators_deposit_data = []
 
     @with_consensus
-    async def process(self, current_block_number) -> None:
+    async def process(
+        self,
+        voting_params: ValidatorVotingParameters,
+        current_block_number: BlockNumber,
+    ) -> None:
         """Process validators registration."""
-        voting_params = await get_voting_parameters(self.network, current_block_number)
         pool_balance = voting_params["pool_balance"]
         if self.network == GNOSIS_CHAIN:
             # apply GNO <-> mGNO exchange rate
@@ -52,9 +49,6 @@ class ValidatorsController(object):
         if not validators_count:
             # not enough balance to register next validator
             return
-
-        while not (await has_synced_block(self.network, current_block_number)):
-            await asyncio.sleep(5)
 
         validators_deposit_data: List[ValidatorDepositData] = []
         used_pubkeys: Set[HexStr] = set()
