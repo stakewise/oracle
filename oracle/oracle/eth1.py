@@ -11,7 +11,11 @@ from web3 import Web3
 from web3.types import BlockNumber, Timestamp, Wei
 
 from oracle.networks import NETWORKS
-from oracle.oracle.clients import execute_single_gql_query, execute_sw_gql_query
+from oracle.oracle.clients import (
+    execute_single_gql_query,
+    execute_sw_gql_query,
+    with_consensus,
+)
 from oracle.oracle.graphql_queries import (
     FINALIZED_BLOCK_QUERY,
     SYNC_BLOCK_QUERY,
@@ -76,6 +80,7 @@ async def has_synced_block(network: str, block_number: BlockNumber) -> bool:
     return block_number <= int(result["_meta"]["block"]["number"])
 
 
+@with_consensus
 async def get_voting_parameters(
     network: str, block_number: BlockNumber
 ) -> VotingParameters:

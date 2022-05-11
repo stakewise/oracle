@@ -114,6 +114,10 @@ async def main() -> None:
             voting_parameters = await get_voting_parameters(
                 network, current_block_number
             )
+            # there is no consensus
+            if not voting_parameters:
+                await asyncio.sleep(5)
+                continue
 
             await asyncio.gather(
                 # check and update staking rewards

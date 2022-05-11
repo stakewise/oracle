@@ -36,7 +36,7 @@ def with_consensus(f):
             return f(*args, **kwargs)
         except GraphqlConsensusError as e:
             logger.error(f"There is no consensus in GraphQL query: {e}")
-            return None
+            return
 
     return wrapper
 
@@ -139,7 +139,7 @@ async def execute_ethereum_paginated_gql_query(
     )
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=3, logger=gql_logger)
+@backoff.on_exception(backoff.expo, Exception, max_time=300, logger=gql_logger)
 async def execute_gql_query(
     subgraph_urls: str, query: DocumentNode, variables: Dict
 ) -> Dict:
