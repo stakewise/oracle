@@ -10,7 +10,13 @@ from eth_account.signers.local import LocalAccount
 from oracle.health_server import create_health_server_runner, start_health_server
 from oracle.networks import NETWORKS
 from oracle.oracle.distributor.controller import DistributorController
-from oracle.oracle.eth1 import get_finalized_block, get_voting_parameters, submit_vote
+from oracle.oracle.eth1 import (
+    get_finalized_block,
+    get_latest_block_number,
+    get_voting_parameters,
+    has_synced_block,
+    submit_vote,
+)
 from oracle.oracle.health_server import oracle_routes
 from oracle.oracle.rewards.controller import RewardsController
 from oracle.oracle.rewards.eth2 import get_finality_checkpoints, get_genesis
@@ -57,10 +63,11 @@ async def main() -> None:
         network_config = NETWORKS[network]
         logger.info(f"[{network}] Checking connection to graph node...")
         await get_finalized_block(network)
-        parsed_uri = "{uri.scheme}://{uri.netloc}".format(
-            uri=urlparse(network_config["ETHEREUM_SUBGRAPH_URL"])
-        )
-        logger.info(f"[{network}] Connected to graph node at {parsed_uri}")
+        parsed_uris = [
+            "{uri.scheme}://{uri.netloc}".format(uri=urlparse(url))
+            for url in network_config["ETHEREUM_SUBGRAPH_URLS"]
+        ]
+        logger.info(f"[{network}] Connected to graph nodes at {parsed_uris}")
 
     # aiohttp session
     session = aiohttp.ClientSession()
@@ -101,9 +108,19 @@ async def main() -> None:
             finalized_block = await get_finalized_block(network)
             current_block_number = finalized_block["block_number"]
             current_timestamp = finalized_block["timestamp"]
+
+            latest_block_number = await get_latest_block_number(network)
+
+            while not (await has_synced_block(network, latest_block_number)):
+                continue
+
             voting_parameters = await get_voting_parameters(
                 network, current_block_number
             )
+            # there is no consensus
+            if not voting_parameters:
+                continue
+
             await asyncio.gather(
                 # check and update staking rewards
                 rewards_ctrl.process(
@@ -114,7 +131,10 @@ async def main() -> None:
                 # check and update merkle distributor
                 distributor_ctrl.process(voting_parameters["distributor"]),
                 # process validators registration
-                validators_ctrl.process(),
+                validators_ctrl.process(
+                    voting_params=voting_parameters["validator"],
+                    block_number=latest_block_number,
+                ),
             )
 
         # wait until next processing time

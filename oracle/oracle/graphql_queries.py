@@ -50,29 +50,30 @@ VOTING_PARAMETERS_QUERY = gql(
         updatedAtBlock
         updatedAtTimestamp
       }
+      networks(block: { number: $block_number }) {
+        oraclesValidatorsNonce
+      }
+      pools(block: { number: $block_number }) {
+        balance
+      }
     }
 """
 )
 
 VALIDATOR_VOTING_PARAMETERS_QUERY = gql(
     """
-    query getVotingParameters {
-      networks {
+    query getVotingParameters($block_number: Int) {
+      networks(block: { number: $block_number }) {
         oraclesValidatorsNonce
       }
-      pools {
+      pools(block: { number: $block_number }) {
         balance
-      }
-      _meta {
-        block {
-          number
-        }
       }
     }
 """
 )
 
-VALIDATOR_REGISTRATIONS_SYNC_BLOCK_QUERY = gql(
+SYNC_BLOCK_QUERY = gql(
     """
     query getMeta {
       _meta {

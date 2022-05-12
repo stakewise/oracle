@@ -10,6 +10,7 @@ from web3 import Web3
 from web3.types import Timestamp, Wei
 
 from oracle.networks import GNOSIS_CHAIN, NETWORKS
+from oracle.oracle.clients import with_consensus
 from oracle.oracle.eth1 import submit_vote
 from oracle.oracle.rewards.types import RewardsVotingParameters, RewardVote
 from oracle.settings import MGNO_RATE, REWARD_VOTE_FILENAME, WAD
@@ -49,6 +50,7 @@ class RewardsController(object):
         self.deposit_token_symbol = NETWORKS[network]["DEPOSIT_TOKEN_SYMBOL"]
         self.last_vote_total_rewards = None
 
+    @with_consensus
     async def process(
         self,
         voting_params: RewardsVotingParameters,
