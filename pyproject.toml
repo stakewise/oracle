@@ -7,7 +7,7 @@ license = "AGPL-3.0-only"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "==3.8.12"
+python = "==3.10.4"
 python-decouple = "==3.6"
 web3 = "==5.29.0"
 py-ecc = "==5.2.0"
