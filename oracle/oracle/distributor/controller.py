@@ -6,9 +6,11 @@ from eth_typing import HexStr
 from web3 import Web3
 
 from oracle.networks import NETWORKS
+from oracle.oracle.utils import save
 from oracle.settings import DISTRIBUTOR_VOTE_FILENAME
 
 from ..eth1 import submit_vote
+from .distributor_tokens import get_distributor_redirects, get_distributor_tokens
 from .eth1 import (
     get_disabled_stakers_reward_token_distributions,
     get_distributor_claimed_accounts,
@@ -41,6 +43,7 @@ class DistributorController(object):
             "REWARD_TOKEN_CONTRACT_ADDRESS"
         ]
 
+    @save
     async def process(self, voting_params: DistributorVotingParameters) -> None:
         """Submits vote for the new merkle root and merkle proofs to the IPFS."""
         from_block = voting_params["from_block"]
@@ -109,12 +112,18 @@ class DistributorController(object):
 
         # calculate reward distributions with coroutines
         tasks = []
+        distributor_tokens = await get_distributor_tokens(self.network, from_block)
+        distributor_redirects = await get_distributor_redirects(
+            self.network, from_block
+        )
         for dist in all_distributions:
             distributor_rewards = DistributorRewards(
                 network=self.network,
                 uniswap_v3_pools=uniswap_v3_pools,
                 from_block=dist["from_block"],
                 to_block=dist["to_block"],
+                distributor_tokens=distributor_tokens,
+                distributor_redirects=distributor_redirects,
                 reward_token=dist["reward_token"],
                 uni_v3_token=dist["uni_v3_token"],
             )

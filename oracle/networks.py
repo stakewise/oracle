@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from decouple import config
+from decouple import Csv, config
 from eth_typing import HexStr
 from web3 import Web3
 
@@ -16,23 +16,32 @@ GNOSIS_CHAIN_UPPER = GNOSIS_CHAIN.upper()
 
 NETWORKS = {
     MAINNET: dict(
-        STAKEWISE_SUBGRAPH_URL=config(
-            f"{MAINNET_UPPER}_STAKEWISE_SUBGRAPH_URL",
-            default="https://api.thegraph.com/subgraphs/name/stakewise/stakewise-mainnet",
+        STAKEWISE_SUBGRAPH_URLS=config(
+            f"{MAINNET_UPPER}_STAKEWISE_SUBGRAPH_URLs",
+            default="https://graph.stakewise.io/subgraphs/name/stakewise/stakewise,https://api.thegraph.com/subgraphs/name/stakewise/stakewise-mainnet",
+            cast=Csv(),
         ),
-        ETHEREUM_SUBGRAPH_URL=config(
-            f"{MAINNET_UPPER}_ETHEREUM_SUBGRAPH_URL",
-            default="https://api.thegraph.com/subgraphs/name/stakewise/ethereum-mainnet",
+        ETHEREUM_SUBGRAPH_URLS=config(
+            f"{MAINNET_UPPER}_ETHEREUM_SUBGRAPH_URLs",
+            default="https://graph.stakewise.io/subgraphs/name/stakewise/ethereum,https://api.thegraph.com/subgraphs/name/stakewise/ethereum-mainnet",
+            cast=Csv(),
         ),
-        UNISWAP_V3_SUBGRAPH_URL=config(
-            f"{MAINNET_UPPER}_UNISWAP_V3_SUBGRAPH_URL",
-            default="https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-mainnet",
-        ),
-        RARI_FUSE_SUBGRAPH_URL=config(
-            f"{MAINNET_UPPER}_RARI_FUSE_SUBGRAPH_URL",
-            default="https://api.thegraph.com/subgraphs/name/stakewise/rari-fuse-mainnet",
+        UNISWAP_V3_SUBGRAPH_URLS=config(
+            f"{MAINNET_UPPER}_UNISWAP_V3_SUBGRAPH_URLs",
+            default="https://graph.stakewise.io/subgraphs/name/stakewise/uniswap-v3,https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-mainnet",
+            cast=Csv(),
         ),
         ETH2_ENDPOINT=config(f"{MAINNET_UPPER}_ETH2_ENDPOINT", default=""),
+        VALIDATORS_FETCH_CHUNK_SIZE=config(
+            f"{MAINNET_UPPER}_VALIDATORS_FETCH_CHUNK_SIZE",
+            default=100,
+            cast=int,
+        ),
+        VALIDATORS_BATCH_SIZE=config(
+            f"{MAINNET_UPPER}_VALIDATORS_BATCH_SIZE",
+            default=10,
+            cast=int,
+        ),
         SLOTS_PER_EPOCH=32,
         SECONDS_PER_SLOT=12,
         ORACLES_CONTRACT_ADDRESS=Web3.toChecksumAddress(
@@ -53,10 +62,6 @@ NETWORKS = {
         DISTRIBUTOR_FALLBACK_ADDRESS=Web3.toChecksumAddress(
             "0x144a98cb1CdBb23610501fE6108858D9B7D24934"
         ),
-        RARI_FUSE_POOL_ADDRESSES=[
-            Web3.toChecksumAddress("0x18F49849D20Bc04059FE9d775df9a38Cd1f5eC9F"),
-            Web3.toChecksumAddress("0x83d534Ab1d4002249B0E6d22410b62CF31978Ca2"),
-        ],
         WITHDRAWAL_CREDENTIALS=HexStr(
             "0x0100000000000000000000002296e122c1a20fca3cac3371357bdad3be0df079"
         ),
@@ -92,23 +97,32 @@ NETWORKS = {
         ),
     ),
     GOERLI: dict(
-        STAKEWISE_SUBGRAPH_URL=config(
+        STAKEWISE_SUBGRAPH_URLS=config(
             f"{GOERLI_UPPER}_STAKEWISE_SUBGRAPH_URL",
             default="https://api.thegraph.com/subgraphs/name/stakewise/stakewise-goerli",
+            cast=Csv(),
         ),
-        ETHEREUM_SUBGRAPH_URL=config(
+        ETHEREUM_SUBGRAPH_URLS=config(
             f"{GOERLI_UPPER}_ETHEREUM_SUBGRAPH_URL",
             default="https://api.thegraph.com/subgraphs/name/stakewise/ethereum-goerli",
+            cast=Csv(),
         ),
-        UNISWAP_V3_SUBGRAPH_URL=config(
+        UNISWAP_V3_SUBGRAPH_URLS=config(
             f"{GOERLI_UPPER}_UNISWAP_V3_SUBGRAPH_URL",
             default="https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-goerli",
-        ),
-        # TODO: update once rari fuse pools is deployed to goerli chain
-        RARI_FUSE_SUBGRAPH_URL=config(
-            f"{GOERLI_UPPER}_RARI_FUSE_SUBGRAPH_URL", default=""
+            cast=Csv(),
         ),
         ETH2_ENDPOINT=config(f"{GOERLI_UPPER}_ETH2_ENDPOINT", default=""),
+        VALIDATORS_FETCH_CHUNK_SIZE=config(
+            f"{GOERLI_UPPER}_VALIDATORS_FETCH_CHUNK_SIZE",
+            default=100,
+            cast=int,
+        ),
+        VALIDATORS_BATCH_SIZE=config(
+            f"{GOERLI_UPPER}_VALIDATORS_BATCH_SIZE",
+            default=10,
+            cast=int,
+        ),
         SLOTS_PER_EPOCH=32,
         SECONDS_PER_SLOT=12,
         ORACLES_CONTRACT_ADDRESS=Web3.toChecksumAddress(
@@ -129,7 +143,6 @@ NETWORKS = {
         DISTRIBUTOR_FALLBACK_ADDRESS=Web3.toChecksumAddress(
             "0x1867c96601bc5fE24F685d112314B8F3Fe228D5A"
         ),
-        RARI_FUSE_POOL_ADDRESSES=[],
         WITHDRAWAL_CREDENTIALS=HexStr(
             "0x010000000000000000000000040f15c6b5bfc5f324ecab5864c38d4e1eef4218"
         ),
@@ -163,23 +176,32 @@ NETWORKS = {
         ),
     ),
     PERM_GOERLI: dict(
-        STAKEWISE_SUBGRAPH_URL=config(
+        STAKEWISE_SUBGRAPH_URLS=config(
             f"{PERM_GOERLI_UPPER}_STAKEWISE_SUBGRAPH_URL",
             default="https://api.thegraph.com/subgraphs/name/stakewise/stakewise-perm-goerli",
+            cast=Csv(),
         ),
-        ETHEREUM_SUBGRAPH_URL=config(
+        ETHEREUM_SUBGRAPH_URLS=config(
             f"{PERM_GOERLI_UPPER}_ETHEREUM_SUBGRAPH_URL",
             default="https://api.thegraph.com/subgraphs/name/stakewise/ethereum-goerli",
+            cast=Csv(),
         ),
-        UNISWAP_V3_SUBGRAPH_URL=config(
+        UNISWAP_V3_SUBGRAPH_URLS=config(
             f"{PERM_GOERLI_UPPER}_UNISWAP_V3_SUBGRAPH_URL",
             default="",
-        ),
-        # TODO: update once rari fuse pools is deployed to goerli chain
-        RARI_FUSE_SUBGRAPH_URL=config(
-            f"{PERM_GOERLI_UPPER}_RARI_FUSE_SUBGRAPH_URL", default=""
+            cast=Csv(),
         ),
         ETH2_ENDPOINT=config(f"{PERM_GOERLI_UPPER}_ETH2_ENDPOINT", default=""),
+        VALIDATORS_FETCH_CHUNK_SIZE=config(
+            f"{PERM_GOERLI_UPPER}_VALIDATORS_FETCH_CHUNK_SIZE",
+            default=100,
+            cast=int,
+        ),
+        VALIDATORS_BATCH_SIZE=config(
+            f"{PERM_GOERLI_UPPER}_VALIDATORS_BATCH_SIZE",
+            default=10,
+            cast=int,
+        ),
         SLOTS_PER_EPOCH=32,
         SECONDS_PER_SLOT=12,
         ORACLES_CONTRACT_ADDRESS=Web3.toChecksumAddress(
@@ -200,7 +222,6 @@ NETWORKS = {
         DISTRIBUTOR_FALLBACK_ADDRESS=Web3.toChecksumAddress(
             "0x66D6c253084d8d51c7CFfDb3C188A0b53D998a3d"
         ),
-        RARI_FUSE_POOL_ADDRESSES=[],
         WITHDRAWAL_CREDENTIALS=HexStr(
             "0x0100000000000000000000006dfc9682e3c3263758ad96e2b2ba9822167f81ee"
         ),
@@ -231,28 +252,43 @@ NETWORKS = {
         SYNC_PERIOD=timedelta(days=1),
         IS_POA=True,
         DEPOSIT_TOKEN_SYMBOL="ETH",
+        SCORING_DATABASE_PATH=config(
+            f"{PERM_GOERLI_UPPER}_SCORING_DATABASE_PATH",
+            default=f"/data/{PERM_GOERLI}_operator.db",
+            cast=str,
+        ),
     ),
     GNOSIS_CHAIN: dict(
-        STAKEWISE_SUBGRAPH_URL=config(
+        STAKEWISE_SUBGRAPH_URLS=config(
             f"{GNOSIS_CHAIN_UPPER}_STAKEWISE_SUBGRAPH_URL",
-            default="https://api.thegraph.com/subgraphs/name/stakewise/stakewise-gnosis",
+            default="https://api.thegraph.com/subgraphs/name/stakewise/stakewise-gnosis,https://graph-gno.stakewise.io/subgraphs/name/stakewise/stakewise",
+            cast=Csv(),
         ),
-        ETHEREUM_SUBGRAPH_URL=config(
+        ETHEREUM_SUBGRAPH_URLS=config(
             f"{GNOSIS_CHAIN_UPPER}_ETHEREUM_SUBGRAPH_URL",
-            default="https://api.thegraph.com/subgraphs/name/stakewise/ethereum-gnosis",
+            default="https://api.thegraph.com/subgraphs/name/stakewise/ethereum-gnosis,https://graph-gno.stakewise.io/subgraphs/name/stakewise/ethereum",
+            cast=Csv(),
         ),
-        UNISWAP_V3_SUBGRAPH_URL=config(
-            f"{GNOSIS_CHAIN_UPPER}_UNISWAP_V3_SUBGRAPH_URL", default=""
-        ),
-        RARI_FUSE_SUBGRAPH_URL=config(
-            f"{GNOSIS_CHAIN_UPPER}_RARI_FUSE_SUBGRAPH_URL",
+        UNISWAP_V3_SUBGRAPH_URLS=config(
+            f"{GNOSIS_CHAIN_UPPER}_UNISWAP_V3_SUBGRAPH_URL",
             default="",
+            cast=Csv(),
         ),
         ETH2_ENDPOINT=config(f"{GNOSIS_CHAIN_UPPER}_ETH2_ENDPOINT", default=""),
+        VALIDATORS_FETCH_CHUNK_SIZE=config(
+            f"{GNOSIS_CHAIN_UPPER}_VALIDATORS_FETCH_CHUNK_SIZE",
+            default=100,
+            cast=int,
+        ),
+        VALIDATORS_BATCH_SIZE=config(
+            f"{GNOSIS_CHAIN_UPPER}_VALIDATORS_BATCH_SIZE",
+            default=10,
+            cast=int,
+        ),
         SLOTS_PER_EPOCH=16,
         SECONDS_PER_SLOT=5,
         ORACLES_CONTRACT_ADDRESS=Web3.toChecksumAddress(
-            "0xd0f5ddaed2D8BaE1F451D2A11FFAe1806f2Ee1a5"
+            "0xa6D123620Ea004cc5158b0ec260E934bd45C78c1"
         ),
         MULTICALL_CONTRACT_ADDRESS=Web3.toChecksumAddress(
             "0xb5b692a88BDFc81ca69dcB1d924f59f0413A602a"
@@ -261,15 +297,14 @@ NETWORKS = {
             "0xfdA94F056346d2320d4B5E468D6Ad099b2277746"
         ),
         REWARD_TOKEN_CONTRACT_ADDRESS=Web3.toChecksumAddress(
-            "0x6FFa613eD41585B1c1e517A78d140cFBD68be639"
+            "0x6aC78efae880282396a335CA2F79863A1e6831D4"
         ),
         STAKED_TOKEN_CONTRACT_ADDRESS=Web3.toChecksumAddress(
-            "0x9AEBd2322D3D5fB69324a3cFE380DD11Bc3694D2"
+            "0xA4eF9Da5BA71Cc0D2e5E877a910A37eC43420445"
         ),
         DISTRIBUTOR_FALLBACK_ADDRESS=Web3.toChecksumAddress(
             "0x8737f638E9af54e89ed9E1234dbC68B115CD169e"
         ),
-        RARI_FUSE_POOL_ADDRESSES=[],
         WITHDRAWAL_CREDENTIALS=HexStr(
             "0x010000000000000000000000fc9b67b6034f6b306ea9bd8ec1baf3efa2490394"
         ),
@@ -299,7 +334,7 @@ NETWORKS = {
         ),
         SYNC_PERIOD=timedelta(days=1),
         IS_POA=True,
-        DEPOSIT_TOKEN_SYMBOL="mGNO",
+        DEPOSIT_TOKEN_SYMBOL="GNO",
         SCORING_DATABASE_PATH=config(
             f"{GNOSIS_CHAIN_UPPER}_SCORING_DATABASE_PATH",
             default=f"/data/{GNOSIS_CHAIN}_operator.db",

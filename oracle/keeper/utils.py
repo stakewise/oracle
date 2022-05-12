@@ -1,3 +1,4 @@
+import json
 import logging
 import time
 from collections import Counter
@@ -16,7 +17,7 @@ from oracle.keeper.typings import OraclesVotes, Parameters
 from oracle.networks import NETWORKS
 from oracle.oracle.distributor.types import DistributorVote
 from oracle.oracle.rewards.types import RewardVote
-from oracle.oracle.validators.types import ValidatorVote
+from oracle.oracle.validators.types import ValidatorsVote
 from oracle.settings import (
     CONFIRMATION_BLOCKS,
     DISTRIBUTOR_VOTE_FILENAME,
@@ -140,16 +141,26 @@ def check_distributor_vote(
 
 
 def check_validator_vote(
-    web3_client: Web3, vote: ValidatorVote, oracle: ChecksumAddress
+    web3_client: Web3, vote: ValidatorsVote, oracle: ChecksumAddress
 ) -> bool:
     """Checks whether oracle's validator vote is correct."""
     try:
+        deposit_data_payloads = []
+        for deposit_data in vote["deposit_data"]:
+            deposit_data_payloads.append(
+                (
+                    deposit_data["operator"],
+                    deposit_data["withdrawal_credentials"],
+                    deposit_data["deposit_data_root"],
+                    deposit_data["public_key"],
+                    deposit_data["deposit_data_signature"],
+                )
+            )
         encoded_data: bytes = web3_client.codec.encode_abi(
-            ["uint256", "bytes", "address", "bytes32"],
+            ["uint256", "(address,bytes32,bytes32,bytes,bytes)[]", "bytes32"],
             [
                 int(vote["nonce"]),
-                vote["public_key"],
-                vote["operator"],
+                deposit_data_payloads,
                 vote["validators_deposit_root"],
             ],
         )
@@ -168,7 +179,7 @@ def get_oracles_votes(
     oracles: List[ChecksumAddress],
 ) -> OraclesVotes:
     """Fetches oracle votes that match current nonces."""
-    votes = OraclesVotes(rewards=[], distributor=[], validator=[])
+    votes = OraclesVotes(rewards=[], distributor=[], validators=[])
     network_config = NETWORKS[network]
     aws_bucket_name = network_config["AWS_BUCKET_NAME"]
     aws_region = network_config["AWS_REGION"]
@@ -183,7 +194,7 @@ def get_oracles_votes(
                 check_distributor_vote,
             ),
             (
-                votes.validator,
+                votes.validators,
                 VALIDATOR_VOTE_FILENAME,
                 validators_nonce,
                 check_validator_vote,
@@ -349,57 +360,67 @@ def submit_votes(
 
     counter = Counter(
         [
-            (vote["public_key"], vote["operator"], vote["validators_deposit_root"])
-            for vote in votes.validator
+            (
+                json.dumps(vote["deposit_data"], sort_keys=True),
+                vote["validators_deposit_root"],
+            )
+            for vote in votes.validators
         ]
     )
     most_voted = counter.most_common(1)
     if most_voted and can_submit(most_voted[0][1], total_oracles):
-        public_key, operator, validators_deposit_root = most_voted[0][0]
+        deposit_data, validators_deposit_root = most_voted[0][0]
+        deposit_data = json.loads(deposit_data)
+
         signatures = []
         i = 0
         while not can_submit(len(signatures), total_oracles):
-            vote = votes.validator[i]
-            if (public_key, operator, validators_deposit_root) == (
-                vote["public_key"],
-                vote["operator"],
+            vote = votes.validators[i]
+            if (deposit_data, validators_deposit_root) == (
+                vote["deposit_data"],
                 vote["validators_deposit_root"],
             ):
                 signatures.append(vote["signature"])
             i += 1
 
-        validator_vote: ValidatorVote = next(
+        validators_vote: ValidatorsVote = next(
             vote
-            for vote in votes.validator
-            if (public_key, operator, validators_deposit_root)
+            for vote in votes.validators
+            if (deposit_data, validators_deposit_root)
             == (
-                vote["public_key"],
-                vote["operator"],
+                vote["deposit_data"],
                 vote["validators_deposit_root"],
             )
         )
         logger.info(
-            f"[{network}] Submitting validator registration: "
-            f"operator={operator}, "
-            f"public key={public_key}, "
-            f"validator deposit root={validators_deposit_root}"
+            f"[{network}] Submitting validator(s) registration: "
+            f"count={len(validators_vote['deposit_data'])}, "
+            f"deposit root={validators_deposit_root}"
         )
+        submit_deposit_data = []
+        submit_merkle_proofs = []
+        for deposit in deposit_data:
+            submit_deposit_data.append(
+                dict(
+                    operator=deposit["operator"],
+                    withdrawalCredentials=deposit["withdrawal_credentials"],
+                    depositDataRoot=deposit["deposit_data_root"],
+                    publicKey=deposit["public_key"],
+                    signature=deposit["deposit_data_signature"],
+                )
+            )
+            submit_merkle_proofs.append(deposit["proof"])
+
         submit_update(
             network,
             web3_client,
-            oracles_contract.functions.registerValidator(
-                dict(
-                    operator=validator_vote["operator"],
-                    withdrawalCredentials=validator_vote["withdrawal_credentials"],
-                    depositDataRoot=validator_vote["deposit_data_root"],
-                    publicKey=validator_vote["public_key"],
-                    signature=validator_vote["deposit_data_signature"],
-                ),
-                validator_vote["proof"],
+            oracles_contract.functions.registerValidators(
+                submit_deposit_data,
+                submit_merkle_proofs,
                 validators_deposit_root,
                 signatures,
             ),
         )
         logger.info(
-            f"[{network}] Validator registration has been successfully submitted"
+            f"[{network}] Validator(s) registration has been successfully submitted"
         )

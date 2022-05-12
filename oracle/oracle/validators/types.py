@@ -1,13 +1,12 @@
 from typing import List, TypedDict
 
-from eth_typing import BlockNumber, ChecksumAddress, HexStr
+from eth_typing import ChecksumAddress, HexStr
 from web3.types import Wei
 
 
 class ValidatorVotingParameters(TypedDict):
     validators_nonce: int
     pool_balance: Wei
-    latest_block_number: BlockNumber
 
 
 class MerkleDepositData(TypedDict):
@@ -28,7 +27,8 @@ class ValidatorDepositData(TypedDict):
     proof: List[HexStr]
 
 
-class ValidatorVote(ValidatorDepositData):
+class ValidatorsVote(TypedDict):
     nonce: int
     validators_deposit_root: HexStr
     signature: HexStr
+    deposit_data: List[ValidatorDepositData]

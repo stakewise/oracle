@@ -10,7 +10,13 @@ from eth_account.signers.local import LocalAccount
 from oracle.health_server import create_health_server_runner, start_health_server
 from oracle.networks import NETWORKS
 from oracle.oracle.distributor.controller import DistributorController
-from oracle.oracle.eth1 import get_finalized_block, get_voting_parameters, submit_vote
+from oracle.oracle.eth1 import (
+    get_finalized_block,
+    get_latest_block_number,
+    get_voting_parameters,
+    has_synced_block,
+    submit_vote,
+)
 from oracle.oracle.health_server import oracle_routes
 from oracle.oracle.rewards.controller import RewardsController
 from oracle.oracle.rewards.eth2 import get_finality_checkpoints, get_genesis
@@ -40,7 +46,49 @@ logger = logging.getLogger(__name__)
 
 async def main() -> None:
     oracle_accounts: Dict[str, LocalAccount] = await get_oracle_accounts()
+    # aiohttp session
+    session = aiohttp.ClientSession()
+    await init_checks(oracle_accounts, session)
 
+    # wait for interrupt
+    interrupt_handler = InterruptHandler()
+
+    # fetch ETH2 genesis
+    controllers = []
+    for network in ENABLED_NETWORKS:
+        genesis = await get_genesis(network, session)
+        oracle = oracle_accounts[network]
+        rewards_controller = RewardsController(
+            network=network,
+            aiohttp_session=session,
+            genesis_timestamp=int(genesis["genesis_time"]),
+            oracle=oracle,
+        )
+        distributor_controller = DistributorController(network, oracle)
+        validators_controller = ValidatorsController(network, oracle)
+        scoring_controller = ScoringController(
+            network,
+            genesis_timestamp=int(genesis["genesis_time"]),
+            aiohttp_session=session,
+            oracle=oracle,
+        )
+        controllers.append(
+            (
+                interrupt_handler,
+                network,
+                rewards_controller,
+                distributor_controller,
+                validators_controller,
+                scoring_controller,
+            )
+        )
+
+    await asyncio.gather(*[process_network(*args) for args in controllers])
+
+    await session.close()
+
+
+async def init_checks(oracle_accounts, session):
     # try submitting test vote
     for network, oracle in oracle_accounts.items():
         logger.info(f"[{network}] Submitting test vote for account {oracle.address}...")
@@ -58,13 +106,11 @@ async def main() -> None:
         network_config = NETWORKS[network]
         logger.info(f"[{network}] Checking connection to graph node...")
         await get_finalized_block(network)
-        parsed_uri = "{uri.scheme}://{uri.netloc}".format(
-            uri=urlparse(network_config["ETHEREUM_SUBGRAPH_URL"])
-        )
-        logger.info(f"[{network}] Connected to graph node at {parsed_uri}")
-
-    # aiohttp session
-    session = aiohttp.ClientSession()
+        parsed_uris = [
+            "{uri.scheme}://{uri.netloc}".format(uri=urlparse(url))
+            for url in network_config["ETHEREUM_SUBGRAPH_URLS"]
+        ]
+        logger.info(f"[{network}] Connected to graph nodes at {parsed_uris}")
 
     # check ETH2 API connection
     for network in ENABLED_NETWORKS:
@@ -76,53 +122,34 @@ async def main() -> None:
         )
         logger.info(f"[{network}] Connected to ETH2 node at {parsed_uri}")
 
-    # wait for interrupt
-    interrupt_handler = InterruptHandler()
 
-    # fetch ETH2 genesis
-    controllers = []
-    for network in ENABLED_NETWORKS:
-        genesis = await get_genesis(network, session)
-        oracle = oracle_accounts[network]
-        rewards_controller = RewardsController(
-            network=network,
-            aiohttp_session=session,
-            genesis_timestamp=int(genesis["genesis_time"]),
-            oracle=oracle,
-        )
-        scoring_controller = ScoringController(
-            network,
-            genesis_timestamp=int(genesis["genesis_time"]),
-            aiohttp_session=session,
-            oracle=oracle,
-        )
-        distributor_controller = DistributorController(network, oracle)
-        validators_controller = ValidatorsController(network, oracle)
-        controllers.append(
-            (
-                network,
-                rewards_controller,
-                distributor_controller,
-                validators_controller,
-                scoring_controller,
-            )
-        )
-
+async def process_network(
+    interrupt_handler: InterruptHandler,
+    network: str,
+    rewards_ctrl: RewardsController,
+    distributor_ctrl: DistributorController,
+    validators_ctrl: ValidatorsController,
+    scoring_ctrl: ScoringController,
+) -> None:
     while not interrupt_handler.exit:
-        for (
-            network,
-            rewards_ctrl,
-            distributor_ctrl,
-            validators_ctrl,
-            scoring_ctrl,
-        ) in controllers:
+        try:
             # fetch current finalized ETH1 block data
             finalized_block = await get_finalized_block(network)
             current_block_number = finalized_block["block_number"]
             current_timestamp = finalized_block["timestamp"]
+
+            latest_block_number = await get_latest_block_number(network)
+
+            while not (await has_synced_block(network, latest_block_number)):
+                continue
+
             voting_parameters = await get_voting_parameters(
                 network, current_block_number
             )
+            # there is no consensus
+            if not voting_parameters:
+                return
+
             await asyncio.gather(
                 # check and update staking rewards
                 rewards_ctrl.process(
@@ -133,14 +160,16 @@ async def main() -> None:
                 # check and update merkle distributor
                 distributor_ctrl.process(voting_parameters["distributor"]),
                 # process validators registration
-                validators_ctrl.process(),
+                validators_ctrl.process(
+                    voting_params=voting_parameters["validator"],
+                    block_number=latest_block_number,
+                ),
                 scoring_ctrl.process(),
             )
+        except BaseException as e:
+            logger.exception(e)
 
-        # wait until next processing time
         await asyncio.sleep(ORACLE_PROCESS_INTERVAL)
-
-    await session.close()
 
 
 if __name__ == "__main__":

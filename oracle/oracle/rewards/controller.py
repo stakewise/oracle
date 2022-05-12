@@ -9,9 +9,11 @@ from eth_typing import BlockNumber, HexStr
 from web3 import Web3
 from web3.types import Timestamp, Wei
 
-from oracle.networks import NETWORKS
+from oracle.networks import GNOSIS_CHAIN, NETWORKS
 from oracle.oracle.eth1 import submit_vote
-from oracle.settings import REWARD_VOTE_FILENAME
+from oracle.oracle.rewards.types import RewardsVotingParameters, RewardVote
+from oracle.oracle.utils import save
+from oracle.settings import MGNO_RATE, REWARD_VOTE_FILENAME, WAD
 
 from .eth1 import get_registered_validators_public_keys
 from .eth2 import (
@@ -20,7 +22,6 @@ from .eth2 import (
     get_finality_checkpoints,
     get_validators,
 )
-from .types import RewardsVotingParameters, RewardVote
 
 logger = logging.getLogger(__name__)
 w3 = Web3()
@@ -49,6 +50,7 @@ class RewardsController(object):
         self.deposit_token_symbol = NETWORKS[network]["DEPOSIT_TOKEN_SYMBOL"]
         self.last_vote_total_rewards = None
 
+    @save
     async def process(
         self,
         voting_params: RewardsVotingParameters,
@@ -101,12 +103,14 @@ class RewardsController(object):
         state_id = str(update_epoch * self.slots_per_epoch)
         total_rewards: Wei = Wei(0)
         activated_validators = 0
-        # fetch balances in chunks of 100 keys
-        for i in range(0, len(public_keys), 100):
+        chunk_size = NETWORKS[self.network]["VALIDATORS_FETCH_CHUNK_SIZE"]
+
+        # fetch balances in chunks
+        for i in range(0, len(public_keys), chunk_size):
             validators = await get_validators(
                 network=self.network,
                 session=self.aiohttp_session,
-                public_keys=public_keys[i : i + 100],
+                public_keys=public_keys[i : i + chunk_size],
                 state_id=state_id,
             )
             for validator in validators:
@@ -117,6 +121,10 @@ class RewardsController(object):
                 total_rewards += Wei(
                     Web3.toWei(validator["balance"], "gwei") - self.deposit_amount
                 )
+
+        if self.network == GNOSIS_CHAIN:
+            # apply mGNO <-> GNO exchange rate
+            total_rewards = Wei(int(total_rewards * WAD // MGNO_RATE))
 
         pretty_total_rewards = self.format_ether(total_rewards)
         logger.info(

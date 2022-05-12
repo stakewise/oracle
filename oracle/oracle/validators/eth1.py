@@ -1,8 +1,8 @@
-from typing import Dict, Union
+from typing import Dict, Set, Union
 
 from eth_typing import HexStr
 from web3 import Web3
-from web3.types import BlockNumber, Wei
+from web3.types import BlockNumber
 
 from oracle.oracle.clients import (
     execute_ethereum_gql_query,
@@ -13,33 +13,13 @@ from oracle.oracle.graphql_queries import (
     OPERATORS_QUERY,
     VALIDATOR_REGISTRATIONS_LATEST_INDEX_QUERY,
     VALIDATOR_REGISTRATIONS_QUERY,
-    VALIDATOR_REGISTRATIONS_SYNC_BLOCK_QUERY,
-    VALIDATOR_VOTING_PARAMETERS_QUERY,
 )
 
-from .types import ValidatorDepositData, ValidatorVotingParameters
-
-
-async def get_voting_parameters(network: str) -> ValidatorVotingParameters:
-    """Fetches validator voting parameters."""
-    result: Dict = await execute_sw_gql_query(
-        network=network,
-        query=VALIDATOR_VOTING_PARAMETERS_QUERY,
-        variables={},
-    )
-    network = result["networks"][0]
-    pool = result["pools"][0]
-    meta = result["_meta"]
-    return ValidatorVotingParameters(
-        validators_nonce=int(network["oraclesValidatorsNonce"]),
-        pool_balance=Wei(int(pool["balance"])),
-        latest_block_number=BlockNumber(int(meta["block"]["number"])),
-    )
+from .types import ValidatorDepositData
 
 
 async def select_validator(
-    network: str,
-    block_number: BlockNumber,
+    network: str, block_number: BlockNumber, used_pubkeys: Set[HexStr]
 ) -> Union[None, ValidatorDepositData]:
     """Selects the next validator to register."""
     result: Dict = await execute_sw_gql_query(
@@ -62,16 +42,19 @@ async def select_validator(
             continue
 
         selected_deposit_data = deposit_datum[deposit_data_index]
-        can_register = await can_register_validator(
-            network, block_number, selected_deposit_data["public_key"]
+        public_key = selected_deposit_data["public_key"]
+        can_register = public_key not in used_pubkeys and await can_register_validator(
+            network, block_number, public_key
         )
         while deposit_data_index < max_deposit_data_index and not can_register:
             # the edge case when the validator was registered in previous merkle root
             # and the deposit data is presented in the same.
             deposit_data_index += 1
             selected_deposit_data = deposit_datum[deposit_data_index]
-            can_register = await can_register_validator(
-                network, block_number, selected_deposit_data["public_key"]
+            public_key = selected_deposit_data["public_key"]
+            can_register = (
+                public_key not in used_pubkeys
+                and await can_register_validator(network, block_number, public_key)
             )
 
         if can_register:
@@ -97,17 +80,6 @@ async def can_register_validator(
     registrations = result["validatorRegistrations"]
 
     return len(registrations) == 0
-
-
-async def has_synced_block(network: str, block_number: BlockNumber) -> bool:
-    result: Dict = await execute_ethereum_gql_query(
-        network=network,
-        query=VALIDATOR_REGISTRATIONS_SYNC_BLOCK_QUERY,
-        variables={},
-    )
-    meta = result["_meta"]
-
-    return block_number <= BlockNumber(int(meta["block"]["number"]))
 
 
 async def get_validators_deposit_root(
