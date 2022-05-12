@@ -18,6 +18,7 @@ from oracle.oracle.clients import (
 )
 from oracle.oracle.graphql_queries import (
     FINALIZED_BLOCK_QUERY,
+    LATEST_BLOCK_QUERY,
     SYNC_BLOCK_QUERY,
     VOTING_PARAMETERS_QUERY,
 )
@@ -61,6 +62,23 @@ async def get_finalized_block(network: str) -> Block:
         block_number=BlockNumber(int(result["blocks"][0]["id"])),
         timestamp=Timestamp(int(result["blocks"][0]["timestamp"])),
     )
+
+
+async def get_latest_block_number(network: str) -> BlockNumber:
+    """Gets the latest block number and its timestamp."""
+    results = await asyncio.gather(
+        *[
+            execute_single_gql_query(
+                subgraph_url,
+                query=LATEST_BLOCK_QUERY,
+                variables=dict(),
+            )
+            for subgraph_url in NETWORKS[network]["ETHEREUM_SUBGRAPH_URLS"]
+        ]
+    )
+    result = _find_max_consensus(results, func=lambda x: int(x["blocks"][0]["id"]))
+
+    return BlockNumber(int(result["blocks"][0]["id"]))
 
 
 async def has_synced_block(network: str, block_number: BlockNumber) -> bool:

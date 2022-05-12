@@ -34,7 +34,7 @@ class ValidatorsController(object):
     async def process(
         self,
         voting_params: ValidatorVotingParameters,
-        current_block_number: BlockNumber,
+        block_number: BlockNumber,
     ) -> None:
         """Process validators registration."""
         pool_balance = voting_params["pool_balance"]
@@ -57,7 +57,7 @@ class ValidatorsController(object):
             # TODO: implement scoring system based on the operators performance
             deposit_data = await select_validator(
                 network=self.network,
-                block_number=current_block_number,
+                block_number=block_number,
                 used_pubkeys=used_pubkeys,
             )
             if deposit_data is None:
@@ -71,7 +71,7 @@ class ValidatorsController(object):
             return
 
         validators_deposit_root = await get_validators_deposit_root(
-            self.network, current_block_number
+            self.network, block_number
         )
         if (
             self.last_vote_validators_deposit_root == validators_deposit_root

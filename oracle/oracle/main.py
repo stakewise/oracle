@@ -12,6 +12,7 @@ from oracle.networks import NETWORKS
 from oracle.oracle.distributor.controller import DistributorController
 from oracle.oracle.eth1 import (
     get_finalized_block,
+    get_latest_block_number,
     get_voting_parameters,
     has_synced_block,
     submit_vote,
@@ -104,19 +105,21 @@ async def main() -> None:
     while not interrupt_handler.exit:
         for (network, rewards_ctrl, distributor_ctrl, validators_ctrl) in controllers:
             # fetch current finalized ETH1 block data
-            finalized_block = await get_finalized_block(network)  # eth
+            finalized_block = await get_finalized_block(network)
             current_block_number = finalized_block["block_number"]
             current_timestamp = finalized_block["timestamp"]
 
-            while not (await has_synced_block(network, current_block_number)):
+            latest_block_number = await get_latest_block_number(network)
+
+            while not (await has_synced_block(network, latest_block_number)):
                 await asyncio.sleep(5)
+                continue
 
             voting_parameters = await get_voting_parameters(
                 network, current_block_number
             )
             # there is no consensus
             if not voting_parameters:
-                await asyncio.sleep(5)
                 continue
 
             await asyncio.gather(
@@ -130,8 +133,8 @@ async def main() -> None:
                 distributor_ctrl.process(voting_parameters["distributor"]),
                 # process validators registration
                 validators_ctrl.process(
-                    voting_parameters=voting_parameters["validator"],
-                    current_block_number=current_block_number,
+                    voting_params=voting_parameters["validator"],
+                    block_number=latest_block_number,
                 ),
             )
 

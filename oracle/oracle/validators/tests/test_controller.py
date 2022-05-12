@@ -94,7 +94,7 @@ class TestValidatorController:
                     validators_nonce=faker.random_int(1000, 2000),
                     pool_balance=w3.toWei(31, "ether"),
                 ),
-                current_block_number=BlockNumber(14583706),
+                block_number=BlockNumber(14583706),
             )
             assert vote_mock.mock_calls == []
 
@@ -147,7 +147,7 @@ class TestValidatorController:
                     validators_nonce=validators_nonce,
                     pool_balance=w3.toWei(33, "ether"),
                 ),
-                current_block_number=BlockNumber(14583706),
+                block_number=BlockNumber(14583706),
             )
 
             encoded_data: bytes = w3.codec.encode_abi(
