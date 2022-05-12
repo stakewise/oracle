@@ -7,8 +7,8 @@ from web3 import Web3
 from web3.types import Wei
 
 from oracle.networks import GNOSIS_CHAIN, NETWORKS
-from oracle.oracle.clients import with_consensus
 from oracle.oracle.eth1 import submit_vote
+from oracle.oracle.utils import save
 from oracle.settings import MGNO_RATE, VALIDATOR_VOTE_FILENAME, WAD
 
 from .eth1 import get_validators_deposit_root, select_validator
@@ -30,7 +30,7 @@ class ValidatorsController(object):
         self.validators_batch_size = NETWORKS[self.network]["VALIDATORS_BATCH_SIZE"]
         self.last_validators_deposit_data = []
 
-    @with_consensus
+    @save
     async def process(
         self,
         voting_params: ValidatorVotingParameters,

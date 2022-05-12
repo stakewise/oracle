@@ -45,7 +45,42 @@ logger = logging.getLogger(__name__)
 
 async def main() -> None:
     oracle_accounts: Dict[str, LocalAccount] = await get_oracle_accounts()
+    # aiohttp session
+    session = aiohttp.ClientSession()
+    await init_checks(oracle_accounts, session)
 
+    # wait for interrupt
+    interrupt_handler = InterruptHandler()
+
+    # fetch ETH2 genesis
+    controllers = []
+    for network in ENABLED_NETWORKS:
+        genesis = await get_genesis(network, session)
+        oracle = oracle_accounts[network]
+        rewards_controller = RewardsController(
+            network=network,
+            aiohttp_session=session,
+            genesis_timestamp=int(genesis["genesis_time"]),
+            oracle=oracle,
+        )
+        distributor_controller = DistributorController(network, oracle)
+        validators_controller = ValidatorsController(network, oracle)
+        controllers.append(
+            (
+                interrupt_handler,
+                network,
+                rewards_controller,
+                distributor_controller,
+                validators_controller,
+            )
+        )
+
+    await asyncio.gather(*[process_network(*args) for args in controllers])
+
+    await session.close()
+
+
+async def init_checks(oracle_accounts, session):
     # try submitting test vote
     for network, oracle in oracle_accounts.items():
         logger.info(f"[{network}] Submitting test vote for account {oracle.address}...")
@@ -69,9 +104,6 @@ async def main() -> None:
         ]
         logger.info(f"[{network}] Connected to graph nodes at {parsed_uris}")
 
-    # aiohttp session
-    session = aiohttp.ClientSession()
-
     # check ETH2 API connection
     for network in ENABLED_NETWORKS:
         network_config = NETWORKS[network]
@@ -82,28 +114,16 @@ async def main() -> None:
         )
         logger.info(f"[{network}] Connected to ETH2 node at {parsed_uri}")
 
-    # wait for interrupt
-    interrupt_handler = InterruptHandler()
 
-    # fetch ETH2 genesis
-    controllers = []
-    for network in ENABLED_NETWORKS:
-        genesis = await get_genesis(network, session)
-        oracle = oracle_accounts[network]
-        rewards_controller = RewardsController(
-            network=network,
-            aiohttp_session=session,
-            genesis_timestamp=int(genesis["genesis_time"]),
-            oracle=oracle,
-        )
-        distributor_controller = DistributorController(network, oracle)
-        validators_controller = ValidatorsController(network, oracle)
-        controllers.append(
-            (network, rewards_controller, distributor_controller, validators_controller)
-        )
-
+async def process_network(
+    interrupt_handler: InterruptHandler,
+    network: str,
+    rewards_ctrl: RewardsController,
+    distributor_ctrl: DistributorController,
+    validators_ctrl: ValidatorsController,
+) -> None:
     while not interrupt_handler.exit:
-        for (network, rewards_ctrl, distributor_ctrl, validators_ctrl) in controllers:
+        try:
             # fetch current finalized ETH1 block data
             finalized_block = await get_finalized_block(network)
             current_block_number = finalized_block["block_number"]
@@ -119,7 +139,7 @@ async def main() -> None:
             )
             # there is no consensus
             if not voting_parameters:
-                continue
+                return
 
             await asyncio.gather(
                 # check and update staking rewards
@@ -136,11 +156,10 @@ async def main() -> None:
                     block_number=latest_block_number,
                 ),
             )
+        except BaseException as e:
+            logger.exception(e)
 
-        # wait until next processing time
         await asyncio.sleep(ORACLE_PROCESS_INTERVAL)
-
-    await session.close()
 
 
 if __name__ == "__main__":
