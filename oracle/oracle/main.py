@@ -112,7 +112,6 @@ async def main() -> None:
             latest_block_number = await get_latest_block_number(network)
 
             while not (await has_synced_block(network, latest_block_number)):
-                await asyncio.sleep(5)
                 continue
 
             voting_parameters = await get_voting_parameters(
