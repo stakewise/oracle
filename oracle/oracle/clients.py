@@ -30,17 +30,6 @@ class GraphqlConsensusError(ConnectionError):
     pass
 
 
-def with_consensus(f):
-    def wrapper(*args, **kwargs):
-        try:
-            return f(*args, **kwargs)
-        except GraphqlConsensusError as e:
-            logger.error(f"There is no consensus in GraphQL query: {e}")
-            return
-
-    return wrapper
-
-
 async def execute_single_gql_query(
     subgraph_url: str, query: DocumentNode, variables: Dict
 ):
