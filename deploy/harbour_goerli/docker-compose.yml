@@ -19,34 +19,34 @@ volumes:
     driver: local
 
 networks:
-  perm_goerli:
-    name: perm_goerli
+  harbour_goerli:
+    name: harbour_goerli
     driver: bridge
 
 services:
   oracle:
-    container_name: oracle_perm_goerli
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.4.1
+    container_name: oracle_harbour_goerli
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.5.0
     restart: always
     entrypoint: ["python"]
     command: ["oracle/oracle/main.py"]
     env_file: [".env"]
     networks:
-      - perm_goerli
+      - harbour_goerli
 
   keeper:
-    container_name: keeper_perm_goerli
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.4.1
+    container_name: keeper_harbour_goerli
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.5.0
     restart: always
     entrypoint: ["python"]
     command: ["oracle/keeper/main.py"]
     env_file: [".env"]
     profiles: ["keeper"]
     networks:
-      - perm_goerli
+      - harbour_goerli
 
   prometheus:
-    container_name: prometheus_perm_goerli
+    container_name: prometheus_harbour_goerli
     image: bitnami/prometheus:2
     restart: always
     env_file: [".env"]
@@ -55,10 +55,10 @@ services:
       - ../configs/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml
       - ../configs/rules.yml:/opt/bitnami/prometheus/conf/rules.yml
     networks:
-      - perm_goerli
+      - harbour_goerli
 
   alertmanager:
-    container_name: alertmanager_perm_goerli
+    container_name: alertmanager_harbour_goerli
     image: bitnami/alertmanager:0
     restart: always
     env_file: [".env"]
@@ -67,20 +67,20 @@ services:
       - ../configs/alertmanager.yml:/opt/bitnami/alertmanager/conf/config.yml
     depends_on: ["prometheus"]
     networks:
-      - perm_goerli
+      - harbour_goerli
 
   graph-node:
-    container_name: graph_node_perm_goerli
+    container_name: graph_node_harbour_goerli
     image: graphprotocol/graph-node:v0.25.2
     restart: always
     env_file: [".env"]
     depends_on: ["postgres","ipfs"]
     profiles: ["graph"]
     networks:
-      - perm_goerli
+      - harbour_goerli
 
   postgres:
-    container_name: postgres_perm_goerli
+    container_name: postgres_harbour_goerli
     image: postgres:14-alpine
     restart: always
     command: ["postgres", "-cshared_preload_libraries=pg_stat_statements"]
@@ -88,14 +88,14 @@ services:
     volumes: ["postgres:/var/lib/postgresql/data"]
     profiles: ["graph"]
     networks:
-      - perm_goerli
+      - harbour_goerli
 
   subgraphs:
-    container_name: subgraphs_perm_goerli
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/subgraphs:v1.2.0
+    container_name: subgraphs_harbour_goerli
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/subgraphs:v1.3.0
     command: >
       /bin/sh -c "until nc -vz graph-node 8020; do echo 'Waiting graph-node'; sleep 2; done
-      && yarn build:perm_goerli
+      && yarn build:harbour_goerli
       && yarn create:local
       && yarn deploy:local"
     env_file: [".env"]
@@ -103,10 +103,10 @@ services:
     depends_on: ["graph-node","ipfs"]
     profiles: ["graph"]
     networks:
-      - perm_goerli
+      - harbour_goerli
 
   ipfs:
-    container_name: ipfs_perm_goerli
+    container_name: ipfs_harbour_goerli
     image: ipfs/go-ipfs:v0.12.1
     restart: always
     env_file: [".env"]
@@ -117,10 +117,10 @@ services:
     volumes: ["ipfs:/data/ipfs","../configs/ipfs-entrypoint.sh:/usr/local/bin/start_ipfs"]
     profiles: ["ipfs"]
     networks:
-      - perm_goerli
+      - harbour_goerli
 
   geth:
-    container_name: geth_perm_goerli
+    container_name: geth_harbour_goerli
     image: ethereum/client-go:v1.10.16
     restart: always
     command:
@@ -136,12 +136,12 @@ services:
     volumes: ["geth:/data"]
     profiles: ["geth"]
     networks:
-      perm_goerli:
+      harbour_goerli:
         aliases:
           - eth1-node
 
   erigon:
-    container_name: erigon_perm_goerli
+    container_name: erigon_harbour_goerli
     image: thorax/erigon:v2022.03.02
     restart: always
     command:
@@ -156,10 +156,10 @@ services:
     volumes: ["erigon:/home/erigon/.local/share/erigon"]
     profiles: ["erigon"]
     networks:
-      - perm_goerli
+      - harbour_goerli
 
   erigon-rpcdaemon:
-    container_name: erigon_rpcdaemon_perm_goerli
+    container_name: erigon_rpcdaemon_harbour_goerli
     image: thorax/erigon:v2022.03.02
     restart: always
     command:
@@ -173,12 +173,12 @@ services:
     depends_on: ["erigon"]
     profiles: ["erigon"]
     networks:
-      perm_goerli:
+      harbour_goerli:
         aliases:
           - eth1-node
 
   prysm:
-    container_name: prysm_perm_goerli
+    container_name: prysm_harbour_goerli
     image: gcr.io/prysmaticlabs/prysm/beacon-chain:v2.0.6
     restart: always
     command:
@@ -194,12 +194,12 @@ services:
     volumes: ["prysm:/data","../configs/genesis.ssz:/data/gensis.ssz"]
     profiles: ["prysm"]
     networks:
-      perm_goerli:
+      harbour_goerli:
         aliases:
           - eth2-node
 
   lighthouse:
-    container_name: lighthouse_perm_goerli
+    container_name: lighthouse_harbour_goerli
     image: sigp/lighthouse:v2.1.5
     restart: always
     command:
@@ -215,6 +215,6 @@ services:
     volumes: ["lighthouse:/root/.lighthouse"]
     profiles: ["lighthouse"]
     networks:
-      perm_goerli:
+      harbour_goerli:
         aliases:
           - eth2-node
