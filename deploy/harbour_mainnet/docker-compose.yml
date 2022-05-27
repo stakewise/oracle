@@ -1,0 +1,220 @@
+version: "3.9"
+
+volumes:
+  prometheus:
+    driver: local
+  alertmanager:
+    driver: local
+  postgres:
+    driver: local
+  ipfs:
+    driver: local
+  geth:
+    driver: local
+  erigon:
+    driver: local
+  prysm:
+    driver: local
+  lighthouse:
+    driver: local
+
+networks:
+  harbour_mainnet:
+    name: harbour_mainnet
+    driver: bridge
+
+services:
+  oracle:
+    container_name: oracle_harbour_mainnet
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.5.0
+    restart: always
+    entrypoint: ["python"]
+    command: ["oracle/oracle/main.py"]
+    env_file: [".env"]
+    networks:
+      - harbour_mainnet
+
+  keeper:
+    container_name: keeper_harbour_mainnet
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.5.0
+    restart: always
+    entrypoint: ["python"]
+    command: ["oracle/keeper/main.py"]
+    env_file: [".env"]
+    profiles: ["keeper"]
+    networks:
+      - harbour_mainnet
+
+  prometheus:
+    container_name: prometheus_harbour_mainnet
+    image: bitnami/prometheus:2
+    restart: always
+    env_file: [".env"]
+    volumes:
+      - prometheus:/opt/bitnami/prometheus/data
+      - ../configs/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml
+      - ../configs/rules.yml:/opt/bitnami/prometheus/conf/rules.yml
+    networks:
+      - harbour_mainnet
+
+  alertmanager:
+    container_name: alertmanager_harbour_mainnet
+    image: bitnami/alertmanager:0
+    restart: always
+    env_file: [".env"]
+    volumes:
+      - alertmanager:/opt/bitnami/alertmanager/data
+      - ../configs/alertmanager.yml:/opt/bitnami/alertmanager/conf/config.yml
+    depends_on: ["prometheus"]
+    networks:
+      - harbour_mainnet
+
+  graph-node:
+    container_name: graph_node_harbour_mainnet
+    image: graphprotocol/graph-node:v0.25.2
+    restart: always
+    env_file: [".env"]
+    depends_on: ["postgres","ipfs"]
+    profiles: ["graph"]
+    networks:
+      - harbour_mainnet
+
+  postgres:
+    container_name: postgres_harbour_mainnet
+    image: postgres:14-alpine
+    restart: always
+    command: ["postgres", "-cshared_preload_libraries=pg_stat_statements"]
+    env_file: [".env"]
+    volumes: ["postgres:/var/lib/postgresql/data"]
+    profiles: ["graph"]
+    networks:
+      - harbour_mainnet
+
+  subgraphs:
+    container_name: subgraphs_harbour_mainnet
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/subgraphs:v1.3.0
+    command: >
+      /bin/sh -c "until nc -vz graph-node 8020; do echo 'Waiting graph-node'; sleep 2; done
+      && yarn build:harbour_mainnet
+      && yarn create:local
+      && yarn deploy:local"
+    env_file: [".env"]
+    restart: "no"
+    depends_on: ["graph-node","ipfs"]
+    profiles: ["graph"]
+    networks:
+      - harbour_mainnet
+
+  ipfs:
+    container_name: ipfs_harbour_mainnet
+    image: ipfs/go-ipfs:v0.12.1
+    restart: always
+    env_file: [".env"]
+    ulimits:
+      nofile:
+        soft: 8192
+        hard: 8192
+    volumes: ["ipfs:/data/ipfs","../configs/ipfs-entrypoint.sh:/usr/local/bin/start_ipfs"]
+    profiles: ["ipfs"]
+    networks:
+      - harbour_mainnet
+
+  geth:
+    container_name: geth_harbour_mainnet
+    image: ethereum/client-go:v1.10.16
+    restart: always
+    command:
+      - --mainnet
+      - --syncmode=full
+      - --http
+      - --http.addr=0.0.0.0
+      - --http.vhosts=*
+      - --http.api=web3,eth,net
+      - --datadir=/data/ethereum
+      - --ethash.dagdir=/data/ethereum/.ethash
+      - --ipcdisable
+    volumes: ["geth:/data"]
+    profiles: ["geth"]
+    networks:
+      harbour_mainnet:
+        aliases:
+          - eth1-node
+
+  erigon:
+    container_name: erigon_harbour_mainnet
+    image: thorax/erigon:v2022.03.02
+    restart: always
+    command:
+      - erigon
+      - --chain=mainnet
+      - --private.api.addr=0.0.0.0:9090
+      - --maxpeers=100
+      - --datadir=/home/erigon/.local/share/erigon
+      - --batchSize=512M
+      - --prune.r.before=11184524
+      - --prune=htc
+    volumes: ["erigon:/home/erigon/.local/share/erigon"]
+    profiles: ["erigon"]
+    networks:
+      - harbour_mainnet
+
+  erigon-rpcdaemon:
+    container_name: erigon_rpcdaemon_harbour_mainnet
+    image: thorax/erigon:v2022.03.02
+    restart: always
+    command:
+      - rpcdaemon
+      - --private.api.addr=erigon:9090
+      - --http.addr=0.0.0.0
+      - --http.vhosts=*
+      - --http.corsdomain=*
+      - --http.api=eth,erigon,web3,net,txpool
+      - --ws
+    depends_on: ["erigon"]
+    profiles: ["erigon"]
+    networks:
+      harbour_mainnet:
+        aliases:
+          - eth1-node
+
+  prysm:
+    container_name: prysm_harbour_mainnet
+    image: gcr.io/prysmaticlabs/prysm/beacon-chain:v2.0.6
+    restart: always
+    command:
+      - --prater
+      - --genesis-state=/data/genesis.ssz
+      - --datadir=/data
+      - --rpc-host=0.0.0.0
+      - --rpc-port=5052
+      - --monitoring-host=0.0.0.0
+      - --http-web3provider=$ETH1_ENDPOINT
+      - --slots-per-archive-point=64
+      - --accept-terms-of-use
+    volumes: ["prysm:/data","../configs/genesis.ssz:/data/gensis.ssz"]
+    profiles: ["prysm"]
+    networks:
+      harbour_mainnet:
+        aliases:
+          - eth2-node
+
+  lighthouse:
+    container_name: lighthouse_harbour_mainnet
+    image: sigp/lighthouse:v2.1.5
+    restart: always
+    command:
+      - lighthouse
+      - --network
+      - prater
+      - beacon
+      - --http
+      - --http-address=0.0.0.0
+      - --http-port=5052
+      - --eth1-endpoints
+      - $ETH1_ENDPOINT
+    volumes: ["lighthouse:/root/.lighthouse"]
+    profiles: ["lighthouse"]
+    networks:
+      harbour_mainnet:
+        aliases:
+          - eth2-node
