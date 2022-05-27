@@ -149,9 +149,7 @@ NETWORKS = {
         AWS_BUCKET_NAME=config(
             f"{HARBOUR_MAINNET_UPPER}_AWS_BUCKET_NAME", default="oracle-votes-mainnet"
         ),
-        AWS_REGION=config(
-            f"{HARBOUR_MAINNET_UPPER}_AWS_REGION", default="eu-central-1"
-        ),
+        AWS_REGION=config(f"{HARBOUR_MAINNET_UPPER}_AWS_REGION", default="us-east-1"),
         AWS_ACCESS_KEY_ID=config(
             f"{HARBOUR_MAINNET_UPPER}_AWS_ACCESS_KEY_ID", default=""
         ),
