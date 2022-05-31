@@ -19,17 +19,17 @@ GNOSIS_CHAIN_UPPER = GNOSIS_CHAIN.upper()
 NETWORKS = {
     MAINNET: dict(
         STAKEWISE_SUBGRAPH_URLS=config(
-            f"{MAINNET_UPPER}_STAKEWISE_SUBGRAPH_URLs",
+            f"{MAINNET_UPPER}_STAKEWISE_SUBGRAPH_URLS",
             default="https://graph.stakewise.io/subgraphs/name/stakewise/stakewise,https://api.thegraph.com/subgraphs/name/stakewise/stakewise-mainnet",
             cast=Csv(),
         ),
         ETHEREUM_SUBGRAPH_URLS=config(
-            f"{MAINNET_UPPER}_ETHEREUM_SUBGRAPH_URLs",
+            f"{MAINNET_UPPER}_ETHEREUM_SUBGRAPH_URLS",
             default="https://graph.stakewise.io/subgraphs/name/stakewise/ethereum,https://api.thegraph.com/subgraphs/name/stakewise/ethereum-mainnet",
             cast=Csv(),
         ),
         UNISWAP_V3_SUBGRAPH_URLS=config(
-            f"{MAINNET_UPPER}_UNISWAP_V3_SUBGRAPH_URLs",
+            f"{MAINNET_UPPER}_UNISWAP_V3_SUBGRAPH_URLS",
             default="https://graph.stakewise.io/subgraphs/name/stakewise/uniswap-v3,https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-mainnet",
             cast=Csv(),
         ),
@@ -95,17 +95,17 @@ NETWORKS = {
     ),
     HARBOUR_MAINNET: dict(
         STAKEWISE_SUBGRAPH_URLS=config(
-            f"{HARBOUR_MAINNET_UPPER}_STAKEWISE_SUBGRAPH_URLs",
+            f"{HARBOUR_MAINNET_UPPER}_STAKEWISE_SUBGRAPH_URLS",
             default="https://graph.stakewise.io/subgraphs/name/stakewise/stakewise-harbour-mainnet,https://api.thegraph.com/subgraphs/name/stakewise/stakewise-harbour-mainnet",
             cast=Csv(),
         ),
         ETHEREUM_SUBGRAPH_URLS=config(
-            f"{HARBOUR_MAINNET_UPPER}_ETHEREUM_SUBGRAPH_URLs",
+            f"{HARBOUR_MAINNET_UPPER}_ETHEREUM_SUBGRAPH_URLS",
             default="https://graph.stakewise.io/subgraphs/name/stakewise/ethereum,https://api.thegraph.com/subgraphs/name/stakewise/ethereum-mainnet",
             cast=Csv(),
         ),
         UNISWAP_V3_SUBGRAPH_URLS=config(
-            f"{HARBOUR_MAINNET_UPPER}_UNISWAP_V3_SUBGRAPH_URLs",
+            f"{HARBOUR_MAINNET_UPPER}_UNISWAP_V3_SUBGRAPH_URLS",
             default="",
             cast=Csv(),
         ),
@@ -176,17 +176,17 @@ NETWORKS = {
     ),
     GOERLI: dict(
         STAKEWISE_SUBGRAPH_URLS=config(
-            f"{GOERLI_UPPER}_STAKEWISE_SUBGRAPH_URL",
+            f"{GOERLI_UPPER}_STAKEWISE_SUBGRAPH_URLS",
             default="https://api.thegraph.com/subgraphs/name/stakewise/stakewise-goerli",
             cast=Csv(),
         ),
         ETHEREUM_SUBGRAPH_URLS=config(
-            f"{GOERLI_UPPER}_ETHEREUM_SUBGRAPH_URL",
+            f"{GOERLI_UPPER}_ETHEREUM_SUBGRAPH_URLS",
             default="https://api.thegraph.com/subgraphs/name/stakewise/ethereum-goerli",
             cast=Csv(),
         ),
         UNISWAP_V3_SUBGRAPH_URLS=config(
-            f"{GOERLI_UPPER}_UNISWAP_V3_SUBGRAPH_URL",
+            f"{GOERLI_UPPER}_UNISWAP_V3_SUBGRAPH_URLS",
             default="https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-goerli",
             cast=Csv(),
         ),
@@ -250,17 +250,17 @@ NETWORKS = {
     ),
     HARBOUR_GOERLI: dict(
         STAKEWISE_SUBGRAPH_URLS=config(
-            f"{HARBOUR_GOERLI_UPPER}_STAKEWISE_SUBGRAPH_URL",
+            f"{HARBOUR_GOERLI_UPPER}_STAKEWISE_SUBGRAPH_URLS",
             default="https://api.thegraph.com/subgraphs/name/stakewise/stakewise-perm-goerli",
             cast=Csv(),
         ),
         ETHEREUM_SUBGRAPH_URLS=config(
-            f"{HARBOUR_GOERLI_UPPER}_ETHEREUM_SUBGRAPH_URL",
+            f"{HARBOUR_GOERLI_UPPER}_ETHEREUM_SUBGRAPH_URLS",
             default="https://api.thegraph.com/subgraphs/name/stakewise/ethereum-goerli",
             cast=Csv(),
         ),
         UNISWAP_V3_SUBGRAPH_URLS=config(
-            f"{HARBOUR_GOERLI_UPPER}_UNISWAP_V3_SUBGRAPH_URL",
+            f"{HARBOUR_GOERLI_UPPER}_UNISWAP_V3_SUBGRAPH_URLS",
             default="",
             cast=Csv(),
         ),
@@ -331,17 +331,17 @@ NETWORKS = {
     ),
     GNOSIS_CHAIN: dict(
         STAKEWISE_SUBGRAPH_URLS=config(
-            f"{GNOSIS_CHAIN_UPPER}_STAKEWISE_SUBGRAPH_URL",
+            f"{GNOSIS_CHAIN_UPPER}_STAKEWISE_SUBGRAPH_URLS",
             default="https://api.thegraph.com/subgraphs/name/stakewise/stakewise-gnosis,https://graph-gno.stakewise.io/subgraphs/name/stakewise/stakewise",
             cast=Csv(),
         ),
         ETHEREUM_SUBGRAPH_URLS=config(
-            f"{GNOSIS_CHAIN_UPPER}_ETHEREUM_SUBGRAPH_URL",
+            f"{GNOSIS_CHAIN_UPPER}_ETHEREUM_SUBGRAPH_URLS",
             default="https://api.thegraph.com/subgraphs/name/stakewise/ethereum-gnosis,https://graph-gno.stakewise.io/subgraphs/name/stakewise/ethereum",
             cast=Csv(),
         ),
         UNISWAP_V3_SUBGRAPH_URLS=config(
-            f"{GNOSIS_CHAIN_UPPER}_UNISWAP_V3_SUBGRAPH_URL",
+            f"{GNOSIS_CHAIN_UPPER}_UNISWAP_V3_SUBGRAPH_URLS",
             default="",
             cast=Csv(),
         ),
