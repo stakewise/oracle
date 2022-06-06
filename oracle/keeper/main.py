@@ -14,6 +14,7 @@ from oracle.settings import (
     HEALTH_SERVER_PORT,
     KEEPER_PROCESS_INTERVAL,
     LOG_LEVEL,
+    SENTRY_SDK,
 )
 from oracle.utils import InterruptHandler
 
@@ -63,4 +64,10 @@ if __name__ == "__main__":
             f"Starting monitoring server at http://{HEALTH_SERVER_HOST}:{HEALTH_SERVER_PORT}"
         )
         t.start()
+
+    if SENTRY_SDK:
+        import sentry_sdk
+
+        sentry_sdk.init(SENTRY_SDK, traces_sample_rate=0.3)
+
     main()
