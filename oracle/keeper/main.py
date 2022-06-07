@@ -14,7 +14,7 @@ from oracle.settings import (
     HEALTH_SERVER_PORT,
     KEEPER_PROCESS_INTERVAL,
     LOG_LEVEL,
-    SENTRY_SDK,
+    SENTRY_DSN,
 )
 from oracle.utils import InterruptHandler
 
@@ -65,9 +65,9 @@ if __name__ == "__main__":
         )
         t.start()
 
-    if SENTRY_SDK:
+    if SENTRY_DSN:
         import sentry_sdk
 
-        sentry_sdk.init(SENTRY_SDK, traces_sample_rate=0.3)
+        sentry_sdk.init(SENTRY_DSN, traces_sample_rate=0.3)
 
     main()
