@@ -28,7 +28,7 @@ from oracle.settings import (
     HEALTH_SERVER_PORT,
     LOG_LEVEL,
     ORACLE_PROCESS_INTERVAL,
-    SENTRY_SDK,
+    SENTRY_DSN,
     TEST_VOTE_FILENAME,
 )
 from oracle.utils import InterruptHandler, get_oracle_accounts
@@ -174,9 +174,9 @@ if __name__ == "__main__":
             f"Starting monitoring server at http://{HEALTH_SERVER_HOST}:{HEALTH_SERVER_PORT}"
         )
         t.start()
-    if SENTRY_SDK:
+    if SENTRY_DSN:
         import sentry_sdk
 
-        sentry_sdk.init(SENTRY_SDK, traces_sample_rate=0.3)
+        sentry_sdk.init(SENTRY_DSN, traces_sample_rate=0.3)
 
     asyncio.run(main())

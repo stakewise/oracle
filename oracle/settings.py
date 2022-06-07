@@ -56,3 +56,6 @@ TRANSACTION_TIMEOUT = config("TRANSACTION_TIMEOUT", default=900, cast=int)
 
 WAD = Web3.toWei(1, "ether")
 MGNO_RATE = Web3.toWei(32, "ether")
+
+# sentry config
+SENTRY_DSN = config("SENTRY_DSN", default="")
