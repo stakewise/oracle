@@ -67,7 +67,9 @@ if __name__ == "__main__":
 
     if SENTRY_DSN:
         import sentry_sdk
+        from sentry_sdk.integrations.logging import ignore_logger
 
-        sentry_sdk.init(SENTRY_DSN, traces_sample_rate=0.3)
+        sentry_sdk.init(SENTRY_DSN, traces_sample_rate=0.1)
+        ignore_logger("backoff")
 
     main()
