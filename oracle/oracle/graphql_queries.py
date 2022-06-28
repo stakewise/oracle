@@ -482,12 +482,27 @@ OPERATOR_PUBLIC_KEYS_QUERY = gql(
     """
     query getValidators($operator: ID!, $last_id: ID) {
       validators(
-        first: 1000
+        first: 1000  # todo
         where: { operator: $operator, id_gt: $last_id }
         orderBy: id
         orderDirection: asc
       ) {
         id
+      }
+    }
+"""
+)
+
+SCORING_QUERY = gql(
+    """
+    query getScoring {
+      scoring(
+        first: 2
+        orderBy: createdAtTimestamp
+        orderDirection: desc
+      ) {
+        balance
+        createdAtTimestamp
       }
     }
 """

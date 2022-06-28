@@ -1,10 +1,10 @@
-from typing import Dict
+from typing import Dict, List
 
 from eth_typing import HexStr
 from web3 import Web3
-from web3.types import ChecksumAddress
+from web3.types import BlockNumber, ChecksumAddress
 
-from oracle.oracle.clients import execute_sw_gql_query
+from oracle.oracle.clients import execute_sw_gql_paginated_query, execute_sw_gql_query
 from oracle.oracle.graphql_queries import (
     OPERATOR_PUBLIC_KEYS_QUERY,
     OPERATORS_IDS_QUERY,
@@ -14,12 +14,13 @@ from oracle.oracle.graphql_queries import (
 
 async def get_operators(
     network: str,
-) -> ChecksumAddress:
+    block_number: BlockNumber,
+) -> List[ChecksumAddress]:
     """Get operators checksum addresses"""
     result: Dict = await execute_sw_gql_query(
         network=network,
         query=OPERATORS_IDS_QUERY,
-        variables={},
+        variables=dict(block_number=block_number),
     )
     items = result["operators"]
     operators = []
@@ -32,32 +33,20 @@ async def get_operators(
 async def get_public_keys(
     network: str,
     operator: ChecksumAddress,
-) -> HexStr:
+    block_number: BlockNumber,
+) -> List[HexStr]:
     """Get operators validators pubkeys"""
-    last_id = ""
-    result: Dict = await execute_sw_gql_query(
+
+    validators: List = await execute_sw_gql_paginated_query(
         network=network,
         query=OPERATOR_PUBLIC_KEYS_QUERY,
-        variables=dict(operator=operator, last_id=last_id),
+        variables=dict(operator=operator, block_number=block_number),
+        paginated_field="validators",
     )
-    validators_chunk = result.get("validators", [])
-    validators = validators_chunk
-
-    # accumulate chunks of validators
-    while len(validators_chunk) >= 1000:
-        last_id = validators_chunk[-1]["id"]
-        result: Dict = await execute_sw_gql_query(
-            network=network,
-            query=OPERATOR_PUBLIC_KEYS_QUERY,
-            variables=dict(operator=operator, last_id=last_id),
-        )
-        validators_chunk = result.get("validators", [])
-        validators.extend(validators_chunk)
-
     return list(set([val["id"] for val in validators]))
 
 
-async def get_operators_rewards_timestamps(
+async def get_operators_rewards_timestamps(  # todo
     network: str,
 ) -> list:
     """Fetches operators rewards."""

@@ -63,6 +63,10 @@ def ipfs_fetch_query(
     ]
 
 
+def scoring(operator):
+    return [{"operator": operator, "score": faker.random_int(1, 100)}]
+
+
 def get_validators_deposit_root(validatorsDepositRoot, *args, **kwargs):
     return {
         "validatorRegistrations": [{"validatorsDepositRoot": validatorsDepositRoot}]
@@ -119,6 +123,9 @@ class TestValidatorController:
         with patch(
             "oracle.oracle.validators.eth1.execute_sw_gql_query",
             side_effect=sw_gql_query(operator=vote["deposit_data"][0]["operator"]),
+        ), patch(
+            "oracle.oracle.validators.scoring.Scoring.sorted_operators",
+            side_effect=scoring(operator=vote["deposit_data"][0]["operator"]),
         ), patch(
             "oracle.oracle.validators.eth1.execute_ethereum_gql_query",
             side_effect=ethereum_gql_query(
