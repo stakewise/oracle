@@ -4,7 +4,7 @@ import aiohttp
 from web3 import Web3
 from web3.types import BlockNumber, Timestamp
 
-from oracle.oracle.tests.common import TEST_NETWORK, get_test_oracle
+from oracle.oracle.tests.common import get_test_oracle
 from oracle.oracle.tests.factories import faker
 
 from ..controller import RewardsController
@@ -84,7 +84,6 @@ class TestRewardController:
             total_rewards = faker.wei_amount()
 
             controller = RewardsController(
-                network=TEST_NETWORK,
                 aiohttp_session=session,
                 genesis_timestamp=1606824023,
                 oracle=get_test_oracle(),
@@ -111,7 +110,6 @@ class TestRewardController:
             vote["total_rewards"] = str(vote["total_rewards"])
             vote_mock.assert_called()
             vote = dict(
-                network=TEST_NETWORK,
                 oracle=get_test_oracle(),
                 encoded_data=encoded_data,
                 vote=vote,

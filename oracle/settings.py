@@ -1,16 +1,17 @@
 from decouple import Csv, config
 from web3 import Web3
 
-from oracle.networks import MAINNET
+from oracle.networks import MAINNET, NETWORKS
 
 # common
 LOG_LEVEL = config("LOG_LEVEL", default="INFO")
 
-ENABLED_NETWORKS = config(
-    "ENABLED_NETWORKS",
+ENABLED_NETWORK = config(
+    "ENABLED_NETWORK",
     default=MAINNET,
-    cast=Csv(),
 )
+
+NETWORK_CONFIG = NETWORKS[ENABLED_NETWORK]
 
 REWARD_VOTE_FILENAME = "reward-vote.json"
 DISTRIBUTOR_VOTE_FILENAME = "distributor-vote.json"

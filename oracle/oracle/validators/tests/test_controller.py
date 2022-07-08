@@ -3,7 +3,7 @@ from unittest.mock import patch
 from web3 import Web3
 from web3.types import BlockNumber
 
-from oracle.oracle.tests.common import TEST_NETWORK, get_test_oracle
+from oracle.oracle.tests.common import get_test_oracle
 from oracle.oracle.tests.factories import faker
 
 from ..controller import ValidatorsController
@@ -86,7 +86,6 @@ class TestValidatorController:
     async def test_process_low_balance(self):
         with patch("oracle.oracle.eth1.submit_vote", return_value=None) as vote_mock:
             controller = ValidatorsController(
-                network=TEST_NETWORK,
                 oracle=get_test_oracle(),
             )
             await controller.process(
@@ -136,10 +135,11 @@ class TestValidatorController:
                 proofs=vote["deposit_data"][0]["proof"],
             ),
         ), patch(
+            "oracle.oracle.validators.controller.ENABLED_NETWORK", "goerli"
+        ), patch(
             "oracle.oracle.validators.controller.submit_vote", return_value=None
         ) as vote_mock:
             controller = ValidatorsController(
-                network=TEST_NETWORK,
                 oracle=get_test_oracle(),
             )
             await controller.process(

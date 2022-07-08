@@ -14,13 +14,13 @@ from web3.contract import Contract, ContractFunction
 from web3.types import TxParams
 
 from oracle.keeper.typings import OraclesVotes, Parameters
-from oracle.networks import NETWORKS
 from oracle.oracle.distributor.types import DistributorVote
 from oracle.oracle.rewards.types import RewardVote
 from oracle.oracle.validators.types import ValidatorsVote
 from oracle.settings import (
     CONFIRMATION_BLOCKS,
     DISTRIBUTOR_VOTE_FILENAME,
+    NETWORK_CONFIG,
     REWARD_VOTE_FILENAME,
     TRANSACTION_TIMEOUT,
     VALIDATOR_VOTE_FILENAME,
@@ -172,7 +172,6 @@ def check_validator_vote(
 
 
 def get_oracles_votes(
-    network: str,
     web3_client: Web3,
     rewards_nonce: int,
     validators_nonce: int,
@@ -180,9 +179,8 @@ def get_oracles_votes(
 ) -> OraclesVotes:
     """Fetches oracle votes that match current nonces."""
     votes = OraclesVotes(rewards=[], distributor=[], validators=[])
-    network_config = NETWORKS[network]
-    aws_bucket_name = network_config["AWS_BUCKET_NAME"]
-    aws_region = network_config["AWS_REGION"]
+    aws_bucket_name = NETWORK_CONFIG["AWS_BUCKET_NAME"]
+    aws_region = NETWORK_CONFIG["AWS_REGION"]
 
     for oracle in oracles:
         for arr, filename, correct_nonce, vote_checker in [
@@ -212,7 +210,7 @@ def get_oracles_votes(
                     continue
                 if not vote_checker(web3_client, vote, oracle):
                     logger.warning(
-                        f"[{network}] Oracle {oracle} has submitted incorrect vote at {bucket_key}"
+                        f"Oracle {oracle} has submitted incorrect vote at {bucket_key}"
                     )
                     continue
 
@@ -228,7 +226,7 @@ def can_submit(signatures_count: int, total_oracles: int) -> bool:
     return signatures_count * 3 > total_oracles * 2
 
 
-def wait_for_transaction(network: str, web3_client: Web3, tx_hash: HexBytes) -> None:
+def wait_for_transaction(web3_client: Web3, tx_hash: HexBytes) -> None:
     """Waits for transaction to be confirmed."""
     receipt = web3_client.eth.wait_for_transaction_receipt(
         transaction_hash=tx_hash, timeout=TRANSACTION_TIMEOUT, poll_latency=5
@@ -237,7 +235,7 @@ def wait_for_transaction(network: str, web3_client: Web3, tx_hash: HexBytes) -> 
     current_block: BlockNumber = web3_client.eth.block_number
     while confirmation_block > current_block:
         logger.info(
-            f"[{network}] Waiting for {confirmation_block - current_block} confirmation blocks..."
+            f"Waiting for {confirmation_block - current_block} confirmation blocks..."
         )
         time.sleep(15)
 
@@ -246,9 +244,8 @@ def wait_for_transaction(network: str, web3_client: Web3, tx_hash: HexBytes) -> 
         current_block = web3_client.eth.block_number
 
 
-def get_transaction_params(network: str, web3_client: Web3) -> TxParams:
-    network_config = NETWORKS[network]
-    max_fee_per_gas = network_config["KEEPER_MAX_FEE_PER_GAS"]
+def get_transaction_params(web3_client: Web3) -> TxParams:
+    max_fee_per_gas = NETWORK_CONFIG["KEEPER_MAX_FEE_PER_GAS"]
     account_nonce = web3_client.eth.getTransactionCount(web3_client.eth.default_account)
     latest_block = web3_client.eth.get_block("latest")
     max_priority_fee = min(web3_client.eth.max_priority_fee, max_fee_per_gas)
@@ -264,10 +261,8 @@ def get_transaction_params(network: str, web3_client: Web3) -> TxParams:
     )
 
 
-def submit_update(
-    network: str, web3_client: Web3, function_call: ContractFunction
-) -> None:
-    tx_params = get_transaction_params(network, web3_client)
+def submit_update(web3_client: Web3, function_call: ContractFunction) -> None:
+    tx_params = get_transaction_params(web3_client)
     estimated_gas = function_call.estimateGas(tx_params)
 
     # add 10% margin to the estimated gas
@@ -275,18 +270,17 @@ def submit_update(
 
     # execute transaction
     tx_hash = function_call.transact(tx_params)
-    logger.info(f"[{network}] Submitted transaction: {Web3.toHex(tx_hash)}")
-    wait_for_transaction(network, web3_client, tx_hash)
+    logger.info(f"Submitted transaction: {Web3.toHex(tx_hash)}")
+    wait_for_transaction(web3_client, tx_hash)
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
 def submit_votes(
-    network: str, web3_client: Web3, oracles_contract: Contract, params: Parameters
+    web3_client: Web3, oracles_contract: Contract, params: Parameters
 ) -> None:
     """Submits aggregated votes in case they have majority."""
     # resolve and fetch the latest votes of the oracles for validators and rewards
     votes = get_oracles_votes(
-        network=network,
         web3_client=web3_client,
         rewards_nonce=params.rewards_nonce,
         validators_nonce=params.validators_nonce,
@@ -303,7 +297,7 @@ def submit_votes(
     most_voted = counter.most_common(1)
     if most_voted and can_submit(most_voted[0][1], total_oracles):
         total_rewards, activated_validators = most_voted[0][0]
-        signatures = []
+        signatures: List[HexStr] = []
         i = 0
         while not can_submit(len(signatures), total_oracles):
             vote = votes.rewards[i]
@@ -316,18 +310,17 @@ def submit_votes(
             i += 1
 
         logger.info(
-            f"[{network}] Submitting total rewards update:"
+            f"Submitting total rewards update:"
             f' rewards={Web3.fromWei(int(total_rewards), "ether")},'
             f" activated validators={activated_validators}"
         )
         submit_update(
-            network,
             web3_client,
             oracles_contract.functions.submitRewards(
                 int(total_rewards), int(activated_validators), signatures
             ),
         )
-        logger.info(f"[{network}] Total rewards has been successfully updated")
+        logger.info("Total rewards has been successfully updated")
 
     counter = Counter(
         [(vote["merkle_root"], vote["merkle_proofs"]) for vote in votes.distributor]
@@ -347,16 +340,15 @@ def submit_votes(
             i += 1
 
         logger.info(
-            f"[{network}] Submitting distributor update: merkle root={merkle_root}, merkle proofs={merkle_proofs}"
+            f"Submitting distributor update: merkle root={merkle_root}, merkle proofs={merkle_proofs}"
         )
         submit_update(
-            network,
             web3_client,
             oracles_contract.functions.submitMerkleRoot(
                 merkle_root, merkle_proofs, signatures
             ),
         )
-        logger.info(f"[{network}] Merkle Distributor has been successfully updated")
+        logger.info("Merkle Distributor has been successfully updated")
 
     counter = Counter(
         [
@@ -393,7 +385,7 @@ def submit_votes(
             )
         )
         logger.info(
-            f"[{network}] Submitting validator(s) registration: "
+            f"Submitting validator(s) registration: "
             f"count={len(validators_vote['deposit_data'])}, "
             f"deposit root={validators_deposit_root}"
         )
@@ -412,7 +404,6 @@ def submit_votes(
             submit_merkle_proofs.append(deposit["proof"])
 
         submit_update(
-            network,
             web3_client,
             oracles_contract.functions.registerValidators(
                 submit_deposit_data,
@@ -421,6 +412,4 @@ def submit_votes(
                 signatures,
             ),
         )
-        logger.info(
-            f"[{network}] Validator(s) registration has been successfully submitted"
-        )
+        logger.info("Validator(s) registration has been successfully submitted")

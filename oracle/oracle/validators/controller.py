@@ -6,10 +6,16 @@ from eth_typing import BlockNumber, HexStr
 from web3 import Web3
 from web3.types import Wei
 
-from oracle.networks import GNOSIS_CHAIN, NETWORKS
+from oracle.networks import GNOSIS_CHAIN
 from oracle.oracle.eth1 import submit_vote
 from oracle.oracle.utils import save
-from oracle.settings import MGNO_RATE, VALIDATOR_VOTE_FILENAME, WAD
+from oracle.settings import (
+    ENABLED_NETWORK,
+    MGNO_RATE,
+    NETWORK_CONFIG,
+    VALIDATOR_VOTE_FILENAME,
+    WAD,
+)
 
 from .eth1 import get_validators_deposit_root, select_validator
 from .types import ValidatorDepositData, ValidatorsVote, ValidatorVotingParameters
@@ -18,17 +24,16 @@ logger = logging.getLogger(__name__)
 w3 = Web3()
 
 
-class ValidatorsController(object):
+class ValidatorsController:
     """Submits new validators registrations to the IPFS."""
 
-    def __init__(self, network: str, oracle: LocalAccount) -> None:
-        self.network = network
+    def __init__(self, oracle: LocalAccount) -> None:
         self.validator_deposit: Wei = Web3.toWei(32, "ether")
         self.last_vote_public_key = None
         self.last_vote_validators_deposit_root = None
         self.oracle = oracle
-        self.validators_batch_size = NETWORKS[self.network]["VALIDATORS_BATCH_SIZE"]
-        self.last_validators_deposit_data = []
+        self.validators_batch_size = NETWORK_CONFIG["VALIDATORS_BATCH_SIZE"]
+        self.last_validators_deposit_data: List[ValidatorDepositData] = []
 
     @save
     async def process(
@@ -38,7 +43,7 @@ class ValidatorsController(object):
     ) -> None:
         """Process validators registration."""
         pool_balance = voting_params["pool_balance"]
-        if self.network == GNOSIS_CHAIN:
+        if ENABLED_NETWORK == GNOSIS_CHAIN:
             # apply GNO <-> mGNO exchange rate
             pool_balance = Wei(int(pool_balance * MGNO_RATE // WAD))
 
@@ -56,7 +61,6 @@ class ValidatorsController(object):
             # select next validator
             # TODO: implement scoring system based on the operators performance
             deposit_data = await select_validator(
-                network=self.network,
                 block_number=block_number,
                 used_pubkeys=used_pubkeys,
             )
@@ -67,12 +71,10 @@ class ValidatorsController(object):
             validators_deposit_data.append(deposit_data)
 
         if not validators_deposit_data:
-            logger.warning(f"[{self.network}] Run out of validator keys")
+            logger.warning("Run out of validator keys")
             return
 
-        validators_deposit_root = await get_validators_deposit_root(
-            self.network, block_number
-        )
+        validators_deposit_root = await get_validators_deposit_root(block_number)
         if (
             self.last_vote_validators_deposit_root == validators_deposit_root
             and self.last_validators_deposit_data == validators_deposit_data
@@ -96,7 +98,7 @@ class ValidatorsController(object):
                 )
             )
             logger.info(
-                f"[{self.network}] Voting for the next validator: operator={operator}, public key={public_key}"
+                f"Voting for the next validator: operator={operator}, public key={public_key}"
             )
 
         encoded_data: bytes = w3.codec.encode_abi(
@@ -111,13 +113,13 @@ class ValidatorsController(object):
         )
 
         submit_vote(
-            network=self.network,
+            network=ENABLED_NETWORK,
             oracle=self.oracle,
             encoded_data=encoded_data,
             vote=vote,
             name=VALIDATOR_VOTE_FILENAME,
         )
-        logger.info(f"[{self.network}] Submitted validators registration votes")
+        logger.info("Submitted validators registration votes")
 
         # skip voting for the same validator and validators deposit root in the next check
         self.last_validators_deposit_data = validators_deposit_data

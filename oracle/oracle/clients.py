@@ -9,8 +9,7 @@ from gql import Client
 from gql.transport.aiohttp import AIOHTTPTransport
 from graphql import DocumentNode
 
-from oracle.networks import NETWORKS
-from oracle.settings import IPFS_FETCH_ENDPOINTS, IPFS_PIN_ENDPOINTS
+from oracle.settings import IPFS_FETCH_ENDPOINTS, IPFS_PIN_ENDPOINTS, NETWORK_CONFIG
 
 gql_logger = logging.getLogger("gql_logger")
 gql_handler = logging.StreamHandler()
@@ -38,35 +37,30 @@ async def execute_single_gql_query(
         return await session.execute(query, variable_values=variables)
 
 
-async def execute_sw_gql_query(
-    network: str, query: DocumentNode, variables: Dict
-) -> Dict:
+async def execute_sw_gql_query(query: DocumentNode, variables: Dict) -> Dict:
     return await execute_gql_query(
-        subgraph_urls=NETWORKS[network]["STAKEWISE_SUBGRAPH_URLS"],
+        subgraph_urls=NETWORK_CONFIG["STAKEWISE_SUBGRAPH_URLS"],
         query=query,
         variables=variables,
     )
 
 
 async def execute_uniswap_v3_gql_query(
-    network: str,
     query: DocumentNode,
     variables: Dict,
 ) -> Dict:
     """Executes GraphQL query."""
     return await execute_gql_query(
-        subgraph_urls=NETWORKS[network]["UNISWAP_V3_SUBGRAPH_URLS"],
+        subgraph_urls=NETWORK_CONFIG["UNISWAP_V3_SUBGRAPH_URLS"],
         query=query,
         variables=variables,
     )
 
 
-async def execute_ethereum_gql_query(
-    network: str, query: DocumentNode, variables: Dict
-) -> Dict:
+async def execute_ethereum_gql_query(query: DocumentNode, variables: Dict) -> Dict:
     """Executes GraphQL query."""
     return await execute_gql_query(
-        subgraph_urls=NETWORKS[network]["ETHEREUM_SUBGRAPH_URLS"],
+        subgraph_urls=NETWORK_CONFIG["ETHEREUM_SUBGRAPH_URLS"],
         query=query,
         variables=variables,
     )
@@ -76,7 +70,8 @@ async def execute_base_gql_paginated_query(
     subgraph_urls: str, query: DocumentNode, variables: Dict, paginated_field: str
 ) -> List:
     """Executes GraphQL query."""
-    chunks, result = [], []
+    chunks = []
+    result: List[Any] = []
     variables["last_id"] = ""
 
     while True:
@@ -94,10 +89,10 @@ async def execute_base_gql_paginated_query(
 
 
 async def execute_sw_gql_paginated_query(
-    network: str, query: DocumentNode, variables: Dict, paginated_field: str
+    query: DocumentNode, variables: Dict, paginated_field: str
 ) -> List:
     return await execute_base_gql_paginated_query(
-        subgraph_urls=NETWORKS[network]["STAKEWISE_SUBGRAPH_URLS"],
+        subgraph_urls=NETWORK_CONFIG["STAKEWISE_SUBGRAPH_URLS"],
         query=query,
         variables=variables,
         paginated_field=paginated_field,
@@ -105,11 +100,11 @@ async def execute_sw_gql_paginated_query(
 
 
 async def execute_uniswap_v3_paginated_gql_query(
-    network: str, query: DocumentNode, variables: Dict, paginated_field: str
+    query: DocumentNode, variables: Dict, paginated_field: str
 ) -> List:
     """Executes GraphQL query."""
     return await execute_base_gql_paginated_query(
-        subgraph_urls=NETWORKS[network]["UNISWAP_V3_SUBGRAPH_URLS"],
+        subgraph_urls=NETWORK_CONFIG["UNISWAP_V3_SUBGRAPH_URLS"],
         query=query,
         variables=variables,
         paginated_field=paginated_field,
@@ -117,11 +112,11 @@ async def execute_uniswap_v3_paginated_gql_query(
 
 
 async def execute_ethereum_paginated_gql_query(
-    network: str, query: DocumentNode, variables: Dict, paginated_field: str
+    query: DocumentNode, variables: Dict, paginated_field: str
 ) -> List:
     """Executes ETH query."""
     return await execute_base_gql_paginated_query(
-        subgraph_urls=NETWORKS[network]["ETHEREUM_SUBGRAPH_URLS"],
+        subgraph_urls=NETWORK_CONFIG["ETHEREUM_SUBGRAPH_URLS"],
         query=query,
         variables=variables,
         paginated_field=paginated_field,
@@ -131,7 +126,7 @@ async def execute_ethereum_paginated_gql_query(
 @backoff.on_exception(backoff.expo, Exception, max_time=300, logger=gql_logger)
 async def execute_gql_query(
     subgraph_urls: str, query: DocumentNode, variables: Dict
-) -> Dict:
+) -> List:
     """Executes gql query."""
     results = await asyncio.gather(
         *[
