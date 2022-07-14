@@ -19,28 +19,28 @@ GNOSIS_CHAIN_UPPER = GNOSIS_CHAIN.upper()
 NETWORKS = {
     MAINNET: dict(
         STAKEWISE_SUBGRAPH_URLS=config(
-            f"{MAINNET_UPPER}_STAKEWISE_SUBGRAPH_URLS",
+            "STAKEWISE_SUBGRAPH_URLS",
             default="https://graph.stakewise.io/subgraphs/name/stakewise/stakewise,https://api.thegraph.com/subgraphs/name/stakewise/stakewise-mainnet",
             cast=Csv(),
         ),
         ETHEREUM_SUBGRAPH_URLS=config(
-            f"{MAINNET_UPPER}_ETHEREUM_SUBGRAPH_URLS",
+            "ETHEREUM_SUBGRAPH_URLS",
             default="https://graph.stakewise.io/subgraphs/name/stakewise/ethereum,https://api.thegraph.com/subgraphs/name/stakewise/ethereum-mainnet",
             cast=Csv(),
         ),
         UNISWAP_V3_SUBGRAPH_URLS=config(
-            f"{MAINNET_UPPER}_UNISWAP_V3_SUBGRAPH_URLS",
+            "UNISWAP_V3_SUBGRAPH_URLS",
             default="https://graph.stakewise.io/subgraphs/name/stakewise/uniswap-v3,https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-mainnet",
             cast=Csv(),
         ),
-        ETH2_ENDPOINT=config(f"{MAINNET_UPPER}_ETH2_ENDPOINT", default=""),
+        ETH2_ENDPOINT=config("ETH2_ENDPOINT", default=""),
         VALIDATORS_FETCH_CHUNK_SIZE=config(
-            f"{MAINNET_UPPER}_VALIDATORS_FETCH_CHUNK_SIZE",
+            "VALIDATORS_FETCH_CHUNK_SIZE",
             default=100,
             cast=int,
         ),
         VALIDATORS_BATCH_SIZE=config(
-            f"{MAINNET_UPPER}_VALIDATORS_BATCH_SIZE",
+            "VALIDATORS_BATCH_SIZE",
             default=10,
             cast=int,
         ),
@@ -67,25 +67,19 @@ NETWORKS = {
         WITHDRAWAL_CREDENTIALS=HexStr(
             "0x0100000000000000000000002296e122c1a20fca3cac3371357bdad3be0df079"
         ),
-        ORACLE_PRIVATE_KEY=config(f"{MAINNET_UPPER}_ORACLE_PRIVATE_KEY", default=""),
-        AWS_BUCKET_NAME=config(
-            f"{MAINNET_UPPER}_AWS_BUCKET_NAME", default="oracle-votes-mainnet"
-        ),
-        AWS_REGION=config(f"{MAINNET_UPPER}_AWS_REGION", default="eu-central-1"),
-        AWS_ACCESS_KEY_ID=config(f"{MAINNET_UPPER}_AWS_ACCESS_KEY_ID", default=""),
-        AWS_SECRET_ACCESS_KEY=config(
-            f"{MAINNET_UPPER}_AWS_SECRET_ACCESS_KEY", default=""
-        ),
-        KEEPER_ETH1_ENDPOINT=config(
-            f"{MAINNET_UPPER}_KEEPER_ETH1_ENDPOINT", default=""
-        ),
+        ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
+        AWS_BUCKET_NAME=config("AWS_BUCKET_NAME", default="oracle-votes-mainnet"),
+        AWS_REGION=config("AWS_REGION", default="eu-central-1"),
+        AWS_ACCESS_KEY_ID=config("AWS_ACCESS_KEY_ID", default=""),
+        AWS_SECRET_ACCESS_KEY=config("AWS_SECRET_ACCESS_KEY", default=""),
+        KEEPER_ETH1_ENDPOINT=config("KEEPER_ETH1_ENDPOINT", default=""),
         KEEPER_MIN_BALANCE=config(
-            f"{MAINNET_UPPER}_KEEPER_MIN_BALANCE_WEI",
+            "KEEPER_MIN_BALANCE_WEI",
             default=Web3.toWei(0.1, "ether"),
             cast=int,
         ),
         KEEPER_MAX_FEE_PER_GAS=config(
-            f"{MAINNET_UPPER}_KEEPER_MAX_FEE_PER_GAS_GWEI",
+            "KEEPER_MAX_FEE_PER_GAS_GWEI",
             default=150,
             cast=lambda x: Web3.toWei(x, "gwei"),
         ),
@@ -95,28 +89,28 @@ NETWORKS = {
     ),
     HARBOUR_MAINNET: dict(
         STAKEWISE_SUBGRAPH_URLS=config(
-            f"{HARBOUR_MAINNET_UPPER}_STAKEWISE_SUBGRAPH_URLS",
+            "STAKEWISE_SUBGRAPH_URLS",
             default="https://graph.stakewise.io/subgraphs/name/stakewise/stakewise-harbour-mainnet,https://api.thegraph.com/subgraphs/name/stakewise/stakewise-harbour-mainnet",
             cast=Csv(),
         ),
         ETHEREUM_SUBGRAPH_URLS=config(
-            f"{HARBOUR_MAINNET_UPPER}_ETHEREUM_SUBGRAPH_URLS",
+            "ETHEREUM_SUBGRAPH_URLS",
             default="https://graph.stakewise.io/subgraphs/name/stakewise/ethereum,https://api.thegraph.com/subgraphs/name/stakewise/ethereum-mainnet",
             cast=Csv(),
         ),
         UNISWAP_V3_SUBGRAPH_URLS=config(
-            f"{HARBOUR_MAINNET_UPPER}_UNISWAP_V3_SUBGRAPH_URLS",
+            "UNISWAP_V3_SUBGRAPH_URLS",
             default="",
             cast=Csv(),
         ),
-        ETH2_ENDPOINT=config(f"{HARBOUR_MAINNET_UPPER}_ETH2_ENDPOINT", default=""),
+        ETH2_ENDPOINT=config("ETH2_ENDPOINT", default=""),
         VALIDATORS_FETCH_CHUNK_SIZE=config(
-            f"{HARBOUR_MAINNET_UPPER}_VALIDATORS_FETCH_CHUNK_SIZE",
+            "VALIDATORS_FETCH_CHUNK_SIZE",
             default=100,
             cast=int,
         ),
         VALIDATORS_BATCH_SIZE=config(
-            f"{HARBOUR_MAINNET_UPPER}_VALIDATORS_BATCH_SIZE",
+            "VALIDATORS_BATCH_SIZE",
             default=10,
             cast=int,
         ),
@@ -143,30 +137,22 @@ NETWORKS = {
         WITHDRAWAL_CREDENTIALS=HexStr(
             "0x0100000000000000000000005c631621b897f467dd6a91855a0bc97d77b78dc0"
         ),
-        ORACLE_PRIVATE_KEY=config(
-            f"{HARBOUR_MAINNET_UPPER}_ORACLE_PRIVATE_KEY", default=""
-        ),
+        ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
         AWS_BUCKET_NAME=config(
-            f"{HARBOUR_MAINNET_UPPER}_AWS_BUCKET_NAME",
+            "AWS_BUCKET_NAME",
             default="oracle-votes-harbour-mainnet",
         ),
-        AWS_REGION=config(f"{HARBOUR_MAINNET_UPPER}_AWS_REGION", default="us-east-1"),
-        AWS_ACCESS_KEY_ID=config(
-            f"{HARBOUR_MAINNET_UPPER}_AWS_ACCESS_KEY_ID", default=""
-        ),
-        AWS_SECRET_ACCESS_KEY=config(
-            f"{HARBOUR_MAINNET_UPPER}_AWS_SECRET_ACCESS_KEY", default=""
-        ),
-        KEEPER_ETH1_ENDPOINT=config(
-            f"{HARBOUR_MAINNET_UPPER}_KEEPER_ETH1_ENDPOINT", default=""
-        ),
+        AWS_REGION=config("AWS_REGION", default="us-east-1"),
+        AWS_ACCESS_KEY_ID=config("AWS_ACCESS_KEY_ID", default=""),
+        AWS_SECRET_ACCESS_KEY=config("AWS_SECRET_ACCESS_KEY", default=""),
+        KEEPER_ETH1_ENDPOINT=config("KEEPER_ETH1_ENDPOINT", default=""),
         KEEPER_MIN_BALANCE=config(
-            f"{HARBOUR_MAINNET_UPPER}_KEEPER_MIN_BALANCE_WEI",
+            "KEEPER_MIN_BALANCE_WEI",
             default=Web3.toWei(0.1, "ether"),
             cast=int,
         ),
         KEEPER_MAX_FEE_PER_GAS=config(
-            f"{HARBOUR_MAINNET_UPPER}_KEEPER_MAX_FEE_PER_GAS_GWEI",
+            "KEEPER_MAX_FEE_PER_GAS_GWEI",
             default=150,
             cast=lambda x: Web3.toWei(x, "gwei"),
         ),
@@ -176,28 +162,28 @@ NETWORKS = {
     ),
     GOERLI: dict(
         STAKEWISE_SUBGRAPH_URLS=config(
-            f"{GOERLI_UPPER}_STAKEWISE_SUBGRAPH_URLS",
+            "STAKEWISE_SUBGRAPH_URLS",
             default="https://api.thegraph.com/subgraphs/name/stakewise/stakewise-goerli",
             cast=Csv(),
         ),
         ETHEREUM_SUBGRAPH_URLS=config(
-            f"{GOERLI_UPPER}_ETHEREUM_SUBGRAPH_URLS",
+            "ETHEREUM_SUBGRAPH_URLS",
             default="https://api.thegraph.com/subgraphs/name/stakewise/ethereum-goerli",
             cast=Csv(),
         ),
         UNISWAP_V3_SUBGRAPH_URLS=config(
-            f"{GOERLI_UPPER}_UNISWAP_V3_SUBGRAPH_URLS",
+            "UNISWAP_V3_SUBGRAPH_URLS",
             default="https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-goerli",
             cast=Csv(),
         ),
-        ETH2_ENDPOINT=config(f"{GOERLI_UPPER}_ETH2_ENDPOINT", default=""),
+        ETH2_ENDPOINT=config("ETH2_ENDPOINT", default=""),
         VALIDATORS_FETCH_CHUNK_SIZE=config(
-            f"{GOERLI_UPPER}_VALIDATORS_FETCH_CHUNK_SIZE",
+            "VALIDATORS_FETCH_CHUNK_SIZE",
             default=100,
             cast=int,
         ),
         VALIDATORS_BATCH_SIZE=config(
-            f"{GOERLI_UPPER}_VALIDATORS_BATCH_SIZE",
+            "VALIDATORS_BATCH_SIZE",
             default=10,
             cast=int,
         ),
@@ -224,23 +210,19 @@ NETWORKS = {
         WITHDRAWAL_CREDENTIALS=HexStr(
             "0x010000000000000000000000040f15c6b5bfc5f324ecab5864c38d4e1eef4218"
         ),
-        ORACLE_PRIVATE_KEY=config(f"{GOERLI_UPPER}_ORACLE_PRIVATE_KEY", default=""),
-        AWS_BUCKET_NAME=config(
-            f"{GOERLI_UPPER}_AWS_BUCKET_NAME", default="oracle-votes-goerli"
-        ),
-        AWS_REGION=config(f"{GOERLI_UPPER}_AWS_REGION", default="eu-central-1"),
-        AWS_ACCESS_KEY_ID=config(f"{GOERLI_UPPER}_AWS_ACCESS_KEY_ID", default=""),
-        AWS_SECRET_ACCESS_KEY=config(
-            f"{GOERLI_UPPER}_AWS_SECRET_ACCESS_KEY", default=""
-        ),
-        KEEPER_ETH1_ENDPOINT=config(f"{GOERLI_UPPER}_KEEPER_ETH1_ENDPOINT", default=""),
+        ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
+        AWS_BUCKET_NAME=config("AWS_BUCKET_NAME", default="oracle-votes-goerli"),
+        AWS_REGION=config("AWS_REGION", default="eu-central-1"),
+        AWS_ACCESS_KEY_ID=config("AWS_ACCESS_KEY_ID", default=""),
+        AWS_SECRET_ACCESS_KEY=config("AWS_SECRET_ACCESS_KEY", default=""),
+        KEEPER_ETH1_ENDPOINT=config("KEEPER_ETH1_ENDPOINT", default=""),
         KEEPER_MIN_BALANCE=config(
-            f"{GOERLI_UPPER}_KEEPER_MIN_BALANCE_WEI",
+            "KEEPER_MIN_BALANCE_WEI",
             default=Web3.toWei(0.1, "ether"),
             cast=int,
         ),
         KEEPER_MAX_FEE_PER_GAS=config(
-            f"{GOERLI_UPPER}_KEEPER_MAX_FEE_PER_GAS_GWEI",
+            "KEEPER_MAX_FEE_PER_GAS_GWEI",
             default=150,
             cast=lambda x: Web3.toWei(x, "gwei"),
         ),
@@ -250,28 +232,28 @@ NETWORKS = {
     ),
     HARBOUR_GOERLI: dict(
         STAKEWISE_SUBGRAPH_URLS=config(
-            f"{HARBOUR_GOERLI_UPPER}_STAKEWISE_SUBGRAPH_URLS",
+            "STAKEWISE_SUBGRAPH_URLS",
             default="https://api.thegraph.com/subgraphs/name/stakewise/stakewise-perm-goerli",
             cast=Csv(),
         ),
         ETHEREUM_SUBGRAPH_URLS=config(
-            f"{HARBOUR_GOERLI_UPPER}_ETHEREUM_SUBGRAPH_URLS",
+            "ETHEREUM_SUBGRAPH_URLS",
             default="https://api.thegraph.com/subgraphs/name/stakewise/ethereum-goerli",
             cast=Csv(),
         ),
         UNISWAP_V3_SUBGRAPH_URLS=config(
-            f"{HARBOUR_GOERLI_UPPER}_UNISWAP_V3_SUBGRAPH_URLS",
+            "UNISWAP_V3_SUBGRAPH_URLS",
             default="",
             cast=Csv(),
         ),
-        ETH2_ENDPOINT=config(f"{HARBOUR_GOERLI_UPPER}_ETH2_ENDPOINT", default=""),
+        ETH2_ENDPOINT=config("ETH2_ENDPOINT", default=""),
         VALIDATORS_FETCH_CHUNK_SIZE=config(
-            f"{HARBOUR_GOERLI_UPPER}_VALIDATORS_FETCH_CHUNK_SIZE",
+            "VALIDATORS_FETCH_CHUNK_SIZE",
             default=100,
             cast=int,
         ),
         VALIDATORS_BATCH_SIZE=config(
-            f"{HARBOUR_GOERLI_UPPER}_VALIDATORS_BATCH_SIZE",
+            "VALIDATORS_BATCH_SIZE",
             default=10,
             cast=int,
         ),
@@ -298,30 +280,22 @@ NETWORKS = {
         WITHDRAWAL_CREDENTIALS=HexStr(
             "0x0100000000000000000000006dfc9682e3c3263758ad96e2b2ba9822167f81ee"
         ),
-        ORACLE_PRIVATE_KEY=config(
-            f"{HARBOUR_GOERLI_UPPER}_ORACLE_PRIVATE_KEY", default=""
-        ),
+        ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
         AWS_BUCKET_NAME=config(
-            f"{HARBOUR_GOERLI_UPPER}_AWS_BUCKET_NAME",
+            "AWS_BUCKET_NAME",
             default="oracle-votes-perm-goerli",
         ),
-        AWS_REGION=config(f"{HARBOUR_GOERLI_UPPER}_AWS_REGION", default="eu-central-1"),
-        AWS_ACCESS_KEY_ID=config(
-            f"{HARBOUR_GOERLI_UPPER}_AWS_ACCESS_KEY_ID", default=""
-        ),
-        AWS_SECRET_ACCESS_KEY=config(
-            f"{HARBOUR_GOERLI_UPPER}_AWS_SECRET_ACCESS_KEY", default=""
-        ),
-        KEEPER_ETH1_ENDPOINT=config(
-            f"{HARBOUR_GOERLI_UPPER}_KEEPER_ETH1_ENDPOINT", default=""
-        ),
+        AWS_REGION=config("AWS_REGION", default="eu-central-1"),
+        AWS_ACCESS_KEY_ID=config("AWS_ACCESS_KEY_ID", default=""),
+        AWS_SECRET_ACCESS_KEY=config("AWS_SECRET_ACCESS_KEY", default=""),
+        KEEPER_ETH1_ENDPOINT=config("KEEPER_ETH1_ENDPOINT", default=""),
         KEEPER_MIN_BALANCE=config(
-            f"{HARBOUR_GOERLI_UPPER}_KEEPER_MIN_BALANCE_WEI",
+            "KEEPER_MIN_BALANCE_WEI",
             default=Web3.toWei(0.1, "ether"),
             cast=int,
         ),
         KEEPER_MAX_FEE_PER_GAS=config(
-            f"{HARBOUR_GOERLI_UPPER}_KEEPER_MAX_FEE_PER_GAS_GWEI",
+            "KEEPER_MAX_FEE_PER_GAS_GWEI",
             default=150,
             cast=lambda x: Web3.toWei(x, "gwei"),
         ),
@@ -331,28 +305,28 @@ NETWORKS = {
     ),
     GNOSIS_CHAIN: dict(
         STAKEWISE_SUBGRAPH_URLS=config(
-            f"{GNOSIS_CHAIN_UPPER}_STAKEWISE_SUBGRAPH_URLS",
+            "STAKEWISE_SUBGRAPH_URLS",
             default="https://api.thegraph.com/subgraphs/name/stakewise/stakewise-gnosis,https://graph-gno.stakewise.io/subgraphs/name/stakewise/stakewise",
             cast=Csv(),
         ),
         ETHEREUM_SUBGRAPH_URLS=config(
-            f"{GNOSIS_CHAIN_UPPER}_ETHEREUM_SUBGRAPH_URLS",
+            "ETHEREUM_SUBGRAPH_URLS",
             default="https://api.thegraph.com/subgraphs/name/stakewise/ethereum-gnosis,https://graph-gno.stakewise.io/subgraphs/name/stakewise/ethereum",
             cast=Csv(),
         ),
         UNISWAP_V3_SUBGRAPH_URLS=config(
-            f"{GNOSIS_CHAIN_UPPER}_UNISWAP_V3_SUBGRAPH_URLS",
+            "UNISWAP_V3_SUBGRAPH_URLS",
             default="",
             cast=Csv(),
         ),
-        ETH2_ENDPOINT=config(f"{GNOSIS_CHAIN_UPPER}_ETH2_ENDPOINT", default=""),
+        ETH2_ENDPOINT=config("ETH2_ENDPOINT", default=""),
         VALIDATORS_FETCH_CHUNK_SIZE=config(
-            f"{GNOSIS_CHAIN_UPPER}_VALIDATORS_FETCH_CHUNK_SIZE",
+            "VALIDATORS_FETCH_CHUNK_SIZE",
             default=100,
             cast=int,
         ),
         VALIDATORS_BATCH_SIZE=config(
-            f"{GNOSIS_CHAIN_UPPER}_VALIDATORS_BATCH_SIZE",
+            "VALIDATORS_BATCH_SIZE",
             default=10,
             cast=int,
         ),
@@ -379,27 +353,19 @@ NETWORKS = {
         WITHDRAWAL_CREDENTIALS=HexStr(
             "0x010000000000000000000000fc9b67b6034f6b306ea9bd8ec1baf3efa2490394"
         ),
-        ORACLE_PRIVATE_KEY=config(
-            f"{GNOSIS_CHAIN_UPPER}_ORACLE_PRIVATE_KEY", default=""
-        ),
-        AWS_BUCKET_NAME=config(
-            f"{GNOSIS_CHAIN_UPPER}_AWS_BUCKET_NAME", default="oracle-votes-gnosis"
-        ),
-        AWS_REGION=config(f"{GNOSIS_CHAIN_UPPER}_AWS_REGION", default="eu-north-1"),
-        AWS_ACCESS_KEY_ID=config(f"{GNOSIS_CHAIN_UPPER}_AWS_ACCESS_KEY_ID", default=""),
-        AWS_SECRET_ACCESS_KEY=config(
-            f"{GNOSIS_CHAIN_UPPER}_AWS_SECRET_ACCESS_KEY", default=""
-        ),
-        KEEPER_ETH1_ENDPOINT=config(
-            f"{GNOSIS_CHAIN_UPPER}_KEEPER_ETH1_ENDPOINT", default=""
-        ),
+        ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
+        AWS_BUCKET_NAME=config("AWS_BUCKET_NAME", default="oracle-votes-gnosis"),
+        AWS_REGION=config("AWS_REGION", default="eu-north-1"),
+        AWS_ACCESS_KEY_ID=config("AWS_ACCESS_KEY_ID", default=""),
+        AWS_SECRET_ACCESS_KEY=config("AWS_SECRET_ACCESS_KEY", default=""),
+        KEEPER_ETH1_ENDPOINT=config("KEEPER_ETH1_ENDPOINT", default=""),
         KEEPER_MIN_BALANCE=config(
-            f"{GNOSIS_CHAIN_UPPER}_KEEPER_MIN_BALANCE_WEI",
+            "KEEPER_MIN_BALANCE_WEI",
             default=Web3.toWei(1, "ether"),
             cast=int,
         ),
         KEEPER_MAX_FEE_PER_GAS=config(
-            f"{GNOSIS_CHAIN_UPPER}_KEEPER_MAX_FEE_PER_GAS_GWEI",
+            "KEEPER_MAX_FEE_PER_GAS_GWEI",
             default=150,
             cast=lambda x: Web3.toWei(x, "gwei"),
         ),

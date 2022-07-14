@@ -135,7 +135,7 @@ class TestValidatorController:
                 proofs=vote["deposit_data"][0]["proof"],
             ),
         ), patch(
-            "oracle.oracle.validators.controller.ENABLED_NETWORK", "goerli"
+            "oracle.oracle.validators.controller.NETWORK", "goerli"
         ), patch(
             "oracle.oracle.validators.controller.submit_vote", return_value=None
         ) as vote_mock:

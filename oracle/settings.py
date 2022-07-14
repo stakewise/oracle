@@ -6,12 +6,12 @@ from oracle.networks import MAINNET, NETWORKS
 # common
 LOG_LEVEL = config("LOG_LEVEL", default="INFO")
 
-ENABLED_NETWORK = config(
-    "ENABLED_NETWORK",
+NETWORK = config(
+    "NETWORK",
     default=MAINNET,
 )
 
-NETWORK_CONFIG = NETWORKS[ENABLED_NETWORK]
+NETWORK_CONFIG = NETWORKS[NETWORK]
 
 REWARD_VOTE_FILENAME = "reward-vote.json"
 DISTRIBUTOR_VOTE_FILENAME = "distributor-vote.json"

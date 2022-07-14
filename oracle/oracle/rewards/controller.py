@@ -14,8 +14,8 @@ from oracle.oracle.eth1 import submit_vote
 from oracle.oracle.rewards.types import RewardsVotingParameters, RewardVote
 from oracle.oracle.utils import save
 from oracle.settings import (
-    ENABLED_NETWORK,
     MGNO_RATE,
+    NETWORK,
     NETWORK_CONFIG,
     REWARD_VOTE_FILENAME,
     WAD,
@@ -119,7 +119,7 @@ class RewardsController(object):
                     Web3.toWei(validator["balance"], "gwei") - self.deposit_amount
                 )
 
-        if ENABLED_NETWORK == GNOSIS_CHAIN:
+        if NETWORK == GNOSIS_CHAIN:
             # apply mGNO <-> GNO exchange rate
             total_rewards = Wei(int(total_rewards * WAD // MGNO_RATE))
 

@@ -10,8 +10,8 @@ from oracle.networks import GNOSIS_CHAIN
 from oracle.oracle.eth1 import submit_vote
 from oracle.oracle.utils import save
 from oracle.settings import (
-    ENABLED_NETWORK,
     MGNO_RATE,
+    NETWORK,
     NETWORK_CONFIG,
     VALIDATOR_VOTE_FILENAME,
     WAD,
@@ -43,7 +43,7 @@ class ValidatorsController:
     ) -> None:
         """Process validators registration."""
         pool_balance = voting_params["pool_balance"]
-        if ENABLED_NETWORK == GNOSIS_CHAIN:
+        if NETWORK == GNOSIS_CHAIN:
             # apply GNO <-> mGNO exchange rate
             pool_balance = Wei(int(pool_balance * MGNO_RATE // WAD))
 
@@ -113,7 +113,7 @@ class ValidatorsController:
         )
 
         submit_vote(
-            network=ENABLED_NETWORK,
+            network=NETWORK,
             oracle=self.oracle,
             encoded_data=encoded_data,
             vote=vote,

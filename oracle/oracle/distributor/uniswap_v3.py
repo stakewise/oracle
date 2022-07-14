@@ -18,7 +18,7 @@ from oracle.oracle.graphql_queries import (
     UNISWAP_V3_POSITIONS_QUERY,
     UNISWAP_V3_RANGE_POSITIONS_QUERY,
 )
-from oracle.settings import ENABLED_NETWORK, NETWORK_CONFIG
+from oracle.settings import NETWORK, NETWORK_CONFIG
 
 from .types import (
     Balances,
@@ -40,7 +40,7 @@ Q96 = 2**96
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def get_uniswap_v3_pools(block_number: BlockNumber) -> UniswapV3Pools:
     """Fetches Uniswap V3 pools."""
-    if ENABLED_NETWORK in (GNOSIS_CHAIN, HARBOUR_GOERLI, HARBOUR_MAINNET):
+    if NETWORK in (GNOSIS_CHAIN, HARBOUR_GOERLI, HARBOUR_MAINNET):
         return UniswapV3Pools(
             staked_token_pools=set(),
             reward_token_pools=set(),
