@@ -11,7 +11,7 @@ python = "==3.10.5"
 python-decouple = "==3.6"
 web3 = "==5.29.0"
 py-ecc = "==5.2.0"
-gql = {version = "3.2.0", extras = ["aiohttp"]}
+gql = {version = "3.4.0", extras = ["aiohttp"]}
 backoff = "==2.0.1"
 aiohttp = {version = "==3.8.1", extras = ["speedups"]}
 boto3 = {version = "==1.22.1", extras = ["awscrt"]}
