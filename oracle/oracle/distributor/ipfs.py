@@ -106,8 +106,8 @@ async def upload_claims(claims: Claims) -> str:
     if not ipfs_ids:
         raise RuntimeError("Failed to submit claims to IPFS")
 
-    ipfs_ids = set(map(add_ipfs_prefix, ipfs_ids))
-    if len(ipfs_ids) != 1:
-        raise RuntimeError(f"Received different ipfs IDs: {','.join(ipfs_ids)}")
+    uniq_ipfs_ids = set(map(add_ipfs_prefix, ipfs_ids))
+    if len(uniq_ipfs_ids) != 1:
+        raise RuntimeError(f"Received different ipfs IDs: {','.join(uniq_ipfs_ids)}")
 
-    return ipfs_ids.pop()
+    return uniq_ipfs_ids.pop()

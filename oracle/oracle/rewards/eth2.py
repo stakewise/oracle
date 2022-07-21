@@ -5,7 +5,7 @@ import backoff
 from aiohttp import ClientSession
 from eth_typing import HexStr
 
-from oracle.networks import NETWORKS
+from oracle.settings import NETWORK_CONFIG
 
 
 class ValidatorStatus(Enum):
@@ -27,11 +27,10 @@ PENDING_STATUSES = [ValidatorStatus.PENDING_INITIALIZED, ValidatorStatus.PENDING
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def get_finality_checkpoints(
-    network: str, session: ClientSession, state_id: str = "head"
+    session: ClientSession, state_id: str = "head"
 ) -> Dict:
     """Fetches finality checkpoints."""
-    network_config = NETWORKS[network]
-    endpoint = f"{network_config['ETH2_ENDPOINT']}/eth/v1/beacon/states/{state_id}/finality_checkpoints"
+    endpoint = f"{NETWORK_CONFIG['ETH2_ENDPOINT']}/eth/v1/beacon/states/{state_id}/finality_checkpoints"
     async with session.get(endpoint) as response:
         response.raise_for_status()
         return (await response.json())["data"]
@@ -39,7 +38,6 @@ async def get_finality_checkpoints(
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def get_validators(
-    network: str,
     session: ClientSession,
     public_keys: List[HexStr],
     state_id: str = "head",
@@ -48,7 +46,7 @@ async def get_validators(
     if not public_keys:
         return []
 
-    _endpoint = NETWORKS[network]["ETH2_ENDPOINT"]
+    _endpoint = NETWORK_CONFIG["ETH2_ENDPOINT"]
     endpoint = f"{_endpoint}/eth/v1/beacon/states/{state_id}/validators?id={'&id='.join(public_keys)}"
 
     async with session.get(endpoint) as response:
@@ -57,10 +55,9 @@ async def get_validators(
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
-async def get_genesis(network: str, session: ClientSession) -> Dict:
+async def get_genesis(session: ClientSession) -> Dict:
     """Fetches beacon chain genesis."""
-    network_config = NETWORKS[network]
-    endpoint = f"{network_config['ETH2_ENDPOINT']}/eth/v1/beacon/genesis"
+    endpoint = f"{NETWORK_CONFIG['ETH2_ENDPOINT']}/eth/v1/beacon/genesis"
     async with session.get(endpoint) as response:
         response.raise_for_status()
         return (await response.json())["data"]

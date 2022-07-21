@@ -9,11 +9,17 @@ from eth_typing import BlockNumber, HexStr
 from web3 import Web3
 from web3.types import Timestamp, Wei
 
-from oracle.networks import GNOSIS_CHAIN, NETWORKS
+from oracle.networks import GNOSIS_CHAIN
 from oracle.oracle.eth1 import submit_vote
 from oracle.oracle.rewards.types import RewardsVotingParameters, RewardVote
 from oracle.oracle.utils import save
-from oracle.settings import MGNO_RATE, REWARD_VOTE_FILENAME, WAD
+from oracle.settings import (
+    MGNO_RATE,
+    NETWORK,
+    NETWORK_CONFIG,
+    REWARD_VOTE_FILENAME,
+    WAD,
+)
 
 from .eth1 import get_registered_validators_public_keys
 from .eth2 import (
@@ -32,7 +38,6 @@ class RewardsController(object):
 
     def __init__(
         self,
-        network: str,
         aiohttp_session: ClientSession,
         genesis_timestamp: int,
         oracle: LocalAccount,
@@ -41,13 +46,12 @@ class RewardsController(object):
         self.aiohttp_session = aiohttp_session
         self.genesis_timestamp = genesis_timestamp
         self.oracle = oracle
-        self.network = network
-        self.sync_period = NETWORKS[network]["SYNC_PERIOD"]
-        self.slots_per_epoch = NETWORKS[network]["SLOTS_PER_EPOCH"]
+        self.sync_period = NETWORK_CONFIG["SYNC_PERIOD"]
+        self.slots_per_epoch = NETWORK_CONFIG["SLOTS_PER_EPOCH"]
         self.seconds_per_epoch = (
-            self.slots_per_epoch * NETWORKS[network]["SECONDS_PER_SLOT"]
+            self.slots_per_epoch * NETWORK_CONFIG["SECONDS_PER_SLOT"]
         )
-        self.deposit_token_symbol = NETWORKS[network]["DEPOSIT_TOKEN_SYMBOL"]
+        self.deposit_token_symbol = NETWORK_CONFIG["DEPOSIT_TOKEN_SYMBOL"]
         self.last_vote_total_rewards = None
 
     @save
@@ -72,9 +76,7 @@ class RewardsController(object):
             return
 
         # fetch pool validator BLS public keys
-        public_keys = await get_registered_validators_public_keys(
-            self.network, current_block_number
-        )
+        public_keys = await get_registered_validators_public_keys(current_block_number)
 
         # calculate current ETH2 epoch
         update_timestamp = int(
@@ -85,30 +87,25 @@ class RewardsController(object):
         ) // self.seconds_per_epoch
 
         logger.info(
-            f"[{self.network}] Voting for new total rewards with parameters:"
+            f"Voting for new total rewards with parameters:"
             f" timestamp={update_timestamp}, epoch={update_epoch}"
         )
 
         # wait for the epoch to get finalized
-        checkpoints = await get_finality_checkpoints(self.network, self.aiohttp_session)
+        checkpoints = await get_finality_checkpoints(self.aiohttp_session)
         while update_epoch > int(checkpoints["finalized"]["epoch"]):
-            logger.info(
-                f"[{self.network}] Waiting for the epoch {update_epoch} to finalize..."
-            )
+            logger.info(f"Waiting for the epoch {update_epoch} to finalize...")
             await asyncio.sleep(360)
-            checkpoints = await get_finality_checkpoints(
-                self.network, self.aiohttp_session
-            )
+            checkpoints = await get_finality_checkpoints(self.aiohttp_session)
 
         state_id = str(update_epoch * self.slots_per_epoch)
         total_rewards: Wei = Wei(0)
         activated_validators = 0
-        chunk_size = NETWORKS[self.network]["VALIDATORS_FETCH_CHUNK_SIZE"]
+        chunk_size = NETWORK_CONFIG["VALIDATORS_FETCH_CHUNK_SIZE"]
 
         # fetch balances in chunks
         for i in range(0, len(public_keys), chunk_size):
             validators = await get_validators(
-                network=self.network,
                 session=self.aiohttp_session,
                 public_keys=public_keys[i : i + chunk_size],
                 state_id=state_id,
@@ -122,24 +119,20 @@ class RewardsController(object):
                     Web3.toWei(validator["balance"], "gwei") - self.deposit_amount
                 )
 
-        if self.network == GNOSIS_CHAIN:
+        if NETWORK == GNOSIS_CHAIN:
             # apply mGNO <-> GNO exchange rate
             total_rewards = Wei(int(total_rewards * WAD // MGNO_RATE))
 
         pretty_total_rewards = self.format_ether(total_rewards)
-        logger.info(
-            f"[{self.network}] Retrieved pool validator rewards: total={pretty_total_rewards}"
-        )
+        logger.info(f"Retrieved pool validator rewards: total={pretty_total_rewards}")
         if not total_rewards:
-            logger.info(
-                f"[{self.network}] No staking rewards, waiting for validators to be activated..."
-            )
+            logger.info("No staking rewards, waiting for validators to be activated...")
             return
 
         if total_rewards < voting_params["total_rewards"]:
             # rewards were reduced -> don't mint new ones
             logger.warning(
-                f"[{self.network}] Total rewards decreased since the previous update:"
+                f"Total rewards decreased since the previous update:"
                 f" current={pretty_total_rewards},"
                 f' previous={self.format_ether(voting_params["total_rewards"])}'
             )
@@ -148,7 +141,7 @@ class RewardsController(object):
 
         # submit vote
         logger.info(
-            f"[{self.network}] Submitting rewards vote:"
+            f"Submitting rewards vote:"
             f" nonce={voting_params['rewards_nonce']},"
             f" total rewards={pretty_total_rewards},"
             f" activated validators={activated_validators}"
@@ -166,13 +159,12 @@ class RewardsController(object):
             total_rewards=str(total_rewards),
         )
         submit_vote(
-            network=self.network,
             oracle=self.oracle,
             encoded_data=encoded_data,
             vote=vote,
             name=REWARD_VOTE_FILENAME,
         )
-        logger.info(f"[{self.network}] Rewards vote has been successfully submitted")
+        logger.info("Rewards vote has been successfully submitted")
 
         self.last_vote_total_rewards = total_rewards
 

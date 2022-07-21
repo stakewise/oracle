@@ -19,11 +19,10 @@ from .types import ValidatorDepositData
 
 
 async def select_validator(
-    network: str, block_number: BlockNumber, used_pubkeys: Set[HexStr]
+    block_number: BlockNumber, used_pubkeys: Set[HexStr]
 ) -> Union[None, ValidatorDepositData]:
     """Selects the next validator to register."""
     result: Dict = await execute_sw_gql_query(
-        network=network,
         query=OPERATORS_QUERY,
         variables=dict(block_number=block_number),
     )
@@ -44,7 +43,7 @@ async def select_validator(
         selected_deposit_data = deposit_datum[deposit_data_index]
         public_key = selected_deposit_data["public_key"]
         can_register = public_key not in used_pubkeys and await can_register_validator(
-            network, block_number, public_key
+            block_number, public_key
         )
         while deposit_data_index < max_deposit_data_index and not can_register:
             # the edge case when the validator was registered in previous merkle root
@@ -54,7 +53,7 @@ async def select_validator(
             public_key = selected_deposit_data["public_key"]
             can_register = (
                 public_key not in used_pubkeys
-                and await can_register_validator(network, block_number, public_key)
+                and await can_register_validator(block_number, public_key)
             )
 
         if can_register:
@@ -66,14 +65,12 @@ async def select_validator(
                 deposit_data_signature=selected_deposit_data["signature"],
                 proof=selected_deposit_data["proof"],
             )
+    return None
 
 
-async def can_register_validator(
-    network: str, block_number: BlockNumber, public_key: HexStr
-) -> bool:
+async def can_register_validator(block_number: BlockNumber, public_key: HexStr) -> bool:
     """Checks whether it's safe to register the validator."""
     result: Dict = await execute_ethereum_gql_query(
-        network=network,
         query=VALIDATOR_REGISTRATIONS_QUERY,
         variables=dict(block_number=block_number, public_key=public_key),
     )
@@ -82,12 +79,9 @@ async def can_register_validator(
     return len(registrations) == 0
 
 
-async def get_validators_deposit_root(
-    network: str, block_number: BlockNumber
-) -> HexStr:
+async def get_validators_deposit_root(block_number: BlockNumber) -> HexStr:
     """Fetches validators deposit root for protecting against operator submitting deposit prior to registration."""
     result: Dict = await execute_ethereum_gql_query(
-        network=network,
         query=VALIDATOR_REGISTRATIONS_LATEST_INDEX_QUERY,
         variables=dict(block_number=block_number),
     )

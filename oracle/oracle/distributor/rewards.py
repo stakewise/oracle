@@ -5,7 +5,7 @@ from typing import Dict, List, Set
 from ens.constants import EMPTY_ADDR_HEX
 from eth_typing import BlockNumber, ChecksumAddress
 
-from oracle.networks import NETWORKS
+from oracle.settings import NETWORK_CONFIG
 
 from .distributor_tokens import get_token_liquidity_points
 from .types import Balances, Rewards, UniswapV3Pools
@@ -21,7 +21,6 @@ logger = logging.getLogger(__name__)
 class DistributorRewards(object):
     def __init__(
         self,
-        network: str,
         uniswap_v3_pools: UniswapV3Pools,
         from_block: BlockNumber,
         to_block: BlockNumber,
@@ -30,18 +29,17 @@ class DistributorRewards(object):
         reward_token: ChecksumAddress,
         uni_v3_token: ChecksumAddress,
     ) -> None:
-        self.network = network
         self.distributor_tokens = distributor_tokens
-        self.distributor_fallback_address = NETWORKS[network][
+        self.distributor_fallback_address = NETWORK_CONFIG[
             "DISTRIBUTOR_FALLBACK_ADDRESS"
         ]
-        self.staked_token_contract_address = NETWORKS[network][
+        self.staked_token_contract_address = NETWORK_CONFIG[
             "STAKED_TOKEN_CONTRACT_ADDRESS"
         ]
-        self.reward_token_contract_address = NETWORKS[network][
+        self.reward_token_contract_address = NETWORK_CONFIG[
             "REWARD_TOKEN_CONTRACT_ADDRESS"
         ]
-        self.swise_token_contract_address = NETWORKS[network][
+        self.swise_token_contract_address = NETWORK_CONFIG[
             "SWISE_TOKEN_CONTRACT_ADDRESS"
         ]
         self.distributor_redirects = distributor_redirects
@@ -128,10 +126,9 @@ class DistributorRewards(object):
             and contract_address in self.uni_v3_staked_token_pools
         ):
             logger.info(
-                f"[{self.network}] Fetching Uniswap V3 staked token balances: pool={contract_address}"
+                f"Fetching Uniswap V3 staked token balances: pool={contract_address}"
             )
             return await get_uniswap_v3_single_token_balances(
-                network=self.network,
                 pool_address=contract_address,
                 token=self.staked_token_contract_address,
                 block_number=self.to_block,
@@ -141,10 +138,9 @@ class DistributorRewards(object):
             and contract_address in self.uni_v3_reward_token_pools
         ):
             logger.info(
-                f"[{self.network}] Fetching Uniswap V3 reward token balances: pool={contract_address}"
+                f"Fetching Uniswap V3 reward token balances: pool={contract_address}"
             )
             return await get_uniswap_v3_single_token_balances(
-                network=self.network,
                 pool_address=contract_address,
                 token=self.reward_token_contract_address,
                 block_number=self.to_block,
@@ -153,11 +149,8 @@ class DistributorRewards(object):
             self.uni_v3_token == self.swise_token_contract_address
             and contract_address in self.uni_v3_swise_pools
         ):
-            logger.info(
-                f"[{self.network}] Fetching Uniswap V3 SWISE balances: pool={contract_address}"
-            )
+            logger.info(f"Fetching Uniswap V3 SWISE balances: pool={contract_address}")
             return await get_uniswap_v3_single_token_balances(
-                network=self.network,
                 pool_address=contract_address,
                 token=self.swise_token_contract_address,
                 block_number=self.to_block,
@@ -167,10 +160,9 @@ class DistributorRewards(object):
             and contract_address in self.uni_v3_swise_pools
         ):
             logger.info(
-                f"[{self.network}] Fetching Uniswap V3 full range liquidity points: pool={contract_address}"
+                f"Fetching Uniswap V3 full range liquidity points: pool={contract_address}"
             )
             return await get_uniswap_v3_range_liquidity_points(
-                network=self.network,
                 tick_lower=-887220,
                 tick_upper=887220,
                 pool_address=contract_address,
@@ -178,26 +170,24 @@ class DistributorRewards(object):
             )
         elif contract_address in self.uni_v3_pools:
             logger.info(
-                f"[{self.network}] Fetching Uniswap V3 liquidity points: pool={contract_address}"
+                f"Fetching Uniswap V3 liquidity points: pool={contract_address}"
             )
             return await get_uniswap_v3_liquidity_points(
-                network=self.network,
                 pool_address=contract_address,
                 block_number=self.to_block,
             )
         elif contract_address in self.distributor_tokens:
             logger.info(
-                f"[{self.network}] Fetching token holders liquidity points: token={contract_address}"
+                f"Fetching token holders liquidity points: token={contract_address}"
             )
             return await get_token_liquidity_points(
-                network=self.network,
                 token_address=contract_address,
                 from_block=self.from_block,
                 to_block=self.to_block,
             )
 
         raise ValueError(
-            f"[{self.network}] Cannot get balances for unsupported contract address {contract_address}"
+            f"Cannot get balances for unsupported contract address {contract_address}"
         )
 
     async def _get_rewards(

@@ -1,14 +1,12 @@
 import asyncio
 import logging
 import threading
-from typing import Dict
 from urllib.parse import urlparse
 
 import aiohttp
 from eth_account.signers.local import LocalAccount
 
 from oracle.health_server import create_health_server_runner, start_health_server
-from oracle.networks import NETWORKS
 from oracle.oracle.distributor.controller import DistributorController
 from oracle.oracle.eth1 import (
     get_finalized_block,
@@ -23,15 +21,15 @@ from oracle.oracle.rewards.eth2 import get_finality_checkpoints, get_genesis
 from oracle.oracle.validators.controller import ValidatorsController
 from oracle.settings import (
     ENABLE_HEALTH_SERVER,
-    ENABLED_NETWORKS,
     HEALTH_SERVER_HOST,
     HEALTH_SERVER_PORT,
     LOG_LEVEL,
+    NETWORK_CONFIG,
     ORACLE_PROCESS_INTERVAL,
     SENTRY_DSN,
     TEST_VOTE_FILENAME,
 )
-from oracle.utils import InterruptHandler, get_oracle_accounts
+from oracle.utils import InterruptHandler, get_oracle_account
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(message)s",
@@ -45,80 +43,65 @@ logger = logging.getLogger(__name__)
 
 
 async def main() -> None:
-    oracle_accounts: Dict[str, LocalAccount] = await get_oracle_accounts()
+    oracle_account: LocalAccount = await get_oracle_account()
     # aiohttp session
     session = aiohttp.ClientSession()
-    await init_checks(oracle_accounts, session)
+    await init_checks(oracle_account, session)
 
     # wait for interrupt
     interrupt_handler = InterruptHandler()
 
     # fetch ETH2 genesis
-    controllers = []
-    for network in ENABLED_NETWORKS:
-        genesis = await get_genesis(network, session)
-        oracle = oracle_accounts[network]
-        rewards_controller = RewardsController(
-            network=network,
-            aiohttp_session=session,
-            genesis_timestamp=int(genesis["genesis_time"]),
-            oracle=oracle,
-        )
-        distributor_controller = DistributorController(network, oracle)
-        validators_controller = ValidatorsController(network, oracle)
-        controllers.append(
-            (
-                interrupt_handler,
-                network,
-                rewards_controller,
-                distributor_controller,
-                validators_controller,
-            )
-        )
+    genesis = await get_genesis(session)
 
-    await asyncio.gather(*[process_network(*args) for args in controllers])
+    rewards_controller = RewardsController(
+        aiohttp_session=session,
+        genesis_timestamp=int(genesis["genesis_time"]),
+        oracle=oracle_account,
+    )
+    distributor_controller = DistributorController(oracle_account)
+    validators_controller = ValidatorsController(oracle_account)
 
+    await process_network(
+        interrupt_handler,
+        rewards_controller,
+        distributor_controller,
+        validators_controller,
+    )
     await session.close()
 
 
-async def init_checks(oracle_accounts, session):
+async def init_checks(oracle_account, session):
     # try submitting test vote
-    for network, oracle in oracle_accounts.items():
-        logger.info(f"[{network}] Submitting test vote for account {oracle.address}...")
-        # noinspection PyTypeChecker
-        submit_vote(
-            network=network,
-            oracle=oracle,
-            encoded_data=b"test data",
-            vote={"name": "test vote"},
-            name=TEST_VOTE_FILENAME,
-        )
+    logger.info(f"Submitting test vote for account {oracle_account.address}...")
+    # noinspection PyTypeChecker
+    submit_vote(
+        oracle=oracle_account,
+        encoded_data=b"test data",
+        vote={"name": "test vote"},
+        name=TEST_VOTE_FILENAME,
+    )
 
     # check stakewise graphql connection
-    for network in ENABLED_NETWORKS:
-        network_config = NETWORKS[network]
-        logger.info(f"[{network}] Checking connection to graph node...")
-        await get_finalized_block(network)
-        parsed_uris = [
-            "{uri.scheme}://{uri.netloc}".format(uri=urlparse(url))
-            for url in network_config["ETHEREUM_SUBGRAPH_URLS"]
-        ]
-        logger.info(f"[{network}] Connected to graph nodes at {parsed_uris}")
+    logger.info("Checking connection to graph node...")
+    await get_finalized_block()
+    parsed_uris = [
+        "{uri.scheme}://{uri.netloc}".format(uri=urlparse(url))
+        for url in NETWORK_CONFIG["ETHEREUM_SUBGRAPH_URLS"]
+    ]
+    logger.info(f"Connected to graph nodes at {parsed_uris}")
 
     # check ETH2 API connection
-    for network in ENABLED_NETWORKS:
-        network_config = NETWORKS[network]
-        logger.info(f"[{network}] Checking connection to ETH2 node...")
-        await get_finality_checkpoints(network, session)
-        parsed_uri = "{uri.scheme}://{uri.netloc}".format(
-            uri=urlparse(network_config["ETH2_ENDPOINT"])
-        )
-        logger.info(f"[{network}] Connected to ETH2 node at {parsed_uri}")
+    logger.info("Checking connection to ETH2 node...")
+    await get_finality_checkpoints(session)
+    parsed_uri = "{uri.scheme}://{uri.netloc}".format(
+        uri=urlparse(NETWORK_CONFIG["ETH2_ENDPOINT"])
+    )
+    logger.info(f"Connected to ETH2 node at {parsed_uri}")
 
 
 async def process_network(
     interrupt_handler: InterruptHandler,
-    network: str,
     rewards_ctrl: RewardsController,
     distributor_ctrl: DistributorController,
     validators_ctrl: ValidatorsController,
@@ -126,18 +109,16 @@ async def process_network(
     while not interrupt_handler.exit:
         try:
             # fetch current finalized ETH1 block data
-            finalized_block = await get_finalized_block(network)
+            finalized_block = await get_finalized_block()
             current_block_number = finalized_block["block_number"]
             current_timestamp = finalized_block["timestamp"]
 
-            latest_block_number = await get_latest_block_number(network)
+            latest_block_number = await get_latest_block_number()
 
-            while not (await has_synced_block(network, latest_block_number)):
+            while not (await has_synced_block(latest_block_number)):
                 continue
 
-            voting_parameters = await get_voting_parameters(
-                network, current_block_number
-            )
+            voting_parameters = await get_voting_parameters(current_block_number)
             # there is no consensus
             if not voting_parameters:
                 return

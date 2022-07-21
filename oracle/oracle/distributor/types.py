@@ -36,7 +36,7 @@ class Balances(TypedDict):
     balances: Dict[ChecksumAddress, int]
 
 
-class Claim(TypedDict):
+class Claim(TypedDict, total=False):
     index: int
     tokens: List[ChecksumAddress]
     values: List[str]

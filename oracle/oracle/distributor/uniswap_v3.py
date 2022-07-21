@@ -6,7 +6,7 @@ from ens.constants import EMPTY_ADDR_HEX
 from eth_typing import BlockNumber, ChecksumAddress
 from web3 import Web3
 
-from oracle.networks import GNOSIS_CHAIN, HARBOUR_GOERLI, HARBOUR_MAINNET, NETWORKS
+from oracle.networks import GNOSIS_CHAIN, HARBOUR_GOERLI, HARBOUR_MAINNET
 from oracle.oracle.clients import (
     execute_uniswap_v3_gql_query,
     execute_uniswap_v3_paginated_gql_query,
@@ -18,6 +18,7 @@ from oracle.oracle.graphql_queries import (
     UNISWAP_V3_POSITIONS_QUERY,
     UNISWAP_V3_RANGE_POSITIONS_QUERY,
 )
+from oracle.settings import NETWORK, NETWORK_CONFIG
 
 from .types import (
     Balances,
@@ -37,20 +38,16 @@ Q96 = 2**96
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
-async def get_uniswap_v3_pools(
-    network: str, block_number: BlockNumber
-) -> UniswapV3Pools:
+async def get_uniswap_v3_pools(block_number: BlockNumber) -> UniswapV3Pools:
     """Fetches Uniswap V3 pools."""
-    if network in (GNOSIS_CHAIN, HARBOUR_GOERLI, HARBOUR_MAINNET):
+    if NETWORK in (GNOSIS_CHAIN, HARBOUR_GOERLI, HARBOUR_MAINNET):
         return UniswapV3Pools(
             staked_token_pools=set(),
             reward_token_pools=set(),
             swise_pools=set(),
         )
 
-    network_config = NETWORKS[network]
     pools: List = await execute_uniswap_v3_paginated_gql_query(
-        network=network,
         query=UNISWAP_V3_POOLS_QUERY,
         variables=dict(block_number=block_number),
         paginated_field="pools",
@@ -66,11 +63,11 @@ async def get_uniswap_v3_pools(
         pool_token0 = Web3.toChecksumAddress(pool["token0"])
         pool_token1 = Web3.toChecksumAddress(pool["token1"])
         for pool_token in [pool_token0, pool_token1]:
-            if pool_token == network_config["STAKED_TOKEN_CONTRACT_ADDRESS"]:
+            if pool_token == NETWORK_CONFIG["STAKED_TOKEN_CONTRACT_ADDRESS"]:
                 uni_v3_pools["staked_token_pools"].add(pool_address)
-            elif pool_token == network_config["REWARD_TOKEN_CONTRACT_ADDRESS"]:
+            elif pool_token == NETWORK_CONFIG["REWARD_TOKEN_CONTRACT_ADDRESS"]:
                 uni_v3_pools["reward_token_pools"].add(pool_address)
-            elif pool_token == network_config["SWISE_TOKEN_CONTRACT_ADDRESS"]:
+            elif pool_token == NETWORK_CONFIG["SWISE_TOKEN_CONTRACT_ADDRESS"]:
                 uni_v3_pools["swise_pools"].add(pool_address)
 
     return uni_v3_pools
@@ -149,12 +146,11 @@ async def get_uniswap_v3_distributions(
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def get_uniswap_v3_liquidity_points(
-    network: str, pool_address: ChecksumAddress, block_number: BlockNumber
+    pool_address: ChecksumAddress, block_number: BlockNumber
 ) -> Balances:
     """Fetches users' liquidity points of the Uniswap V3 pool in the current tick."""
     lowered_pool_address = pool_address.lower()
     result: Dict = await execute_uniswap_v3_gql_query(
-        network=network,
         query=UNISWAP_V3_POOL_QUERY,
         variables=dict(block_number=block_number, pool_address=lowered_pool_address),
     )
@@ -169,7 +165,6 @@ async def get_uniswap_v3_liquidity_points(
         return Balances(total_supply=0, balances={})
 
     positions: List = await execute_uniswap_v3_paginated_gql_query(
-        network=network,
         query=UNISWAP_V3_CURRENT_TICK_POSITIONS_QUERY,
         variables=dict(
             block_number=block_number,
@@ -200,7 +195,6 @@ async def get_uniswap_v3_liquidity_points(
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def get_uniswap_v3_range_liquidity_points(
-    network: str,
     tick_lower: int,
     tick_upper: int,
     pool_address: ChecksumAddress,
@@ -210,7 +204,6 @@ async def get_uniswap_v3_range_liquidity_points(
     lowered_pool_address = pool_address.lower()
 
     positions: List = await execute_uniswap_v3_paginated_gql_query(
-        network=network,
         query=UNISWAP_V3_RANGE_POSITIONS_QUERY,
         variables=dict(
             block_number=block_number,
@@ -242,7 +235,6 @@ async def get_uniswap_v3_range_liquidity_points(
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
 async def get_uniswap_v3_single_token_balances(
-    network: str,
     pool_address: ChecksumAddress,
     token: ChecksumAddress,
     block_number: BlockNumber,
@@ -250,7 +242,6 @@ async def get_uniswap_v3_single_token_balances(
     """Fetches users' single token balances of the Uniswap V3 pair across all the ticks."""
     lowered_pool_address = pool_address.lower()
     result: Dict = await execute_uniswap_v3_gql_query(
-        network=network,
         query=UNISWAP_V3_POOL_QUERY,
         variables=dict(block_number=block_number, pool_address=lowered_pool_address),
     )
@@ -273,7 +264,6 @@ async def get_uniswap_v3_single_token_balances(
     token1_address: ChecksumAddress = Web3.toChecksumAddress(pool["token1"])
 
     positions: List = await execute_uniswap_v3_paginated_gql_query(
-        network=network,
         query=UNISWAP_V3_POSITIONS_QUERY,
         variables=dict(
             block_number=block_number,
@@ -417,15 +407,13 @@ def get_sqrt_ratio_at_tick(tick: int) -> int:
     if not (MIN_TICK <= tick <= MAX_TICK and isinstance(tick, int)):
         raise ValueError(f"Received invalid tick: {tick}")
 
-    if tick < 0:
-        abs_tick: int = tick * -1
-    else:
-        abs_tick: int = tick
+    abs_tick = abs(tick)
 
+    ratio: int
     if (abs_tick & 0x1) != 0:
-        ratio: int = 0xFFFCB933BD6FAD37AA2D162D1A594001
+        ratio = 0xFFFCB933BD6FAD37AA2D162D1A594001
     else:
-        ratio: int = 0x100000000000000000000000000000000
+        ratio = 0x100000000000000000000000000000000
 
     if (abs_tick & 0x2) != 0:
         ratio = mul_shift(ratio, 0xFFF97272373D413259A46990580E213A)

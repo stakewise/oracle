@@ -10,7 +10,6 @@ from eth_account.signers.local import LocalAccount
 from web3 import Web3
 from web3.types import BlockNumber, Timestamp, Wei
 
-from oracle.networks import NETWORKS
 from oracle.oracle.clients import execute_single_gql_query, execute_sw_gql_query
 from oracle.oracle.graphql_queries import (
     FINALIZED_BLOCK_QUERY,
@@ -18,7 +17,7 @@ from oracle.oracle.graphql_queries import (
     SYNC_BLOCK_QUERY,
     VOTING_PARAMETERS_QUERY,
 )
-from oracle.settings import CONFIRMATION_BLOCKS
+from oracle.settings import CONFIRMATION_BLOCKS, NETWORK_CONFIG
 
 from .distributor.types import DistributorVote, DistributorVotingParameters
 from .rewards.types import RewardsVotingParameters, RewardVote
@@ -38,7 +37,7 @@ class VotingParameters(TypedDict):
     validator: ValidatorVotingParameters
 
 
-async def get_finalized_block(network: str) -> Block:
+async def get_finalized_block() -> Block:
     """Gets the finalized block number and its timestamp."""
     results = await asyncio.gather(
         *[
@@ -49,7 +48,7 @@ async def get_finalized_block(network: str) -> Block:
                     confirmation_blocks=CONFIRMATION_BLOCKS,
                 ),
             )
-            for subgraph_url in NETWORKS[network]["ETHEREUM_SUBGRAPH_URLS"]
+            for subgraph_url in NETWORK_CONFIG["ETHEREUM_SUBGRAPH_URLS"]
         ]
     )
     result = _find_max_consensus(results, func=lambda x: int(x["blocks"][0]["id"]))
@@ -60,7 +59,7 @@ async def get_finalized_block(network: str) -> Block:
     )
 
 
-async def get_latest_block_number(network: str) -> BlockNumber:
+async def get_latest_block_number() -> BlockNumber:
     """Gets the latest block number and its timestamp."""
     results = await asyncio.gather(
         *[
@@ -69,7 +68,7 @@ async def get_latest_block_number(network: str) -> BlockNumber:
                 query=LATEST_BLOCK_QUERY,
                 variables=dict(),
             )
-            for subgraph_url in NETWORKS[network]["ETHEREUM_SUBGRAPH_URLS"]
+            for subgraph_url in NETWORK_CONFIG["ETHEREUM_SUBGRAPH_URLS"]
         ]
     )
     result = _find_max_consensus(results, func=lambda x: int(x["blocks"][0]["id"]))
@@ -77,7 +76,7 @@ async def get_latest_block_number(network: str) -> BlockNumber:
     return BlockNumber(int(result["blocks"][0]["id"]))
 
 
-async def has_synced_block(network: str, block_number: BlockNumber) -> bool:
+async def has_synced_block(block_number: BlockNumber) -> bool:
     results = await asyncio.gather(
         *[
             execute_single_gql_query(
@@ -85,7 +84,7 @@ async def has_synced_block(network: str, block_number: BlockNumber) -> bool:
                 query=SYNC_BLOCK_QUERY,
                 variables={},
             )
-            for subgraph_url in NETWORKS[network]["STAKEWISE_SUBGRAPH_URLS"]
+            for subgraph_url in NETWORK_CONFIG["STAKEWISE_SUBGRAPH_URLS"]
         ]
     )
     result = _find_max_consensus(
@@ -94,12 +93,9 @@ async def has_synced_block(network: str, block_number: BlockNumber) -> bool:
     return block_number <= int(result["_meta"]["block"]["number"])
 
 
-async def get_voting_parameters(
-    network: str, block_number: BlockNumber
-) -> VotingParameters:
+async def get_voting_parameters(block_number: BlockNumber) -> VotingParameters:
     """Fetches rewards voting parameters."""
     result: Dict = await execute_sw_gql_query(
-        network=network,
         query=VOTING_PARAMETERS_QUERY,
         variables=dict(
             block_number=block_number,
@@ -147,19 +143,17 @@ async def get_voting_parameters(
 
 @backoff.on_exception(backoff.expo, Exception, max_time=900)
 def submit_vote(
-    network: str,
     oracle: LocalAccount,
     encoded_data: bytes,
     vote: Union[RewardVote, DistributorVote, ValidatorsVote],
     name: str,
 ) -> None:
     """Submits vote to the votes' aggregator."""
-    network_config = NETWORKS[network]
-    aws_bucket_name = network_config["AWS_BUCKET_NAME"]
+    aws_bucket_name = NETWORK_CONFIG["AWS_BUCKET_NAME"]
     s3_client = boto3.client(
         "s3",
-        aws_access_key_id=network_config["AWS_ACCESS_KEY_ID"],
-        aws_secret_access_key=network_config["AWS_SECRET_ACCESS_KEY"],
+        aws_access_key_id=NETWORK_CONFIG["AWS_ACCESS_KEY_ID"],
+        aws_secret_access_key=NETWORK_CONFIG["AWS_SECRET_ACCESS_KEY"],
     )
     # generate candidate ID
     candidate_id: bytes = Web3.keccak(primitive=encoded_data)

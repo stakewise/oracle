@@ -15,8 +15,8 @@ from oracle.oracle.graphql_queries import (
     PARTNERS_QUERY,
     PERIODIC_DISTRIBUTIONS_QUERY,
 )
+from oracle.settings import NETWORK_CONFIG
 
-from ...networks import NETWORKS
 from .ipfs import get_one_time_rewards_allocations
 from .rewards import DistributorRewards
 from .types import (
@@ -32,11 +32,10 @@ logger = logging.getLogger(__name__)
 
 
 async def get_periodic_allocations(
-    network: str, from_block: BlockNumber, to_block: BlockNumber
+    from_block: BlockNumber, to_block: BlockNumber
 ) -> TokenAllocations:
     """Fetches periodic allocations."""
     distributions: List = await execute_sw_gql_paginated_query(
-        network=network,
         query=PERIODIC_DISTRIBUTIONS_QUERY,
         variables=dict(from_block=from_block, to_block=to_block),
         paginated_field="periodicDistributions",
@@ -65,7 +64,6 @@ async def get_periodic_allocations(
 
 
 async def get_disabled_stakers_reward_token_distributions(
-    network: str,
     distributor_reward: Wei,
     from_block: BlockNumber,
     to_block: BlockNumber,
@@ -74,12 +72,11 @@ async def get_disabled_stakers_reward_token_distributions(
     if distributor_reward <= 0:
         return []
 
-    reward_token_address = NETWORKS[network]["REWARD_TOKEN_CONTRACT_ADDRESS"]
-    staked_token_address = NETWORKS[network]["STAKED_TOKEN_CONTRACT_ADDRESS"]
+    reward_token_address = NETWORK_CONFIG["REWARD_TOKEN_CONTRACT_ADDRESS"]
+    staked_token_address = NETWORK_CONFIG["STAKED_TOKEN_CONTRACT_ADDRESS"]
 
     last_id = ""
     result: Dict = await execute_sw_gql_query(
-        network=network,
         query=DISABLED_STAKER_ACCOUNTS_QUERY,
         variables=dict(block_number=to_block, last_id=last_id),
     )
@@ -89,12 +86,11 @@ async def get_disabled_stakers_reward_token_distributions(
     # accumulate chunks of validators
     while len(stakers_chunk) >= 1000:
         last_id = stakers_chunk[-1]["id"]
-        result: Dict = await execute_sw_gql_query(
-            network=network,
+        result_stakers: Dict = await execute_sw_gql_query(
             query=DISABLED_STAKER_ACCOUNTS_QUERY,
             variables=dict(block_number=to_block, last_id=last_id),
         )
-        stakers_chunk = result.get("stakers", [])
+        stakers_chunk = result_stakers.get("stakers", [])
         stakers.extend(stakers_chunk)
 
     reward_per_token: Wei = Wei(
@@ -122,10 +118,11 @@ async def get_disabled_stakers_reward_token_distributions(
     distributed: Wei = Wei(0)
     last_staker_index = len(principals) - 1
     for i, staker_address in enumerate(principals):
+        rewards: Wei
         if i == last_staker_index:
-            reward: Wei = Wei(distributor_reward - distributed)
+            reward = Wei(distributor_reward - distributed)
         else:
-            reward: Wei = Wei(
+            reward = Wei(
                 (distributor_reward * principals[staker_address])
                 // distributor_principal
             )
@@ -147,12 +144,9 @@ async def get_disabled_stakers_reward_token_distributions(
     return distributions
 
 
-async def get_distributor_claimed_accounts(
-    network: str, merkle_root: HexStr
-) -> ClaimedAccounts:
+async def get_distributor_claimed_accounts(merkle_root: HexStr) -> ClaimedAccounts:
     """Fetches addresses that have claimed their tokens from the `MerkleDistributor` contract."""
     claims: List = await execute_sw_gql_paginated_query(
-        network=network,
         query=DISTRIBUTOR_CLAIMED_ACCOUNTS_QUERY,
         variables=dict(merkle_root=merkle_root),
         paginated_field="merkleDistributorClaims",
@@ -161,21 +155,19 @@ async def get_distributor_claimed_accounts(
 
 
 async def get_operators_rewards(
-    network: str,
     from_block: BlockNumber,
     to_block: BlockNumber,
     total_reward: Wei,
 ) -> Tuple[Rewards, Wei]:
     """Fetches operators rewards."""
     result: Dict = await execute_sw_gql_query(
-        network=network,
         query=OPERATORS_REWARDS_QUERY,
         variables=dict(
             block_number=to_block,
         ),
     )
     operators = result["operators"]
-    reward_token_address = NETWORKS[network]["REWARD_TOKEN_CONTRACT_ADDRESS"]
+    reward_token_address = NETWORK_CONFIG["REWARD_TOKEN_CONTRACT_ADDRESS"]
 
     # process operators
     points: Dict[ChecksumAddress, int] = {}
@@ -227,18 +219,17 @@ async def get_operators_rewards(
 
 
 async def get_partners_rewards(
-    network: str, from_block: BlockNumber, to_block: BlockNumber, total_reward: Wei
+    from_block: BlockNumber, to_block: BlockNumber, total_reward: Wei
 ) -> Tuple[Rewards, Wei]:
     """Fetches partners rewards."""
     result: Dict = await execute_sw_gql_query(
-        network=network,
         query=PARTNERS_QUERY,
         variables=dict(
             block_number=to_block,
         ),
     )
     partners = result["partners"]
-    reward_token_address = NETWORKS[network]["REWARD_TOKEN_CONTRACT_ADDRESS"]
+    reward_token_address = NETWORK_CONFIG["REWARD_TOKEN_CONTRACT_ADDRESS"]
 
     # process partners
     points: Dict[ChecksumAddress, int] = {}
@@ -299,7 +290,7 @@ def calculate_points_based_rewards(
     if total_reward <= 0 or total_points <= 0:
         return {}
 
-    rewards = {}
+    rewards: Rewards = {}
     last_account_index = len(points) - 1
     distributed = 0
     for i, account in enumerate(points):
@@ -323,13 +314,12 @@ def calculate_points_based_rewards(
 
 
 async def get_one_time_rewards(
-    network: str, from_block: BlockNumber, to_block: BlockNumber
+    from_block: BlockNumber, to_block: BlockNumber
 ) -> Rewards:
     """Fetches one time rewards."""
-    distributor_fallback_address = NETWORKS[network]["DISTRIBUTOR_FALLBACK_ADDRESS"]
+    distributor_fallback_address = NETWORK_CONFIG["DISTRIBUTOR_FALLBACK_ADDRESS"]
 
     distributions: List = await execute_sw_gql_paginated_query(
-        network=network,
         query=ONE_TIME_DISTRIBUTIONS_QUERY,
         variables=dict(from_block=from_block, to_block=to_block),
         paginated_field="oneTimeDistributions",
@@ -359,19 +349,15 @@ async def get_one_time_rewards(
 
             if total_amount != distributed_amount:
                 logger.warning(
-                    f'[{network}] Failed to process one time distribution: {distribution["id"]}. Invalid rewards.'
+                    f'Failed to process one time distribution: {distribution["id"]}. Invalid rewards.'
                 )
-                rewards: Rewards = {
-                    distributor_fallback_address: {token: str(total_amount)}
-                }
+                rewards = {distributor_fallback_address: {token: str(total_amount)}}
         except Exception as e:
             logger.error(e)
             logger.warning(
-                f'[{network}] Failed to process one time distribution: {distribution["id"]}. Exception occurred.'
+                f'Failed to process one time distribution: {distribution["id"]}. Exception occurred.'
             )
-            rewards: Rewards = {
-                distributor_fallback_address: {token: str(total_amount)}
-            }
+            rewards = {distributor_fallback_address: {token: str(total_amount)}}
 
         final_rewards = DistributorRewards.merge_rewards(final_rewards, rewards)
 
