@@ -5,9 +5,9 @@ from typing import Any, List
 from eth_account import Account
 from eth_account.signers.local import LocalAccount
 
-from oracle.oracle.clients import execute_sw_gql_query
-from oracle.oracle.graphql_queries import ORACLE_QUERY
-from oracle.settings import NETWORK_CONFIG
+from oracle.oracle.common.clients import execute_sw_gql_query
+from oracle.oracle.common.graphql_queries import ORACLE_QUERY
+from oracle.settings import NETWORK, NETWORK_CONFIG
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +35,7 @@ async def check_oracle_account(oracle: LocalAccount) -> None:
     oracle_lowered_address = oracle.address.lower()
     result: List = (
         await execute_sw_gql_query(
+            network=NETWORK,
             query=ORACLE_QUERY,
             variables=dict(
                 oracle_address=oracle_lowered_address,

@@ -4,8 +4,7 @@ from unittest.mock import patch
 
 from gql import gql
 
-from oracle.networks import NETWORKS
-from oracle.oracle.clients import (
+from oracle.oracle.common.clients import (
     execute_ethereum_gql_query,
     execute_ethereum_paginated_gql_query,
     execute_sw_gql_paginated_query,
@@ -29,7 +28,6 @@ TEST_QUERY = gql(
 )
 
 
-@patch("oracle.oracle.clients.NETWORK_CONFIG", NETWORKS[TEST_NETWORK])
 class TestClients:
     async def _test_basic(self, query_func):
         data = [{"results": [{"id": x} for x in range(5)]}]
@@ -38,6 +36,7 @@ class TestClients:
             return_value=data,
         ):
             result: Dict = await query_func(
+                network=TEST_NETWORK,
                 query=TEST_QUERY,
                 variables=dict(block_number=111111),
             )
@@ -50,6 +49,7 @@ class TestClients:
                 side_effect=data,
             ):
                 result: List = await query_func(
+                    network=TEST_NETWORK,
                     query=TEST_QUERY,
                     variables=dict(block_number=111111),
                     paginated_field="results",

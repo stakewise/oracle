@@ -1,15 +1,13 @@
 import asyncio
 import logging
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List
 
 import backoff
-import ipfshttpclient
-from aiohttp import ClientSession
 from gql import Client
 from gql.transport.aiohttp import AIOHTTPTransport
 from graphql import DocumentNode
 
-from oracle.settings import IPFS_FETCH_ENDPOINTS, IPFS_PIN_ENDPOINTS, NETWORK_CONFIG
+from oracle.settings import NETWORKS
 
 gql_logger = logging.getLogger("gql_logger")
 gql_handler = logging.StreamHandler()
@@ -37,40 +35,44 @@ async def execute_single_gql_query(
         return await session.execute(query, variable_values=variables)
 
 
-async def execute_sw_gql_query(query: DocumentNode, variables: Dict) -> Dict:
+async def execute_sw_gql_query(
+    network: str, query: DocumentNode, variables: Dict
+) -> Dict:
     return await execute_gql_query(
-        subgraph_urls=NETWORK_CONFIG["STAKEWISE_SUBGRAPH_URLS"],
+        subgraph_urls=NETWORKS[network]["STAKEWISE_SUBGRAPH_URLS"],
         query=query,
         variables=variables,
     )
 
 
 async def execute_uniswap_v3_gql_query(
+    network: str,
     query: DocumentNode,
     variables: Dict,
 ) -> Dict:
     """Executes GraphQL query."""
     return await execute_gql_query(
-        subgraph_urls=NETWORK_CONFIG["UNISWAP_V3_SUBGRAPH_URLS"],
+        subgraph_urls=NETWORKS[network]["UNISWAP_V3_SUBGRAPH_URLS"],
         query=query,
         variables=variables,
     )
 
 
-async def execute_ethereum_gql_query(query: DocumentNode, variables: Dict) -> Dict:
+async def execute_ethereum_gql_query(
+    network: str, query: DocumentNode, variables: Dict
+) -> Dict:
     """Executes GraphQL query."""
     return await execute_gql_query(
-        subgraph_urls=NETWORK_CONFIG["ETHEREUM_SUBGRAPH_URLS"],
+        subgraph_urls=NETWORKS[network]["ETHEREUM_SUBGRAPH_URLS"],
         query=query,
         variables=variables,
     )
 
 
-async def execute_base_gql_paginated_query(
+async def _execute_base_gql_paginated_query(
     subgraph_urls: str, query: DocumentNode, variables: Dict, paginated_field: str
 ) -> List:
     """Executes GraphQL query."""
-    chunks = []
     result: List[Any] = []
     variables["last_id"] = ""
 
@@ -89,10 +91,10 @@ async def execute_base_gql_paginated_query(
 
 
 async def execute_sw_gql_paginated_query(
-    query: DocumentNode, variables: Dict, paginated_field: str
+    network: str, query: DocumentNode, variables: Dict, paginated_field: str
 ) -> List:
-    return await execute_base_gql_paginated_query(
-        subgraph_urls=NETWORK_CONFIG["STAKEWISE_SUBGRAPH_URLS"],
+    return await _execute_base_gql_paginated_query(
+        subgraph_urls=NETWORKS[network]["STAKEWISE_SUBGRAPH_URLS"],
         query=query,
         variables=variables,
         paginated_field=paginated_field,
@@ -100,11 +102,11 @@ async def execute_sw_gql_paginated_query(
 
 
 async def execute_uniswap_v3_paginated_gql_query(
-    query: DocumentNode, variables: Dict, paginated_field: str
+    network: str, query: DocumentNode, variables: Dict, paginated_field: str
 ) -> List:
     """Executes GraphQL query."""
-    return await execute_base_gql_paginated_query(
-        subgraph_urls=NETWORK_CONFIG["UNISWAP_V3_SUBGRAPH_URLS"],
+    return await _execute_base_gql_paginated_query(
+        subgraph_urls=NETWORKS[network]["UNISWAP_V3_SUBGRAPH_URLS"],
         query=query,
         variables=variables,
         paginated_field=paginated_field,
@@ -112,11 +114,11 @@ async def execute_uniswap_v3_paginated_gql_query(
 
 
 async def execute_ethereum_paginated_gql_query(
-    query: DocumentNode, variables: Dict, paginated_field: str
+    network: str, query: DocumentNode, variables: Dict, paginated_field: str
 ) -> List:
     """Executes ETH query."""
-    return await execute_base_gql_paginated_query(
-        subgraph_urls=NETWORK_CONFIG["ETHEREUM_SUBGRAPH_URLS"],
+    return await _execute_base_gql_paginated_query(
+        subgraph_urls=NETWORKS[network]["ETHEREUM_SUBGRAPH_URLS"],
         query=query,
         variables=variables,
         paginated_field=paginated_field,
@@ -148,28 +150,3 @@ async def execute_gql_query(
     if majority >= len(subgraph_urls) // 2 + 1:
         return result
     raise GraphqlConsensusError
-
-
-@backoff.on_exception(backoff.expo, Exception, max_time=900)
-async def ipfs_fetch(ipfs_hash: str) -> Union[Dict[Any, Any], List[Dict[Any, Any]]]:
-    """Tries to fetch IPFS hash from different sources."""
-    _ipfs_hash = ipfs_hash.replace("ipfs://", "").replace("/ipfs/", "")
-    for ipfs_endpoint in IPFS_PIN_ENDPOINTS:
-        try:
-            with ipfshttpclient.connect(ipfs_endpoint) as client:
-                return client.get_json(_ipfs_hash)
-        except ipfshttpclient.exceptions.TimeoutError:
-            pass
-
-    async with ClientSession() as session:
-        for endpoint in IPFS_FETCH_ENDPOINTS:
-            try:
-                response = await session.get(
-                    f"{endpoint.rstrip('/')}/ipfs/{_ipfs_hash}"
-                )
-                response.raise_for_status()
-                return await response.json()
-            except:  # noqa: E722
-                pass
-
-    raise RuntimeError(f"Failed to fetch IPFS data at {_ipfs_hash}")

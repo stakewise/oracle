@@ -7,23 +7,24 @@ import aiohttp
 from eth_account.signers.local import LocalAccount
 
 from oracle.health_server import create_health_server_runner, start_health_server
-from oracle.oracle.distributor.controller import DistributorController
-from oracle.oracle.eth1 import (
+from oracle.oracle.common.eth1 import (
     get_finalized_block,
     get_latest_block_number,
     get_voting_parameters,
     has_synced_block,
-    submit_vote,
 )
+from oracle.oracle.distributor.controller import DistributorController
 from oracle.oracle.health_server import oracle_routes
 from oracle.oracle.rewards.controller import RewardsController
 from oracle.oracle.rewards.eth2 import get_finality_checkpoints, get_genesis
 from oracle.oracle.validators.controller import ValidatorsController
+from oracle.oracle.vote import submit_vote
 from oracle.settings import (
     ENABLE_HEALTH_SERVER,
     HEALTH_SERVER_HOST,
     HEALTH_SERVER_PORT,
     LOG_LEVEL,
+    NETWORK,
     NETWORK_CONFIG,
     ORACLE_PROCESS_INTERVAL,
     SENTRY_DSN,
@@ -84,7 +85,7 @@ async def init_checks(oracle_account, session):
 
     # check stakewise graphql connection
     logger.info("Checking connection to graph node...")
-    await get_finalized_block()
+    await get_finalized_block(NETWORK)
     parsed_uris = [
         "{uri.scheme}://{uri.netloc}".format(uri=urlparse(url))
         for url in NETWORK_CONFIG["ETHEREUM_SUBGRAPH_URLS"]
@@ -109,16 +110,18 @@ async def process_network(
     while not interrupt_handler.exit:
         try:
             # fetch current finalized ETH1 block data
-            finalized_block = await get_finalized_block()
+            finalized_block = await get_finalized_block(NETWORK)
             current_block_number = finalized_block["block_number"]
             current_timestamp = finalized_block["timestamp"]
 
-            latest_block_number = await get_latest_block_number()
+            latest_block_number = await get_latest_block_number(NETWORK)
 
-            while not (await has_synced_block(latest_block_number)):
+            while not (await has_synced_block(NETWORK, latest_block_number)):
                 continue
 
-            voting_parameters = await get_voting_parameters(current_block_number)
+            voting_parameters = await get_voting_parameters(
+                NETWORK, current_block_number
+            )
             # there is no consensus
             if not voting_parameters:
                 return

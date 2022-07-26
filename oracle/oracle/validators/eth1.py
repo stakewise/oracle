@@ -4,16 +4,16 @@ from eth_typing import HexStr
 from web3 import Web3
 from web3.types import BlockNumber
 
-from oracle.oracle.clients import (
+from oracle.oracle.common.clients import (
     execute_ethereum_gql_query,
     execute_sw_gql_query,
-    ipfs_fetch,
 )
-from oracle.oracle.graphql_queries import (
+from oracle.oracle.common.graphql_queries import (
     OPERATORS_QUERY,
     VALIDATOR_REGISTRATIONS_LATEST_INDEX_QUERY,
     VALIDATOR_REGISTRATIONS_QUERY,
 )
+from oracle.oracle.common.ipfs import ipfs_fetch
 
 from .types import ValidatorDepositData
 

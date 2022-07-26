@@ -1,27 +1,20 @@
 import asyncio
-import json
 import logging
-from typing import Dict, TypedDict, Union
+from typing import Dict, TypedDict
 
-import backoff
-import boto3
-from eth_account.messages import encode_defunct
-from eth_account.signers.local import LocalAccount
-from web3 import Web3
 from web3.types import BlockNumber, Timestamp, Wei
 
-from oracle.oracle.clients import execute_single_gql_query, execute_sw_gql_query
-from oracle.oracle.graphql_queries import (
+from oracle.oracle.common.clients import execute_single_gql_query, execute_sw_gql_query
+from oracle.oracle.common.graphql_queries import (
     FINALIZED_BLOCK_QUERY,
     LATEST_BLOCK_QUERY,
     SYNC_BLOCK_QUERY,
     VOTING_PARAMETERS_QUERY,
 )
-from oracle.settings import CONFIRMATION_BLOCKS, NETWORK_CONFIG
-
-from .distributor.types import DistributorVote, DistributorVotingParameters
-from .rewards.types import RewardsVotingParameters, RewardVote
-from .validators.types import ValidatorsVote, ValidatorVotingParameters
+from oracle.oracle.distributor.common.types import DistributorVotingParameters
+from oracle.oracle.rewards.types import RewardsVotingParameters
+from oracle.oracle.validators.types import ValidatorVotingParameters
+from oracle.settings import CONFIRMATION_BLOCKS, NETWORKS
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +30,7 @@ class VotingParameters(TypedDict):
     validator: ValidatorVotingParameters
 
 
-async def get_finalized_block() -> Block:
+async def get_finalized_block(network: str) -> Block:
     """Gets the finalized block number and its timestamp."""
     results = await asyncio.gather(
         *[
@@ -48,7 +41,7 @@ async def get_finalized_block() -> Block:
                     confirmation_blocks=CONFIRMATION_BLOCKS,
                 ),
             )
-            for subgraph_url in NETWORK_CONFIG["ETHEREUM_SUBGRAPH_URLS"]
+            for subgraph_url in NETWORKS[network]["ETHEREUM_SUBGRAPH_URLS"]
         ]
     )
     result = _find_max_consensus(results, func=lambda x: int(x["blocks"][0]["id"]))
@@ -59,7 +52,7 @@ async def get_finalized_block() -> Block:
     )
 
 
-async def get_latest_block_number() -> BlockNumber:
+async def get_latest_block_number(network: str) -> BlockNumber:
     """Gets the latest block number and its timestamp."""
     results = await asyncio.gather(
         *[
@@ -68,7 +61,7 @@ async def get_latest_block_number() -> BlockNumber:
                 query=LATEST_BLOCK_QUERY,
                 variables=dict(),
             )
-            for subgraph_url in NETWORK_CONFIG["ETHEREUM_SUBGRAPH_URLS"]
+            for subgraph_url in NETWORKS[network]["ETHEREUM_SUBGRAPH_URLS"]
         ]
     )
     result = _find_max_consensus(results, func=lambda x: int(x["blocks"][0]["id"]))
@@ -76,7 +69,7 @@ async def get_latest_block_number() -> BlockNumber:
     return BlockNumber(int(result["blocks"][0]["id"]))
 
 
-async def has_synced_block(block_number: BlockNumber) -> bool:
+async def has_synced_block(network: str, block_number: BlockNumber) -> bool:
     results = await asyncio.gather(
         *[
             execute_single_gql_query(
@@ -84,7 +77,7 @@ async def has_synced_block(block_number: BlockNumber) -> bool:
                 query=SYNC_BLOCK_QUERY,
                 variables={},
             )
-            for subgraph_url in NETWORK_CONFIG["STAKEWISE_SUBGRAPH_URLS"]
+            for subgraph_url in NETWORKS[network]["STAKEWISE_SUBGRAPH_URLS"]
         ]
     )
     result = _find_max_consensus(
@@ -93,9 +86,12 @@ async def has_synced_block(block_number: BlockNumber) -> bool:
     return block_number <= int(result["_meta"]["block"]["number"])
 
 
-async def get_voting_parameters(block_number: BlockNumber) -> VotingParameters:
+async def get_voting_parameters(
+    network: str, block_number: BlockNumber
+) -> VotingParameters:
     """Fetches rewards voting parameters."""
     result: Dict = await execute_sw_gql_query(
+        network=network,
         query=VOTING_PARAMETERS_QUERY,
         variables=dict(
             block_number=block_number,
@@ -139,37 +135,6 @@ async def get_voting_parameters(block_number: BlockNumber) -> VotingParameters:
     return VotingParameters(
         rewards=rewards, distributor=distributor, validator=validator
     )
-
-
-@backoff.on_exception(backoff.expo, Exception, max_time=900)
-def submit_vote(
-    oracle: LocalAccount,
-    encoded_data: bytes,
-    vote: Union[RewardVote, DistributorVote, ValidatorsVote],
-    name: str,
-) -> None:
-    """Submits vote to the votes' aggregator."""
-    aws_bucket_name = NETWORK_CONFIG["AWS_BUCKET_NAME"]
-    s3_client = boto3.client(
-        "s3",
-        aws_access_key_id=NETWORK_CONFIG["AWS_ACCESS_KEY_ID"],
-        aws_secret_access_key=NETWORK_CONFIG["AWS_SECRET_ACCESS_KEY"],
-    )
-    # generate candidate ID
-    candidate_id: bytes = Web3.keccak(primitive=encoded_data)
-    message = encode_defunct(primitive=candidate_id)
-    signed_message = oracle.sign_message(message)
-    vote["signature"] = signed_message.signature.hex()
-
-    # TODO: support more aggregators (GCP, Azure, etc.)
-    bucket_key = f"{oracle.address}/{name}"
-    s3_client.put_object(
-        Bucket=aws_bucket_name,
-        Key=bucket_key,
-        Body=json.dumps(vote),
-        ACL="public-read",
-    )
-    s3_client.get_waiter("object_exists").wait(Bucket=aws_bucket_name, Key=bucket_key)
 
 
 def _find_max_consensus(items, func):

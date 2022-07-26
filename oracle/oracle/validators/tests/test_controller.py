@@ -84,7 +84,7 @@ def ethereum_gql_query(validatorsDepositRoot, *args, **kwargs):
 
 class TestValidatorController:
     async def test_process_low_balance(self):
-        with patch("oracle.oracle.eth1.submit_vote", return_value=None) as vote_mock:
+        with patch("oracle.oracle.vote.submit_vote", return_value=None) as vote_mock:
             controller = ValidatorsController(
                 oracle=get_test_oracle(),
             )
