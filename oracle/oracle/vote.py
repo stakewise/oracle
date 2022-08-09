@@ -23,7 +23,6 @@ def submit_vote(
     vote: Union[RewardVote, DistributorVote, ValidatorsVote],
     name: str,
 ) -> None:
-    return
     """Submits vote to the votes' aggregator."""
     aws_bucket_name = NETWORK_CONFIG["AWS_BUCKET_NAME"]
     s3_client = boto3.client(

@@ -169,7 +169,6 @@ class TestValidatorController:
 
             vote_mock.assert_called()
             validator_vote = dict(
-                network="goerli",
                 oracle=get_test_oracle(),
                 encoded_data=encoded_data,
                 vote=vote,
