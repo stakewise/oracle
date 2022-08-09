@@ -118,7 +118,7 @@ def calculate_merkle_root(rewards: Rewards) -> Tuple[HexStr, Claims]:
     claims: Claims = OrderedDict()
     for i, account in enumerate(accounts):
         tokens: List[ChecksumAddress] = sorted(rewards[account].keys())
-        claim: Claim = Claims(
+        claim: Claim = OrderedDict(
             index=i, tokens=tokens, values=[rewards[account][t] for t in tokens]
         )
         claims[account] = claim

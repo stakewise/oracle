@@ -113,7 +113,6 @@ class ValidatorsController:
         )
 
         submit_vote(
-            network=NETWORK,
             oracle=self.oracle,
             encoded_data=encoded_data,
             vote=vote,
