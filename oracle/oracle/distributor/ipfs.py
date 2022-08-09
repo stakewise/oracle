@@ -1,21 +1,18 @@
 import json
 import logging
-from typing import Dict
 
 import backoff
 import ipfshttpclient
 from aiohttp import ClientSession
-from eth_typing import ChecksumAddress
 
-from oracle.oracle.clients import ipfs_fetch
+from oracle.oracle.common.ipfs import ipfs_fetch
+from oracle.oracle.distributor.common.types import ClaimedAccounts, Claims, Rewards
 from oracle.settings import (
     IPFS_PIN_ENDPOINTS,
     IPFS_PINATA_API_KEY,
     IPFS_PINATA_PIN_ENDPOINT,
     IPFS_PINATA_SECRET_KEY,
 )
-
-from .types import ClaimedAccounts, Claims, Rewards
 
 logger = logging.getLogger(__name__)
 
@@ -51,11 +48,6 @@ async def get_unclaimed_balances(
                 )
 
     return unclaimed_rewards
-
-
-async def get_one_time_rewards_allocations(rewards: str) -> Dict[ChecksumAddress, str]:
-    """Fetches one time rewards from IPFS."""
-    return await ipfs_fetch(rewards)
 
 
 def add_ipfs_prefix(ipfs_id: str) -> str:

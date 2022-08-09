@@ -6,7 +6,7 @@ from eth_typing.encoding import HexStr
 from eth_utils.crypto import keccak
 from web3 import Web3
 
-from .types import Claim, Claims, Rewards
+from oracle.oracle.distributor.common.types import Claim, Claims, Rewards
 
 w3 = Web3()
 

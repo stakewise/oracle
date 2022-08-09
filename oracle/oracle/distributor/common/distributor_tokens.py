@@ -4,21 +4,22 @@ from ens.constants import EMPTY_ADDR_HEX
 from eth_typing import BlockNumber, ChecksumAddress
 from web3 import Web3
 
-from oracle.oracle.clients import execute_sw_gql_paginated_query
-from oracle.oracle.graphql_queries import (
+from oracle.oracle.common.clients import execute_sw_gql_paginated_query
+from oracle.oracle.common.graphql_queries import (
     DISTRIBUTOR_REDIRECTS_QUERY,
     DISTRIBUTOR_TOKEN_HOLDERS_QUERY,
     DISTRIBUTOR_TOKENS_QUERY,
 )
-
-from .types import Balances
+from oracle.oracle.distributor.common.types import Balances
 
 
 async def get_distributor_redirects(
+    network: str,
     block_number: BlockNumber,
 ) -> Dict[ChecksumAddress, ChecksumAddress]:
     """Fetches distributor redirects."""
     distributor_redirects: List = await execute_sw_gql_paginated_query(
+        network=network,
         query=DISTRIBUTOR_REDIRECTS_QUERY,
         variables=dict(
             block_number=block_number,
@@ -35,9 +36,12 @@ async def get_distributor_redirects(
     return redirects
 
 
-async def get_distributor_tokens(block_number: BlockNumber) -> Set[ChecksumAddress]:
+async def get_distributor_tokens(
+    network: str, block_number: BlockNumber
+) -> Set[ChecksumAddress]:
     """Fetches distributor tokens."""
     distributor_tokens: List = await execute_sw_gql_paginated_query(
+        network=network,
         query=DISTRIBUTOR_TOKENS_QUERY,
         variables=dict(
             block_number=block_number,
@@ -49,6 +53,7 @@ async def get_distributor_tokens(block_number: BlockNumber) -> Set[ChecksumAddre
 
 
 async def get_token_liquidity_points(
+    network: str,
     token_address: ChecksumAddress,
     from_block: BlockNumber,
     to_block: BlockNumber,
@@ -56,6 +61,7 @@ async def get_token_liquidity_points(
     """Fetches distributor token holders' balances."""
     lowered_token_address = token_address.lower()
     positions: List = await execute_sw_gql_paginated_query(
+        network=network,
         query=DISTRIBUTOR_TOKEN_HOLDERS_QUERY,
         variables=dict(
             token_address=lowered_token_address,

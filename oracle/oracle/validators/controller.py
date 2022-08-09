@@ -7,8 +7,8 @@ from web3 import Web3
 from web3.types import Wei
 
 from oracle.networks import GNOSIS_CHAIN
-from oracle.oracle.eth1 import submit_vote
 from oracle.oracle.utils import save
+from oracle.oracle.vote import submit_vote
 from oracle.settings import (
     MGNO_RATE,
     NETWORK,

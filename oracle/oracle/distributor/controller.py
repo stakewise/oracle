@@ -5,12 +5,11 @@ from eth_account.signers.local import LocalAccount
 from eth_typing import HexStr
 from web3 import Web3
 
-from oracle.oracle.utils import save
-from oracle.settings import DISTRIBUTOR_VOTE_FILENAME, NETWORK_CONFIG
-
-from ..eth1 import submit_vote
-from .distributor_tokens import get_distributor_redirects, get_distributor_tokens
-from .eth1 import (
+from oracle.oracle.distributor.common.distributor_tokens import (
+    get_distributor_redirects,
+    get_distributor_tokens,
+)
+from oracle.oracle.distributor.common.eth1 import (
     get_disabled_stakers_reward_token_distributions,
     get_distributor_claimed_accounts,
     get_one_time_rewards,
@@ -18,11 +17,22 @@ from .eth1 import (
     get_partners_rewards,
     get_periodic_allocations,
 )
+from oracle.oracle.distributor.common.merkle_tree import calculate_merkle_root
+from oracle.oracle.distributor.common.types import (
+    DistributorVote,
+    DistributorVotingParameters,
+    Rewards,
+)
+from oracle.oracle.distributor.common.uniswap_v3 import (
+    get_uniswap_v3_distributions,
+    get_uniswap_v3_pools,
+)
+from oracle.oracle.utils import save
+from oracle.oracle.vote import submit_vote
+from oracle.settings import DISTRIBUTOR_VOTE_FILENAME, NETWORK, NETWORK_CONFIG
+
 from .ipfs import get_unclaimed_balances, upload_claims
-from .merkle_tree import calculate_merkle_root
 from .rewards import DistributorRewards
-from .types import DistributorVote, DistributorVotingParameters, Rewards
-from .uniswap_v3 import get_uniswap_v3_distributions, get_uniswap_v3_pools
 
 logger = logging.getLogger(__name__)
 w3 = Web3()
@@ -63,9 +73,15 @@ class DistributorController(object):
 
         # fetch active periodic allocations
         active_allocations = await get_periodic_allocations(
-            from_block=from_block, to_block=to_block
+            network=NETWORK, from_block=from_block, to_block=to_block
         )
-        uniswap_v3_pools = await get_uniswap_v3_pools(block_number=to_block)
+        uniswap_v3_pools = await get_uniswap_v3_pools(
+            network=NETWORK,
+            block_number=to_block,
+            reward_token_address=NETWORK_CONFIG["REWARD_TOKEN_CONTRACT_ADDRESS"],
+            staked_token_address=NETWORK_CONFIG["STAKED_TOKEN_CONTRACT_ADDRESS"],
+            swise_token_address=NETWORK_CONFIG["SWISE_TOKEN_CONTRACT_ADDRESS"],
+        )
 
         # fetch uni v3 distributions
         all_distributions = await get_uniswap_v3_distributions(
@@ -78,9 +94,12 @@ class DistributorController(object):
         # fetch disabled stakers distributions
         disabled_stakers_distributions = (
             await get_disabled_stakers_reward_token_distributions(
+                network=NETWORK,
                 distributor_reward=voting_params["distributor_reward"],
                 from_block=from_block,
                 to_block=to_block,
+                reward_token_address=NETWORK_CONFIG["REWARD_TOKEN_CONTRACT_ADDRESS"],
+                staked_token_address=NETWORK_CONFIG["STAKED_TOKEN_CONTRACT_ADDRESS"],
             )
         )
         all_distributions.extend(disabled_stakers_distributions)
@@ -94,7 +113,7 @@ class DistributorController(object):
         ):
             # fetch accounts that have claimed since last merkle root update
             claimed_accounts = await get_distributor_claimed_accounts(
-                merkle_root=last_merkle_root
+                network=NETWORK, merkle_root=last_merkle_root
             )
 
             # calculate unclaimed rewards
@@ -107,8 +126,8 @@ class DistributorController(object):
 
         # calculate reward distributions with coroutines
         tasks = []
-        distributor_tokens = await get_distributor_tokens(from_block)
-        distributor_redirects = await get_distributor_redirects(from_block)
+        distributor_tokens = await get_distributor_tokens(NETWORK, from_block)
+        distributor_redirects = await get_distributor_redirects(NETWORK, from_block)
         for dist in all_distributions:
             distributor_rewards = DistributorRewards(
                 uniswap_v3_pools=uniswap_v3_pools,
@@ -125,7 +144,16 @@ class DistributorController(object):
             tasks.append(task)
 
         # process one time rewards
-        tasks.append(get_one_time_rewards(from_block=from_block, to_block=to_block))
+        tasks.append(
+            get_one_time_rewards(
+                network=NETWORK,
+                from_block=from_block,
+                to_block=to_block,
+                distributor_fallback_address=NETWORK_CONFIG[
+                    "DISTRIBUTOR_FALLBACK_ADDRESS"
+                ],
+            )
+        )
 
         # merge results
         results = await asyncio.gather(*tasks)
@@ -135,14 +163,18 @@ class DistributorController(object):
 
         protocol_reward = voting_params["protocol_reward"]
         operators_rewards, left_reward = await get_operators_rewards(
+            network=NETWORK,
             from_block=from_block,
             to_block=to_block,
             total_reward=protocol_reward,
+            reward_token_address=NETWORK_CONFIG["REWARD_TOKEN_CONTRACT_ADDRESS"],
         )
         partners_rewards, left_reward = await get_partners_rewards(
+            network=NETWORK,
             from_block=from_block,
             to_block=to_block,
             total_reward=left_reward,
+            reward_token_address=NETWORK_CONFIG["REWARD_TOKEN_CONTRACT_ADDRESS"],
         )
         if left_reward > 0:
             fallback_rewards: Rewards = {

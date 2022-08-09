@@ -14,7 +14,7 @@ from web3.contract import Contract, ContractFunction
 from web3.types import TxParams
 
 from oracle.keeper.typings import OraclesVotes, Parameters
-from oracle.oracle.distributor.types import DistributorVote
+from oracle.oracle.distributor.common.types import DistributorVote
 from oracle.oracle.rewards.types import RewardVote
 from oracle.oracle.validators.types import ValidatorsVote
 from oracle.settings import (

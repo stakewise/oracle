@@ -5,15 +5,16 @@ from typing import Dict, List, Set
 from ens.constants import EMPTY_ADDR_HEX
 from eth_typing import BlockNumber, ChecksumAddress
 
-from oracle.settings import NETWORK_CONFIG
-
-from .distributor_tokens import get_token_liquidity_points
-from .types import Balances, Rewards, UniswapV3Pools
-from .uniswap_v3 import (
+from oracle.oracle.distributor.common.distributor_tokens import (
+    get_token_liquidity_points,
+)
+from oracle.oracle.distributor.common.types import Balances, Rewards, UniswapV3Pools
+from oracle.oracle.distributor.common.uniswap_v3 import (
     get_uniswap_v3_liquidity_points,
     get_uniswap_v3_range_liquidity_points,
     get_uniswap_v3_single_token_balances,
 )
+from oracle.settings import NETWORK, NETWORK_CONFIG
 
 logger = logging.getLogger(__name__)
 
@@ -129,6 +130,7 @@ class DistributorRewards(object):
                 f"Fetching Uniswap V3 staked token balances: pool={contract_address}"
             )
             return await get_uniswap_v3_single_token_balances(
+                network=NETWORK,
                 pool_address=contract_address,
                 token=self.staked_token_contract_address,
                 block_number=self.to_block,
@@ -141,6 +143,7 @@ class DistributorRewards(object):
                 f"Fetching Uniswap V3 reward token balances: pool={contract_address}"
             )
             return await get_uniswap_v3_single_token_balances(
+                network=NETWORK,
                 pool_address=contract_address,
                 token=self.reward_token_contract_address,
                 block_number=self.to_block,
@@ -151,6 +154,7 @@ class DistributorRewards(object):
         ):
             logger.info(f"Fetching Uniswap V3 SWISE balances: pool={contract_address}")
             return await get_uniswap_v3_single_token_balances(
+                network=NETWORK,
                 pool_address=contract_address,
                 token=self.swise_token_contract_address,
                 block_number=self.to_block,
@@ -163,6 +167,7 @@ class DistributorRewards(object):
                 f"Fetching Uniswap V3 full range liquidity points: pool={contract_address}"
             )
             return await get_uniswap_v3_range_liquidity_points(
+                network=NETWORK,
                 tick_lower=-887220,
                 tick_upper=887220,
                 pool_address=contract_address,
@@ -173,6 +178,7 @@ class DistributorRewards(object):
                 f"Fetching Uniswap V3 liquidity points: pool={contract_address}"
             )
             return await get_uniswap_v3_liquidity_points(
+                network=NETWORK,
                 pool_address=contract_address,
                 block_number=self.to_block,
             )
@@ -181,6 +187,7 @@ class DistributorRewards(object):
                 f"Fetching token holders liquidity points: token={contract_address}"
             )
             return await get_token_liquidity_points(
+                network=NETWORK,
                 token_address=contract_address,
                 from_block=self.from_block,
                 to_block=self.to_block,

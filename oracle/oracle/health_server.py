@@ -2,8 +2,9 @@ import logging
 
 from aiohttp import web
 
-from oracle.oracle.clients import ipfs_fetch
-from oracle.oracle.eth1 import get_finalized_block, get_voting_parameters
+from oracle.oracle.common.eth1 import get_finalized_block, get_voting_parameters
+from oracle.oracle.common.ipfs import ipfs_fetch
+from oracle.settings import NETWORK
 
 logger = logging.getLogger(__name__)
 oracle_routes = web.RouteTableDef()
@@ -13,9 +14,9 @@ oracle_routes = web.RouteTableDef()
 async def health(request):
     try:
         # check graphQL connection
-        finalized_block = await get_finalized_block()
+        finalized_block = await get_finalized_block(NETWORK)
         current_block_number = finalized_block["block_number"]
-        voting_params = await get_voting_parameters(current_block_number)
+        voting_params = await get_voting_parameters(NETWORK, current_block_number)
         last_merkle_proofs = voting_params["distributor"]["last_merkle_proofs"]
         if last_merkle_proofs:
             # check IPFS connection
