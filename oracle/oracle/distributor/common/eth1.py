@@ -236,6 +236,7 @@ async def get_partners_rewards(
 ) -> Tuple[Rewards, Wei]:
     """Fetches partners rewards."""
     result: Dict = await execute_sw_gql_query(
+        network=network,
         query=PARTNERS_QUERY,
         variables=dict(
             block_number=to_block,
