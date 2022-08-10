@@ -171,6 +171,7 @@ async def get_uniswap_v3_liquidity_points(
         return Balances(total_supply=0, balances={})
 
     positions: List = await execute_uniswap_v3_paginated_gql_query(
+        network=network,
         query=UNISWAP_V3_CURRENT_TICK_POSITIONS_QUERY,
         variables=dict(
             block_number=block_number,

@@ -14,6 +14,7 @@ from oracle.oracle.common.graphql_queries import (
     VALIDATOR_REGISTRATIONS_QUERY,
 )
 from oracle.oracle.common.ipfs import ipfs_fetch
+from oracle.settings import NETWORK
 
 from .types import ValidatorDepositData
 
@@ -23,6 +24,7 @@ async def select_validator(
 ) -> Union[None, ValidatorDepositData]:
     """Selects the next validator to register."""
     result: Dict = await execute_sw_gql_query(
+        network=NETWORK,
         query=OPERATORS_QUERY,
         variables=dict(block_number=block_number),
     )
@@ -71,6 +73,7 @@ async def select_validator(
 async def can_register_validator(block_number: BlockNumber, public_key: HexStr) -> bool:
     """Checks whether it's safe to register the validator."""
     result: Dict = await execute_ethereum_gql_query(
+        network=NETWORK,
         query=VALIDATOR_REGISTRATIONS_QUERY,
         variables=dict(block_number=block_number, public_key=public_key),
     )
@@ -82,6 +85,7 @@ async def can_register_validator(block_number: BlockNumber, public_key: HexStr) 
 async def get_validators_deposit_root(block_number: BlockNumber) -> HexStr:
     """Fetches validators deposit root for protecting against operator submitting deposit prior to registration."""
     result: Dict = await execute_ethereum_gql_query(
+        network=NETWORK,
         query=VALIDATOR_REGISTRATIONS_LATEST_INDEX_QUERY,
         variables=dict(block_number=block_number),
     )
