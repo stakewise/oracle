@@ -8,10 +8,13 @@ from aiohttp import ClientSession
 from oracle.oracle.common.ipfs import ipfs_fetch
 from oracle.oracle.distributor.common.types import ClaimedAccounts, Claims, Rewards
 from oracle.settings import (
-    IPFS_PIN_ENDPOINTS,
+    INFURA_IPFS_CLIENT_ENDPOINT,
+    INFURA_IPFS_CLIENT_PASSWORD,
+    INFURA_IPFS_CLIENT_USERNAME,
     IPFS_PINATA_API_KEY,
     IPFS_PINATA_PIN_ENDPOINT,
     IPFS_PINATA_SECRET_KEY,
+    LOCAL_IPFS_CLIENT_ENDPOINT,
 )
 
 logger = logging.getLogger(__name__)
@@ -65,15 +68,26 @@ async def upload_claims(claims: Claims) -> str:
     """Submits claims to the IPFS and pins the file."""
     # TODO: split claims into files up to 1000 entries
     ipfs_ids = []
-    for pin_endpoint in IPFS_PIN_ENDPOINTS:
+    try:
+        with ipfshttpclient.connect(
+            INFURA_IPFS_CLIENT_ENDPOINT,
+            username=INFURA_IPFS_CLIENT_USERNAME,
+            password=INFURA_IPFS_CLIENT_PASSWORD,
+        ) as client:
+            ipfs_id = client.add_json(claims)
+            client.pin.add(ipfs_id)
+            ipfs_ids.append(ipfs_id)
+    except Exception as e:
+        logger.error(e)
+
+    if LOCAL_IPFS_CLIENT_ENDPOINT:
         try:
-            with ipfshttpclient.connect(pin_endpoint) as client:
+            with ipfshttpclient.connect(LOCAL_IPFS_CLIENT_ENDPOINT) as client:
                 ipfs_id = client.add_json(claims)
                 client.pin.add(ipfs_id)
                 ipfs_ids.append(ipfs_id)
         except Exception as e:
             logger.error(e)
-            logger.error(f"Failed to submit claims to {pin_endpoint}")
 
     if IPFS_PINATA_API_KEY and IPFS_PINATA_SECRET_KEY:
         headers = {
