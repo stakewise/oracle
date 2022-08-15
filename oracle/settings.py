@@ -29,16 +29,21 @@ CONFIRMATION_BLOCKS: int = config("CONFIRMATION_BLOCKS", default=15, cast=int)
 # oracle
 ORACLE_PROCESS_INTERVAL = config("ORACLE_PROCESS_INTERVAL", default=10, cast=int)
 
-IPFS_PIN_ENDPOINTS = config(
-    "IPFS_PIN_ENDPOINTS",
-    cast=Csv(),
-    default="/dns/ipfs.infura.io/tcp/5001/https,/dns/ipfs/tcp/5001/http",
-)
 IPFS_FETCH_ENDPOINTS = config(
     "IPFS_FETCH_ENDPOINTS",
     cast=Csv(),
-    default="https://gateway.pinata.cloud,http://cloudflare-ipfs.com,https://ipfs.io",
+    default="http://cloudflare-ipfs.com,https://ipfs.io,https://gateway.pinata.cloud",
 )
+
+LOCAL_IPFS_CLIENT_ENDPOINT = config("LOCAL_IPFS_CLIENT_ENDPOINT", default="")
+
+# infura
+INFURA_IPFS_CLIENT_ENDPOINT = config(
+    "INFURA_IPFS_CLIENT_ENDPOINT",
+    default="/dns/ipfs.infura.io/tcp/5001/https",
+)
+INFURA_IPFS_CLIENT_USERNAME = config("INFURA_IPFS_CLIENT_USERNAME", default="")
+INFURA_IPFS_CLIENT_PASSWORD = config("INFURA_IPFS_CLIENT_PASSWORD", default="")
 
 # extra pins to pinata for redundancy
 IPFS_PINATA_PIN_ENDPOINT = config(
