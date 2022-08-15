@@ -35,7 +35,7 @@ IPFS_FETCH_ENDPOINTS = config(
     default="http://cloudflare-ipfs.com,https://ipfs.io,https://gateway.pinata.cloud",
 )
 
-LOCAL_IPFS_CLIENT_ENDPOINT = config("INFURA_IPFS_CLIENT_USERNAME", default="")
+LOCAL_IPFS_CLIENT_ENDPOINT = config("LOCAL_IPFS_CLIENT_ENDPOINT", default="")
 
 # infura
 INFURA_IPFS_CLIENT_ENDPOINT = config(
