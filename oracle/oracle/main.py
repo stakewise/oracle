@@ -115,16 +115,13 @@ async def process_network(
             current_timestamp = finalized_block["timestamp"]
 
             latest_block_number = await get_latest_block_number(NETWORK)
-
-            while not (await has_synced_block(NETWORK, latest_block_number)):
+            graphs_synced = await has_synced_block(NETWORK, latest_block_number)
+            if not graphs_synced:
                 continue
 
             voting_parameters = await get_voting_parameters(
                 NETWORK, current_block_number
             )
-            # there is no consensus
-            if not voting_parameters:
-                return
 
             await asyncio.gather(
                 # check and update staking rewards
@@ -143,8 +140,8 @@ async def process_network(
             )
         except BaseException as e:
             logger.exception(e)
-
-        await asyncio.sleep(ORACLE_PROCESS_INTERVAL)
+        finally:
+            await asyncio.sleep(ORACLE_PROCESS_INTERVAL)
 
 
 if __name__ == "__main__":

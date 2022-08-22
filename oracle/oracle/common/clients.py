@@ -16,8 +16,8 @@ gql_logger.setLevel(logging.ERROR)
 logger = logging.getLogger(__name__)
 
 
-# set default GQL query execution timeout to 30 seconds
-EXECUTE_TIMEOUT = 30
+# set default GQL query execution timeout to 45 seconds
+EXECUTE_TIMEOUT = 45
 
 # set default GQL pagination
 PAGINATION_WINDOWS = 1000
