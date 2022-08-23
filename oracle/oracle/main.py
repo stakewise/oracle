@@ -4,6 +4,7 @@ import threading
 from urllib.parse import urlparse
 
 import aiohttp
+from eth_account import Account
 from eth_account.signers.local import LocalAccount
 
 from oracle.health_server import create_health_server_runner, start_health_server
@@ -160,6 +161,10 @@ if __name__ == "__main__":
         from sentry_sdk.integrations.logging import ignore_logger
 
         sentry_sdk.init(SENTRY_DSN, traces_sample_rate=0.1)
+        sentry_sdk.set_tag("network", NETWORK)
+        sentry_sdk.set_tag(
+            "account", Account.from_key(NETWORK_CONFIG["ORACLE_PRIVATE_KEY"]).address
+        )
         ignore_logger("backoff")
 
     asyncio.run(main())
