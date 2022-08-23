@@ -7,8 +7,6 @@ from gql import Client
 from gql.transport.aiohttp import AIOHTTPTransport
 from graphql import DocumentNode
 
-from oracle.settings import NETWORKS
-
 gql_logger = logging.getLogger("gql_logger")
 gql_handler = logging.StreamHandler()
 gql_logger.addHandler(gql_handler)
@@ -21,6 +19,15 @@ EXECUTE_TIMEOUT = 45
 
 # set default GQL pagination
 PAGINATION_WINDOWS = 1000
+
+
+def get_network_config(network):
+    try:
+        # backend settings
+        from config.settings.networks import NETWORKS
+    except ImportError:
+        from oracle.settings import NETWORKS
+    return NETWORKS[network]
 
 
 class GraphqlConsensusError(ConnectionError):
@@ -39,7 +46,7 @@ async def execute_sw_gql_query(
     network: str, query: DocumentNode, variables: Dict
 ) -> Dict:
     return await execute_gql_query(
-        subgraph_urls=NETWORKS[network]["STAKEWISE_SUBGRAPH_URLS"],
+        subgraph_urls=get_network_config(network)["STAKEWISE_SUBGRAPH_URLS"],
         query=query,
         variables=variables,
     )
@@ -52,7 +59,7 @@ async def execute_uniswap_v3_gql_query(
 ) -> Dict:
     """Executes GraphQL query."""
     return await execute_gql_query(
-        subgraph_urls=NETWORKS[network]["UNISWAP_V3_SUBGRAPH_URLS"],
+        subgraph_urls=get_network_config(network)["UNISWAP_V3_SUBGRAPH_URLS"],
         query=query,
         variables=variables,
     )
@@ -63,7 +70,7 @@ async def execute_ethereum_gql_query(
 ) -> Dict:
     """Executes GraphQL query."""
     return await execute_gql_query(
-        subgraph_urls=NETWORKS[network]["ETHEREUM_SUBGRAPH_URLS"],
+        subgraph_urls=get_network_config(network)["ETHEREUM_SUBGRAPH_URLS"],
         query=query,
         variables=variables,
     )
@@ -94,7 +101,7 @@ async def execute_sw_gql_paginated_query(
     network: str, query: DocumentNode, variables: Dict, paginated_field: str
 ) -> List:
     return await _execute_base_gql_paginated_query(
-        subgraph_urls=NETWORKS[network]["STAKEWISE_SUBGRAPH_URLS"],
+        subgraph_urls=get_network_config(network)["STAKEWISE_SUBGRAPH_URLS"],
         query=query,
         variables=variables,
         paginated_field=paginated_field,
@@ -106,7 +113,7 @@ async def execute_uniswap_v3_paginated_gql_query(
 ) -> List:
     """Executes GraphQL query."""
     return await _execute_base_gql_paginated_query(
-        subgraph_urls=NETWORKS[network]["UNISWAP_V3_SUBGRAPH_URLS"],
+        subgraph_urls=get_network_config(network)["UNISWAP_V3_SUBGRAPH_URLS"],
         query=query,
         variables=variables,
         paginated_field=paginated_field,
@@ -118,7 +125,7 @@ async def execute_ethereum_paginated_gql_query(
 ) -> List:
     """Executes ETH query."""
     return await _execute_base_gql_paginated_query(
-        subgraph_urls=NETWORKS[network]["ETHEREUM_SUBGRAPH_URLS"],
+        subgraph_urls=get_network_config(network)["ETHEREUM_SUBGRAPH_URLS"],
         query=query,
         variables=variables,
         paginated_field=paginated_field,
