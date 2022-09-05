@@ -11,7 +11,7 @@ volumes:
     driver: local
   geth:
     driver: local
-  erigon:
+  besu:
     driver: local
   prysm:
     driver: local
@@ -121,55 +121,51 @@ services:
 
   geth:
     container_name: geth_mainnet
-    image: ethereum/client-go:v1.10.15
+    image: ethereum/client-go:v1.10.23
     restart: always
     command:
+      - --mainnet
       - --syncmode=full
+      - --authrpc.jwtsecret=/jwtsecret
+      - --authrpc.addr=0.0.0.0
+      - --authrpc.port=8551
+      - --authrpc.vhosts=*
       - --http
       - --http.addr=0.0.0.0
+      - --http.port=8545
       - --http.vhosts=*
       - --http.api=web3,eth,net
       - --datadir=/data/ethereum
       - --ethash.dagdir=/data/ethereum/.ethash
       - --ipcdisable
-    volumes: ["geth:/data"]
+    volumes: ["geth:/data","../configs/jwtsecret:/jwtsecret"]
     profiles: ["geth"]
     networks:
       - mainnet
 
-  erigon:
-    container_name: erigon_mainnet
-    image: thorax/erigon:v2022.03.02
+  besu:
+    container_name: besu_mainnet
+    image: hyperledger/besu:22.7.1
     restart: always
-    command:
-      - erigon
-      - --private.api.addr=0.0.0.0:9090
-      - --maxpeers=100
-      - --datadir=/home/erigon/.local/share/erigon
-      - --batchSize=512M
-      - --prune.r.before=11184524
-      - --prune=htc
-    volumes: ["erigon:/home/erigon/.local/share/erigon"]
-    profiles: ["erigon"]
-    networks:
-      mainnet:
-        aliases:
-          - eth1-node
-
-  erigon-rpcdaemon:
-    container_name: erigon_rpcdaemon_mainnet
-    image: thorax/erigon:v2022.03.02
-    restart: always
-    command:
-      - rpcdaemon
-      - --private.api.addr=erigon:9090
-      - --http.addr=0.0.0.0
-      - --http.vhosts=*
-      - --http.corsdomain=*
-      - --http.api=eth,erigon,web3,net,txpool
-      - --ws
-    depends_on: ["erigon"]
-    profiles: ["erigon"]
+    command: >
+      --network=mainnet
+      --data-path=/data
+      --data-storage-format=BONSAI
+      --sync-mode=X_SNAP
+      --rpc-http-enabled
+      --rpc-http-cors-origins=*
+      --rpc-http-host=0.0.0.0
+      --rpc-http-max-active-connections=256
+      --rpc-http-port=8545
+      --engine-rpc-enabled
+      --engine-host-allowlist=*
+      --engine-jwt-secret=/jwtsecret
+      --engine-rpc-port=8551
+      --host-allowlist=*
+      --max-peers=50
+    volumes: ["besu:/data","../configs/jwtsecret:/jwtsecret"]
+    user: "0:0"
+    profiles: ["besu"]
     networks:
       mainnet:
         aliases:
@@ -177,17 +173,18 @@ services:
 
   prysm:
     container_name: prysm_mainnet
-    image: gcr.io/prysmaticlabs/prysm/beacon-chain:v2.0.6
+    image: gcr.io/prysmaticlabs/prysm/beacon-chain:v3.0.0
     restart: always
     command:
       - --datadir=/data
+      - --jwt-secret=/jwtsecre
       - --rpc-host=0.0.0.0
       - --rpc-port=5052
       - --monitoring-host=0.0.0.0
       - --http-web3provider=$ETH1_ENDPOINT
-      - --slots-per-archive-point=64
+      - --slots-per-archive-point=1024
       - --accept-terms-of-use
-    volumes: ["prysm:/data"]
+    volumes: ["prysm:/data","../configs/jwtsecret:/jwtsecret"]
     profiles: ["prysm"]
     networks:
       mainnet:
@@ -196,7 +193,7 @@ services:
 
   lighthouse:
     container_name: lighthouse_mainnet
-    image: sigp/lighthouse:v2.1.5
+    image: sigp/lighthouse:v3.1.0
     restart: always
     command:
       - lighthouse
@@ -206,9 +203,10 @@ services:
       - --http
       - --http-address=0.0.0.0
       - --http-port=5052
-      - --eth1-endpoints
+      - --execution-endpoint
       - $ETH1_ENDPOINT
-    volumes: ["lighthouse:/root/.lighthouse"]
+      - --execution-jwt=/jwtsecret
+    volumes: ["lighthouse:/root/.lighthouse","../configs/jwtsecret:/jwtsecret"]
     profiles: ["lighthouse"]
     networks:
       mainnet:
