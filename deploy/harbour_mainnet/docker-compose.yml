@@ -179,7 +179,6 @@ services:
     restart: always
     command:
       - --mainnet
-      - --genesis-state=/data/genesis.ssz
       - --datadir=/data
       - --jwt-secret=/jwtsecret
       - --rpc-host=0.0.0.0
@@ -202,7 +201,7 @@ services:
     command:
       - lighthouse
       - --network
-      - prater
+      - mainnet
       - beacon
       - --http
       - --http-address=0.0.0.0
