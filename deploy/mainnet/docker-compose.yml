@@ -177,7 +177,7 @@ services:
     restart: always
     command:
       - --datadir=/data
-      - --jwt-secret=/jwtsecre
+      - --jwt-secret=/jwtsecret
       - --rpc-host=0.0.0.0
       - --rpc-port=5052
       - --monitoring-host=0.0.0.0

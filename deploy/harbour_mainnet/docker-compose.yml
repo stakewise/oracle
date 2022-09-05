@@ -178,10 +178,10 @@ services:
     image: gcr.io/prysmaticlabs/prysm/beacon-chain:v3.0.0
     restart: always
     command:
-      - --prater
+      - --mainnet
       - --genesis-state=/data/genesis.ssz
       - --datadir=/data
-      - --jwt-secret=/jwtsecre
+      - --jwt-secret=/jwtsecret
       - --rpc-host=0.0.0.0
       - --rpc-port=5052
       - --monitoring-host=0.0.0.0
