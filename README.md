@@ -45,16 +45,22 @@ cd deploy/mainnet
 cp .env.example .env
 ```
 
-3. Enable `pushover` alerts in `deploy/configs/alertmanager.yml`
+3. Create JWT
+
+```shell script
+openssl rand -hex 32 > ../configs/jwtsecret
+```
+
+4. Enable `pushover` alerts in `deploy/configs/alertmanager.yml`
 
    1. Register an account on [pushover](https://pushover.net/).
    2. Create an [Application/API Token](https://pushover.net/apps/build).
    3. Add `User Key` and `API Token` to `deploy/configs/alertmanager.yml` file.
 
-4. Run with [docker-compose](https://docs.docker.com/compose/). The docker-compose version must be **v1.27.0+**.
+5. Run with [docker-compose](https://docs.docker.com/compose/). The docker-compose version must be **v1.27.0+**.
 
 ```shell script
-COMPOSE_PROFILES=lighthouse docker-compose up -d
+COMPOSE_PROFILES=besu,lighthouse docker-compose up -d
 ```
 
 ## Keeper
@@ -70,7 +76,7 @@ It helps save the gas cost and stability as there is no need for every oracle to
 The ETH1 node is used to submit the transactions on chain. Any of the ETH1 clients can be used:
 
 - [Go-ethereum](https://github.com/ethereum/go-ethereum)
-- [OpenEthereum](https://github.com/openethereum/openethereum)
+- [Besu](https://github.com/hyperledger/besu)
 - [Nethermind](https://github.com/NethermindEth/nethermind)
 - [Infura](https://infura.io/docs/eth2) (hosted)
 - [Alchemy](https://www.alchemy.com/) (hosted)
@@ -90,5 +96,5 @@ The ETH1 node is used to submit the transactions on chain. Any of the ETH1 clien
 5. Run with [docker-compose](https://docs.docker.com/compose/). The docker-compose version must be **v1.27.0+**.
 
 ```shell script
-COMPOSE_PROFILES=lighthouse,keeper docker-compose up -d
+COMPOSE_PROFILES=besu,lighthouse,keeper docker-compose up -d
 ```

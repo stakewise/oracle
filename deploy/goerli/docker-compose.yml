@@ -11,7 +11,7 @@ volumes:
     driver: local
   geth:
     driver: local
-  erigon:
+  besu:
     driver: local
   prysm:
     driver: local
@@ -26,7 +26,7 @@ networks:
 services:
   oracle:
     container_name: oracle_goerli
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.7.6
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.8.0
     restart: always
     entrypoint: ["python"]
     command: ["oracle/oracle/main.py"]
@@ -36,7 +36,7 @@ services:
 
   keeper:
     container_name: keeper_goerli
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.7.6
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.8.0
     restart: always
     entrypoint: ["python"]
     command: ["oracle/keeper/main.py"]
@@ -121,57 +121,53 @@ services:
 
   geth:
     container_name: geth_goerli
-    image: ethereum/client-go:v1.10.15
+    image: ethereum/client-go:v1.10.23
     restart: always
     command:
       - --goerli
       - --syncmode=full
+      - --authrpc.jwtsecret=/jwtsecret
+      - --authrpc.addr=0.0.0.0
+      - --authrpc.port=8551
+      - --authrpc.vhosts=*
       - --http
       - --http.addr=0.0.0.0
+      - --http.port=8545
       - --http.vhosts=*
       - --http.api=web3,eth,net
       - --datadir=/data/ethereum
       - --ethash.dagdir=/data/ethereum/.ethash
       - --ipcdisable
-    volumes: ["geth:/data"]
+    volumes: ["geth:/data","../configs/jwtsecret:/jwtsecret"]
     profiles: ["geth"]
     networks:
       goerli:
         aliases:
           - eth1-node
 
-  erigon:
-    container_name: erigon_goerli
-    image: thorax/erigon:v2022.03.02
+  besu:
+    container_name: besu_goerli
+    image: hyperledger/besu:22.7.1
     restart: always
-    command:
-      - erigon
-      - --chain=goerli
-      - --private.api.addr=0.0.0.0:9090
-      - --maxpeers=100
-      - --datadir=/home/erigon/.local/share/erigon
-      - --batchSize=512M
-      - --prune.r.before=11184524
-      - --prune=htc
-    volumes: ["erigon:/home/erigon/.local/share/erigon"]
-    profiles: ["erigon"]
-    networks:
-      - goerli
-
-  erigon-rpcdaemon:
-    container_name: erigon_rpcdaemon_goerli
-    image: thorax/erigon:v2022.03.02
-    restart: always
-    command:
-      - rpcdaemon
-      - --private.api.addr=erigon:9090
-      - --http.addr=0.0.0.0
-      - --http.vhosts=*
-      - --http.corsdomain=*
-      - --http.api=eth,erigon,web3,net,txpool
-      - --ws
-    depends_on: ["erigon"]
-    profiles: ["erigon"]
+    command: >
+      --network=goerli
+      --data-path=/data
+      --data-storage-format=BONSAI
+      --sync-mode=X_SNAP
+      --rpc-http-enabled
+      --rpc-http-cors-origins=*
+      --rpc-http-host=0.0.0.0
+      --rpc-http-max-active-connections=256
+      --rpc-http-port=8545
+      --engine-rpc-enabled
+      --engine-host-allowlist=*
+      --engine-jwt-secret=/jwtsecret
+      --engine-rpc-port=8551
+      --host-allowlist=*
+      --max-peers=50
+    volumes: ["besu:/data","../configs/jwtsecret:/jwtsecret"]
+    user: "0:0"
+    profiles: ["besu"]
     networks:
       goerli:
         aliases:
@@ -179,19 +175,20 @@ services:
 
   prysm:
     container_name: prysm_goerli
-    image: gcr.io/prysmaticlabs/prysm/beacon-chain:v2.0.6
+    image: gcr.io/prysmaticlabs/prysm/beacon-chain:v3.0.0
     restart: always
     command:
-      - --prater
+      - --goerli
       - --genesis-state=/data/genesis.ssz
       - --datadir=/data
+      - --jwt-secret=/jwtsecret
       - --rpc-host=0.0.0.0
       - --rpc-port=5052
       - --monitoring-host=0.0.0.0
       - --http-web3provider=$ETH1_ENDPOINT
-      - --slots-per-archive-point=64
+      - --slots-per-archive-point=1024
       - --accept-terms-of-use
-    volumes: ["prysm:/data","../configs/genesis.ssz:/data/gensis.ssz"]
+    volumes: ["prysm:/data","../configs/genesis.ssz:/data/gensis.ssz","../configs/jwtsecret:/jwtsecret"]
     profiles: ["prysm"]
     networks:
       goerli:
@@ -200,19 +197,20 @@ services:
 
   lighthouse:
     container_name: lighthouse_goerli
-    image: sigp/lighthouse:v2.1.5
+    image: sigp/lighthouse:v3.1.0
     restart: always
     command:
       - lighthouse
       - --network
-      - prater
+      - goerli
       - beacon
       - --http
       - --http-address=0.0.0.0
       - --http-port=5052
-      - --eth1-endpoints
+      - --execution-endpoint
       - $ETH1_ENDPOINT
-    volumes: ["lighthouse:/root/.lighthouse"]
+      - --execution-jwt=/jwtsecret
+    volumes: ["lighthouse:/root/.lighthouse","../configs/jwtsecret:/jwtsecret"]
     profiles: ["lighthouse"]
     networks:
       goerli:

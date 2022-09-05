@@ -24,7 +24,7 @@ networks:
 services:
   oracle:
     container_name: oracle_gnosis
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.7.6
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.8.0
     restart: always
     entrypoint: ["python"]
     command: ["oracle/oracle/main.py"]
@@ -34,7 +34,7 @@ services:
 
   keeper:
     container_name: keeper_gnosis
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.7.6
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.8.0
     restart: always
     entrypoint: ["python"]
     command: ["oracle/keeper/main.py"]
@@ -117,33 +117,16 @@ services:
     networks:
       - gnosis
 
-  openethereum:
-    container_name: openethereum_gnosis
-    image: openethereum/openethereum:v3.3.4
-    restart: always
-    command:
-      - --chain=xdai
-      - --jsonrpc-interface=all
-      - --jsonrpc-hosts=all
-      - --jsonrpc-port=8545
-      - --min-peers=50
-      - --max-peers=100
-    volumes: ["openethereum:/home/openethereum"]
-    profiles: ["openethereum"]
-    networks:
-      gnosis:
-        aliases:
-          - eth1-node
-
   nethermind:
     container_name: nethermind_gnosis
-    image: nethermind/nethermind:1.12.6
+    image: nethermind/nethermind:1.14.0
     restart: always
     command:
       - --config=xdai
       - --datadir=/data/nethermind
+      - --Sync.FastSync=true
       - --JsonRpc.Enabled=true
-      - --JsonRpc.EnabledModules=Eth,Subscribe,Trace,TxPool,Web3,Personal,Proof,Net,Parity,Health
+      - --JsonRpc.EnabledModules=Net,Eth,Consensus,Subscribe,Web3,Client,Health,Txpool
       - --JsonRpc.Host=0.0.0.0
       - --JsonRpc.Port=8545
     volumes: ["nethermind:/data"]
@@ -155,7 +138,7 @@ services:
 
   lighthouse:
     container_name: lighthouse_gnosis
-    image: sigp/lighthouse:v2.1.5
+    image: sigp/lighthouse:v3.1.0
     restart: always
     command:
       - lighthouse
