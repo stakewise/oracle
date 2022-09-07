@@ -141,7 +141,9 @@ services:
     volumes: ["geth:/data","../configs/jwtsecret:/jwtsecret"]
     profiles: ["geth"]
     networks:
-      - mainnet
+      mainnet:
+        aliases:
+          - eth1-node
 
   besu:
     container_name: besu_mainnet
