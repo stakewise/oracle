@@ -7,6 +7,7 @@ from web3.types import Timestamp, Wei
 class RewardsVotingParameters(TypedDict):
     rewards_nonce: int
     total_rewards: Wei
+    total_fees: Wei
     rewards_updated_at_timestamp: Timestamp
 
 

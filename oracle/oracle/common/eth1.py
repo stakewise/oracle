@@ -113,6 +113,7 @@ async def get_voting_parameters(
     rewards = RewardsVotingParameters(
         rewards_nonce=int(network["oraclesRewardsNonce"]),
         total_rewards=Wei(int(reward_token["totalRewards"])),
+        total_fees=Wei(int(reward_token["totalFees"])),
         rewards_updated_at_timestamp=Timestamp(int(reward_token["updatedAtTimestamp"])),
     )
     distributor = DistributorVotingParameters(
