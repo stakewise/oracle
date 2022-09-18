@@ -45,6 +45,7 @@ VOTING_PARAMETERS_QUERY = gql(
       }
       rewardEthTokens(block: { number: $block_number }) {
         totalRewards
+        totalFees
         distributorPeriodReward
         protocolPeriodReward
         updatedAtBlock
