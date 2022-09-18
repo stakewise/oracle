@@ -99,7 +99,7 @@ class RewardsController(object):
             checkpoints = await get_finality_checkpoints(self.aiohttp_session)
 
         state_id = str(update_epoch * self.slots_per_epoch)
-        total_rewards: Wei = Wei(0)
+        total_rewards: Wei = voting_params["total_fees"]
         activated_validators = 0
         chunk_size = NETWORK_CONFIG["VALIDATORS_FETCH_CHUNK_SIZE"]
 
@@ -115,13 +115,13 @@ class RewardsController(object):
                     continue
 
                 activated_validators += 1
-                total_rewards += Wei(
+                validator_reward = (
                     Web3.toWei(validator["balance"], "gwei") - self.deposit_amount
                 )
-
-        if NETWORK == GNOSIS_CHAIN:
-            # apply mGNO <-> GNO exchange rate
-            total_rewards = Wei(int(total_rewards * WAD // MGNO_RATE))
+                if NETWORK == GNOSIS_CHAIN:
+                    # apply mGNO <-> GNO exchange rate
+                    validator_reward = Wei(int(validator_reward * WAD // MGNO_RATE))
+                total_rewards += validator_reward
 
         pretty_total_rewards = self.format_ether(total_rewards)
         logger.info(f"Retrieved pool validator rewards: total={pretty_total_rewards}")
