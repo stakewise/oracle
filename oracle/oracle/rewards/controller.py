@@ -124,7 +124,11 @@ class RewardsController(object):
                 total_rewards += validator_reward
 
         pretty_total_rewards = self.format_ether(total_rewards)
-        logger.info(f"Retrieved pool validator rewards: total={pretty_total_rewards}")
+        logger.info(
+            f"Retrieved pool validator rewards:"
+            f" total={pretty_total_rewards},"
+            f" fees={self.format_ether(voting_params['total_fees'])}"
+        )
         if not total_rewards:
             logger.info("No staking rewards, waiting for validators to be activated...")
             return
