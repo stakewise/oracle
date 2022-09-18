@@ -82,6 +82,8 @@ class TestRewardController:
             session = aiohttp.ClientSession()
             rewards_nonce = faker.random_int(1000, 2000)
             total_rewards = faker.wei_amount()
+            total_fees = faker.wei_amount()
+            total_rewards += total_fees
 
             controller = RewardsController(
                 aiohttp_session=session,
@@ -92,6 +94,7 @@ class TestRewardController:
                 voting_params=RewardsVotingParameters(
                     rewards_nonce=rewards_nonce,
                     total_rewards=total_rewards,
+                    total_fees=total_fees,
                     rewards_updated_at_timestamp=Timestamp(1649854536),
                 ),
                 current_block_number=BlockNumber(14583706),
