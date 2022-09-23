@@ -153,7 +153,8 @@ async def execute_gql_query(
         if results.count(item) > majority:
             result = item
             majority = results.count(item)
-
+        else:
+            diff = item
     if majority >= len(subgraph_urls) // 2 + 1:
         return result
-    raise GraphqlConsensusError
+    raise GraphqlConsensusError(f"{diff} not equals to {result}")
