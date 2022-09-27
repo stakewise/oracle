@@ -27,7 +27,7 @@ HEALTH_SERVER_HOST = config("HEALTH_SERVER_HOST", default="127.0.0.1", cast=str)
 CONFIRMATION_BLOCKS: int = config("CONFIRMATION_BLOCKS", default=15, cast=int)
 
 # oracle
-ORACLE_PROCESS_INTERVAL = config("ORACLE_PROCESS_INTERVAL", default=10, cast=int)
+ORACLE_PROCESS_INTERVAL = config("ORACLE_PROCESS_INTERVAL", default=15, cast=int)
 
 IPFS_FETCH_ENDPOINTS = config(
     "IPFS_FETCH_ENDPOINTS",
@@ -56,7 +56,7 @@ IPFS_PINATA_SECRET_KEY = config(
 )
 
 # keeper
-KEEPER_PROCESS_INTERVAL = config("KEEPER_PROCESS_INTERVAL", default=10, cast=int)
+KEEPER_PROCESS_INTERVAL = config("KEEPER_PROCESS_INTERVAL", default=60, cast=int)
 
 TRANSACTION_TIMEOUT = config("TRANSACTION_TIMEOUT", default=900, cast=int)
 
