@@ -68,6 +68,14 @@ NETWORKS = {
             "0x0100000000000000000000002296e122c1a20fca3cac3371357bdad3be0df079"
         ),
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
+        ORACLE_STAKEWISE_OPERATOR=Web3.toChecksumAddress(
+            "0x5fc60576b92c5ce5c341c43e3b2866eb9e0cddd1"
+        ),
+        ORACLE_IGNORE_STAKEWISE_OPERATOR=config(
+            "ORACLE_IGNORE_STAKEWISE_OPERATOR",
+            cast=bool,
+            default=True,
+        ),
         AWS_BUCKET_NAME=config("AWS_BUCKET_NAME", default="oracle-votes-mainnet"),
         AWS_REGION=config("AWS_REGION", default="eu-central-1"),
         AWS_ACCESS_KEY_ID=config("AWS_ACCESS_KEY_ID", default=""),
@@ -138,6 +146,14 @@ NETWORKS = {
             "0x0100000000000000000000005c631621b897f467dd6a91855a0bc97d77b78dc0"
         ),
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
+        ORACLE_STAKEWISE_OPERATOR=Web3.toChecksumAddress(
+            "0xa11c358c20b2baa682956ea2c7a659f6e9583f96"
+        ),
+        ORACLE_IGNORE_STAKEWISE_OPERATOR=config(
+            "ORACLE_IGNORE_STAKEWISE_OPERATOR",
+            cast=bool,
+            default=False,
+        ),
         AWS_BUCKET_NAME=config(
             "AWS_BUCKET_NAME",
             default="oracle-votes-harbour-mainnet",
@@ -211,6 +227,14 @@ NETWORKS = {
             "0x010000000000000000000000040f15c6b5bfc5f324ecab5864c38d4e1eef4218"
         ),
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
+        ORACLE_STAKEWISE_OPERATOR=Web3.toChecksumAddress(
+            "0x15c4bd6fe01f6cd2eaa6bf77d976a6a879b1d5bd"
+        ),
+        ORACLE_IGNORE_STAKEWISE_OPERATOR=config(
+            "ORACLE_IGNORE_STAKEWISE_OPERATOR",
+            cast=bool,
+            default=False,
+        ),
         AWS_BUCKET_NAME=config("AWS_BUCKET_NAME", default="oracle-votes-goerli"),
         AWS_REGION=config("AWS_REGION", default="eu-central-1"),
         AWS_ACCESS_KEY_ID=config("AWS_ACCESS_KEY_ID", default=""),
@@ -281,6 +305,14 @@ NETWORKS = {
             "0x0100000000000000000000006dfc9682e3c3263758ad96e2b2ba9822167f81ee"
         ),
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
+        ORACLE_STAKEWISE_OPERATOR=Web3.toChecksumAddress(
+            "0xca445ecf3c53e1f8bc0dcfec6ff1e9544b3dc5b8"
+        ),
+        ORACLE_IGNORE_STAKEWISE_OPERATOR=config(
+            "ORACLE_IGNORE_STAKEWISE_OPERATOR",
+            cast=bool,
+            default=False,
+        ),
         AWS_BUCKET_NAME=config(
             "AWS_BUCKET_NAME",
             default="oracle-votes-perm-goerli",
@@ -354,6 +386,14 @@ NETWORKS = {
             "0x010000000000000000000000fc9b67b6034f6b306ea9bd8ec1baf3efa2490394"
         ),
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
+        ORACLE_STAKEWISE_OPERATOR=Web3.toChecksumAddress(
+            "0xe11e57383312be71b0589e1a3529fec2a524975c"
+        ),
+        ORACLE_IGNORE_STAKEWISE_OPERATOR=config(
+            "ORACLE_IGNORE_STAKEWISE_OPERATOR",
+            cast=bool,
+            default=True,
+        ),
         AWS_BUCKET_NAME=config("AWS_BUCKET_NAME", default="oracle-votes-gnosis"),
         AWS_REGION=config("AWS_REGION", default="eu-north-1"),
         AWS_ACCESS_KEY_ID=config("AWS_ACCESS_KEY_ID", default=""),

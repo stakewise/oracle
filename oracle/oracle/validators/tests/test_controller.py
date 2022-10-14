@@ -13,7 +13,7 @@ w3 = Web3()
 block_number = faker.random_int(150000, 250000)
 
 
-def select_validator(operator, *args, **kwargs):
+def select_operators(operator, *args, **kwargs):
     return {
         "operators": [
             {
@@ -23,6 +23,10 @@ def select_validator(operator, *args, **kwargs):
             },
         ]
     }
+
+
+def select_validators(*args, **kwargs):
+    return {"validators": []}
 
 
 def can_registor_validator(*args, **kwargs):
@@ -71,7 +75,8 @@ def get_validators_deposit_root(validatorsDepositRoot, *args, **kwargs):
 
 def sw_gql_query(operator):
     return [
-        select_validator(operator),
+        select_operators(operator),
+        select_validators(),
     ]
 
 

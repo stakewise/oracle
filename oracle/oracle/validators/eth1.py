@@ -9,12 +9,13 @@ from oracle.oracle.common.clients import (
     execute_sw_gql_query,
 )
 from oracle.oracle.common.graphql_queries import (
+    LAST_VALIDATORS_QUERY,
     OPERATORS_QUERY,
     VALIDATOR_REGISTRATIONS_LATEST_INDEX_QUERY,
     VALIDATOR_REGISTRATIONS_QUERY,
 )
 from oracle.oracle.common.ipfs import ipfs_fetch
-from oracle.settings import NETWORK
+from oracle.settings import NETWORK, NETWORK_CONFIG
 
 from .types import ValidatorDepositData
 
@@ -28,7 +29,36 @@ async def select_validator(
         query=OPERATORS_QUERY,
         variables=dict(block_number=block_number),
     )
-    operators = result["operators"]
+    operators = result["operators"][:1]
+    result: Dict = await execute_sw_gql_query(
+        network=NETWORK,
+        query=LAST_VALIDATORS_QUERY,
+        variables=dict(block_number=block_number),
+    )
+    last_validators = result["validators"]
+
+    if last_validators:
+        last_operator_id = last_validators[0]["operator"]["id"]
+        index = None
+        for i, operator in enumerate(operators):
+            if operator["id"] == last_operator_id:
+                index = i
+                break
+        if index is not None:
+            operators.append(operators.pop(index))
+
+    if NETWORK_CONFIG["ORACLE_IGNORE_STAKEWISE_OPERATOR"]:
+        index = None
+        for i, operator in enumerate(operators):
+            if (
+                Web3.toChecksumAddress(operator["id"])
+                == NETWORK_CONFIG["ORACLE_STAKEWISE_OPERATOR"]
+            ):
+                index = i
+                break
+        if index is not None:
+            operators.append(operators.pop(index))
+
     for operator in operators:
         merkle_proofs = operator["depositDataMerkleProofs"]
         if not merkle_proofs:
