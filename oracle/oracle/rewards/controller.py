@@ -52,7 +52,7 @@ class RewardsController(object):
             self.slots_per_epoch * NETWORK_CONFIG["SECONDS_PER_SLOT"]
         )
         self.deposit_token_symbol = NETWORK_CONFIG["DEPOSIT_TOKEN_SYMBOL"]
-        self.last_vote_total_rewards = None
+        self.last_vote_time = None
 
     @save
     async def process(
@@ -66,6 +66,10 @@ class RewardsController(object):
         last_update_time = datetime.utcfromtimestamp(
             voting_params["rewards_updated_at_timestamp"]
         )
+
+        if self.last_vote_time:
+            last_update_time = self.last_vote_time
+
         next_update_time: datetime = last_update_time + self.sync_period
         current_time: datetime = datetime.utcfromtimestamp(current_timestamp)
         while next_update_time + self.sync_period <= current_time:
@@ -170,7 +174,7 @@ class RewardsController(object):
         )
         logger.info("Rewards vote has been successfully submitted")
 
-        self.last_vote_total_rewards = total_rewards
+        self.last_vote_time = current_time
 
     def format_ether(self, value: Union[str, int, Wei]) -> str:
         """Converts Wei value."""
