@@ -147,7 +147,7 @@ NETWORKS = {
         ),
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
         ORACLE_STAKEWISE_OPERATOR=Web3.toChecksumAddress(
-            "0xa11c358c20b2baa682956ea2c7a659f6e9583f96"
+            "0x0000000000000000000000000000000000000000"
         ),
         ORACLE_IGNORE_STAKEWISE_OPERATOR=config(
             "ORACLE_IGNORE_STAKEWISE_OPERATOR",
@@ -228,7 +228,7 @@ NETWORKS = {
         ),
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
         ORACLE_STAKEWISE_OPERATOR=Web3.toChecksumAddress(
-            "0x15c4bd6fe01f6cd2eaa6bf77d976a6a879b1d5bd"
+            "0x0000000000000000000000000000000000000000"
         ),
         ORACLE_IGNORE_STAKEWISE_OPERATOR=config(
             "ORACLE_IGNORE_STAKEWISE_OPERATOR",
@@ -306,7 +306,7 @@ NETWORKS = {
         ),
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
         ORACLE_STAKEWISE_OPERATOR=Web3.toChecksumAddress(
-            "0xca445ecf3c53e1f8bc0dcfec6ff1e9544b3dc5b8"
+            "0x0000000000000000000000000000000000000000"
         ),
         ORACLE_IGNORE_STAKEWISE_OPERATOR=config(
             "ORACLE_IGNORE_STAKEWISE_OPERATOR",
@@ -387,7 +387,7 @@ NETWORKS = {
         ),
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
         ORACLE_STAKEWISE_OPERATOR=Web3.toChecksumAddress(
-            "0xe11e57383312be71b0589e1a3529fec2a524975c"
+            "0x0000000000000000000000000000000000000000"
         ),
         ORACLE_IGNORE_STAKEWISE_OPERATOR=config(
             "ORACLE_IGNORE_STAKEWISE_OPERATOR",
