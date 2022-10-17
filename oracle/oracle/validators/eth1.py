@@ -35,13 +35,15 @@ async def select_validator(
         query=LAST_VALIDATORS_QUERY,
         variables=dict(block_number=block_number),
     )
+
     last_validators = result["validators"]
     if last_validators:
         last_operator_id = last_validators[0]["operator"]["id"]
-        _move_to_bottom(operators, last_operator_id)
+        index = _find_operator_index(operators, last_operator_id)
+        if index != len(operators) - 1:
+            operators = operators[index + 1 :] + [operators[index]] + operators[:index]
 
-    if NETWORK_CONFIG["ORACLE_IGNORE_STAKEWISE_OPERATOR"]:
-        _move_to_bottom(operators, NETWORK_CONFIG["ORACLE_STAKEWISE_OPERATOR"])
+    _move_to_bottom(operators, NETWORK_CONFIG["ORACLE_STAKEWISE_OPERATOR"])
 
     for operator in operators:
         merkle_proofs = operator["depositDataMerkleProofs"]
@@ -107,6 +109,17 @@ async def get_validators_deposit_root(block_number: BlockNumber) -> HexStr:
 
 
 def _move_to_bottom(operators, operator_id):
+    if operator_id == Web3.toChecksumAddress(
+        "0x0000000000000000000000000000000000000000"
+    ):
+        return
+
+    index = _find_operator_index(operators, operator_id)
+    if index is not None:
+        operators.append(operators.pop(index))
+
+
+def _find_operator_index(operators, operator_id):
     index = None
     for i, operator in enumerate(operators):
         if Web3.toChecksumAddress(operator["id"]) == Web3.toChecksumAddress(
@@ -114,5 +127,4 @@ def _move_to_bottom(operators, operator_id):
         ):
             index = i
             break
-    if index is not None:
-        operators.append(operators.pop(index))
+    return index

@@ -71,11 +71,6 @@ NETWORKS = {
         ORACLE_STAKEWISE_OPERATOR=Web3.toChecksumAddress(
             "0x5fc60576b92c5ce5c341c43e3b2866eb9e0cddd1"
         ),
-        ORACLE_IGNORE_STAKEWISE_OPERATOR=config(
-            "ORACLE_IGNORE_STAKEWISE_OPERATOR",
-            cast=bool,
-            default=True,
-        ),
         AWS_BUCKET_NAME=config("AWS_BUCKET_NAME", default="oracle-votes-mainnet"),
         AWS_REGION=config("AWS_REGION", default="eu-central-1"),
         AWS_ACCESS_KEY_ID=config("AWS_ACCESS_KEY_ID", default=""),
@@ -148,11 +143,6 @@ NETWORKS = {
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
         ORACLE_STAKEWISE_OPERATOR=Web3.toChecksumAddress(
             "0x0000000000000000000000000000000000000000"
-        ),
-        ORACLE_IGNORE_STAKEWISE_OPERATOR=config(
-            "ORACLE_IGNORE_STAKEWISE_OPERATOR",
-            cast=bool,
-            default=False,
         ),
         AWS_BUCKET_NAME=config(
             "AWS_BUCKET_NAME",
@@ -230,11 +220,6 @@ NETWORKS = {
         ORACLE_STAKEWISE_OPERATOR=Web3.toChecksumAddress(
             "0x0000000000000000000000000000000000000000"
         ),
-        ORACLE_IGNORE_STAKEWISE_OPERATOR=config(
-            "ORACLE_IGNORE_STAKEWISE_OPERATOR",
-            cast=bool,
-            default=False,
-        ),
         AWS_BUCKET_NAME=config("AWS_BUCKET_NAME", default="oracle-votes-goerli"),
         AWS_REGION=config("AWS_REGION", default="eu-central-1"),
         AWS_ACCESS_KEY_ID=config("AWS_ACCESS_KEY_ID", default=""),
@@ -307,11 +292,6 @@ NETWORKS = {
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
         ORACLE_STAKEWISE_OPERATOR=Web3.toChecksumAddress(
             "0x0000000000000000000000000000000000000000"
-        ),
-        ORACLE_IGNORE_STAKEWISE_OPERATOR=config(
-            "ORACLE_IGNORE_STAKEWISE_OPERATOR",
-            cast=bool,
-            default=False,
         ),
         AWS_BUCKET_NAME=config(
             "AWS_BUCKET_NAME",
@@ -388,11 +368,6 @@ NETWORKS = {
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
         ORACLE_STAKEWISE_OPERATOR=Web3.toChecksumAddress(
             "0x0000000000000000000000000000000000000000"
-        ),
-        ORACLE_IGNORE_STAKEWISE_OPERATOR=config(
-            "ORACLE_IGNORE_STAKEWISE_OPERATOR",
-            cast=bool,
-            default=True,
         ),
         AWS_BUCKET_NAME=config("AWS_BUCKET_NAME", default="oracle-votes-gnosis"),
         AWS_REGION=config("AWS_REGION", default="eu-north-1"),

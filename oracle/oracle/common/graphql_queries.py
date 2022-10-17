@@ -400,7 +400,7 @@ OPERATORS_QUERY = gql(
       operators(
         block: { number: $block_number }
         where: { committed: true }
-        orderBy: validatorsCount
+        orderBy: id
         orderDirection: asc
       ) {
         id
