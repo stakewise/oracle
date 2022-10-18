@@ -420,7 +420,6 @@ LAST_VALIDATORS_QUERY = gql(
         orderDirection: desc
         first: 1
       ) {
-        id
         operator {
             id
         }
