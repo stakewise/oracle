@@ -1,5 +1,6 @@
 from typing import Dict, Set, Union
 
+from ens.constants import EMPTY_ADDR_HEX
 from eth_typing import HexStr
 from web3 import Web3
 from web3.types import BlockNumber
@@ -40,7 +41,7 @@ async def select_validator(
     if last_validators:
         last_operator_id = last_validators[0]["operator"]["id"]
         index = _find_operator_index(operators, last_operator_id)
-        if index != len(operators) - 1:
+        if index is not None and index != len(operators) - 1:
             operators = operators[index + 1 :] + [operators[index]] + operators[:index]
 
     _move_to_bottom(operators, NETWORK_CONFIG["ORACLE_STAKEWISE_OPERATOR"])
@@ -109,9 +110,7 @@ async def get_validators_deposit_root(block_number: BlockNumber) -> HexStr:
 
 
 def _move_to_bottom(operators, operator_id):
-    if operator_id == Web3.toChecksumAddress(
-        "0x0000000000000000000000000000000000000000"
-    ):
+    if operator_id == EMPTY_ADDR_HEX:
         return
 
     index = _find_operator_index(operators, operator_id)
@@ -121,10 +120,9 @@ def _move_to_bottom(operators, operator_id):
 
 def _find_operator_index(operators, operator_id):
     index = None
+    operator_id = Web3.toChecksumAddress(operator_id)
     for i, operator in enumerate(operators):
-        if Web3.toChecksumAddress(operator["id"]) == Web3.toChecksumAddress(
-            operator_id
-        ):
+        if Web3.toChecksumAddress(operator["id"]) == operator_id:
             index = i
             break
     return index
