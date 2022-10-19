@@ -1,5 +1,6 @@
 from typing import Dict, Set, Union
 
+from ens.constants import EMPTY_ADDR_HEX
 from eth_typing import HexStr
 from web3 import Web3
 from web3.types import BlockNumber
@@ -9,12 +10,13 @@ from oracle.oracle.common.clients import (
     execute_sw_gql_query,
 )
 from oracle.oracle.common.graphql_queries import (
+    LAST_VALIDATORS_QUERY,
     OPERATORS_QUERY,
     VALIDATOR_REGISTRATIONS_LATEST_INDEX_QUERY,
     VALIDATOR_REGISTRATIONS_QUERY,
 )
 from oracle.oracle.common.ipfs import ipfs_fetch
-from oracle.settings import NETWORK
+from oracle.settings import NETWORK, NETWORK_CONFIG
 
 from .types import ValidatorDepositData
 
@@ -29,6 +31,21 @@ async def select_validator(
         variables=dict(block_number=block_number),
     )
     operators = result["operators"]
+    result: Dict = await execute_sw_gql_query(
+        network=NETWORK,
+        query=LAST_VALIDATORS_QUERY,
+        variables=dict(block_number=block_number),
+    )
+
+    last_validators = result["validators"]
+    if last_validators:
+        last_operator_id = last_validators[0]["operator"]["id"]
+        index = _find_operator_index(operators, last_operator_id)
+        if index is not None and index != len(operators) - 1:
+            operators = operators[index + 1 :] + [operators[index]] + operators[:index]
+
+    _move_to_bottom(operators, NETWORK_CONFIG["ORACLE_STAKEWISE_OPERATOR"])
+
     for operator in operators:
         merkle_proofs = operator["depositDataMerkleProofs"]
         if not merkle_proofs:
@@ -90,3 +107,22 @@ async def get_validators_deposit_root(block_number: BlockNumber) -> HexStr:
         variables=dict(block_number=block_number),
     )
     return result["validatorRegistrations"][0]["validatorsDepositRoot"]
+
+
+def _move_to_bottom(operators, operator_id):
+    if operator_id == EMPTY_ADDR_HEX:
+        return
+
+    index = _find_operator_index(operators, operator_id)
+    if index is not None:
+        operators.append(operators.pop(index))
+
+
+def _find_operator_index(operators, operator_id):
+    index = None
+    operator_id = Web3.toChecksumAddress(operator_id)
+    for i, operator in enumerate(operators):
+        if Web3.toChecksumAddress(operator["id"]) == operator_id:
+            index = i
+            break
+    return index
