@@ -1,6 +1,5 @@
 from typing import Dict, Set, Union
 
-from ens.constants import EMPTY_ADDR_HEX
 from eth_typing import HexStr
 from web3 import Web3
 from web3.types import BlockNumber
@@ -44,8 +43,7 @@ async def select_validator(
         if index is not None and index != len(operators) - 1:
             operators = operators[index + 1 :] + [operators[index]] + operators[:index]
 
-    _move_to_bottom(operators, NETWORK_CONFIG["ORACLE_STAKEWISE_OPERATOR"])
-
+    _move_to_bottom(operators, NETWORK_CONFIG["ORACLE_STAKEWISE_OPERATORS"])
     for operator in operators:
         merkle_proofs = operator["depositDataMerkleProofs"]
         if not merkle_proofs:
@@ -109,13 +107,14 @@ async def get_validators_deposit_root(block_number: BlockNumber) -> HexStr:
     return result["validatorRegistrations"][0]["validatorsDepositRoot"]
 
 
-def _move_to_bottom(operators, operator_id):
-    if operator_id == EMPTY_ADDR_HEX:
+def _move_to_bottom(operators, stakewise_operators):
+    if not stakewise_operators:
         return
 
-    index = _find_operator_index(operators, operator_id)
-    if index is not None:
-        operators.append(operators.pop(index))
+    for operator_id in stakewise_operators:
+        index = _find_operator_index(operators, operator_id)
+        if index is not None:
+            operators.append(operators.pop(index))
 
 
 def _find_operator_index(operators, operator_id):
