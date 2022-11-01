@@ -167,6 +167,7 @@ async def get_operators_rewards(
     to_block: BlockNumber,
     total_reward: Wei,
     reward_token_address: ChecksumAddress,
+    validators_split: dict,
 ) -> Tuple[Rewards, Wei]:
     """Fetches operators rewards."""
     result: Dict = await execute_sw_gql_query(
@@ -187,7 +188,9 @@ async def get_operators_rewards(
         if account == EMPTY_ADDR_HEX:
             continue
 
-        validators_count = int(operator["validatorsCount"])
+        validators_count = int(operator["validatorsCount"]) + validators_split.get(
+            account, 0
+        )
         total_validators += validators_count
 
         revenue_share = int(operator["revenueShare"])
