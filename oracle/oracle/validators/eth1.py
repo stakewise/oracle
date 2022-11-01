@@ -1,6 +1,5 @@
-from typing import Dict, Set, Union
+from typing import Dict
 
-from ens.constants import EMPTY_ADDR_HEX
 from eth_typing import HexStr
 from web3 import Web3
 from web3.types import BlockNumber
@@ -15,76 +14,41 @@ from oracle.oracle.common.graphql_queries import (
     VALIDATOR_REGISTRATIONS_LATEST_INDEX_QUERY,
     VALIDATOR_REGISTRATIONS_QUERY,
 )
-from oracle.oracle.common.ipfs import ipfs_fetch
-from oracle.settings import NETWORK, NETWORK_CONFIG
+from oracle.settings import NETWORK
 
-from .types import ValidatorDepositData
+from .types import Operator
 
 
-async def select_validator(
-    block_number: BlockNumber, used_pubkeys: Set[HexStr]
-) -> Union[None, ValidatorDepositData]:
-    """Selects the next validator to register."""
+async def get_operators(block_number: BlockNumber) -> list[Operator]:
+    """todo."""
     result: Dict = await execute_sw_gql_query(
         network=NETWORK,
         query=OPERATORS_QUERY,
         variables=dict(block_number=block_number),
     )
-    operators = result["operators"]
+    return [
+        Operator(
+            id=Web3.toChecksumAddress(x["id"]),
+            deposit_data_merkle_proofs=x["depositDataMerkleProofs"],
+            deposit_data_index=int(x["depositDataIndex"]),
+        )
+        for x in result["operators"]
+    ]
+
+
+async def get_last_operators(
+    block_number: BlockNumber, validators_count: int
+) -> list[HexStr]:
+    """todo."""
     result: Dict = await execute_sw_gql_query(
         network=NETWORK,
         query=LAST_VALIDATORS_QUERY,
-        variables=dict(block_number=block_number),
+        variables=dict(block_number=block_number, count=validators_count),
     )
-
-    last_validators = result["validators"]
-    if last_validators:
-        last_operator_id = last_validators[0]["operator"]["id"]
-        index = _find_operator_index(operators, last_operator_id)
-        if index is not None and index != len(operators) - 1:
-            operators = operators[index + 1 :] + [operators[index]] + operators[:index]
-
-    _move_to_bottom(operators, NETWORK_CONFIG["ORACLE_STAKEWISE_OPERATOR"])
-
-    for operator in operators:
-        merkle_proofs = operator["depositDataMerkleProofs"]
-        if not merkle_proofs:
-            continue
-
-        operator_address = Web3.toChecksumAddress(operator["id"])
-        deposit_data_index = int(operator["depositDataIndex"])
-        deposit_datum = await ipfs_fetch(merkle_proofs)
-
-        max_deposit_data_index = len(deposit_datum) - 1
-        if deposit_data_index > max_deposit_data_index:
-            continue
-
-        selected_deposit_data = deposit_datum[deposit_data_index]
-        public_key = selected_deposit_data["public_key"]
-        can_register = public_key not in used_pubkeys and await can_register_validator(
-            block_number, public_key
-        )
-        while deposit_data_index < max_deposit_data_index and not can_register:
-            # the edge case when the validator was registered in previous merkle root
-            # and the deposit data is presented in the same.
-            deposit_data_index += 1
-            selected_deposit_data = deposit_datum[deposit_data_index]
-            public_key = selected_deposit_data["public_key"]
-            can_register = (
-                public_key not in used_pubkeys
-                and await can_register_validator(block_number, public_key)
-            )
-
-        if can_register:
-            return ValidatorDepositData(
-                operator=operator_address,
-                public_key=selected_deposit_data["public_key"],
-                withdrawal_credentials=selected_deposit_data["withdrawal_credentials"],
-                deposit_data_root=selected_deposit_data["deposit_data_root"],
-                deposit_data_signature=selected_deposit_data["signature"],
-                proof=selected_deposit_data["proof"],
-            )
-    return None
+    operators = []
+    for validator in result["validators"]:
+        operators.append(validator["operator"]["id"])
+    return operators
 
 
 async def can_register_validator(block_number: BlockNumber, public_key: HexStr) -> bool:
@@ -107,22 +71,3 @@ async def get_validators_deposit_root(block_number: BlockNumber) -> HexStr:
         variables=dict(block_number=block_number),
     )
     return result["validatorRegistrations"][0]["validatorsDepositRoot"]
-
-
-def _move_to_bottom(operators, operator_id):
-    if operator_id == EMPTY_ADDR_HEX:
-        return
-
-    index = _find_operator_index(operators, operator_id)
-    if index is not None:
-        operators.append(operators.pop(index))
-
-
-def _find_operator_index(operators, operator_id):
-    index = None
-    operator_id = Web3.toChecksumAddress(operator_id)
-    for i, operator in enumerate(operators):
-        if Web3.toChecksumAddress(operator["id"]) == operator_id:
-            index = i
-            break
-    return index

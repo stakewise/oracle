@@ -1,5 +1,5 @@
 import logging
-from typing import List, Set
+from typing import List
 
 from eth_account.signers.local import LocalAccount
 from eth_typing import BlockNumber, HexStr
@@ -17,8 +17,9 @@ from oracle.settings import (
     WAD,
 )
 
-from .eth1 import get_validators_deposit_root, select_validator
+from .eth1 import get_validators_deposit_root
 from .types import ValidatorDepositData, ValidatorsVote, ValidatorVotingParameters
+from .validator import select_validators
 
 logger = logging.getLogger(__name__)
 w3 = Web3()
@@ -55,20 +56,10 @@ class ValidatorsController:
             # not enough balance to register next validator
             return
 
-        validators_deposit_data: List[ValidatorDepositData] = []
-        used_pubkeys: Set[HexStr] = set()
-        for _ in range(validators_count):
-            # select next validator
-            # TODO: implement scoring system based on the operators performance
-            deposit_data = await select_validator(
-                block_number=block_number,
-                used_pubkeys=used_pubkeys,
-            )
-            if deposit_data is None:
-                break
-
-            used_pubkeys.add(deposit_data["public_key"])
-            validators_deposit_data.append(deposit_data)
+        validators_deposit_data: List[ValidatorDepositData] = await select_validators(
+            block_number=block_number,
+            validators_count=validators_count,
+        )
 
         if not validators_deposit_data:
             logger.warning("Run out of validator keys")
