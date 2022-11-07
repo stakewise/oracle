@@ -16,7 +16,7 @@ from oracle.settings import (
 
 logger = logging.getLogger(__name__)
 
-timeout = ClientTimeout(total=60)
+timeout = ClientTimeout(total=180)
 
 CACHE_SIZE = 1024
 IPFS_CACHE = LimitedSizeDict(size_limit=CACHE_SIZE)
@@ -41,24 +41,24 @@ async def ipfs_fetch(ipfs_hash: str) -> Union[Dict[Any, Any], List[Dict[Any, Any
                     return await response.json()
                 except BaseException as e:  # noqa: E722
                     logger.exception(e)
-                    pass
 
         if LOCAL_IPFS_CLIENT_ENDPOINT:
             try:
                 with ipfshttpclient.connect(LOCAL_IPFS_CLIENT_ENDPOINT) as client:
                     return client.get_json(_ipfs_hash)
-            except ipfshttpclient.exceptions.TimeoutError:
-                pass
+            except BaseException as e:  # noqa: E722
+                logger.exception(e)
 
         try:
             with ipfshttpclient.connect(
                 INFURA_IPFS_CLIENT_ENDPOINT,
                 username=INFURA_IPFS_CLIENT_USERNAME,
                 password=INFURA_IPFS_CLIENT_PASSWORD,
+                timeout=180,
             ) as client:
                 return client.get_json(_ipfs_hash)
-        except ipfshttpclient.exceptions.TimeoutError:
-            pass
+        except BaseException as e:  # noqa: E722
+            logger.exception(e)
 
     data = await _fetch(_ipfs_hash)
     if data:
