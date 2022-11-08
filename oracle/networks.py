@@ -1,7 +1,6 @@
 from datetime import timedelta
 
 from decouple import Csv, config
-from ens.constants import EMPTY_ADDR_HEX
 from eth_typing import HexStr
 from web3 import Web3
 

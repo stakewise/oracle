@@ -1,4 +1,3 @@
-from itertools import cycle
 from typing import Set
 
 from eth_typing import HexStr
@@ -6,6 +5,11 @@ from web3 import Web3
 from web3.types import BlockNumber
 
 from oracle.oracle.common.ipfs import ipfs_fetch
+from oracle.settings import (
+    OPERATOR_WEIGHT_FIRST,
+    OPERATOR_WEIGHT_OTHERS,
+    OPERATOR_WEIGHT_SECOND,
+)
 
 from .eth1 import can_register_validator, get_last_operators, get_operators
 from .types import Operator, ValidatorDepositData
@@ -14,42 +18,50 @@ from .types import Operator, ValidatorDepositData
 async def select_validators(
     block_number: BlockNumber, validators_count: int
 ) -> list[ValidatorDepositData]:
-    """Selects the next validator to register."""
+    """Selects the next validators to register."""
     used_pubkeys: Set[HexStr] = set()
     deposit_datas: list[ValidatorDepositData] = []
 
     operators = await get_operators(block_number)
     weighted_operators = _get_weighted_operators(operators)
-    last_validators_count = len(weighted_operators)  # todo
-    last_operators = await get_last_operators(block_number, last_validators_count)
+    last_operators = await get_last_operators(block_number, len(weighted_operators))
 
-    for operator in last_operators:
-        index = _find_operator_index(weighted_operators, operator)
-        if index:
-            weighted_operators.pop(index)
+    discarded_operator_ids = set()
 
-    deposit_datas, used_pubkeys = await _process(
-        operators=weighted_operators,
-        deposit_datas=deposit_datas,
-        used_pubkeys=used_pubkeys,
-        block_number=block_number,
-        validators_count=validators_count,
-    )
-    if deposit_datas == validators_count:
-        return deposit_datas
+    while len(deposit_datas) < validators_count and len(discarded_operator_ids) < len(
+        operators
+    ):
+        operator = _select_operator(
+            weighted_operators, last_operators, discarded_operator_ids
+        )
 
-    weighted_operators = _get_weighted_operators(operators)
-    deposit_datas, used_pubkeys = await _process(
-        operators=cycle(weighted_operators),
-        deposit_datas=deposit_datas,
-        used_pubkeys=used_pubkeys,
-        block_number=block_number,
-        validators_count=validators_count,
-    )
-    if deposit_datas == validators_count:
-        return deposit_datas
+        deposit_data = await _process_operator(operator, used_pubkeys, block_number)
+        if deposit_data:
+            deposit_datas.append(deposit_data)
+            last_operators.append(operator["id"])
+            used_pubkeys.add(deposit_data["public_key"])
+        else:
+            discarded_operator_ids.add(operator["id"])
 
     return deposit_datas
+
+
+def _select_operator(
+    weighted_operators: list[Operator],
+    last_operator_ids: list[HexStr],
+    discarded_operator_ids: set[HexStr],
+) -> Operator:
+    result = weighted_operators.copy()
+    last_operator_ids = last_operator_ids.copy()
+    if len(last_operator_ids) > len(weighted_operators):
+        last_operator_ids = last_operator_ids[:]
+    for operator_id in last_operator_ids:
+        index = _find_operator_index(result, operator_id)
+        if index is not None:
+            result.pop(index)
+    for operator in result + weighted_operators:
+        if operator["id"] not in discarded_operator_ids:
+            return operator
 
 
 async def _process_operator(
@@ -103,36 +115,16 @@ def _find_operator_index(operators: list[Operator], operator_id: str) -> int | N
     return index
 
 
-def _sort_operators(last_operator_id: str, operators: list[dict]) -> list[dict]:
-    index = _find_operator_index(operators, last_operator_id)
-    if index is not None and index != len(operators) - 1:
-        operators = operators[index + 1 :] + [operators[index]] + operators[:index]
-    return operators
-
-
 def _get_weighted_operators(operators: list[Operator]) -> list[Operator]:
     if len(operators) < 2:
         return operators
     if len(operators) == 2:
-        return [operators[0]] * 10 + [operators[1]] * 5
+        return [operators[0]] * OPERATOR_WEIGHT_FIRST + [
+            operators[1]
+        ] * OPERATOR_WEIGHT_SECOND
     else:
-        return [operators[0]] * 10 + [operators[1]] * 5 + operators[2:] * 2
-
-
-async def _process(
-    operators, deposit_datas, used_pubkeys, block_number, validators_count
-):
-    discarded_operator = set()
-    for operator in cycle(operators):
-        deposit_data = await _process_operator(operator, used_pubkeys, block_number)
-        if deposit_data:
-            deposit_datas.append(deposit_data)
-            used_pubkeys.add(deposit_data["public_key"])
-
-            if len(deposit_datas) >= validators_count:
-                break
-        else:
-            discarded_operator.add(operator)
-            if len(discarded_operator) >= len(operators):
-                break
-    return deposit_datas, used_pubkeys
+        return (
+            [operators[0]] * OPERATOR_WEIGHT_FIRST
+            + [operators[1]] * OPERATOR_WEIGHT_SECOND
+            + operators[2:] * OPERATOR_WEIGHT_OTHERS
+        )

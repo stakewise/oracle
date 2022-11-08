@@ -20,7 +20,7 @@ from .types import Operator
 
 
 async def get_operators(block_number: BlockNumber) -> list[Operator]:
-    """todo."""
+    """Fetch list of registered operators"""
     result: Dict = await execute_sw_gql_query(
         network=NETWORK,
         query=OPERATORS_QUERY,
@@ -39,7 +39,7 @@ async def get_operators(block_number: BlockNumber) -> list[Operator]:
 async def get_last_operators(
     block_number: BlockNumber, validators_count: int
 ) -> list[HexStr]:
-    """todo."""
+    """Fetch last registered validator's operators addresses."""
     result: Dict = await execute_sw_gql_query(
         network=NETWORK,
         query=LAST_VALIDATORS_QUERY,
