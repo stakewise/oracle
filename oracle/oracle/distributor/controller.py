@@ -168,6 +168,7 @@ class DistributorController(object):
             to_block=to_block,
             total_reward=protocol_reward,
             reward_token_address=NETWORK_CONFIG["REWARD_TOKEN_CONTRACT_ADDRESS"],
+            validators_split=NETWORK_CONFIG["VALIDATORS_SPLIT"],
         )
         partners_rewards, left_reward = await get_partners_rewards(
             network=NETWORK,
