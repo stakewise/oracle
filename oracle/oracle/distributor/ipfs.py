@@ -73,6 +73,7 @@ async def upload_claims(claims: Claims) -> str:
             INFURA_IPFS_CLIENT_ENDPOINT,
             username=INFURA_IPFS_CLIENT_USERNAME,
             password=INFURA_IPFS_CLIENT_PASSWORD,
+            timeout=180,
         ) as client:
             ipfs_id = client.add_json(claims)
             client.pin.add(ipfs_id)
@@ -107,7 +108,6 @@ async def upload_claims(claims: Claims) -> str:
                 ipfs_ids.append(ipfs_id)
         except Exception as e:  # noqa: E722
             logger.error(e)
-            logger.error("Failed to submit claims to Pinata")
 
     if not ipfs_ids:
         raise RuntimeError("Failed to submit claims to IPFS")
