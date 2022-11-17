@@ -91,9 +91,9 @@ NETWORKS = {
         IS_POA=False,
         DEPOSIT_TOKEN_SYMBOL="ETH",
         VALIDATORS_SPLIT={
-            Web3.toChecksumAddress("0xfe26832d3580e0ade4813f9e60e7c17b45e92cba"): 50,
-            Web3.toChecksumAddress("0x59ecf48345a221e0731e785ed79ed40d0a94e2a5"): 50,
-            Web3.toChecksumAddress("0x01f26d7f195a37d368cb772ed75ef70dd29700f5"): 50,
+            Web3.toChecksumAddress("0xfe26832d3580e0ade4813f9e60e7c17b45e92cba"): 64,
+            Web3.toChecksumAddress("0x59ecf48345a221e0731e785ed79ed40d0a94e2a5"): 63,
+            Web3.toChecksumAddress("0x01f26d7f195a37d368cb772ed75ef70dd29700f5"): 64,
         },
     ),
     HARBOUR_MAINNET: dict(
@@ -388,6 +388,9 @@ NETWORKS = {
         SYNC_PERIOD=timedelta(days=1),
         IS_POA=True,
         DEPOSIT_TOKEN_SYMBOL="GNO",
-        VALIDATORS_SPLIT={},
+        VALIDATORS_SPLIT={
+            Web3.toChecksumAddress("0x59ecf48345a221e0731e785ed79ed40d0a94e2a5"): 4971,
+            Web3.toChecksumAddress("0xf37c8f35fc820354b402054699610c098559ae44"): 4971,
+        },
     ),
 }
