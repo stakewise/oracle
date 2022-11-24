@@ -119,7 +119,7 @@ services:
 
   nethermind:
     container_name: nethermind_gnosis
-    image: nethermind/nethermind:1.14.0
+    image: nethermind/nethermind:1.14.6
     restart: always
     command:
       - --config=xdai
@@ -129,7 +129,11 @@ services:
       - --JsonRpc.EnabledModules=Net,Eth,Consensus,Subscribe,Web3,Client,Health,Txpool
       - --JsonRpc.Host=0.0.0.0
       - --JsonRpc.Port=8545
-    volumes: ["nethermind:/data"]
+      - --JsonRpc.JwtSecretFile=/jwtsecret
+      - --JsonRpc.EnginePort=8551
+      - --JsonRpc.EngineHost=0.0.0.0
+      - --JsonRpc.EngineEnabledModules=Net,Eth,Subscribe,Engine,Web3,Client
+    volumes: ["nethermind:/data","../configs/jwtsecret:/jwtsecret"]
     profiles: ["nethermind"]
     networks:
       gnosis:
@@ -138,7 +142,7 @@ services:
 
   lighthouse:
     container_name: lighthouse_gnosis
-    image: sigp/lighthouse:v3.1.0
+    image: sigp/lighthouse:v3.3.0
     restart: always
     command:
       - lighthouse
@@ -148,9 +152,10 @@ services:
       - --http
       - --http-address=0.0.0.0
       - --http-port=5052
-      - --eth1-endpoints
+      - --execution-endpoint
       - $ETH1_ENDPOINT
-    volumes: ["lighthouse:/root/.lighthouse"]
+      - --execution-jwt=/jwtsecret
+    volumes: ["lighthouse:/root/.lighthouse","../configs/jwtsecret:/jwtsecret"]
     profiles: ["lighthouse"]
     networks:
       gnosis:

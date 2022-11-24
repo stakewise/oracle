@@ -121,7 +121,7 @@ services:
 
   geth:
     container_name: geth_mainnet
-    image: ethereum/client-go:v1.10.23
+    image: ethereum/client-go:v1.10.26
     restart: always
     command:
       - --mainnet
@@ -147,7 +147,7 @@ services:
 
   besu:
     container_name: besu_mainnet
-    image: hyperledger/besu:22.7.1
+    image: hyperledger/besu:22.10.0
     restart: always
     command: >
       --network=mainnet
@@ -175,7 +175,7 @@ services:
 
   prysm:
     container_name: prysm_mainnet
-    image: gcr.io/prysmaticlabs/prysm/beacon-chain:v3.0.0
+    image: gcr.io/prysmaticlabs/prysm/beacon-chain:v3.1.2
     restart: always
     command:
       - --datadir=/data
@@ -195,7 +195,7 @@ services:
 
   lighthouse:
     container_name: lighthouse_mainnet
-    image: sigp/lighthouse:v3.1.0
+    image: sigp/lighthouse:v3.3.0
     restart: always
     command:
       - lighthouse
