@@ -119,7 +119,7 @@ services:
 
   nethermind:
     container_name: nethermind_gnosis
-    image: nethermind/nethermind:1.14.6
+    image: nethermind/nethermind:1.14.7
     restart: always
     command:
       - --config=xdai
