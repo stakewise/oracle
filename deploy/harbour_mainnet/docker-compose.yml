@@ -138,8 +138,12 @@ services:
       - --datadir=/data/ethereum
       - --ethash.dagdir=/data/ethereum/.ethash
       - --ipcdisable
+      - --port=30300
     volumes: ["geth:/data","../configs/jwtsecret:/jwtsecret"]
     profiles: ["geth"]
+    ports:
+      - 30300:30300/tcp
+      - 30300:30300/udp
     networks:
       harbour_mainnet:
         aliases:
@@ -165,9 +169,14 @@ services:
       --engine-rpc-port=8551
       --host-allowlist=*
       --max-peers=50
+      --p2p-enabled=true
+      --p2p-port=30300
     volumes: ["besu:/data","../configs/jwtsecret:/jwtsecret"]
     user: "0:0"
     profiles: ["besu"]
+    ports:
+      - 30300:30300/tcp
+      - 30300:30300/udp
     networks:
       harbour_mainnet:
         aliases:
@@ -187,8 +196,13 @@ services:
       - --http-web3provider=$ETH1_ENDPOINT
       - --slots-per-archive-point=1024
       - --accept-terms-of-use
+      - --p2p-tcp-port=30301
+      - --p2p-udp-port=30301
     volumes: ["prysm:/data","../configs/genesis.ssz:/data/gensis.ssz","../configs/jwtsecret:/jwtsecret"]
     profiles: ["prysm"]
+    ports:
+      - 30301:30301/tcp
+      - 30301:30301/udp
     networks:
       harbour_mainnet:
         aliases:
@@ -209,8 +223,13 @@ services:
       - --execution-endpoint
       - $ETH1_ENDPOINT
       - --execution-jwt=/jwtsecret
+      - --port=30301
+      - --enr-udp-port=30302
     volumes: ["lighthouse:/root/.lighthouse","../configs/jwtsecret:/jwtsecret"]
     profiles: ["lighthouse"]
+    ports:
+      - 30302:30302/tcp
+      - 30302:30302/udp
     networks:
       harbour_mainnet:
         aliases:

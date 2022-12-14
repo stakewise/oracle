@@ -133,8 +133,13 @@ services:
       - --JsonRpc.EnginePort=8551
       - --JsonRpc.EngineHost=0.0.0.0
       - --JsonRpc.EngineEnabledModules=Net,Eth,Subscribe,Engine,Web3,Client
+      - --Network.P2PPort=30330
+      - --Network.DiscoveryPort=30330
     volumes: ["nethermind:/data","../configs/jwtsecret:/jwtsecret"]
     profiles: ["nethermind"]
+    ports:
+      - 30330:30330/tcp
+      - 30330:30330/udp
     networks:
       gnosis:
         aliases:
@@ -155,8 +160,13 @@ services:
       - --execution-endpoint
       - $ETH1_ENDPOINT
       - --execution-jwt=/jwtsecret
+      - --port=30331
+      - --enr-udp-port=30332
     volumes: ["lighthouse:/root/.lighthouse","../configs/jwtsecret:/jwtsecret"]
     profiles: ["lighthouse"]
+    ports:
+      - 30331:30331/tcp
+      - 30332:30332/udp
     networks:
       gnosis:
         aliases:
