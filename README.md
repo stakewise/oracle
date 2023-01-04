@@ -20,16 +20,15 @@ contracts data and allows oracle to perform complex queries using GraphQL. Eithe
 or `https://api.thegraph.com/subgraphs/name/stakewise/stakewise-<network>`
 endpoint can be used.
 
-#### ETH2 Node
+#### Consensus Node
 
-The ETH2 node is used to fetch StakeWise validators data (statuses, balances). Any ETH2 client that
+The consensus node is used to fetch StakeWise validators data (statuses, balances). Any consensus client that
 supports [ETH2 Beacon Node API specification](https://ethereum.github.io/beacon-APIs/#/) can be used:
 
 - [Lighthouse](https://launchpad.ethereum.org/en/lighthouse)
 - [Nimbus](https://launchpad.ethereum.org/en/nimbus)
-- [Prym](https://launchpad.ethereum.org/en/prysm). Make sure to provide `--slots-per-archive-point` flag. See [Archival Beacon Node](https://docs.prylabs.network/docs/advanced/beacon_node_api/)
+- [Prysm](https://launchpad.ethereum.org/en/prysm). Make sure to provide `--slots-per-archive-point` flag. See [Archival Beacon Node](https://docs.prylabs.network/docs/advanced/beacon_node_api/)
 - [Teku](https://launchpad.ethereum.org/en/teku)
-- [Infura](https://infura.io/docs/eth2) (hosted)
 
 ### Oracle Usage
 
@@ -71,9 +70,9 @@ It helps save the gas cost and stability as there is no need for every oracle to
 
 ### Dependencies
 
-#### ETH1 Node
+#### Execution Node
 
-The ETH1 node is used to submit the transactions on chain. Any of the ETH1 clients can be used:
+The execution node is used to submit the transactions on chain. Any of the execution clients can be used:
 
 - [Go-ethereum](https://github.com/ethereum/go-ethereum)
 - [Besu](https://github.com/hyperledger/besu)
