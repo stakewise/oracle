@@ -413,12 +413,12 @@ OPERATORS_QUERY = gql(
 
 LAST_VALIDATORS_QUERY = gql(
     """
-    query getValidators($block_number: Int) {
+    query getValidators($block_number: Int, $count: Int) {
       validators(
         block: { number: $block_number }
         orderBy: createdAtBlock
         orderDirection: desc
-        first: 1
+        first: $count
       ) {
         operator {
             id

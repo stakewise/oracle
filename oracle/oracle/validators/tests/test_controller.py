@@ -129,7 +129,7 @@ class TestValidatorController:
                 validatorsDepositRoot=vote["validators_deposit_root"]
             ),
         ), patch(
-            "oracle.oracle.validators.eth1.ipfs_fetch",
+            "oracle.oracle.validators.validator.ipfs_fetch",
             side_effect=ipfs_fetch_query(
                 deposit_data_root=vote["deposit_data"][0]["deposit_data_root"],
                 public_key=vote["deposit_data"][0]["public_key"],

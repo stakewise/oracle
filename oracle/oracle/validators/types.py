@@ -32,3 +32,9 @@ class ValidatorsVote(TypedDict):
     validators_deposit_root: HexStr
     signature: HexStr
     deposit_data: List[ValidatorDepositData]
+
+
+class Operator(TypedDict):
+    id: ChecksumAddress
+    deposit_data_merkle_proofs: str
+    deposit_data_index: int
