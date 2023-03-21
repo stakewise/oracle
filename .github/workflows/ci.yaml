@@ -30,7 +30,7 @@ jobs:
       - name: Set up python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.10.5
+          python-version: 3.10.10
 
       # Install poetry
       - name: Load cached Poetry installation
@@ -44,6 +44,7 @@ jobs:
           virtualenvs-create: true
           virtualenvs-in-project: true
           installer-parallel: true
+          version: 1.3.2
 
       # Install dependencies
       - name: Install dependencies

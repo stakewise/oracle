@@ -6,9 +6,10 @@ from web3.types import BlockNumber, Timestamp
 
 from oracle.oracle.tests.common import get_test_oracle
 from oracle.oracle.tests.factories import faker
+from oracle.settings import NETWORK_CONFIG
 
 from ..controller import RewardsController
-from ..types import RewardsVotingParameters
+from ..types import RewardsVotingParameters, Withdrawal
 
 epoch = faker.random_int(150000, 250000)
 
@@ -34,6 +35,16 @@ def get_finality_checkpoints(*args, **kwargs):
 
 def get_registered_validators_public_keys(*args, **kwargs):
     return [{"id": faker.public_key()} for x in range(3)]
+
+
+def get_withdrawals(*args, **kwargs):
+    return [
+        Withdrawal(
+            validator_index=faker.random_int(),
+            amount=faker.random_int(0.001 * 10**9, 0.01 * 10**9),
+        )
+        for _ in range(2)
+    ]
 
 
 def get_validator(status="active_ongoing"):
@@ -67,9 +78,20 @@ sw_gql_query = [get_registered_validators_public_keys()]
 
 class TestRewardController:
     async def test_process_success(self):
+        block_number = BlockNumber(14583706)
+        NETWORK_CONFIG["WITHDRAWALS_GENESIS_BLOCK"] = block_number - 3
         with patch(
             "oracle.oracle.rewards.eth1.execute_sw_gql_paginated_query",
             side_effect=sw_gql_query,
+        ), patch(
+            "oracle.oracle.rewards.eth1.execute_sw_gql_paginated_query",
+            side_effect=sw_gql_query,
+        ), patch.dict(
+            "oracle.oracle.rewards.controller.NETWORK_CONFIG",
+            side_effect=NETWORK_CONFIG,
+        ), patch(
+            "oracle.oracle.rewards.controller.get_withdrawals",
+            side_effect=get_withdrawals,
         ), patch(
             "oracle.oracle.rewards.controller.get_finality_checkpoints",
             side_effect=get_finality_checkpoints,
@@ -97,7 +119,7 @@ class TestRewardController:
                     total_fees=total_fees,
                     rewards_updated_at_timestamp=Timestamp(1649854536),
                 ),
-                current_block_number=BlockNumber(14583706),
+                current_block_number=block_number,
                 current_timestamp=Timestamp(1649941516),
             )
             vote = {
