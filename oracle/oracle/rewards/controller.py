@@ -1,5 +1,7 @@
 import asyncio
+import concurrent.futures
 import logging
+from concurrent.futures import as_completed
 from datetime import datetime, timezone
 from typing import Union
 
@@ -10,7 +12,13 @@ from web3 import Web3
 from web3.types import Timestamp, Wei
 
 from oracle.networks import GNOSIS_CHAIN
-from oracle.oracle.rewards.types import RewardsVotingParameters, RewardVote
+from oracle.oracle.common.eth1 import get_web3_client
+from oracle.oracle.rewards.eth1 import get_withdrawals
+from oracle.oracle.rewards.types import (
+    RegisteredValidatorsPublicKeys,
+    RewardsVotingParameters,
+    RewardVote,
+)
 from oracle.oracle.utils import save
 from oracle.oracle.vote import submit_vote
 from oracle.settings import (
@@ -100,28 +108,17 @@ class RewardsController(object):
 
         state_id = str(update_epoch * self.slots_per_epoch)
         total_rewards: Wei = voting_params["total_fees"]
-        activated_validators = 0
-        chunk_size = NETWORK_CONFIG["VALIDATORS_FETCH_CHUNK_SIZE"]
+        validator_indexes, balance_rewards = await self.calculate_balance_rewards(
+            public_keys, state_id
+        )
+        total_rewards += balance_rewards
+        activated_validators = len(validator_indexes)
 
-        # fetch balances in chunks
-        for i in range(0, len(public_keys), chunk_size):
-            validators = await get_validators(
-                session=self.aiohttp_session,
-                public_keys=public_keys[i : i + chunk_size],
-                state_id=state_id,
-            )
-            for validator in validators:
-                if ValidatorStatus(validator["status"]) in PENDING_STATUSES:
-                    continue
+        withdrawals_rewards = await self.calculate_withdrawal_rewards(
+            validator_indexes, current_block_number
+        )
 
-                activated_validators += 1
-                validator_reward = (
-                    Web3.toWei(validator["balance"], "gwei") - self.deposit_amount
-                )
-                if NETWORK == GNOSIS_CHAIN:
-                    # apply mGNO <-> GNO exchange rate
-                    validator_reward = Wei(int(validator_reward * WAD // MGNO_RATE))
-                total_rewards += validator_reward
+        total_rewards += withdrawals_rewards
 
         pretty_total_rewards = self.format_ether(total_rewards)
         logger.info(
@@ -171,6 +168,58 @@ class RewardsController(object):
         logger.info("Rewards vote has been successfully submitted")
 
         self.last_vote_total_rewards = total_rewards
+
+    async def calculate_balance_rewards(
+        self, public_keys: RegisteredValidatorsPublicKeys, state_id: str
+    ) -> tuple[set[int], Wei]:
+        validator_indexes = set()
+        rewards = 0
+        chunk_size = NETWORK_CONFIG["VALIDATORS_FETCH_CHUNK_SIZE"]
+        # fetch balances in chunks
+        for i in range(0, len(public_keys), chunk_size):
+            validators = await get_validators(
+                session=self.aiohttp_session,
+                public_keys=public_keys[i : i + chunk_size],
+                state_id=state_id,
+            )
+            for validator in validators:
+                if ValidatorStatus(validator["status"]) in PENDING_STATUSES:
+                    continue
+
+                validator_indexes.add(int(validator["index"]))
+                validator_reward = (
+                    Web3.toWei(validator["balance"], "gwei") - self.deposit_amount
+                )
+                if NETWORK == GNOSIS_CHAIN:
+                    # apply mGNO <-> GNO exchange rate
+                    validator_reward = Wei(int(validator_reward * WAD // MGNO_RATE))
+                rewards += validator_reward
+
+        return validator_indexes, Wei(rewards)
+
+    async def calculate_withdrawal_rewards(
+        self, validator_indexes: set[int], to_block: BlockNumber
+    ) -> Wei:
+        withdrawals_amount = 0
+        from_block = NETWORK_CONFIG["WITHDRAWALS_GENESIS_BLOCK"]
+        execution_client = get_web3_client()
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            futures = [
+                executor.submit(get_withdrawals, execution_client, block_number)
+                for block_number in range(from_block, to_block)
+            ]
+            for future in as_completed(futures):
+                withdrawals = future.result()
+                for withdrawal in withdrawals:
+                    if withdrawal["validator_index"] in validator_indexes:
+                        withdrawals_amount += withdrawal["amount"]
+
+        withdrawals_amount = Web3.toWei(withdrawals_amount, "gwei")
+        if NETWORK == GNOSIS_CHAIN:
+            # apply mGNO <-> GNO exchange rate
+            withdrawals_amount = Wei(int(withdrawals_amount * WAD // MGNO_RATE))
+        return withdrawals_amount
 
     def format_ether(self, value: Union[str, int, Wei]) -> str:
         """Converts Wei value."""
