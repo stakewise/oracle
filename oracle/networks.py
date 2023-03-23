@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from decouple import Csv, config
 from ens.constants import EMPTY_ADDR_HEX
-from eth_typing import BlockNumber, HexStr
+from eth_typing import HexStr
 from web3 import Web3
 
 MAINNET = "mainnet"
@@ -73,7 +73,8 @@ NETWORKS = {
         ORACLE_STAKEWISE_OPERATOR=Web3.toChecksumAddress(
             "0x5fc60576b92c5ce5c341c43e3b2866eb9e0cddd1"
         ),
-        WITHDRAWALS_GENESIS_BLOCK=BlockNumber(0),
+        WITHDRAWALS_GENESIS_EPOCH=194048,
+        WITHDRAWALS_GENESIS_SLOT=6209536,
         AWS_BUCKET_NAME=config("AWS_BUCKET_NAME", default="oracle-votes-mainnet"),
         AWS_REGION=config("AWS_REGION", default="eu-central-1"),
         AWS_ACCESS_KEY_ID=config("AWS_ACCESS_KEY_ID", default=""),
@@ -151,7 +152,8 @@ NETWORKS = {
         ),
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
         ORACLE_STAKEWISE_OPERATOR=EMPTY_ADDR_HEX,
-        WITHDRAWALS_GENESIS_BLOCK=BlockNumber(0),
+        WITHDRAWALS_GENESIS_EPOCH=194048,
+        WITHDRAWALS_GENESIS_SLOT=6209536,
         AWS_BUCKET_NAME=config(
             "AWS_BUCKET_NAME",
             default="oracle-votes-harbour-mainnet",
@@ -228,7 +230,8 @@ NETWORKS = {
         ),
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
         ORACLE_STAKEWISE_OPERATOR=EMPTY_ADDR_HEX,
-        WITHDRAWALS_GENESIS_BLOCK=BlockNumber(8656122),
+        WITHDRAWALS_GENESIS_EPOCH=162304,
+        WITHDRAWALS_GENESIS_SLOT=5193728,
         AWS_BUCKET_NAME=config("AWS_BUCKET_NAME", default="oracle-votes-goerli"),
         AWS_REGION=config("AWS_REGION", default="eu-central-1"),
         AWS_ACCESS_KEY_ID=config("AWS_ACCESS_KEY_ID", default=""),
@@ -302,7 +305,8 @@ NETWORKS = {
         ),
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
         ORACLE_STAKEWISE_OPERATOR=EMPTY_ADDR_HEX,
-        WITHDRAWALS_GENESIS_BLOCK=BlockNumber(0),
+        WITHDRAWALS_GENESIS_EPOCH=162304,
+        WITHDRAWALS_GENESIS_SLOT=5193728,
         AWS_BUCKET_NAME=config(
             "AWS_BUCKET_NAME",
             default="oracle-votes-perm-goerli",
@@ -379,7 +383,8 @@ NETWORKS = {
         ),
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
         ORACLE_STAKEWISE_OPERATOR=EMPTY_ADDR_HEX,
-        WITHDRAWALS_GENESIS_BLOCK=BlockNumber(0),
+        WITHDRAWALS_GENESIS_EPOCH=0,
+        WITHDRAWALS_GENESIS_SLOT=0,
         AWS_BUCKET_NAME=config("AWS_BUCKET_NAME", default="oracle-votes-gnosis"),
         AWS_REGION=config("AWS_REGION", default="eu-north-1"),
         AWS_ACCESS_KEY_ID=config("AWS_ACCESS_KEY_ID", default=""),

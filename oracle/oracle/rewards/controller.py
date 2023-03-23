@@ -33,6 +33,7 @@ from .eth1 import get_registered_validators_public_keys
 from .eth2 import (
     PENDING_STATUSES,
     ValidatorStatus,
+    get_execution_block,
     get_finality_checkpoints,
     get_validators,
 )
@@ -114,11 +115,13 @@ class RewardsController(object):
         total_rewards += balance_rewards
         activated_validators = len(validator_indexes)
 
-        withdrawals_rewards = await self.calculate_withdrawal_rewards(
-            validator_indexes, current_block_number
-        )
+        withdrawals_genesis_epoch = NETWORK_CONFIG["WITHDRAWALS_GENESIS_EPOCH"]
 
-        total_rewards += withdrawals_rewards
+        if withdrawals_genesis_epoch and update_epoch >= withdrawals_genesis_epoch:
+            withdrawals_rewards = await self.calculate_withdrawal_rewards(
+                validator_indexes, current_block_number
+            )
+            total_rewards += withdrawals_rewards
 
         pretty_total_rewards = self.format_ether(total_rewards)
         logger.info(
@@ -201,7 +204,11 @@ class RewardsController(object):
         self, validator_indexes: set[int], to_block: BlockNumber
     ) -> Wei:
         withdrawals_amount = 0
-        from_block = NETWORK_CONFIG["WITHDRAWALS_GENESIS_BLOCK"]
+
+        from_block = await self.get_withdrawals_from_block()
+        if from_block > to_block:
+            return Wei(0)
+
         execution_client = get_web3_client()
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
@@ -220,6 +227,16 @@ class RewardsController(object):
             # apply mGNO <-> GNO exchange rate
             withdrawals_amount = Wei(int(withdrawals_amount * WAD // MGNO_RATE))
         return withdrawals_amount
+
+    async def get_withdrawals_from_block(self) -> BlockNumber:
+        slot_number = NETWORK_CONFIG["WITHDRAWALS_GENESIS_SLOT"]
+        while True:
+            from_block = await get_execution_block(
+                session=self.aiohttp_session, slot_number=slot_number
+            )
+            if from_block:
+                return from_block
+            slot_number += 1
 
     def format_ether(self, value: Union[str, int, Wei]) -> str:
         """Converts Wei value."""

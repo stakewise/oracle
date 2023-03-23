@@ -6,7 +6,6 @@ from web3.types import BlockNumber, Timestamp
 
 from oracle.oracle.tests.common import get_test_oracle
 from oracle.oracle.tests.factories import faker
-from oracle.settings import NETWORK_CONFIG
 
 from ..controller import RewardsController
 from ..types import RewardsVotingParameters, Withdrawal
@@ -79,16 +78,9 @@ sw_gql_query = [get_registered_validators_public_keys()]
 class TestRewardController:
     async def test_process_success(self):
         block_number = BlockNumber(14583706)
-        NETWORK_CONFIG["WITHDRAWALS_GENESIS_BLOCK"] = block_number - 3
         with patch(
             "oracle.oracle.rewards.eth1.execute_sw_gql_paginated_query",
             side_effect=sw_gql_query,
-        ), patch(
-            "oracle.oracle.rewards.eth1.execute_sw_gql_paginated_query",
-            side_effect=sw_gql_query,
-        ), patch.dict(
-            "oracle.oracle.rewards.controller.NETWORK_CONFIG",
-            side_effect=NETWORK_CONFIG,
         ), patch(
             "oracle.oracle.rewards.controller.get_withdrawals",
             side_effect=get_withdrawals,
@@ -98,6 +90,9 @@ class TestRewardController:
         ), patch(
             "oracle.oracle.rewards.controller.get_validators",
             side_effect=get_validators,
+        ), patch(
+            "oracle.oracle.rewards.controller.get_execution_block",
+            side_effect=block_number - faker.random_int(1, 100),
         ), patch(
             "oracle.oracle.rewards.controller.submit_vote", return_value=None
         ) as vote_mock:
