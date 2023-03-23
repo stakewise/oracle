@@ -209,7 +209,7 @@ services:
 
   lighthouse:
     container_name: lighthouse_mainnet
-    image: sigp/lighthouse:v4.0.0
+    image: sigp/lighthouse:v4.0.1.rc-0
     restart: always
     command:
       - lighthouse
