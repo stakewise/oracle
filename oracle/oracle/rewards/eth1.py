@@ -1,6 +1,5 @@
 from typing import List
 
-import backoff
 from web3 import Web3
 from web3.types import BlockNumber
 
@@ -25,7 +24,6 @@ async def get_registered_validators_public_keys(
     return list(set([val["id"] for val in validators]))
 
 
-@backoff.on_exception(backoff.expo, Exception, max_time=900)
 def get_withdrawals(
     execution_client: Web3, block_number: BlockNumber
 ) -> list[Withdrawal]:
