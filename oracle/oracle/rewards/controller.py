@@ -119,7 +119,9 @@ class RewardsController(object):
 
         if withdrawals_genesis_epoch and update_epoch >= withdrawals_genesis_epoch:
             withdrawals_rewards = await self.calculate_withdrawal_rewards(
-                validator_indexes, current_block_number
+                validator_indexes=validator_indexes,
+                to_block=current_block_number,
+                current_slot=int(state_id),
             )
             total_rewards += withdrawals_rewards
 
@@ -201,11 +203,10 @@ class RewardsController(object):
         return validator_indexes, Wei(rewards)
 
     async def calculate_withdrawal_rewards(
-        self, validator_indexes: set[int], to_block: BlockNumber
+        self, validator_indexes: set[int], to_block: BlockNumber, current_slot: int
     ) -> Wei:
         withdrawals_amount = 0
-
-        from_block = await self.get_withdrawals_from_block()
+        from_block = await self.get_withdrawals_from_block(current_slot)
         if from_block > to_block:
             return Wei(0)
 
@@ -228,9 +229,9 @@ class RewardsController(object):
             withdrawals_amount = Wei(int(withdrawals_amount * WAD // MGNO_RATE))
         return withdrawals_amount
 
-    async def get_withdrawals_from_block(self) -> BlockNumber:
+    async def get_withdrawals_from_block(self, current_slot: int) -> BlockNumber:
         slot_number = NETWORK_CONFIG["WITHDRAWALS_GENESIS_SLOT"]
-        while True:
+        while slot_number <= current_slot:
             from_block = await get_execution_block(
                 session=self.aiohttp_session, slot_number=slot_number
             )
