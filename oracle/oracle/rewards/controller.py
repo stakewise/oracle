@@ -61,6 +61,7 @@ class RewardsController(object):
             self.slots_per_epoch * NETWORK_CONFIG["SECONDS_PER_SLOT"]
         )
         self.deposit_token_symbol = NETWORK_CONFIG["DEPOSIT_TOKEN_SYMBOL"]
+        self.withdrawals_genesis_epoch = NETWORK_CONFIG["WITHDRAWALS_GENESIS_EPOCH"]
         self.last_vote_total_rewards = None
 
     @save
@@ -115,9 +116,10 @@ class RewardsController(object):
         total_rewards += balance_rewards
         activated_validators = len(validator_indexes)
 
-        withdrawals_genesis_epoch = NETWORK_CONFIG["WITHDRAWALS_GENESIS_EPOCH"]
-
-        if withdrawals_genesis_epoch and update_epoch >= withdrawals_genesis_epoch:
+        if (
+            self.withdrawals_genesis_epoch
+            and update_epoch >= self.withdrawals_genesis_epoch
+        ):
             withdrawals_rewards = await self.calculate_withdrawal_rewards(
                 validator_indexes=validator_indexes,
                 to_block=current_block_number,
@@ -207,7 +209,7 @@ class RewardsController(object):
     ) -> Wei:
         withdrawals_amount = 0
         from_block = await self.get_withdrawals_from_block(current_slot)
-        if from_block > to_block:
+        if not from_block or from_block >= to_block:
             return Wei(0)
 
         execution_client = get_web3_client()
@@ -229,8 +231,8 @@ class RewardsController(object):
             withdrawals_amount = Wei(int(withdrawals_amount * WAD // MGNO_RATE))
         return withdrawals_amount
 
-    async def get_withdrawals_from_block(self, current_slot: int) -> BlockNumber:
-        slot_number = NETWORK_CONFIG["WITHDRAWALS_GENESIS_SLOT"]
+    async def get_withdrawals_from_block(self, current_slot: int) -> BlockNumber | None:
+        slot_number = self.withdrawals_genesis_epoch * self.slots_per_epoch
         while slot_number <= current_slot:
             from_block = await get_execution_block(
                 session=self.aiohttp_session, slot_number=slot_number
