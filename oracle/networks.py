@@ -34,6 +34,7 @@ NETWORKS = {
             default="https://graph.stakewise.io/subgraphs/name/stakewise/uniswap-v3,https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-mainnet",
             cast=Csv(),
         ),
+        ETH1_ENDPOINT=config("ETH1_ENDPOINT", default=""),
         ETH2_ENDPOINT=config("ETH2_ENDPOINT", default=""),
         VALIDATORS_FETCH_CHUNK_SIZE=config(
             "VALIDATORS_FETCH_CHUNK_SIZE",
@@ -72,6 +73,7 @@ NETWORKS = {
         ORACLE_STAKEWISE_OPERATOR=Web3.toChecksumAddress(
             "0x5fc60576b92c5ce5c341c43e3b2866eb9e0cddd1"
         ),
+        WITHDRAWALS_GENESIS_EPOCH=194048,
         AWS_BUCKET_NAME=config("AWS_BUCKET_NAME", default="oracle-votes-mainnet"),
         AWS_REGION=config("AWS_REGION", default="eu-central-1"),
         AWS_ACCESS_KEY_ID=config("AWS_ACCESS_KEY_ID", default=""),
@@ -112,6 +114,7 @@ NETWORKS = {
             default="",
             cast=Csv(),
         ),
+        ETH1_ENDPOINT=config("ETH1_ENDPOINT", default=""),
         ETH2_ENDPOINT=config("ETH2_ENDPOINT", default=""),
         VALIDATORS_FETCH_CHUNK_SIZE=config(
             "VALIDATORS_FETCH_CHUNK_SIZE",
@@ -148,6 +151,7 @@ NETWORKS = {
         ),
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
         ORACLE_STAKEWISE_OPERATOR=EMPTY_ADDR_HEX,
+        WITHDRAWALS_GENESIS_EPOCH=194048,
         AWS_BUCKET_NAME=config(
             "AWS_BUCKET_NAME",
             default="oracle-votes-harbour-mainnet",
@@ -187,6 +191,7 @@ NETWORKS = {
             default="https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-goerli",
             cast=Csv(),
         ),
+        ETH1_ENDPOINT=config("ETH1_ENDPOINT", default=""),
         ETH2_ENDPOINT=config("ETH2_ENDPOINT", default=""),
         VALIDATORS_FETCH_CHUNK_SIZE=config(
             "VALIDATORS_FETCH_CHUNK_SIZE",
@@ -223,6 +228,7 @@ NETWORKS = {
         ),
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
         ORACLE_STAKEWISE_OPERATOR=EMPTY_ADDR_HEX,
+        WITHDRAWALS_GENESIS_EPOCH=162304,
         AWS_BUCKET_NAME=config("AWS_BUCKET_NAME", default="oracle-votes-goerli"),
         AWS_REGION=config("AWS_REGION", default="eu-central-1"),
         AWS_ACCESS_KEY_ID=config("AWS_ACCESS_KEY_ID", default=""),
@@ -259,6 +265,7 @@ NETWORKS = {
             default="",
             cast=Csv(),
         ),
+        ETH1_ENDPOINT=config("ETH1_ENDPOINT", default=""),
         ETH2_ENDPOINT=config("ETH2_ENDPOINT", default=""),
         VALIDATORS_FETCH_CHUNK_SIZE=config(
             "VALIDATORS_FETCH_CHUNK_SIZE",
@@ -295,6 +302,7 @@ NETWORKS = {
         ),
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
         ORACLE_STAKEWISE_OPERATOR=EMPTY_ADDR_HEX,
+        WITHDRAWALS_GENESIS_EPOCH=162304,
         AWS_BUCKET_NAME=config(
             "AWS_BUCKET_NAME",
             default="oracle-votes-perm-goerli",
@@ -334,6 +342,7 @@ NETWORKS = {
             default="",
             cast=Csv(),
         ),
+        ETH1_ENDPOINT=config("ETH1_ENDPOINT", default=""),
         ETH2_ENDPOINT=config("ETH2_ENDPOINT", default=""),
         VALIDATORS_FETCH_CHUNK_SIZE=config(
             "VALIDATORS_FETCH_CHUNK_SIZE",
@@ -370,6 +379,7 @@ NETWORKS = {
         ),
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
         ORACLE_STAKEWISE_OPERATOR=EMPTY_ADDR_HEX,
+        WITHDRAWALS_GENESIS_EPOCH=0,
         AWS_BUCKET_NAME=config("AWS_BUCKET_NAME", default="oracle-votes-gnosis"),
         AWS_REGION=config("AWS_REGION", default="eu-north-1"),
         AWS_ACCESS_KEY_ID=config("AWS_ACCESS_KEY_ID", default=""),

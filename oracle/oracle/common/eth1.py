@@ -2,6 +2,8 @@ import asyncio
 import logging
 from typing import Dict, TypedDict
 
+from web3 import Web3
+from web3.middleware import geth_poa_middleware
 from web3.types import BlockNumber, Timestamp, Wei
 
 from oracle.oracle.common.clients import execute_single_gql_query, execute_sw_gql_query
@@ -14,7 +16,7 @@ from oracle.oracle.common.graphql_queries import (
 from oracle.oracle.distributor.common.types import DistributorVotingParameters
 from oracle.oracle.rewards.types import RewardsVotingParameters
 from oracle.oracle.validators.types import ValidatorVotingParameters
-from oracle.settings import CONFIRMATION_BLOCKS, NETWORKS
+from oracle.settings import CONFIRMATION_BLOCKS, NETWORK_CONFIG, NETWORKS
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +30,28 @@ class VotingParameters(TypedDict):
     rewards: RewardsVotingParameters
     distributor: DistributorVotingParameters
     validator: ValidatorVotingParameters
+
+
+def get_web3_client() -> Web3:
+    """Returns instance of the Web3 client."""
+    endpoint = NETWORK_CONFIG["ETH1_ENDPOINT"]
+
+    # Prefer WS over HTTP
+    if endpoint.startswith("ws"):
+        w3 = Web3(Web3.WebsocketProvider(endpoint, websocket_timeout=60))
+        logger.warning(f"Web3 websocket endpoint={endpoint}")
+    elif endpoint.startswith("http"):
+        w3 = Web3(Web3.HTTPProvider(endpoint))
+        logger.warning(f"Web3 HTTP endpoint={endpoint}")
+    else:
+        w3 = Web3(Web3.IPCProvider(endpoint))
+        logger.warning(f"Web3 HTTP endpoint={endpoint}")
+
+    if NETWORK_CONFIG["IS_POA"]:
+        w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+        logger.warning("Injected POA middleware")
+
+    return w3
 
 
 async def get_finalized_block(network: str) -> Block:

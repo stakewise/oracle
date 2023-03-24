@@ -19,4 +19,9 @@ class RewardVote(TypedDict):
     total_rewards: str
 
 
+class Withdrawal(TypedDict):
+    validator_index: int
+    amount: int
+
+
 RegisteredValidatorsPublicKeys = List[HexStr]

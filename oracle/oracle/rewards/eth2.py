@@ -3,7 +3,7 @@ from typing import Dict, List
 
 import backoff
 from aiohttp import ClientSession
-from eth_typing import HexStr
+from eth_typing import BlockNumber, HexStr
 
 from oracle.settings import NETWORK_CONFIG
 
@@ -61,3 +61,23 @@ async def get_genesis(session: ClientSession) -> Dict:
     async with session.get(endpoint) as response:
         response.raise_for_status()
         return (await response.json())["data"]
+
+
+@backoff.on_exception(backoff.expo, Exception, max_time=900)
+async def get_execution_block(
+    session: ClientSession, slot_number: int
+) -> BlockNumber | None:
+    """Fetches beacon chain slot data."""
+
+    endpoint = f"{NETWORK_CONFIG['ETH2_ENDPOINT']}/eth/v2/beacon/blocks/{slot_number}"
+    async with session.get(endpoint) as response:
+        if response.status == 404:
+            return None
+        response.raise_for_status()
+        return BlockNumber(
+            int(
+                (await response.json())["data"]["message"]["body"]["execution_payload"][
+                    "block_number"
+                ]
+            )
+        )
