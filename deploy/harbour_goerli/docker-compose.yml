@@ -121,7 +121,7 @@ services:
 
   geth:
     container_name: geth_harbour_goerli
-    image: ethereum/client-go:v1.10.26
+    image: ethereum/client-go:v1.11.5
     restart: always
     command:
       - --goerli
@@ -151,7 +151,7 @@ services:
 
   besu:
     container_name: besu_harbour_goerli
-    image: hyperledger/besu:22.10.0
+    image: hyperledger/besu:23.1.2
     restart: always
     command: >
       --network=goerli
@@ -184,7 +184,7 @@ services:
 
   prysm:
     container_name: prysm_harbour_goerli
-    image: gcr.io/prysmaticlabs/prysm/beacon-chain:v3.1.2
+    image: gcr.io/prysmaticlabs/prysm/beacon-chain:v3.2.2
     restart: always
     command:
       - --prater
@@ -211,7 +211,7 @@ services:
 
   lighthouse:
     container_name: lighthouse_harbour_goerli
-    image: sigp/lighthouse:v3.3.0
+    image: sigp/lighthouse:v4.0.1
     restart: always
     command:
       - lighthouse
