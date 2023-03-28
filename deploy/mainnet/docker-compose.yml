@@ -184,7 +184,7 @@ services:
 
   prysm:
     container_name: prysm_mainnet
-    image: gcr.io/prysmaticlabs/prysm/beacon-chain:v3.2.2
+    image: gcr.io/prysmaticlabs/prysm/beacon-chain:v4.0.0
     restart: always
     command:
       - --datadir=/data
@@ -192,7 +192,7 @@ services:
       - --rpc-host=0.0.0.0
       - --rpc-port=5052
       - --monitoring-host=0.0.0.0
-      - --http-web3provider=$ETH1_ENDPOINT
+      - --execution-endpoint=$ETH1_ENDPOINT
       - --slots-per-archive-point=1024
       - --accept-terms-of-use
       - --p2p-tcp-port=30301
