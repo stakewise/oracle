@@ -116,6 +116,7 @@ class RewardsController(object):
         total_rewards += balance_rewards
         activated_validators = len(validator_indexes)
 
+        withdrawals_rewards = Wei(0)
         if (
             self.withdrawals_genesis_epoch
             and update_epoch >= self.withdrawals_genesis_epoch
@@ -131,6 +132,8 @@ class RewardsController(object):
         logger.info(
             f"Retrieved pool validator rewards:"
             f" total={pretty_total_rewards},"
+            f" balance_rewards={self.format_ether(balance_rewards)},"
+            f" withdrawals_rewards={self.format_ether(withdrawals_rewards)},"
             f" fees={self.format_ether(voting_params['total_fees'])}"
         )
         if not total_rewards:
