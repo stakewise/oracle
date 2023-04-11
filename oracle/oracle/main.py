@@ -12,6 +12,7 @@ from oracle.oracle.common.eth1 import (
     get_finalized_block,
     get_latest_block_number,
     get_voting_parameters,
+    get_web3_client,
     has_synced_block,
 )
 from oracle.oracle.distributor.controller import DistributorController
@@ -100,6 +101,16 @@ async def init_checks(oracle_account, session):
         uri=urlparse(NETWORK_CONFIG["ETH2_ENDPOINT"])
     )
     logger.info(f"Connected to ETH2 node at {parsed_uri}")
+
+    # check ETH1 connection
+    logger.info("Checking connection to ETH1 node...")
+    block_number = get_web3_client().eth.block_number
+    parsed_uri = "{uri.scheme}://{uri.netloc}".format(
+        uri=urlparse(NETWORK_CONFIG["ETH1_ENDPOINT"])
+    )
+    logger.info(
+        f"Connected to ETH1 node at {parsed_uri}. Current block number: {block_number}"
+    )
 
 
 async def process_network(
