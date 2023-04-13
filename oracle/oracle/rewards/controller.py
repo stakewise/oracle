@@ -123,7 +123,6 @@ class RewardsController(object):
         ):
             withdrawals_rewards = await self.calculate_withdrawal_rewards(
                 validator_indexes=validator_indexes,
-                to_block=current_block_number,
                 current_slot=int(state_id),
             )
             total_rewards += withdrawals_rewards
@@ -208,13 +207,18 @@ class RewardsController(object):
         return validator_indexes, Wei(rewards)
 
     async def calculate_withdrawal_rewards(
-        self, validator_indexes: set[int], to_block: BlockNumber, current_slot: int
+        self, validator_indexes: set[int], current_slot: int
     ) -> Wei:
         withdrawals_amount = 0
         from_block = await self.get_withdrawals_from_block(current_slot)
+        to_block = await self.get_withdrawals_to_block(current_slot)
         if not from_block or from_block >= to_block:
             return Wei(0)
 
+        logger.info(
+            f"Retrieving pool validator withdrawals "
+            f"from block: {from_block} to block: {to_block}"
+        )
         execution_client = get_web3_client()
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
@@ -243,6 +247,17 @@ class RewardsController(object):
             if from_block:
                 return from_block
             slot_number += 1
+
+    async def get_withdrawals_to_block(self, current_slot: int) -> BlockNumber | None:
+        slot_number = current_slot
+        withdrawals_slot_number = self.withdrawals_genesis_epoch * self.slots_per_epoch
+        while slot_number >= withdrawals_slot_number:
+            to_block = await get_execution_block(
+                session=self.aiohttp_session, slot_number=slot_number
+            )
+            if to_block:
+                return to_block
+            slot_number -= 1
 
     def format_ether(self, value: Union[str, int, Wei]) -> str:
         """Converts Wei value."""
