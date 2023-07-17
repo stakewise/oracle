@@ -379,7 +379,7 @@ NETWORKS = {
         ),
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
         ORACLE_STAKEWISE_OPERATOR=EMPTY_ADDR_HEX,
-        WITHDRAWALS_GENESIS_EPOCH=0,
+        WITHDRAWALS_GENESIS_EPOCH=648704,
         AWS_BUCKET_NAME=config("AWS_BUCKET_NAME", default="oracle-votes-gnosis"),
         AWS_REGION=config("AWS_REGION", default="eu-north-1"),
         AWS_ACCESS_KEY_ID=config("AWS_ACCESS_KEY_ID", default=""),
