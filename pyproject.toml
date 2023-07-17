@@ -1,5 +1,6 @@
 [tool.poetry]
 name = "oracle"
+version = "2.9.5"
 version = "2.9.4"
 description = "StakeWise Oracles are responsible for submitting off-chain data."
 authors = ["Dmitri Tsumak <tsumak.dmitri@gmail.com>"]
