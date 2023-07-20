@@ -13,7 +13,7 @@ web3 = "==5.31.0"
 py-ecc = "==5.2.0"
 gql = {version = "3.4.0", extras = ["aiohttp"]}
 backoff = "2.1.2"
-aiohttp = {version = "==3.8.1", extras = ["speedups"]}
+aiohttp = {version = "==3.8.5", extras = ["speedups"]}
 boto3 = {version = "==1.22.1", extras = ["awscrt"]}
 sentry-sdk = "1.9.5"
 
