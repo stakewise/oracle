@@ -26,7 +26,7 @@ networks:
 services:
   oracle:
     container_name: oracle_mainnet
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.9.4
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v3.0.0
     restart: always
     entrypoint: ["python"]
     command: ["oracle/oracle/main.py"]
@@ -36,7 +36,7 @@ services:
 
   keeper:
     container_name: keeper_mainnet
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.9.4
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v3.0.0
     restart: always
     entrypoint: ["python"]
     command: ["oracle/keeper/main.py"]
@@ -121,7 +121,7 @@ services:
 
   geth:
     container_name: geth_mainnet
-    image: ethereum/client-go:v1.11.5
+    image: ethereum/client-go:v1.12.0
     restart: always
     command:
       - --mainnet
@@ -151,7 +151,7 @@ services:
 
   besu:
     container_name: besu_mainnet
-    image: hyperledger/besu:23.1.2
+    image: hyperledger/besu:23.4.4
     restart: always
     command: >
       --network=mainnet
@@ -184,7 +184,7 @@ services:
 
   prysm:
     container_name: prysm_mainnet
-    image: gcr.io/prysmaticlabs/prysm/beacon-chain:v4.0.0
+    image: gcr.io/prysmaticlabs/prysm/beacon-chain:v4.0.7
     restart: always
     command:
       - --datadir=/data
@@ -209,7 +209,7 @@ services:
 
   lighthouse:
     container_name: lighthouse_mainnet
-    image: sigp/lighthouse:v4.0.1
+    image: sigp/lighthouse:v4.3.0
     restart: always
     command:
       - lighthouse
