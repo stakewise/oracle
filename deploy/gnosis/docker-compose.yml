@@ -24,7 +24,7 @@ networks:
 services:
   oracle:
     container_name: oracle_gnosis
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.8.10
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v3.0.0
     restart: always
     entrypoint: ["python"]
     command: ["oracle/oracle/main.py"]
@@ -34,7 +34,7 @@ services:
 
   keeper:
     container_name: keeper_gnosis
-    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v2.8.10
+    image: europe-west4-docker.pkg.dev/stakewiselabs/public/oracle:v3.0.0
     restart: always
     entrypoint: ["python"]
     command: ["oracle/keeper/main.py"]
@@ -119,7 +119,7 @@ services:
 
   nethermind:
     container_name: nethermind_gnosis
-    image: nethermind/nethermind:1.17.3
+    image: nethermind/nethermind:1.20.1
     restart: always
     command:
       - --config=xdai
@@ -148,7 +148,7 @@ services:
 
   lighthouse:
     container_name: lighthouse_gnosis
-    image: sigp/lighthouse:v4.0.1
+    image: sigp/lighthouse:v4.3.0
     restart: always
     command:
       - lighthouse
