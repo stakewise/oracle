@@ -192,7 +192,7 @@ services:
       - --rpc-host=0.0.0.0
       - --rpc-port=5052
       - --monitoring-host=0.0.0.0
-      - --execution-endpoint=$ETH1_ENDPOINT
+      - --execution-endpoint=$ETH1_AUTH_ENDPOINT
       - --slots-per-archive-point=1024
       - --accept-terms-of-use
       - --p2p-tcp-port=30301
@@ -220,7 +220,7 @@ services:
       - --http-address=0.0.0.0
       - --http-port=5052
       - --execution-endpoint
-      - $ETH1_ENDPOINT
+      - $ETH1_AUTH_ENDPOINT
       - --execution-jwt=/jwtsecret
       - --port=30301
       - --enr-udp-port=30302
