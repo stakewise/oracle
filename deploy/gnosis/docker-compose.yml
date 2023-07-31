@@ -159,7 +159,7 @@ services:
       - --http-address=0.0.0.0
       - --http-port=5052
       - --execution-endpoint
-      - $ETH1_ENDPOINT
+      - $ETH1_AUTH_ENDPOINT
       - --execution-jwt=/jwtsecret
       - --port=30331
       - --enr-udp-port=30332
