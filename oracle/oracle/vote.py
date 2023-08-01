@@ -1,6 +1,5 @@
 import json
 import logging
-from typing import Union
 
 import backoff
 import boto3
@@ -9,8 +8,6 @@ from eth_account.signers.local import LocalAccount
 from web3 import Web3
 
 from oracle.oracle.distributor.common.types import DistributorVote
-from oracle.oracle.rewards.types import RewardVote
-from oracle.oracle.validators.types import ValidatorsVote
 from oracle.settings import NETWORK_CONFIG
 
 logger = logging.getLogger(__name__)
@@ -20,7 +17,7 @@ logger = logging.getLogger(__name__)
 def submit_vote(
     oracle: LocalAccount,
     encoded_data: bytes,
-    vote: Union[RewardVote, DistributorVote, ValidatorsVote],
+    vote: DistributorVote,
     name: str,
 ) -> None:
     """Submits vote to the votes' aggregator."""

@@ -5,8 +5,6 @@ from unittest.mock import patch
 from gql import gql
 
 from oracle.oracle.common.clients import (
-    execute_ethereum_gql_query,
-    execute_ethereum_paginated_gql_query,
     execute_sw_gql_paginated_query,
     execute_sw_gql_query,
     execute_uniswap_v3_gql_query,
@@ -94,14 +92,12 @@ class TestClients:
 
     async def test_basic(self):
         for query_func in [
-            execute_ethereum_gql_query,
             execute_sw_gql_query,
             execute_uniswap_v3_gql_query,
         ]:
             await self._test_basic(query_func)
 
         for query_func in [
-            execute_ethereum_paginated_gql_query,
             execute_sw_gql_paginated_query,
             execute_uniswap_v3_paginated_gql_query,
         ]:

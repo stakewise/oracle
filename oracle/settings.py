@@ -13,9 +13,7 @@ NETWORK = config(
 
 NETWORK_CONFIG = NETWORKS[NETWORK]
 
-REWARD_VOTE_FILENAME = "reward-vote.json"
 DISTRIBUTOR_VOTE_FILENAME = "distributor-vote.json"
-VALIDATOR_VOTE_FILENAME = "validator-vote.json"
 TEST_VOTE_FILENAME = "test-vote.json"
 
 # health server settings

@@ -2,7 +2,6 @@ from datetime import timedelta
 
 from decouple import Csv, config
 from ens.constants import EMPTY_ADDR_HEX
-from eth_typing import HexStr
 from web3 import Web3
 
 MAINNET = "mainnet"
@@ -35,19 +34,6 @@ NETWORKS = {
             cast=Csv(),
         ),
         ETH1_ENDPOINT=config("ETH1_ENDPOINT", default=""),
-        ETH2_ENDPOINT=config("ETH2_ENDPOINT", default=""),
-        VALIDATORS_FETCH_CHUNK_SIZE=config(
-            "VALIDATORS_FETCH_CHUNK_SIZE",
-            default=100,
-            cast=int,
-        ),
-        VALIDATORS_BATCH_SIZE=config(
-            "VALIDATORS_BATCH_SIZE",
-            default=10,
-            cast=int,
-        ),
-        SLOTS_PER_EPOCH=32,
-        SECONDS_PER_SLOT=12,
         ORACLES_CONTRACT_ADDRESS=Web3.toChecksumAddress(
             "0x8a887282E67ff41d36C0b7537eAB035291461AcD"
         ),
@@ -65,9 +51,6 @@ NETWORKS = {
         ),
         DISTRIBUTOR_FALLBACK_ADDRESS=Web3.toChecksumAddress(
             "0x144a98cb1CdBb23610501fE6108858D9B7D24934"
-        ),
-        WITHDRAWAL_CREDENTIALS=HexStr(
-            "0x0100000000000000000000002296e122c1a20fca3cac3371357bdad3be0df079"
         ),
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
         ORACLE_STAKEWISE_OPERATOR=Web3.toChecksumAddress(
@@ -115,19 +98,6 @@ NETWORKS = {
             cast=Csv(),
         ),
         ETH1_ENDPOINT=config("ETH1_ENDPOINT", default=""),
-        ETH2_ENDPOINT=config("ETH2_ENDPOINT", default=""),
-        VALIDATORS_FETCH_CHUNK_SIZE=config(
-            "VALIDATORS_FETCH_CHUNK_SIZE",
-            default=100,
-            cast=int,
-        ),
-        VALIDATORS_BATCH_SIZE=config(
-            "VALIDATORS_BATCH_SIZE",
-            default=10,
-            cast=int,
-        ),
-        SLOTS_PER_EPOCH=32,
-        SECONDS_PER_SLOT=12,
         ORACLES_CONTRACT_ADDRESS=Web3.toChecksumAddress(
             "0x16c0020fC507C675eA8A3A817416adA3D95c661b"
         ),
@@ -145,9 +115,6 @@ NETWORKS = {
         ),
         DISTRIBUTOR_FALLBACK_ADDRESS=Web3.toChecksumAddress(
             "0x6C7692dB59FDC7A659208EEE57C2c876aE54a448"
-        ),
-        WITHDRAWAL_CREDENTIALS=HexStr(
-            "0x0100000000000000000000005c631621b897f467dd6a91855a0bc97d77b78dc0"
         ),
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
         ORACLE_STAKEWISE_OPERATOR=EMPTY_ADDR_HEX,
@@ -192,19 +159,6 @@ NETWORKS = {
             cast=Csv(),
         ),
         ETH1_ENDPOINT=config("ETH1_ENDPOINT", default=""),
-        ETH2_ENDPOINT=config("ETH2_ENDPOINT", default=""),
-        VALIDATORS_FETCH_CHUNK_SIZE=config(
-            "VALIDATORS_FETCH_CHUNK_SIZE",
-            default=100,
-            cast=int,
-        ),
-        VALIDATORS_BATCH_SIZE=config(
-            "VALIDATORS_BATCH_SIZE",
-            default=10,
-            cast=int,
-        ),
-        SLOTS_PER_EPOCH=32,
-        SECONDS_PER_SLOT=12,
         ORACLES_CONTRACT_ADDRESS=Web3.toChecksumAddress(
             "0x531b9D9cb268E88D53A87890699bbe31326A6f08"
         ),
@@ -222,9 +176,6 @@ NETWORKS = {
         ),
         DISTRIBUTOR_FALLBACK_ADDRESS=Web3.toChecksumAddress(
             "0x1867c96601bc5fE24F685d112314B8F3Fe228D5A"
-        ),
-        WITHDRAWAL_CREDENTIALS=HexStr(
-            "0x010000000000000000000000040f15c6b5bfc5f324ecab5864c38d4e1eef4218"
         ),
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
         ORACLE_STAKEWISE_OPERATOR=EMPTY_ADDR_HEX,
@@ -266,19 +217,6 @@ NETWORKS = {
             cast=Csv(),
         ),
         ETH1_ENDPOINT=config("ETH1_ENDPOINT", default=""),
-        ETH2_ENDPOINT=config("ETH2_ENDPOINT", default=""),
-        VALIDATORS_FETCH_CHUNK_SIZE=config(
-            "VALIDATORS_FETCH_CHUNK_SIZE",
-            default=100,
-            cast=int,
-        ),
-        VALIDATORS_BATCH_SIZE=config(
-            "VALIDATORS_BATCH_SIZE",
-            default=10,
-            cast=int,
-        ),
-        SLOTS_PER_EPOCH=32,
-        SECONDS_PER_SLOT=12,
         ORACLES_CONTRACT_ADDRESS=Web3.toChecksumAddress(
             "0x4E9CA30186E829D7712ADFEEE491c0c6C46E1AED"
         ),
@@ -296,9 +234,6 @@ NETWORKS = {
         ),
         DISTRIBUTOR_FALLBACK_ADDRESS=Web3.toChecksumAddress(
             "0x66D6c253084d8d51c7CFfDb3C188A0b53D998a3d"
-        ),
-        WITHDRAWAL_CREDENTIALS=HexStr(
-            "0x0100000000000000000000006dfc9682e3c3263758ad96e2b2ba9822167f81ee"
         ),
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
         ORACLE_STAKEWISE_OPERATOR=EMPTY_ADDR_HEX,
@@ -343,19 +278,6 @@ NETWORKS = {
             cast=Csv(),
         ),
         ETH1_ENDPOINT=config("ETH1_ENDPOINT", default=""),
-        ETH2_ENDPOINT=config("ETH2_ENDPOINT", default=""),
-        VALIDATORS_FETCH_CHUNK_SIZE=config(
-            "VALIDATORS_FETCH_CHUNK_SIZE",
-            default=100,
-            cast=int,
-        ),
-        VALIDATORS_BATCH_SIZE=config(
-            "VALIDATORS_BATCH_SIZE",
-            default=10,
-            cast=int,
-        ),
-        SLOTS_PER_EPOCH=16,
-        SECONDS_PER_SLOT=5,
         ORACLES_CONTRACT_ADDRESS=Web3.toChecksumAddress(
             "0xa6D123620Ea004cc5158b0ec260E934bd45C78c1"
         ),
@@ -373,9 +295,6 @@ NETWORKS = {
         ),
         DISTRIBUTOR_FALLBACK_ADDRESS=Web3.toChecksumAddress(
             "0x8737f638E9af54e89ed9E1234dbC68B115CD169e"
-        ),
-        WITHDRAWAL_CREDENTIALS=HexStr(
-            "0x010000000000000000000000fc9b67b6034f6b306ea9bd8ec1baf3efa2490394"
         ),
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
         ORACLE_STAKEWISE_OPERATOR=EMPTY_ADDR_HEX,
