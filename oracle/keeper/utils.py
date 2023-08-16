@@ -1,4 +1,3 @@
-import json
 import logging
 import time
 from collections import Counter
@@ -13,17 +12,13 @@ from web3 import Web3
 from web3.contract import Contract, ContractFunction
 from web3.types import TxParams
 
-from oracle.keeper.typings import OraclesVotes, Parameters
+from oracle.keeper.typings import Parameters
 from oracle.oracle.distributor.common.types import DistributorVote
-from oracle.oracle.rewards.types import RewardVote
-from oracle.oracle.validators.types import ValidatorsVote
 from oracle.settings import (
     CONFIRMATION_BLOCKS,
     DISTRIBUTOR_VOTE_FILENAME,
     NETWORK_CONFIG,
-    REWARD_VOTE_FILENAME,
     TRANSACTION_TIMEOUT,
-    VALIDATOR_VOTE_FILENAME,
 )
 
 logger = logging.getLogger(__name__)
@@ -47,10 +42,6 @@ def get_keeper_params(
         },
         {
             "target": oracles_contract.address,
-            "callData": oracles_contract.encodeABI(fn_name="currentValidatorsNonce"),
-        },
-        {
-            "target": oracles_contract.address,
             "callData": oracles_contract.encodeABI(
                 fn_name="getRoleMemberCount", args=[ORACLE_ROLE]
             ),
@@ -60,8 +51,7 @@ def get_keeper_params(
 
     paused = bool(Web3.toInt(primitive=response[0]))
     rewards_nonce = Web3.toInt(primitive=response[1])
-    validators_nonce = Web3.toInt(primitive=response[2])
-    total_oracles = Web3.toInt(primitive=response[3])
+    total_oracles = Web3.toInt(primitive=response[2])
     calls = []
     for i in range(total_oracles):
         calls.append(
@@ -80,7 +70,6 @@ def get_keeper_params(
     return Parameters(
         paused=paused,
         rewards_nonce=rewards_nonce,
-        validators_nonce=validators_nonce,
         oracles=oracles,
     )
 
@@ -104,26 +93,6 @@ def validate_vote_signature(
     return True
 
 
-def check_reward_vote(
-    web3_client: Web3, vote: RewardVote, oracle: ChecksumAddress
-) -> bool:
-    """Checks whether oracle's reward vote is correct."""
-    try:
-        encoded_data: bytes = web3_client.codec.encode_abi(
-            ["uint256", "uint256", "uint256"],
-            [
-                int(vote["nonce"]),
-                int(vote["activated_validators"]),
-                int(vote["total_rewards"]),
-            ],
-        )
-        return validate_vote_signature(
-            web3_client, encoded_data, oracle, vote["signature"]
-        )
-    except:  # noqa: E722
-        return False
-
-
 def check_distributor_vote(
     web3_client: Web3, vote: DistributorVote, oracle: ChecksumAddress
 ) -> bool:
@@ -140,83 +109,36 @@ def check_distributor_vote(
         return False
 
 
-def check_validator_vote(
-    web3_client: Web3, vote: ValidatorsVote, oracle: ChecksumAddress
-) -> bool:
-    """Checks whether oracle's validator vote is correct."""
-    try:
-        deposit_data_payloads = []
-        for deposit_data in vote["deposit_data"]:
-            deposit_data_payloads.append(
-                (
-                    deposit_data["operator"],
-                    deposit_data["withdrawal_credentials"],
-                    deposit_data["deposit_data_root"],
-                    deposit_data["public_key"],
-                    deposit_data["deposit_data_signature"],
-                )
-            )
-        encoded_data: bytes = web3_client.codec.encode_abi(
-            ["uint256", "(address,bytes32,bytes32,bytes,bytes)[]", "bytes32"],
-            [
-                int(vote["nonce"]),
-                deposit_data_payloads,
-                vote["validators_deposit_root"],
-            ],
-        )
-        return validate_vote_signature(
-            web3_client, encoded_data, oracle, vote["signature"]
-        )
-    except:  # noqa: E722
-        return False
-
-
 def get_oracles_votes(
     web3_client: Web3,
     rewards_nonce: int,
-    validators_nonce: int,
     oracles: List[ChecksumAddress],
-) -> OraclesVotes:
+) -> List[DistributorVote]:
     """Fetches oracle votes that match current nonces."""
-    votes = OraclesVotes(rewards=[], distributor=[], validators=[])
+    votes = []
     aws_bucket_name = NETWORK_CONFIG["AWS_BUCKET_NAME"]
     aws_region = NETWORK_CONFIG["AWS_REGION"]
 
     for oracle in oracles:
-        for arr, filename, correct_nonce, vote_checker in [
-            (votes.rewards, REWARD_VOTE_FILENAME, rewards_nonce, check_reward_vote),
-            (
-                votes.distributor,
-                DISTRIBUTOR_VOTE_FILENAME,
-                rewards_nonce,
-                check_distributor_vote,
-            ),
-            (
-                votes.validators,
-                VALIDATOR_VOTE_FILENAME,
-                validators_nonce,
-                check_validator_vote,
-            ),
-        ]:
-            # TODO: support more aggregators (GCP, Azure, etc.)
-            bucket_key = f"{oracle}/{filename}"
-            try:
-                response = requests.get(
-                    f"https://{aws_bucket_name}.s3.{aws_region}.amazonaws.com/{bucket_key}"
+        # TODO: support more aggregators (GCP, Azure, etc.)
+        bucket_key = f"{oracle}/{DISTRIBUTOR_VOTE_FILENAME}"
+        try:
+            response = requests.get(
+                f"https://{aws_bucket_name}.s3.{aws_region}.amazonaws.com/{bucket_key}"
+            )
+            response.raise_for_status()
+            vote = response.json()
+            if "nonce" not in vote or vote["nonce"] != rewards_nonce:
+                continue
+            if not check_distributor_vote(web3_client, vote, oracle):
+                logger.warning(
+                    f"Oracle {oracle} has submitted incorrect vote at {bucket_key}"
                 )
-                response.raise_for_status()
-                vote = response.json()
-                if "nonce" not in vote or vote["nonce"] != correct_nonce:
-                    continue
-                if not vote_checker(web3_client, vote, oracle):
-                    logger.warning(
-                        f"Oracle {oracle} has submitted incorrect vote at {bucket_key}"
-                    )
-                    continue
+                continue
 
-                arr.append(vote)
-            except:  # noqa: E722
-                pass
+            votes.append(vote)
+        except:  # noqa: E722
+            pass
 
     return votes
 
@@ -283,55 +205,18 @@ def submit_votes(
     votes = get_oracles_votes(
         web3_client=web3_client,
         rewards_nonce=params.rewards_nonce,
-        validators_nonce=params.validators_nonce,
         oracles=params.oracles,
     )
     total_oracles = len(params.oracles)
 
-    counter = Counter(
-        [
-            (vote["total_rewards"], vote["activated_validators"])
-            for vote in votes.rewards
-        ]
-    )
-    most_voted = counter.most_common(1)
-    if most_voted and can_submit(most_voted[0][1], total_oracles):
-        total_rewards, activated_validators = most_voted[0][0]
-        signatures: List[HexStr] = []
-        i = 0
-        while not can_submit(len(signatures), total_oracles):
-            vote = votes.rewards[i]
-            if (total_rewards, activated_validators) == (
-                vote["total_rewards"],
-                vote["activated_validators"],
-            ):
-                signatures.append(vote["signature"])
-
-            i += 1
-
-        logger.info(
-            f"Submitting total rewards update:"
-            f' rewards={Web3.fromWei(int(total_rewards), "ether")},'
-            f" activated validators={activated_validators}"
-        )
-        submit_update(
-            web3_client,
-            oracles_contract.functions.submitRewards(
-                int(total_rewards), int(activated_validators), signatures
-            ),
-        )
-        logger.info("Total rewards has been successfully updated")
-
-    counter = Counter(
-        [(vote["merkle_root"], vote["merkle_proofs"]) for vote in votes.distributor]
-    )
+    counter = Counter([(vote["merkle_root"], vote["merkle_proofs"]) for vote in votes])
     most_voted = counter.most_common(1)
     if most_voted and can_submit(most_voted[0][1], total_oracles):
         merkle_root, merkle_proofs = most_voted[0][0]
         signatures = []
         i = 0
         while not can_submit(len(signatures), total_oracles):
-            vote = votes.distributor[i]
+            vote = votes[i]
             if (merkle_root, merkle_proofs) == (
                 vote["merkle_root"],
                 vote["merkle_proofs"],
@@ -349,67 +234,3 @@ def submit_votes(
             ),
         )
         logger.info("Merkle Distributor has been successfully updated")
-
-    counter = Counter(
-        [
-            (
-                json.dumps(vote["deposit_data"], sort_keys=True),
-                vote["validators_deposit_root"],
-            )
-            for vote in votes.validators
-        ]
-    )
-    most_voted = counter.most_common(1)
-    if most_voted and can_submit(most_voted[0][1], total_oracles):
-        deposit_data, validators_deposit_root = most_voted[0][0]
-        deposit_data = json.loads(deposit_data)
-
-        signatures = []
-        i = 0
-        while not can_submit(len(signatures), total_oracles):
-            vote = votes.validators[i]
-            if (deposit_data, validators_deposit_root) == (
-                vote["deposit_data"],
-                vote["validators_deposit_root"],
-            ):
-                signatures.append(vote["signature"])
-            i += 1
-
-        validators_vote: ValidatorsVote = next(
-            vote
-            for vote in votes.validators
-            if (deposit_data, validators_deposit_root)
-            == (
-                vote["deposit_data"],
-                vote["validators_deposit_root"],
-            )
-        )
-        logger.info(
-            f"Submitting validator(s) registration: "
-            f"count={len(validators_vote['deposit_data'])}, "
-            f"deposit root={validators_deposit_root}"
-        )
-        submit_deposit_data = []
-        submit_merkle_proofs = []
-        for deposit in deposit_data:
-            submit_deposit_data.append(
-                dict(
-                    operator=deposit["operator"],
-                    withdrawalCredentials=deposit["withdrawal_credentials"],
-                    depositDataRoot=deposit["deposit_data_root"],
-                    publicKey=deposit["public_key"],
-                    signature=deposit["deposit_data_signature"],
-                )
-            )
-            submit_merkle_proofs.append(deposit["proof"])
-
-        submit_update(
-            web3_client,
-            oracles_contract.functions.registerValidators(
-                submit_deposit_data,
-                submit_merkle_proofs,
-                validators_deposit_root,
-                signatures,
-            ),
-        )
-        logger.info("Validator(s) registration has been successfully submitted")
