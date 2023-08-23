@@ -223,7 +223,7 @@ class RewardsController(object):
 
         chunk_size = 50000
         for block_number in range(from_block, to_block, chunk_size):
-            withdrawals_amount += self.fetch_withdrawal_chunk(
+            withdrawals_amount += await self.fetch_withdrawal_chunk(
                 validator_indexes=validator_indexes,
                 from_block=block_number,
                 to_block=min(block_number + chunk_size, to_block),
