@@ -221,6 +221,33 @@ class RewardsController(object):
         )
         execution_client = get_web3_client()
 
+        chunk_size = 50000
+        for block_number in range(from_block, to_block, chunk_size):
+            withdrawals_amount += self.fetch_withdrawal_chunk(
+                validator_indexes=validator_indexes,
+                from_block=block_number,
+                to_block=min(block_number + chunk_size, to_block),
+                execution_client=execution_client,
+            )
+
+        withdrawals_amount = Web3.toWei(withdrawals_amount, "gwei")
+        if NETWORK == GNOSIS_CHAIN:
+            # apply mGNO <-> GNO exchange rate
+            withdrawals_amount = Wei(int(withdrawals_amount * WAD // MGNO_RATE))
+        return withdrawals_amount
+
+    async def fetch_withdrawal_chunk(
+        self,
+        validator_indexes: set[int],
+        from_block: int,
+        to_block: int,
+        execution_client,
+    ) -> int:
+        logger.info(
+            f"Retrieving pool validator withdrawals chunk "
+            f"from block: {from_block} to block: {to_block}"
+        )
+        withdrawals_amount = 0
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             futures = [
                 executor.submit(get_withdrawals, execution_client, block_number)
@@ -231,11 +258,6 @@ class RewardsController(object):
                 for withdrawal in withdrawals:
                     if withdrawal["validator_index"] in validator_indexes:
                         withdrawals_amount += withdrawal["amount"]
-
-        withdrawals_amount = Web3.toWei(withdrawals_amount, "gwei")
-        if NETWORK == GNOSIS_CHAIN:
-            # apply mGNO <-> GNO exchange rate
-            withdrawals_amount = Wei(int(withdrawals_amount * WAD // MGNO_RATE))
         return withdrawals_amount
 
     async def get_withdrawals_from_block(self, current_slot: int) -> BlockNumber | None:
