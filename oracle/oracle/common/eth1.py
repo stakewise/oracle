@@ -14,6 +14,8 @@ from oracle.oracle.common.graphql_queries import (
     VOTING_PARAMETERS_QUERY,
 )
 from oracle.oracle.distributor.common.types import DistributorVotingParameters
+from oracle.oracle.rewards.types import RewardsVotingParameters
+from oracle.oracle.validators.types import ValidatorVotingParameters
 from oracle.settings import CONFIRMATION_BLOCKS, NETWORK_CONFIG, NETWORKS
 
 logger = logging.getLogger(__name__)
@@ -25,7 +27,9 @@ class Block(TypedDict):
 
 
 class VotingParameters(TypedDict):
+    rewards: RewardsVotingParameters
     distributor: DistributorVotingParameters
+    validator: ValidatorVotingParameters
 
 
 def get_web3_client() -> Web3:
@@ -130,6 +134,12 @@ async def get_voting_parameters(
             "merkleProofs": None,
         }
 
+    rewards = RewardsVotingParameters(
+        rewards_nonce=int(network["oraclesRewardsNonce"]),
+        total_rewards=Wei(int(reward_token["totalRewards"])),
+        total_fees=Wei(int(reward_token["totalFees"])),
+        rewards_updated_at_timestamp=Timestamp(int(reward_token["updatedAtTimestamp"])),
+    )
     distributor = DistributorVotingParameters(
         rewards_nonce=int(network["oraclesRewardsNonce"]),
         from_block=BlockNumber(int(distributor["rewardsUpdatedAtBlock"])),
@@ -140,8 +150,16 @@ async def get_voting_parameters(
         protocol_reward=Wei(int(reward_token["protocolPeriodReward"])),
         distributor_reward=Wei(int(reward_token["distributorPeriodReward"])),
     )
+    network = result["networks"][0]
+    pool = result["pools"][0]
+    validator = ValidatorVotingParameters(
+        validators_nonce=int(network["oraclesValidatorsNonce"]),
+        pool_balance=Wei(int(pool["balance"])),
+    )
 
-    return VotingParameters(distributor=distributor)
+    return VotingParameters(
+        rewards=rewards, distributor=distributor, validator=validator
+    )
 
 
 def _find_max_consensus(items, func):

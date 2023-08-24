@@ -32,6 +32,7 @@ async def health(request):
         get_oracles_votes(
             web3_client=web3_client,
             rewards_nonce=params.rewards_nonce,
+            validators_nonce=params.validators_nonce,
             oracles=params.oracles,
         )
 
