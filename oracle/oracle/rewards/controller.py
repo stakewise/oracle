@@ -25,6 +25,7 @@ from oracle.settings import (
     MGNO_RATE,
     NETWORK,
     NETWORK_CONFIG,
+    ORACLE_WITHDRAWAL_CHUNK_SIZE,
     REWARD_VOTE_FILENAME,
     WAD,
 )
@@ -221,7 +222,7 @@ class RewardsController(object):
         )
         execution_client = get_web3_client()
 
-        chunk_size = 50000
+        chunk_size = ORACLE_WITHDRAWAL_CHUNK_SIZE
         for block_number in range(from_block, to_block, chunk_size):
             withdrawals_amount += await self.fetch_withdrawal_chunk(
                 validator_indexes=validator_indexes,
