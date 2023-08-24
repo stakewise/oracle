@@ -13,6 +13,7 @@ gql_logger.addHandler(gql_handler)
 gql_logger.setLevel(logging.ERROR)
 logger = logging.getLogger(__name__)
 
+
 # set default GQL query execution timeout to 45 seconds
 EXECUTE_TIMEOUT = 45
 
@@ -64,6 +65,17 @@ async def execute_uniswap_v3_gql_query(
     )
 
 
+async def execute_ethereum_gql_query(
+    network: str, query: DocumentNode, variables: Dict
+) -> Dict:
+    """Executes GraphQL query."""
+    return await execute_gql_query(
+        subgraph_urls=get_network_config(network)["ETHEREUM_SUBGRAPH_URLS"],
+        query=query,
+        variables=variables,
+    )
+
+
 async def _execute_base_gql_paginated_query(
     subgraph_urls: str, query: DocumentNode, variables: Dict, paginated_field: str
 ) -> List:
@@ -102,6 +114,18 @@ async def execute_uniswap_v3_paginated_gql_query(
     """Executes GraphQL query."""
     return await _execute_base_gql_paginated_query(
         subgraph_urls=get_network_config(network)["UNISWAP_V3_SUBGRAPH_URLS"],
+        query=query,
+        variables=variables,
+        paginated_field=paginated_field,
+    )
+
+
+async def execute_ethereum_paginated_gql_query(
+    network: str, query: DocumentNode, variables: Dict, paginated_field: str
+) -> List:
+    """Executes ETH query."""
+    return await _execute_base_gql_paginated_query(
+        subgraph_urls=get_network_config(network)["ETHEREUM_SUBGRAPH_URLS"],
         query=query,
         variables=variables,
         paginated_field=paginated_field,

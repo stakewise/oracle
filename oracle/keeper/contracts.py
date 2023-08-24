@@ -47,6 +47,13 @@ def get_oracles_contract(web3_client: Web3) -> Contract:
                 "type": "function",
             },
             {
+                "inputs": [],
+                "name": "currentValidatorsNonce",
+                "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                "stateMutability": "view",
+                "type": "function",
+            },
+            {
                 "inputs": [
                     {"internalType": "address", "name": "account", "type": "address"}
                 ],
@@ -100,6 +107,84 @@ def get_oracles_contract(web3_client: Web3) -> Contract:
                     },
                 ],
                 "name": "submitMerkleRoot",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function",
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "totalRewards",
+                        "type": "uint256",
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "activatedValidators",
+                        "type": "uint256",
+                    },
+                    {
+                        "internalType": "bytes[]",
+                        "name": "signatures",
+                        "type": "bytes[]",
+                    },
+                ],
+                "name": "submitRewards",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function",
+            },
+            {
+                "inputs": [
+                    {
+                        "components": [
+                            {
+                                "internalType": "address",
+                                "name": "operator",
+                                "type": "address",
+                            },
+                            {
+                                "internalType": "bytes32",
+                                "name": "withdrawalCredentials",
+                                "type": "bytes32",
+                            },
+                            {
+                                "internalType": "bytes32",
+                                "name": "depositDataRoot",
+                                "type": "bytes32",
+                            },
+                            {
+                                "internalType": "bytes",
+                                "name": "publicKey",
+                                "type": "bytes",
+                            },
+                            {
+                                "internalType": "bytes",
+                                "name": "signature",
+                                "type": "bytes",
+                            },
+                        ],
+                        "internalType": "struct IPoolValidators.DepositData[]",
+                        "name": "depositData",
+                        "type": "tuple[]",
+                    },
+                    {
+                        "internalType": "bytes32[][]",
+                        "name": "merkleProofs",
+                        "type": "bytes32[][]",
+                    },
+                    {
+                        "internalType": "bytes32",
+                        "name": "validatorsDepositRoot",
+                        "type": "bytes32",
+                    },
+                    {
+                        "internalType": "bytes[]",
+                        "name": "signatures",
+                        "type": "bytes[]",
+                    },
+                ],
+                "name": "registerValidators",
                 "outputs": [],
                 "stateMutability": "nonpayable",
                 "type": "function",
