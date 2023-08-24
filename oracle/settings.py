@@ -28,6 +28,10 @@ CONFIRMATION_BLOCKS: int = config("CONFIRMATION_BLOCKS", default=15, cast=int)
 
 # oracle
 ORACLE_PROCESS_INTERVAL = config("ORACLE_PROCESS_INTERVAL", default=15, cast=int)
+ORACLE_WITHDRAWAL_CHUNK_SIZE = config(
+    "ORACLE_WITHDRAWAL_CHUNK_SIZE", default=50000, cast=int
+)
+
 
 IPFS_FETCH_ENDPOINTS = config(
     "IPFS_FETCH_ENDPOINTS",
