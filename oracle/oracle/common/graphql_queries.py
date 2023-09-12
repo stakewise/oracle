@@ -44,31 +44,9 @@ VOTING_PARAMETERS_QUERY = gql(
         rewardsUpdatedAtBlock
       }
       rewardEthTokens(block: { number: $block_number }) {
-        totalRewards
-        totalFees
         distributorPeriodReward
         protocolPeriodReward
         updatedAtBlock
-        updatedAtTimestamp
-      }
-      networks(block: { number: $block_number }) {
-        oraclesValidatorsNonce
-      }
-      pools(block: { number: $block_number }) {
-        balance
-      }
-    }
-"""
-)
-
-VALIDATOR_VOTING_PARAMETERS_QUERY = gql(
-    """
-    query getVotingParameters($block_number: Int) {
-      networks(block: { number: $block_number }) {
-        oraclesValidatorsNonce
-      }
-      pools(block: { number: $block_number }) {
-        balance
       }
     }
 """
@@ -81,22 +59,6 @@ SYNC_BLOCK_QUERY = gql(
         block {
           number
         }
-      }
-    }
-"""
-)
-
-REGISTERED_VALIDATORS_QUERY = gql(
-    """
-    query getValidators($block_number: Int, $last_id: ID) {
-      validators(
-        block: { number: $block_number }
-        where: { id_gt: $last_id }
-        first: 1000
-        orderBy: id
-        orderDirection: asc
-      ) {
-        id
       }
     }
 """
@@ -394,41 +356,6 @@ OPERATORS_REWARDS_QUERY = gql(
 """
 )
 
-OPERATORS_QUERY = gql(
-    """
-    query getOperators($block_number: Int) {
-      operators(
-        block: { number: $block_number }
-        where: { committed: true }
-        orderBy: id
-        orderDirection: asc
-      ) {
-        id
-        depositDataMerkleProofs
-        depositDataIndex
-      }
-    }
-"""
-)
-
-LAST_VALIDATORS_QUERY = gql(
-    """
-    query getValidators($block_number: Int) {
-      validators(
-        block: { number: $block_number }
-        orderBy: createdAtBlock
-        orderDirection: desc
-        first: 1
-      ) {
-        operator {
-            id
-        }
-      }
-    }
-"""
-)
-
-
 PARTNERS_QUERY = gql(
     """
     query getPartners($block_number: Int) {
@@ -438,34 +365,6 @@ PARTNERS_QUERY = gql(
         revenueShare
         distributorPoints
         updatedAtBlock
-      }
-    }
-"""
-)
-
-VALIDATOR_REGISTRATIONS_QUERY = gql(
-    """
-    query getValidatorRegistrations($block_number: Int, $public_key: Bytes) {
-      validatorRegistrations(
-        block: { number: $block_number }
-        where: { publicKey: $public_key }
-      ) {
-        publicKey
-      }
-    }
-"""
-)
-
-VALIDATOR_REGISTRATIONS_LATEST_INDEX_QUERY = gql(
-    """
-    query getValidatorRegistrations($block_number: Int) {
-      validatorRegistrations(
-        block: { number: $block_number }
-        first: 1
-        orderBy: createdAtBlock
-        orderDirection: desc
-      ) {
-        validatorsDepositRoot
       }
     }
 """
