@@ -194,6 +194,8 @@ services:
       - --monitoring-host=0.0.0.0
       - --execution-endpoint=$ETH1_AUTH_ENDPOINT
       - --slots-per-archive-point=1024
+      - --checkpoint-sync-url=https://beaconstate.ethstaker.cc
+      - --genesis-beacon-api-url=https://beaconstate.ethstaker.cc
       - --accept-terms-of-use
       - --p2p-tcp-port=30301
       - --p2p-udp-port=30301
@@ -219,6 +221,7 @@ services:
       - --http
       - --http-address=0.0.0.0
       - --http-port=5052
+      - --checkpoint-sync-url=https://beaconstate.ethstaker.cc
       - --execution-endpoint
       - $ETH1_AUTH_ENDPOINT
       - --execution-jwt=/jwtsecret
