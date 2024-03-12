@@ -158,6 +158,7 @@ services:
       - --http
       - --http-address=0.0.0.0
       - --http-port=5052
+      - --checkpoint-sync-url=https://checkpoint.gnosischain.com
       - --execution-endpoint
       - $ETH1_AUTH_ENDPOINT
       - --execution-jwt=/jwtsecret
