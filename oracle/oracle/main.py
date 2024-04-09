@@ -17,7 +17,7 @@ from oracle.oracle.common.eth1 import (
 )
 from oracle.oracle.distributor.controller import DistributorController
 from oracle.oracle.health_server import oracle_routes
-from oracle.oracle.rewards.controller import RewardsController
+from oracle.oracle.rewards.controller import RewardsController, WithdrawalsCache
 from oracle.oracle.rewards.eth2 import get_finality_checkpoints, get_genesis
 from oracle.oracle.validators.controller import ValidatorsController
 from oracle.oracle.vote import submit_vote
@@ -56,11 +56,15 @@ async def main() -> None:
 
     # fetch ETH2 genesis
     genesis = await get_genesis(session)
-
+    withdrawals_cache = WithdrawalsCache(
+        NETWORK_CONFIG["WITHDRAWALS_CACHE_BLOCK"],
+        NETWORK_CONFIG["WITHDRAWALS_CACHE_AMOUNT"],
+    )
     rewards_controller = RewardsController(
         aiohttp_session=session,
         genesis_timestamp=int(genesis["genesis_time"]),
         oracle=oracle_account,
+        withdrawals_cache=withdrawals_cache,
     )
     distributor_controller = DistributorController(oracle_account)
     validators_controller = ValidatorsController(oracle_account)
