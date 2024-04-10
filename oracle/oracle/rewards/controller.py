@@ -44,10 +44,7 @@ w3 = Web3()
 
 
 class WithdrawalsCache:
-    block: BlockNumber
-    withdrawals: Wei
-
-    def __init__(self, block: BlockNumber, withdrawals: Wei):
+    def __init__(self, block: BlockNumber = None, withdrawals: Wei = None):
         self.block = block
         self.withdrawals = withdrawals
 
@@ -239,7 +236,7 @@ class RewardsController(object):
             f"from block: {from_block} to block: {to_block}"
         )
         cached_block, cached_withdrawals = self.withdrawals_cache.get()
-        if cached_block:
+        if cached_block is not None:
             logger.info(
                 f"Restored cached {cached_withdrawals} withdrawals on block: {cached_block}"
             )
