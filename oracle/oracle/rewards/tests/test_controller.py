@@ -7,7 +7,7 @@ from web3.types import BlockNumber, Timestamp
 from oracle.oracle.tests.common import get_test_oracle
 from oracle.oracle.tests.factories import faker
 
-from ..controller import RewardsController
+from ..controller import RewardsController, WithdrawalsCache
 from ..types import RewardsVotingParameters, Withdrawal
 
 epoch = faker.random_int(150000, 250000)
@@ -106,6 +106,7 @@ class TestRewardController:
                 aiohttp_session=session,
                 genesis_timestamp=1606824023,
                 oracle=get_test_oracle(),
+                withdrawals_cache=WithdrawalsCache(None, None),
             )
             await controller.process(
                 voting_params=RewardsVotingParameters(

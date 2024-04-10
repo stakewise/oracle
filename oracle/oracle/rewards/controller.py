@@ -43,6 +43,19 @@ logger = logging.getLogger(__name__)
 w3 = Web3()
 
 
+class WithdrawalsCache:
+    def __init__(self, block: BlockNumber = None, withdrawals: Wei = None):
+        self.block = block
+        self.withdrawals = withdrawals
+
+    def set(self, block: BlockNumber, withdrawals: Wei):
+        self.block = block
+        self.withdrawals = withdrawals
+
+    def get(self) -> tuple[BlockNumber, Wei]:
+        return self.block, self.withdrawals
+
+
 class RewardsController(object):
     """Updates total rewards and activated validators number."""
 
@@ -51,6 +64,7 @@ class RewardsController(object):
         aiohttp_session: ClientSession,
         genesis_timestamp: int,
         oracle: LocalAccount,
+        withdrawals_cache: WithdrawalsCache,
     ) -> None:
         self.deposit_amount: Wei = Web3.toWei(32, "ether")
         self.aiohttp_session = aiohttp_session
@@ -64,6 +78,7 @@ class RewardsController(object):
         self.deposit_token_symbol = NETWORK_CONFIG["DEPOSIT_TOKEN_SYMBOL"]
         self.withdrawals_genesis_epoch = NETWORK_CONFIG["WITHDRAWALS_GENESIS_EPOCH"]
         self.last_vote_total_rewards = None
+        self.withdrawals_cache = withdrawals_cache
 
     @save
     async def process(
@@ -217,6 +232,18 @@ class RewardsController(object):
             return Wei(0)
 
         logger.info(
+            f"Calculating pool validator withdrawals "
+            f"from block: {from_block} to block: {to_block}"
+        )
+        cached_block, cached_withdrawals = self.withdrawals_cache.get()
+        if cached_block is not None:
+            logger.info(
+                f"Restored cached {cached_withdrawals} withdrawals on block: {cached_block}"
+            )
+            from_block = cached_block
+            withdrawals_amount += cached_withdrawals
+
+        logger.info(
             f"Retrieving pool validator withdrawals "
             f"from block: {from_block} to block: {to_block}"
         )
@@ -235,6 +262,8 @@ class RewardsController(object):
         if NETWORK == GNOSIS_CHAIN:
             # apply mGNO <-> GNO exchange rate
             withdrawals_amount = Wei(int(withdrawals_amount * WAD // MGNO_RATE))
+
+        self.withdrawals_cache.set(to_block, withdrawals_amount)
         return withdrawals_amount
 
     async def fetch_withdrawal_chunk(

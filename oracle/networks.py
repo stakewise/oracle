@@ -97,6 +97,8 @@ NETWORKS = {
             Web3.toChecksumAddress("0x59ecf48345a221e0731e785ed79ed40d0a94e2a5"): 63,
             Web3.toChecksumAddress("0x01f26d7f195a37d368cb772ed75ef70dd29700f5"): 64,
         },
+        WITHDRAWALS_CACHE_BLOCK=None,
+        WITHDRAWALS_CACHE_AMOUNT=None,
     ),
     HARBOUR_MAINNET: dict(
         STAKEWISE_SUBGRAPH_URLS=config(
@@ -174,6 +176,8 @@ NETWORKS = {
         IS_POA=False,
         DEPOSIT_TOKEN_SYMBOL="ETH",
         VALIDATORS_SPLIT={},
+        WITHDRAWALS_CACHE_BLOCK=None,
+        WITHDRAWALS_CACHE_AMOUNT=None,
     ),
     GOERLI: dict(
         STAKEWISE_SUBGRAPH_URLS=config(
@@ -248,6 +252,8 @@ NETWORKS = {
         IS_POA=True,
         DEPOSIT_TOKEN_SYMBOL="ETH",
         VALIDATORS_SPLIT={},
+        WITHDRAWALS_CACHE_BLOCK=None,
+        WITHDRAWALS_CACHE_AMOUNT=None,
     ),
     HARBOUR_GOERLI: dict(
         STAKEWISE_SUBGRAPH_URLS=config(
@@ -325,6 +331,8 @@ NETWORKS = {
         IS_POA=True,
         DEPOSIT_TOKEN_SYMBOL="ETH",
         VALIDATORS_SPLIT={},
+        WITHDRAWALS_CACHE_BLOCK=None,
+        WITHDRAWALS_CACHE_AMOUNT=None,
     ),
     GNOSIS_CHAIN: dict(
         STAKEWISE_SUBGRAPH_URLS=config(
@@ -402,5 +410,7 @@ NETWORKS = {
             Web3.toChecksumAddress("0x59ecf48345a221e0731e785ed79ed40d0a94e2a5"): 4971,
             Web3.toChecksumAddress("0xf37c8f35fc820354b402054699610c098559ae44"): 4971,
         },
+        WITHDRAWALS_CACHE_BLOCK=33192932,
+        WITHDRAWALS_CACHE_AMOUNT=286633425704392,
     ),
 }
