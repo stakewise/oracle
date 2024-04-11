@@ -44,15 +44,15 @@ w3 = Web3()
 
 
 class WithdrawalsCache:
-    def __init__(self, block: BlockNumber = None, withdrawals: Wei = None):
+    def __init__(self, block: BlockNumber = None, withdrawals: int = None):
         self.block = block
         self.withdrawals = withdrawals
 
-    def set(self, block: BlockNumber, withdrawals: Wei):
+    def set(self, block: BlockNumber, withdrawals: int):
         self.block = block
         self.withdrawals = withdrawals
 
-    def get(self) -> tuple[BlockNumber, Wei]:
+    def get(self) -> tuple[BlockNumber, int]:
         return self.block, self.withdrawals
 
 
@@ -258,12 +258,12 @@ class RewardsController(object):
                 execution_client=execution_client,
             )
 
+        self.withdrawals_cache.set(to_block, withdrawals_amount)
         withdrawals_amount = Web3.toWei(withdrawals_amount, "gwei")
         if NETWORK == GNOSIS_CHAIN:
             # apply mGNO <-> GNO exchange rate
             withdrawals_amount = Wei(int(withdrawals_amount * WAD // MGNO_RATE))
 
-        self.withdrawals_cache.set(to_block, withdrawals_amount)
         return withdrawals_amount
 
     async def fetch_withdrawal_chunk(
