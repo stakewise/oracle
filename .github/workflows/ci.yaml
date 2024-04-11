@@ -1,16 +1,6 @@
 name: CI
 
-on:
-  pull_request:
-    paths:
-      - 'oracle/**/*'
-      - 'pyporject.toml'
-      - 'Dockerfile'
-  push:
-    paths:
-      - 'oracle/**/*'
-      - 'pyporject.toml'
-      - 'Dockerfile'
+on: [ push ]
 
 jobs:
   pre-commit:
