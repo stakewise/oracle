@@ -20,17 +20,17 @@ GNOSIS_CHAIN_UPPER = GNOSIS_CHAIN.upper()
 NETWORKS = {
     MAINNET: dict(
         STAKEWISE_SUBGRAPH_URLS=config(
-            "STAKEWISE_SUBGRAPH_URLS",
+            "MAINNET_STAKEWISE_SUBGRAPH_URLS",
             default="https://graph.stakewise.io/subgraphs/name/stakewise/stakewise,https://api.thegraph.com/subgraphs/name/stakewise/stakewise-mainnet",
             cast=Csv(),
         ),
         ETHEREUM_SUBGRAPH_URLS=config(
-            "ETHEREUM_SUBGRAPH_URLS",
+            "MAINNET_ETHEREUM_SUBGRAPH_URLS",
             default="https://graph.stakewise.io/subgraphs/name/stakewise/ethereum,https://api.thegraph.com/subgraphs/name/stakewise/ethereum-mainnet",
             cast=Csv(),
         ),
         UNISWAP_V3_SUBGRAPH_URLS=config(
-            "UNISWAP_V3_SUBGRAPH_URLS",
+            "MAINNET_UNISWAP_V3_SUBGRAPH_URLS",
             default="https://graph.stakewise.io/subgraphs/name/stakewise/uniswap-v3,https://api.thegraph.com/subgraphs/name/stakewise/uniswap-v3-mainnet",
             cast=Csv(),
         ),
@@ -336,22 +336,22 @@ NETWORKS = {
     ),
     GNOSIS_CHAIN: dict(
         STAKEWISE_SUBGRAPH_URLS=config(
-            "STAKEWISE_SUBGRAPH_URLS",
+            "GNOSIS_STAKEWISE_SUBGRAPH_URLS",
             default="https://api.thegraph.com/subgraphs/name/stakewise/stakewise-gnosis,https://graph-gno.stakewise.io/subgraphs/name/stakewise/stakewise",
             cast=Csv(),
         ),
         ETHEREUM_SUBGRAPH_URLS=config(
-            "ETHEREUM_SUBGRAPH_URLS",
+            "GNOSIS_ETHEREUM_SUBGRAPH_URLS",
             default="https://api.thegraph.com/subgraphs/name/stakewise/ethereum-gnosis,https://graph-gno.stakewise.io/subgraphs/name/stakewise/ethereum",
             cast=Csv(),
         ),
         UNISWAP_V3_SUBGRAPH_URLS=config(
-            "UNISWAP_V3_SUBGRAPH_URLS",
+            "GNOSIS_UNISWAP_V3_SUBGRAPH_URLS",
             default="",
             cast=Csv(),
         ),
-        ETH1_ENDPOINT=config("ETH1_ENDPOINT", default=""),
-        ETH2_ENDPOINT=config("ETH2_ENDPOINT", default=""),
+        ETH1_ENDPOINT=config("GNOSIS_ETH1_ENDPOINT", default=""),
+        ETH2_ENDPOINT=config("GNOSIS_ETH2_ENDPOINT", default=""),
         VALIDATORS_FETCH_CHUNK_SIZE=config(
             "VALIDATORS_FETCH_CHUNK_SIZE",
             default=100,
