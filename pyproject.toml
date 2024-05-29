@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "oracle"
-version = "3.3.0"
+version = "3.3.1"
 description = "StakeWise Oracles are responsible for submitting off-chain data."
 authors = ["Dmitri Tsumak <tsumak.dmitri@gmail.com>"]
 license = "AGPL-3.0-only"
@@ -20,14 +20,12 @@ sentry-sdk = "1.9.5"
 [tool.poetry.dev-dependencies]
 mypy = "==0.950"
 black = "==22.3.0"
-flake8 = "==4.0.1"
 isort = "==5.10.1"
-flake8-black = "==0.3.2"
-flake8-bugbear = "==22.4.25"
 pre-commit = "==2.18.1"
 pytest = "==7.1.1"
 pytest-asyncio = "==0.18.3"
 Faker = "==13.6.0"
+flake8-pyproject = "==1.2.3"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
