@@ -122,7 +122,7 @@ async def get_disabled_stakers_reward_token_distributions(
     distributed: Wei = Wei(0)
     last_staker_index = len(principals) - 1
     for i, staker_address in enumerate(principals):
-        rewards: Wei
+        reward: Wei
         if i == last_staker_index:
             reward = Wei(distributor_reward - distributed)
         else:
