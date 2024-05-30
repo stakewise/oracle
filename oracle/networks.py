@@ -336,22 +336,22 @@ NETWORKS = {
     ),
     GNOSIS_CHAIN: dict(
         STAKEWISE_SUBGRAPH_URLS=config(
-            "GNOSIS_STAKEWISE_SUBGRAPH_URLS",
+            "STAKEWISE_SUBGRAPH_URLS",
             default="https://graph-gno.stakewise.io/subgraphs/name/stakewise/stakewise",
             cast=Csv(),
         ),
         ETHEREUM_SUBGRAPH_URLS=config(
-            "GNOSIS_ETHEREUM_SUBGRAPH_URLS",
+            "ETHEREUM_SUBGRAPH_URLS",
             default="https://graph-gno.stakewise.io/subgraphs/name/stakewise/ethereum",
             cast=Csv(),
         ),
         UNISWAP_V3_SUBGRAPH_URLS=config(
-            "GNOSIS_UNISWAP_V3_SUBGRAPH_URLS",
+            "UNISWAP_V3_SUBGRAPH_URLS",
             default="",
             cast=Csv(),
         ),
-        ETH1_ENDPOINT=config("GNOSIS_ETH1_ENDPOINT", default=""),
-        ETH2_ENDPOINT=config("GNOSIS_ETH2_ENDPOINT", default=""),
+        ETH1_ENDPOINT=config("ETH1_ENDPOINT", default=""),
+        ETH2_ENDPOINT=config("ETH2_ENDPOINT", default=""),
         VALIDATORS_FETCH_CHUNK_SIZE=config(
             "VALIDATORS_FETCH_CHUNK_SIZE",
             default=100,
