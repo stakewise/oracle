@@ -54,7 +54,7 @@ NETWORKS = {
         ),
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
         OPERATOR_ADDRESS=Web3.toChecksumAddress(
-            "0x5fc60576b92c5ce5c341c43e3b2866eb9e0cddd1"
+            "0xf330b5fE72E91d1a3782E65eED876CF3624c7802"
         ),
         WITHDRAWALS_GENESIS_EPOCH=194048,
         AWS_BUCKET_NAME=config("AWS_BUCKET_NAME", default="oracle-votes-mainnet"),
@@ -289,7 +289,9 @@ NETWORKS = {
             "0x8737f638E9af54e89ed9E1234dbC68B115CD169e"
         ),
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
-        OPERATOR_ADDRESS=EMPTY_ADDR_HEX,
+        OPERATOR_ADDRESS=Web3.toChecksumAddress(
+            "0x6Da6B1EfCCb7216078B9004535941b71EeD30b0F"
+        ),
         WITHDRAWALS_GENESIS_EPOCH=648704,
         AWS_BUCKET_NAME=config("AWS_BUCKET_NAME", default="oracle-votes-gnosis"),
         AWS_REGION=config("AWS_REGION", default="eu-north-1"),
