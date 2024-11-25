@@ -14,7 +14,6 @@ from oracle.oracle.common.graphql_queries import (
     DISABLED_STAKER_ACCOUNTS_QUERY,
     DISTRIBUTOR_CLAIMED_ACCOUNTS_QUERY,
     ONE_TIME_DISTRIBUTIONS_QUERY,
-    PARTNERS_QUERY,
     PERIODIC_DISTRIBUTIONS_QUERY,
 )
 from oracle.oracle.distributor.common.ipfs import get_one_time_rewards_allocations
@@ -186,105 +185,6 @@ async def get_operators_rewards(
     )
 
     return rewards, Wei(total_reward - operators_reward)
-
-
-async def get_partners_rewards(
-    network: str,
-    from_block: BlockNumber,
-    to_block: BlockNumber,
-    total_reward: Wei,
-    reward_token_address: ChecksumAddress,
-) -> Tuple[Rewards, Wei]:
-    """Fetches partners rewards."""
-    result: Dict = await execute_sw_gql_query(
-        network=network,
-        query=PARTNERS_QUERY,
-        variables=dict(
-            block_number=to_block,
-        ),
-    )
-    partners = result["partners"]
-
-    # process partners
-    points: Dict[ChecksumAddress, int] = {}
-    total_points = 0
-    total_contributed = 0
-    for partner in partners:
-        account = Web3.toChecksumAddress(partner["id"])
-        if account == EMPTY_ADDR_HEX:
-            continue
-
-        contributed_amount = Wei(int(partner["contributedAmount"]))
-        total_contributed += contributed_amount
-
-        revenue_share = int(partner["revenueShare"])
-        prev_account_points = int(partner["distributorPoints"])
-        updated_at_block = BlockNumber(int(partner["updatedAtBlock"]))
-        if from_block > updated_at_block:
-            updated_at_block = from_block
-            prev_account_points = 0
-
-        account_points = prev_account_points + (
-            contributed_amount * revenue_share * (to_block - updated_at_block)
-        )
-        if account_points <= 0:
-            continue
-
-        points[account] = account_points
-        total_points += account_points
-
-    if total_contributed <= 0:
-        return {}, total_reward
-
-    partners_reward = Wei(
-        (total_reward * total_points)
-        // (total_contributed * 10000 * (to_block - from_block))
-    )
-    if partners_reward <= 0:
-        return {}, total_reward
-
-    partners_reward = min(total_reward, partners_reward)
-    rewards = calculate_points_based_rewards(
-        total_reward=partners_reward,
-        points=points,
-        total_points=total_points,
-        reward_token=reward_token_address,
-    )
-
-    return rewards, Wei(total_reward - partners_reward)
-
-
-def calculate_points_based_rewards(
-    total_reward: int,
-    points: Dict[ChecksumAddress, int],
-    total_points: int,
-    reward_token: ChecksumAddress,
-) -> Rewards:
-    """Calculates points based rewards."""
-    if total_reward <= 0 or total_points <= 0:
-        return {}
-
-    rewards: Rewards = {}
-    last_account_index = len(points) - 1
-    distributed = 0
-    for i, account in enumerate(points):
-        if i == last_account_index:
-            reward = total_reward - distributed
-        else:
-            reward = (total_reward * points[account]) // total_points
-
-        if reward <= 0:
-            continue
-
-        DistributorRewards.add_value(
-            rewards=rewards,
-            to=account,
-            reward_token=reward_token,
-            amount=reward,
-        )
-        distributed += reward
-
-    return rewards
 
 
 async def get_one_time_rewards(
