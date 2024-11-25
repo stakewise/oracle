@@ -163,12 +163,9 @@ class DistributorController(object):
 
         protocol_reward = voting_params["protocol_reward"]
         operators_rewards, left_reward = await get_operators_rewards(
-            network=NETWORK,
-            from_block=from_block,
-            to_block=to_block,
             total_reward=protocol_reward,
             reward_token_address=NETWORK_CONFIG["REWARD_TOKEN_CONTRACT_ADDRESS"],
-            validators_split=NETWORK_CONFIG["VALIDATORS_SPLIT"],
+            operator_address=NETWORK_CONFIG["OPERATOR_ADDRESS"],
         )
         partners_rewards, left_reward = await get_partners_rewards(
             network=NETWORK,

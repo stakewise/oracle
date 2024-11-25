@@ -14,7 +14,6 @@ from oracle.oracle.common.graphql_queries import (
     DISABLED_STAKER_ACCOUNTS_QUERY,
     DISTRIBUTOR_CLAIMED_ACCOUNTS_QUERY,
     ONE_TIME_DISTRIBUTIONS_QUERY,
-    OPERATORS_REWARDS_QUERY,
     PARTNERS_QUERY,
     PERIODIC_DISTRIBUTIONS_QUERY,
 )
@@ -162,69 +161,28 @@ async def get_distributor_claimed_accounts(
 
 
 async def get_operators_rewards(
-    network: str,
-    from_block: BlockNumber,
-    to_block: BlockNumber,
     total_reward: Wei,
+    operator_address: ChecksumAddress,
     reward_token_address: ChecksumAddress,
-    validators_split: dict,
 ) -> Tuple[Rewards, Wei]:
-    """Fetches operators rewards."""
-    result: Dict = await execute_sw_gql_query(
-        network=network,
-        query=OPERATORS_REWARDS_QUERY,
-        variables=dict(
-            block_number=to_block,
-        ),
-    )
-    operators = result["operators"]
-
-    # process operators
-    points: Dict[ChecksumAddress, int] = {}
-    total_points = 0
-    total_validators = 0
-    for operator in operators:
-        account = Web3.toChecksumAddress(operator["id"])
-        if account == EMPTY_ADDR_HEX:
-            continue
-
-        validators_count = int(operator["validatorsCount"]) + validators_split.get(
-            account, 0
-        )
-        total_validators += validators_count
-
-        revenue_share = int(operator["revenueShare"])
-        prev_account_points = int(operator["distributorPoints"])
-        updated_at_block = BlockNumber(int(operator["updatedAtBlock"]))
-        if from_block > updated_at_block:
-            updated_at_block = from_block
-            prev_account_points = 0
-
-        account_points = prev_account_points + (
-            validators_count * revenue_share * (to_block - updated_at_block)
-        )
-        if account_points <= 0:
-            continue
-
-        points[account] = points.get(account, 0) + account_points
-        total_points += account_points
-
-    if total_validators <= 0:
+    """Send half of rewards to a single operator address."""
+    if operator_address == EMPTY_ADDR_HEX:
+        logger.error("Invalid operator address")
         return {}, total_reward
 
-    operators_reward = Wei(
-        (total_reward * total_points)
-        // (total_validators * 10000 * (to_block - from_block))
-    )
+    operators_reward = Wei(total_reward // 2)
+
     if operators_reward <= 0:
         return {}, total_reward
 
     operators_reward = min(total_reward, operators_reward)
-    rewards = calculate_points_based_rewards(
-        total_reward=operators_reward,
-        points=points,
-        total_points=total_points,
+
+    rewards: Rewards = {}
+    DistributorRewards.add_value(
+        rewards=rewards,
+        to=operator_address,
         reward_token=reward_token_address,
+        amount=operators_reward,
     )
 
     return rewards, Wei(total_reward - operators_reward)

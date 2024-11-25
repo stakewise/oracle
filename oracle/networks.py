@@ -53,7 +53,7 @@ NETWORKS = {
             "0x144a98cb1CdBb23610501fE6108858D9B7D24934"
         ),
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
-        ORACLE_STAKEWISE_OPERATOR=Web3.toChecksumAddress(
+        OPERATOR_ADDRESS=Web3.toChecksumAddress(
             "0x5fc60576b92c5ce5c341c43e3b2866eb9e0cddd1"
         ),
         WITHDRAWALS_GENESIS_EPOCH=194048,
@@ -75,11 +75,6 @@ NETWORKS = {
         SYNC_PERIOD=timedelta(days=1),
         IS_POA=False,
         DEPOSIT_TOKEN_SYMBOL="ETH",
-        VALIDATORS_SPLIT={
-            Web3.toChecksumAddress("0xfe26832d3580e0ade4813f9e60e7c17b45e92cba"): 64,
-            Web3.toChecksumAddress("0x59ecf48345a221e0731e785ed79ed40d0a94e2a5"): 63,
-            Web3.toChecksumAddress("0x01f26d7f195a37d368cb772ed75ef70dd29700f5"): 64,
-        },
     ),
     HARBOUR_MAINNET: dict(
         STAKEWISE_SUBGRAPH_URLS=config(
@@ -117,7 +112,7 @@ NETWORKS = {
             "0x6C7692dB59FDC7A659208EEE57C2c876aE54a448"
         ),
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
-        ORACLE_STAKEWISE_OPERATOR=EMPTY_ADDR_HEX,
+        OPERATOR_ADDRESS=EMPTY_ADDR_HEX,
         WITHDRAWALS_GENESIS_EPOCH=194048,
         AWS_BUCKET_NAME=config(
             "AWS_BUCKET_NAME",
@@ -140,7 +135,6 @@ NETWORKS = {
         SYNC_PERIOD=timedelta(days=1),
         IS_POA=False,
         DEPOSIT_TOKEN_SYMBOL="ETH",
-        VALIDATORS_SPLIT={},
     ),
     GOERLI: dict(
         STAKEWISE_SUBGRAPH_URLS=config(
@@ -178,7 +172,7 @@ NETWORKS = {
             "0x1867c96601bc5fE24F685d112314B8F3Fe228D5A"
         ),
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
-        ORACLE_STAKEWISE_OPERATOR=EMPTY_ADDR_HEX,
+        OPERATOR_ADDRESS=EMPTY_ADDR_HEX,
         WITHDRAWALS_GENESIS_EPOCH=162304,
         AWS_BUCKET_NAME=config("AWS_BUCKET_NAME", default="oracle-votes-goerli"),
         AWS_REGION=config("AWS_REGION", default="eu-central-1"),
@@ -198,7 +192,6 @@ NETWORKS = {
         SYNC_PERIOD=timedelta(hours=1),
         IS_POA=True,
         DEPOSIT_TOKEN_SYMBOL="ETH",
-        VALIDATORS_SPLIT={},
     ),
     HARBOUR_GOERLI: dict(
         STAKEWISE_SUBGRAPH_URLS=config(
@@ -236,7 +229,7 @@ NETWORKS = {
             "0x66D6c253084d8d51c7CFfDb3C188A0b53D998a3d"
         ),
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
-        ORACLE_STAKEWISE_OPERATOR=EMPTY_ADDR_HEX,
+        OPERATOR_ADDRESS=EMPTY_ADDR_HEX,
         WITHDRAWALS_GENESIS_EPOCH=162304,
         AWS_BUCKET_NAME=config(
             "AWS_BUCKET_NAME",
@@ -259,7 +252,6 @@ NETWORKS = {
         SYNC_PERIOD=timedelta(days=1),
         IS_POA=True,
         DEPOSIT_TOKEN_SYMBOL="ETH",
-        VALIDATORS_SPLIT={},
     ),
     GNOSIS_CHAIN: dict(
         STAKEWISE_SUBGRAPH_URLS=config(
@@ -297,7 +289,7 @@ NETWORKS = {
             "0x8737f638E9af54e89ed9E1234dbC68B115CD169e"
         ),
         ORACLE_PRIVATE_KEY=config("ORACLE_PRIVATE_KEY", default=""),
-        ORACLE_STAKEWISE_OPERATOR=EMPTY_ADDR_HEX,
+        OPERATOR_ADDRESS=EMPTY_ADDR_HEX,
         WITHDRAWALS_GENESIS_EPOCH=648704,
         AWS_BUCKET_NAME=config("AWS_BUCKET_NAME", default="oracle-votes-gnosis"),
         AWS_REGION=config("AWS_REGION", default="eu-north-1"),
@@ -317,9 +309,5 @@ NETWORKS = {
         SYNC_PERIOD=timedelta(days=1),
         IS_POA=True,
         DEPOSIT_TOKEN_SYMBOL="GNO",
-        VALIDATORS_SPLIT={
-            Web3.toChecksumAddress("0x59ecf48345a221e0731e785ed79ed40d0a94e2a5"): 4971,
-            Web3.toChecksumAddress("0xf37c8f35fc820354b402054699610c098559ae44"): 4971,
-        },
     ),
 }
