@@ -34,7 +34,7 @@ ORACLE_WITHDRAWAL_CHUNK_SIZE = config(
 IPFS_FETCH_ENDPOINTS = config(
     "IPFS_FETCH_ENDPOINTS",
     cast=Csv(),
-    default="http://cloudflare-ipfs.com,https://ipfs.io,https://gateway.pinata.cloud",
+    default="https://ipfs.io,https://gateway.pinata.cloud",
 )
 
 LOCAL_IPFS_CLIENT_ENDPOINT = config("LOCAL_IPFS_CLIENT_ENDPOINT", default="")

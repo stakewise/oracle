@@ -341,31 +341,3 @@ DISTRIBUTOR_CLAIMED_ACCOUNTS_QUERY = gql(
     }
 """
 )
-
-OPERATORS_REWARDS_QUERY = gql(
-    """
-    query getOperatorsRewards($block_number: Int) {
-      operators(block: { number: $block_number }) {
-        id
-        validatorsCount
-        revenueShare
-        distributorPoints
-        updatedAtBlock
-      }
-    }
-"""
-)
-
-PARTNERS_QUERY = gql(
-    """
-    query getPartners($block_number: Int) {
-      partners(block: { number: $block_number }) {
-        id
-        contributedAmount
-        revenueShare
-        distributorPoints
-        updatedAtBlock
-      }
-    }
-"""
-)

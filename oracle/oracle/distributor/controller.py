@@ -14,7 +14,6 @@ from oracle.oracle.distributor.common.eth1 import (
     get_distributor_claimed_accounts,
     get_one_time_rewards,
     get_operators_rewards,
-    get_partners_rewards,
     get_periodic_allocations,
 )
 from oracle.oracle.distributor.common.merkle_tree import calculate_merkle_root
@@ -163,20 +162,11 @@ class DistributorController(object):
 
         protocol_reward = voting_params["protocol_reward"]
         operators_rewards, left_reward = await get_operators_rewards(
-            network=NETWORK,
-            from_block=from_block,
-            to_block=to_block,
             total_reward=protocol_reward,
             reward_token_address=NETWORK_CONFIG["REWARD_TOKEN_CONTRACT_ADDRESS"],
-            validators_split=NETWORK_CONFIG["VALIDATORS_SPLIT"],
+            operator_address=NETWORK_CONFIG["OPERATOR_ADDRESS"],
         )
-        partners_rewards, left_reward = await get_partners_rewards(
-            network=NETWORK,
-            from_block=from_block,
-            to_block=to_block,
-            total_reward=left_reward,
-            reward_token_address=NETWORK_CONFIG["REWARD_TOKEN_CONTRACT_ADDRESS"],
-        )
+
         if left_reward > 0:
             fallback_rewards: Rewards = {
                 self.distributor_fallback_address: {
@@ -188,7 +178,7 @@ class DistributorController(object):
                 rewards2=fallback_rewards,
             )
 
-        for rewards in [operators_rewards, partners_rewards]:
+        for rewards in [operators_rewards]:
             final_rewards = DistributorRewards.merge_rewards(final_rewards, rewards)
 
         # merge final rewards with unclaimed rewards
