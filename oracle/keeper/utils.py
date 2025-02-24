@@ -10,7 +10,7 @@ from eth_typing import BlockNumber, ChecksumAddress, HexStr
 from hexbytes import HexBytes
 from web3 import Web3
 from web3.contract import Contract, ContractFunction
-from web3.types import TxParams
+from web3.types import TxParams, Wei
 
 from oracle.keeper.typings import Parameters
 from oracle.oracle.distributor.common.types import DistributorVote
@@ -183,15 +183,71 @@ def get_transaction_params(web3_client: Web3) -> TxParams:
     )
 
 
+def get_high_priority_tx_params(web3_client) -> {}:
+    """
+    `maxPriorityFeePerGas <= maxFeePerGas` must be fulfilled
+    Because of that when increasing `maxPriorityFeePerGas` I have to adjust `maxFeePerGas`.
+    See https://eips.ethereum.org/EIPS/eip-1559 for details.
+    """
+    tx_params = {}
+
+    max_priority_fee_per_gas = _calc_high_priority_fee(web3_client)
+
+    # Reference: `_max_fee_per_gas` in web3/_utils/async_transactions.py
+    block = web3_client.eth.get_block("latest")
+    max_fee_per_gas = Wei(max_priority_fee_per_gas + (2 * block["baseFeePerGas"]))
+
+    tx_params["maxPriorityFeePerGas"] = max_priority_fee_per_gas
+    tx_params["maxFeePerGas"] = max_fee_per_gas
+    logger.debug("tx_params %s", tx_params)
+
+    return tx_params
+
+
+def _calc_high_priority_fee(web3_client) -> Wei:
+    """
+    reference: "high" priority value from https://etherscan.io/gastracker
+    """
+    num_blocks = 10
+    percentile = 80
+    history = web3_client.eth.fee_history(num_blocks, "pending", [percentile])
+    validator_rewards = [r[0] for r in history["reward"]]
+    mean_reward = int(sum(validator_rewards) / len(validator_rewards))
+
+    # prettify `mean_reward`
+    # same as `round(value, 1)` if value was in gwei
+    if mean_reward > Web3.toWei(1, "gwei"):
+        mean_reward = round(mean_reward, -8)
+
+    return Wei(mean_reward)
+
+
 def submit_update(web3_client: Web3, function_call: ContractFunction) -> None:
-    tx_params = get_transaction_params(web3_client)
-    estimated_gas = function_call.estimateGas(tx_params)
+    ATTEMPTS_WITH_DEFAULT_GAS = 5
+    for i in range(ATTEMPTS_WITH_DEFAULT_GAS):
+        try:
+            tx_params = get_transaction_params(web3_client)
+            estimated_gas = function_call.estimateGas(tx_params)
 
-    # add 10% margin to the estimated gas
-    tx_params["gas"] = int(estimated_gas * 0.1) + estimated_gas
+            # add 10% margin to the estimated gas
+            tx_params["gas"] = int(estimated_gas * 0.1) + estimated_gas
 
-    # execute transaction
-    tx_hash = function_call.transact(tx_params)
+            # execute transaction
+            tx_hash = function_call.transact(tx_params)
+        except ValueError as e:
+            # Handle only FeeTooLow error
+            code = None
+            if e.args and isinstance(e.args[0], dict):
+                code = e.args[0].get("code")
+            if not code or code != -32010:
+                raise e
+            logger.exception(e)
+            if i < ATTEMPTS_WITH_DEFAULT_GAS - 1:  # skip last sleep
+                time.sleep(NETWORK_CONFIG.SECONDS_PER_BLOCK)
+    else:
+        tx_params = get_high_priority_tx_params(web3_client)
+        tx_hash = function_call.transact(tx_params)
+
     logger.info(f"Submitted transaction: {Web3.toHex(tx_hash)}")
     wait_for_transaction(web3_client, tx_hash)
 
