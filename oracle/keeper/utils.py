@@ -243,7 +243,7 @@ def submit_update(web3_client: Web3, function_call: ContractFunction) -> None:
                 raise e
             logger.exception(e)
             if i < ATTEMPTS_WITH_DEFAULT_GAS - 1:  # skip last sleep
-                time.sleep(NETWORK_CONFIG.SECONDS_PER_BLOCK)
+                time.sleep(NETWORK_CONFIG["SECONDS_PER_BLOCK"])
     else:
         tx_params = get_high_priority_tx_params(web3_client)
         tx_hash = function_call.transact(tx_params)
