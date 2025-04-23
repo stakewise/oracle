@@ -34,7 +34,7 @@ jobs:
 
       # Install poetry
       - name: Load cached Poetry installation
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ~/.local
           key: poetry-0
