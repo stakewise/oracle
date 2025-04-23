@@ -75,6 +75,7 @@ NETWORKS = {
         SYNC_PERIOD=timedelta(days=1),
         IS_POA=False,
         DEPOSIT_TOKEN_SYMBOL="ETH",
+        SECONDS_PER_BLOCK=12,
     ),
     HARBOUR_MAINNET: dict(
         STAKEWISE_SUBGRAPH_URLS=config(
@@ -135,6 +136,7 @@ NETWORKS = {
         SYNC_PERIOD=timedelta(days=1),
         IS_POA=False,
         DEPOSIT_TOKEN_SYMBOL="ETH",
+        SECONDS_PER_BLOCK=12,
     ),
     GOERLI: dict(
         STAKEWISE_SUBGRAPH_URLS=config(
@@ -192,6 +194,7 @@ NETWORKS = {
         SYNC_PERIOD=timedelta(hours=1),
         IS_POA=True,
         DEPOSIT_TOKEN_SYMBOL="ETH",
+        SECONDS_PER_BLOCK=12,
     ),
     HARBOUR_GOERLI: dict(
         STAKEWISE_SUBGRAPH_URLS=config(
@@ -252,6 +255,7 @@ NETWORKS = {
         SYNC_PERIOD=timedelta(days=1),
         IS_POA=True,
         DEPOSIT_TOKEN_SYMBOL="ETH",
+        SECONDS_PER_BLOCK=12,
     ),
     GNOSIS_CHAIN: dict(
         STAKEWISE_SUBGRAPH_URLS=config(
@@ -311,5 +315,6 @@ NETWORKS = {
         SYNC_PERIOD=timedelta(days=1),
         IS_POA=True,
         DEPOSIT_TOKEN_SYMBOL="GNO",
+        SECONDS_PER_BLOCK=5,
     ),
 }
