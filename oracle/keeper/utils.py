@@ -219,6 +219,11 @@ def _calc_high_priority_fee(web3_client) -> Wei:
     if mean_reward > Web3.toWei(1, "gwei"):
         mean_reward = round(mean_reward, -8)
 
+    min_effective_priority_fee_per_gas = NETWORK_CONFIG[
+        "MIN_EFFECTIVE_PRIORITY_FEE_PER_GAS"
+    ]
+    if min_effective_priority_fee_per_gas:
+        return Wei(max(min_effective_priority_fee_per_gas, mean_reward))
     return Wei(mean_reward)
 
 
@@ -234,6 +239,7 @@ def submit_update(web3_client: Web3, function_call: ContractFunction) -> None:
 
             # execute transaction
             tx_hash = function_call.transact(tx_params)
+            break
         except ValueError as e:
             # Handle only FeeTooLow error
             code = None
@@ -241,7 +247,7 @@ def submit_update(web3_client: Web3, function_call: ContractFunction) -> None:
                 code = e.args[0].get("code")
             if not code or code != -32010:
                 raise e
-            logger.exception(e)
+            logger.warning(e)
             if i < ATTEMPTS_WITH_DEFAULT_GAS - 1:  # skip last sleep
                 time.sleep(NETWORK_CONFIG["SECONDS_PER_BLOCK"])
     else:
