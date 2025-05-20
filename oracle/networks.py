@@ -76,6 +76,7 @@ NETWORKS = {
         IS_POA=False,
         DEPOSIT_TOKEN_SYMBOL="ETH",
         SECONDS_PER_BLOCK=12,
+        MIN_EFFECTIVE_PRIORITY_FEE_PER_GAS=Web3.toWei(0, "gwei"),
     ),
     HARBOUR_MAINNET: dict(
         STAKEWISE_SUBGRAPH_URLS=config(
@@ -137,6 +138,7 @@ NETWORKS = {
         IS_POA=False,
         DEPOSIT_TOKEN_SYMBOL="ETH",
         SECONDS_PER_BLOCK=12,
+        MIN_EFFECTIVE_PRIORITY_FEE_PER_GAS=Web3.toWei(0, "gwei"),
     ),
     GOERLI: dict(
         STAKEWISE_SUBGRAPH_URLS=config(
@@ -195,6 +197,7 @@ NETWORKS = {
         IS_POA=True,
         DEPOSIT_TOKEN_SYMBOL="ETH",
         SECONDS_PER_BLOCK=12,
+        MIN_EFFECTIVE_PRIORITY_FEE_PER_GAS=Web3.toWei(0, "gwei"),
     ),
     HARBOUR_GOERLI: dict(
         STAKEWISE_SUBGRAPH_URLS=config(
@@ -256,6 +259,7 @@ NETWORKS = {
         IS_POA=True,
         DEPOSIT_TOKEN_SYMBOL="ETH",
         SECONDS_PER_BLOCK=12,
+        MIN_EFFECTIVE_PRIORITY_FEE_PER_GAS=Web3.toWei(0, "gwei"),
     ),
     GNOSIS_CHAIN: dict(
         STAKEWISE_SUBGRAPH_URLS=config(
@@ -316,5 +320,6 @@ NETWORKS = {
         IS_POA=True,
         DEPOSIT_TOKEN_SYMBOL="GNO",
         SECONDS_PER_BLOCK=5,
+        MIN_EFFECTIVE_PRIORITY_FEE_PER_GAS=Web3.toWei(1, "gwei"),
     ),
 }
